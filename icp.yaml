@@ -1,0 +1,13 @@
+canisters:
+  - name: backend
+    build:
+      steps:
+        - type: script
+          commands:
+            - make backend
+            - cp build/copycat.wasm "$ICP_WASM_OUTPUT_PATH"
+    sync:
+      steps:
+        - type: assets
+          dirs:
+            - dist

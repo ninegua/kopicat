@@ -1,0 +1,10 @@
+.agents/
+.icp/
+.pnpm-store/
+.svelte-kit/
+.vessel/
+build/
+dist/
+**/*.swp
+node_modules/
+skills-lock.json
