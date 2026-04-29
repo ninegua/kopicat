@@ -165,25 +165,25 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
     };
     let (status_code, body) = switch (clipboard, req.body) {
       case (null, _) {
-        (400: Nat16, "Parameter /clip/:clipboard not found")
+        (400: Nat16, "\"" # "Parameter /clip/:clipboard not found" # "\"")
       };
       case (_, null) {
-         (400: Nat16, "Missing body")
+         (400: Nat16, "\"" # "Missing body" # "\"")
       };
       case (?clipboard, ?body) {
         switch (body.deserialize()) {
           case (null) {
-            (400: Nat16, "Malformed JSON body")
+            (400: Nat16, "\"" # "Malformed JSON body" # "\"")
           };
           case (?json) {
             switch (parseInput(clipboard, json)) {
               case (null) {
-                (400: Nat16, "Malformed input")
+                (400: Nat16, "\"" # "Malformed input" # "\"")
               };
               case (?input) {
                 switch (create_clip(input.blob, clipboard, input.expires_after, input.burn_after_read)) {
                   case (#err(err)) {
-                    (403 : Nat16, err)
+                    (403 : Nat16, "\"" # err # "\"")
                   };
                   case (#ok(board)) {
                     (200 : Nat16, "\"" # board # "\"")
@@ -209,12 +209,12 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
     };
     let (status_code, body, cache_strategy) = switch (board) {
       case (null) {
-        (400: Nat16, "Parameter /clip/:clipboard not found", #noCache)
+        (400: Nat16, "\"" # "Parameter /clip/:clipboard not found" # "\"", #noCache)
       };
       case (?clipboard) {
         switch (get_clip(clipboard)) {
           case (null) {
-            (404: Nat16, "Not found", #noCache)
+            (404: Nat16, "\"" # "Not found" # "\"", #noCache)
           };
           case (?clip) {
             // TODO: encode blob with base64

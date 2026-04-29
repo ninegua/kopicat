@@ -251,6 +251,121 @@ else
 fi
 echo ""
 
+# ── Test 10: PUT error cases ────────────────────────────────────────
+echo "=== Test 10: PUT error cases ==="
+
+# 10a: PUT with no body (empty string)
+echo "  -- PUT missing body (empty string) --"
+RESP=$(curl -s -w "\n%{http_code}" -X PUT -H "Content-Type: application/json" -d "" "http://backend.local.localhost:8000/clip/test-missing-body" 2>/dev/null)
+BODY=$(get_body "$RESP")
+if check_status "$RESP" "400"; then
+  if echo "$BODY" | jq '.' >/dev/null 2>&1; then
+    pass "PUT missing body returns 400 with valid JSON"
+  else
+    fail "PUT missing body returns 400 but body is not valid JSON (got: $BODY)"
+  fi
+else
+  fail "PUT missing body returned status $(echo "$RESP" | tail -1), expected 400 (body: $BODY)"
+fi
+
+# 10b: PUT with malformed JSON
+echo "  -- PUT malformed JSON body --"
+RESP=$(curl -s -w "\n%{http_code}" -X PUT -H "Content-Type: application/json" -d "{not json}" "http://backend.local.localhost:8000/clip/test-malformed" 2>/dev/null)
+BODY=$(get_body "$RESP")
+if check_status "$RESP" "400"; then
+  if echo "$BODY" | jq '.' >/dev/null 2>&1; then
+    pass "PUT malformed JSON returns 400 with valid JSON"
+  else
+    fail "PUT malformed JSON returns 400 but body is not valid JSON (got: $BODY)"
+  fi
+else
+  fail "PUT malformed JSON returned status $(echo "$RESP" | tail -1), expected 400 (body: $BODY)"
+fi
+
+# 10c: PUT with malformed input (missing required field 'blob')
+echo "  -- PUT malformed input (missing blob) --"
+RESP=$(curl -s -w "\n%{http_code}" -X PUT -H "Content-Type: application/json" -d '{"clipboard": "test"}' "http://backend.local.localhost:8000/clip/test-malformed-input" 2>/dev/null)
+BODY=$(get_body "$RESP")
+if check_status "$RESP" "400"; then
+  if echo "$BODY" | jq '.' >/dev/null 2>&1; then
+    pass "PUT malformed input returns 400 with valid JSON"
+  else
+    fail "PUT malformed input returns 400 but body is not valid JSON (got: $BODY)"
+  fi
+else
+  fail "PUT malformed input returned status $(echo "$RESP" | tail -1), expected 400 (body: $BODY)"
+fi
+
+# 10d: PUT with malformed input (blob is not a string)
+echo "  -- PUT malformed input (blob is number) --"
+RESP=$(curl -s -w "\n%{http_code}" -X PUT -H "Content-Type: application/json" -d '{"blob": 12345}' "http://backend.local.localhost:8000/clip/test-blob-type" 2>/dev/null)
+BODY=$(get_body "$RESP")
+if check_status "$RESP" "400"; then
+  if echo "$BODY" | jq '.' >/dev/null 2>&1; then
+    pass "PUT blob is not string returns 400 with valid JSON"
+  else
+    fail "PUT blob is not string returns 400 but body is not valid JSON (got: $BODY)"
+  fi
+else
+  fail "PUT blob is not string returned status $(echo "$RESP" | tail -1), expected 400 (body: $BODY)"
+fi
+
+# 10e: PUT with extra unknown fields (should still succeed)
+echo "  -- PUT with extra fields (should succeed) --"
+RESP=$(curl -s -w "\n%{http_code}" -X PUT -H "Content-Type: application/json" -d '{"blob": "test", "extra": "ignored"}' "http://backend.local.localhost:8000/clip/test-extra-fields" 2>/dev/null)
+BODY=$(get_body "$RESP")
+if check_status "$RESP" "200"; then
+  if echo "$BODY" | jq '.' >/dev/null 2>&1; then
+    pass "PUT with extra fields returns 200 with valid JSON"
+  else
+    fail "PUT extra fields returns 200 but body is not valid JSON (got: $BODY)"
+  fi
+else
+  fail "PUT extra fields returned status $(echo "$RESP" | tail -1), expected 200 (body: $BODY)"
+fi
+
+# ── Test 11: All success responses are valid JSON ───────────────────
+echo "=== Test 11: All success responses are valid JSON ==="
+
+# 11a: PUT success body is valid JSON
+echo "  -- PUT success body is valid JSON --"
+RESP=$(http_put "/test-json-check-1" '{"blob": "blob1"}')
+BODY=$(get_body "$RESP")
+if echo "$BODY" | jq '.' >/dev/null 2>&1; then
+  pass "PUT success body is valid JSON"
+else
+  fail "PUT success body is not valid JSON (got: $BODY)"
+fi
+
+# 11b: PUT duplicate body is valid JSON
+echo "  -- PUT duplicate body is valid JSON --"
+RESP=$(http_put "/test-json-check-1" '{"blob": "blob1"}')
+BODY=$(get_body "$RESP")
+if echo "$BODY" | jq '.' >/dev/null 2>&1; then
+  pass "PUT duplicate body is valid JSON"
+else
+  fail "PUT duplicate body is not valid JSON (got: $BODY)"
+fi
+
+# 11c: GET success body is valid JSON
+echo "  -- GET success body is valid JSON --"
+RESP=$(http_get "/test-json-check-1")
+BODY=$(get_body "$RESP")
+if echo "$BODY" | jq '.' >/dev/null 2>&1; then
+  pass "GET success body is valid JSON"
+else
+  fail "GET success body is not valid JSON (got: $BODY)"
+fi
+
+# 11d: GET success body has correct shape
+echo "  -- GET success body has correct shape --"
+check_shape=$(echo "$BODY" | jq 'has("blob") and has("created_at") and has("expires_at") and has("burn_after_read")')
+if [ "$check_shape" = "true" ]; then
+  pass "GET success body has blob, created_at, expires_at, burn_after_read"
+else
+  fail "GET success body missing required fields (got: $BODY)"
+fi
+
 # ── Summary ─────────────────────────────────────────────────────────
 echo "================================"
 echo "Results: $PASS passed, $FAIL failed, $ERRORS errors"
