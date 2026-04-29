@@ -10,7 +10,7 @@ default: backend frontend
 backend: build/$(NAME).wasm
 
 frontend:
-	pnpm run build:frontend
+	pnpm run build
 
 build/$(NAME).wasm build/$(NAME).did &: ${BACKEND_SRC} $(MOC) | .vessel/ build/
 	$(MOC) --public-metadata candid:service --public-metadata candid:args --public-metadata motoko:compiler \
