@@ -10,20 +10,25 @@ import Option "mo:core/Option";
 import JSON "mo:json/JSON";
 import ServeHttpRequest "./http";
 
-shared ({ caller = creator }) persistent actor class () {
+shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_to_live: Nat }) {
 
   include ServeHttpRequest(creator);
 
   type JSON = JSON.JSON;
+
+  // Both created_at and expires_at are timestamp in seconds.
   type Clip = {
     clipboard : Text;
     blob : Text;
     created_at : Int;
-    expires_at : ?Int;
+    expires_at : Int;
     burn_after_read : Bool;
   };
 
   let clips : Map.Map<Text, Clip> = Map.empty<Text, Clip>();
+
+  // Default max time to live is 7 days or a week.
+  let DEFAULT_MAX_SECONDS_TO_LIVE: Nat = 3600 * 24 * 7;
 
   /**
    * Clip API
@@ -39,12 +44,12 @@ shared ({ caller = creator }) persistent actor class () {
       return #err("clipboard already exists");
     };
 
-    let now = Time.now();
-    let expires_at = switch (expires_after) {
-      case (?after) ?(now + Int.fromNat(after) * 1_000_000_000);
-      case null null;
+    let default_ttl = switch (init_arg) {
+      case (null) DEFAULT_MAX_SECONDS_TO_LIVE; 
+      case (?{ max_seconds_to_live }) max_seconds_to_live;
     };
-
+    let now = now_secs();
+    let expires_at = now + Option.get(expires_after, default_ttl);
     let clip : Clip = {
       clipboard;
       blob;
@@ -61,21 +66,18 @@ shared ({ caller = creator }) persistent actor class () {
     #ok(clipboard)
   };
 
+  func now_secs() : Int {
+    Time.now() / 1_000_000_000
+  };
+
   func get_clip(clipboard : Text) : ?Clip {
     switch (Map.get(clips, Text.compare, clipboard)) {
       case (?clip) {
         // Check if expired
-        switch (clip.expires_at) {
-          case (?expires_at) {
-            if (Time.now() > expires_at) {
-              null
-            } else {
-              ?clip
-            }
-          };
-          case null {
-            ?clip
-          }
+        if (now_secs() > clip.expires_at) {
+          null
+        } else {
+          ?clip
         }
       };
       case null { null };
@@ -91,14 +93,9 @@ shared ({ caller = creator }) persistent actor class () {
    */
   func cleanupExpired(now : Int) {
     for ((key, clip) in Map.entries(clips)) {
-      switch (clip.expires_at) {
-        case (?expires_at) {
-          if (now > expires_at) {
-            Map.remove(clips, Text.compare, key);
-          };
-        };
-        case null {};
-      }
+      if (now > clip.expires_at) {
+        Map.remove(clips, Text.compare, key);
+      };
     }
   };
 
@@ -189,7 +186,7 @@ shared ({ caller = creator }) persistent actor class () {
                     (403 : Nat16, err)
                   };
                   case (#ok(board)) {
-                    (201 : Nat16, "\"" # board # "\"")
+                    (200 : Nat16, "\"" # board # "\"")
                   }
                 }
               }
@@ -210,61 +207,48 @@ shared ({ caller = creator }) persistent actor class () {
       let map = req.params !;
       map.get("clipboard") !;
     };
-    let (status_code, body) = switch (board) {
+    let (status_code, body, cache_strategy) = switch (board) {
       case (null) {
-        (400: Nat16, "Parameter /clip/:clipboard not found")
+        (400: Nat16, "Parameter /clip/:clipboard not found", #noCache)
       };
       case (?clipboard) {
         switch (get_clip(clipboard)) {
           case (null) {
-            (404: Nat16, clipboard)
+            (404: Nat16, "Not found", #noCache)
           };
           case (?clip) {
             // TODO: encode blob with base64
             let blob = clip.blob;
-            let created = Int.toText(clip.created_at);
-            let expires = Option.toText(clip.expires_at, Int.toText);
+            let created_at = Int.toText(clip.created_at);
+            let expires_at = Int.toText(clip.expires_at);
+            let burn_after_read = debug_show(clip.burn_after_read);
+            let cache_strategy = if (clip.burn_after_read) { 
+              delete_clip(clipboard);
+              #noCache
+            } else {
+              // certified-cache has expiration related bugs. So always noCache for now.
+              # noCache
+              // Since get_clip already handles expiry, nanoseconds is always > 0 
+              // let nanoseconds = (clip.expires_at - now_secs()) * 1_000_000_000;
+              // #expireAfter{ nanoseconds = Int.abs(nanoseconds) }
+            };
             (
               200 : Nat16,
-              "{ \"blob\": \"" # clip.blob #
-              "\",\"created\": \"" # created #
-              "\", \"expires\": \"" # expires #
-              "\" }"
+              "{\"blob\": \"" # clip.blob #
+              "\",\"created_at\": " # created_at #
+              ",\"expires_at\": " # expires_at #
+              ",\"burn_after_read\": " # burn_after_read #
+              "}",
+              cache_strategy
             )
           }
         }
       }
     };
-    res.json({
-      status_code = status_code;
-      body = body;
-      cache_strategy = #default;
-    })
-  };
-
-  func handle_delete(req : Request, res : ResponseClass) : async Response {
-    let clipboard = do ? {
-      let map = req.params !;
-      map.get("clipboard") !;
-    };
-    let (status_code, body) = switch (clipboard) {
-      case (null) {
-        (400: Nat16, "Parameter /clip/:clipboard not found")
-      };
-      case (?cb) {
-        delete_clip(cb);
-        (200 : Nat16, "deleted")
-      }
-    };
-    res.json({
-      status_code = status_code;
-      body = body;
-      cache_strategy = #noCache;
-    })
+    res.json({ status_code; body; cache_strategy; })
   };
 
   server.get("/clip/:clipboard", handle_get);
   server.put("/clip/:clipboard", handle_put);
-  server.delete("/clip/:clipboard", handle_delete);
 
 };
