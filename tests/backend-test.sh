@@ -323,6 +323,7 @@ if check_status "$RESP" "200"; then
 else
   fail "PUT extra fields returned status $(echo "$RESP" | tail -1), expected 200 (body: $BODY)"
 fi
+echo ""
 
 # ── Test 11: All success responses are valid JSON ───────────────────
 echo "=== Test 11: All success responses are valid JSON ==="

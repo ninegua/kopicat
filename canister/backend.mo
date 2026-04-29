@@ -18,7 +18,6 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
 
   // Both created_at and expires_at are timestamp in seconds.
   type Clip = {
-    clipboard : Text;
     blob : Text;
     created_at : Int;
     expires_at : Int;
@@ -30,48 +29,46 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
   // Default max time to live is 7 days or a week.
   let DEFAULT_MAX_SECONDS_TO_LIVE: Nat = 3600 * 24 * 7;
 
-  /**
-   * Clip API
-   */
+  type Input = {
+    id : Text;
+    blob : Text;
+    expires_after: ?Nat;
+    burn_after_read : Bool;
+  };
 
-  func create_clip(
-    blob : Text,
-    clipboard : Text,
-    expires_after : ?Nat,
-    burn_after_read : Bool
-  ) : (Result.Result<Text, Text>) {
-    if (Map.containsKey(clips, Text.compare, clipboard)) {
-      return #err("clipboard already exists");
+  func create_clip(input : Input) : (Result.Result<Text, Text>) {
+    let { id; blob; expires_after; burn_after_read } = input;
+    if (Map.containsKey(clips, Text.compare, id)) {
+      return #err("clip already exists");
     };
 
     let default_ttl = switch (init_arg) {
-      case (null) DEFAULT_MAX_SECONDS_TO_LIVE; 
+      case (null) DEFAULT_MAX_SECONDS_TO_LIVE;
       case (?{ max_seconds_to_live }) max_seconds_to_live;
     };
     let now = now_secs();
     let expires_at = now + Option.get(expires_after, default_ttl);
     let clip : Clip = {
-      clipboard;
       blob;
       created_at = now;
       expires_at;
       burn_after_read;
     };
 
-    Map.add(clips, Text.compare, clipboard, clip);
+    Map.add(clips, Text.compare, id, clip);
 
     // Lazy cleanup of expired clips
     cleanupExpired(now);
 
-    #ok(clipboard)
+    #ok(id)
   };
 
   func now_secs() : Int {
     Time.now() / 1_000_000_000
   };
 
-  func get_clip(clipboard : Text) : ?Clip {
-    switch (Map.get(clips, Text.compare, clipboard)) {
+  func get_clip(id: Text) : ?Clip {
+    switch (Map.get(clips, Text.compare, id)) {
       case (?clip) {
         // Check if expired
         if (now_secs() > clip.expires_at) {
@@ -84,8 +81,8 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
     }
   };
 
-  func delete_clip(clipboard : Text) {
-    Map.remove(clips, Text.compare, clipboard);
+  func delete_clip(id: Text) {
+    Map.remove(clips, Text.compare, id);
   };
 
   /**
@@ -142,46 +139,39 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
     };
   };
 
-  type Input = {
-    blob : Text;
-    clipboard : Text;
-    expires_after: ?Nat;
-    burn_after_read : Bool;
-  };
-
-  func parseInput(clipboard: Text, json: JSON) : ?Input {
+  func parseInput(id: Text, json: JSON) : ?Input {
     do ? {
       let blob = expectText(json, "blob") !;
       let expires_after = expectNat(json, "expires_after");
       let burn_after_read = Option.get(expectBool(json, "burn_after_read"), false);
-      { clipboard; blob; expires_after; burn_after_read }
+      { id; blob; expires_after; burn_after_read }
     }
   };
 
   func handle_put(req : Request, res : ResponseClass) : async Response {
-    let clipboard = do ? {
+    let id = do ? {
       let map = req.params !;
-      map.get("clipboard") !;
+      map.get("id") !;
     };
-    let (status_code, body) = switch (clipboard, req.body) {
+    let (status_code, body) = switch (id, req.body) {
       case (null, _) {
-        (400: Nat16, "\"" # "Parameter /clip/:clipboard not found" # "\"")
+        (400: Nat16, "\"" # "Parameter /clip/:id not found" # "\"")
       };
       case (_, null) {
          (400: Nat16, "\"" # "Missing body" # "\"")
       };
-      case (?clipboard, ?body) {
+      case (?id, ?body) {
         switch (body.deserialize()) {
           case (null) {
             (400: Nat16, "\"" # "Malformed JSON body" # "\"")
           };
           case (?json) {
-            switch (parseInput(clipboard, json)) {
+            switch (parseInput(id, json)) {
               case (null) {
                 (400: Nat16, "\"" # "Malformed input" # "\"")
               };
               case (?input) {
-                switch (create_clip(input.blob, clipboard, input.expires_after, input.burn_after_read)) {
+                switch (create_clip(input)) {
                   case (#err(err)) {
                     (403 : Nat16, "\"" # err # "\"")
                   };
@@ -205,14 +195,14 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
   func handle_get(req : Request, res : ResponseClass) : async Response {
     let board = do ? {
       let map = req.params !;
-      map.get("clipboard") !;
+      map.get("id") !;
     };
     let (status_code, body, cache_strategy) = switch (board) {
       case (null) {
-        (400: Nat16, "\"" # "Parameter /clip/:clipboard not found" # "\"", #noCache)
+        (400: Nat16, "\"" # "Parameter /clip/:id not found" # "\"", #noCache)
       };
-      case (?clipboard) {
-        switch (get_clip(clipboard)) {
+      case (?id) {
+        switch (get_clip(id)) {
           case (null) {
             (404: Nat16, "\"" # "Not found" # "\"", #noCache)
           };
@@ -222,13 +212,13 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
             let created_at = Int.toText(clip.created_at);
             let expires_at = Int.toText(clip.expires_at);
             let burn_after_read = debug_show(clip.burn_after_read);
-            let cache_strategy = if (clip.burn_after_read) { 
-              delete_clip(clipboard);
+            let cache_strategy = if (clip.burn_after_read) {
+              delete_clip(id);
               #noCache
             } else {
               // certified-cache has expiration related bugs. So always noCache for now.
               # noCache
-              // Since get_clip already handles expiry, nanoseconds is always > 0 
+              // Since get_clip already handles expiry, nanoseconds is always > 0
               // let nanoseconds = (clip.expires_at - now_secs()) * 1_000_000_000;
               // #expireAfter{ nanoseconds = Int.abs(nanoseconds) }
             };
@@ -248,7 +238,7 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
     res.json({ status_code; body; cache_strategy; })
   };
 
-  server.get("/clip/:clipboard", handle_get);
-  server.put("/clip/:clipboard", handle_put);
+  server.get("/clip/:id", handle_get);
+  server.put("/clip/:id", handle_put);
 
 };
