@@ -1,5 +1,4 @@
 import Array "mo:core/Array";
-import Debug "mo:core/Debug";
 import Int "mo:core/Int";
 import Map "mo:core/Map";
 import Nat "mo:core/Nat";
@@ -149,16 +148,16 @@ shared ({ caller = creator }) persistent actor class () {
   type Input = {
     blob : Text;
     clipboard : Text;
-    expires: ?Nat;
+    expires_after: ?Nat;
     burn_after_read : Bool;
   };
 
   func parseInput(clipboard: Text, json: JSON) : ?Input {
     do ? {
       let blob = expectText(json, "blob") !;
-      let expires = expectNat(json, "expires");
+      let expires_after = expectNat(json, "expires_after");
       let burn_after_read = Option.get(expectBool(json, "burn_after_read"), false);
-      { clipboard; blob; expires; burn_after_read }
+      { clipboard; blob; expires_after; burn_after_read }
     }
   };
 
@@ -177,7 +176,7 @@ shared ({ caller = creator }) persistent actor class () {
       case (?clipboard, ?body) {
         switch (body.deserialize()) {
           case (null) {
-            (400: Nat16, "Malformed JSON body " # debug_show(body.text()))
+            (400: Nat16, "Malformed JSON body")
           };
           case (?json) {
             switch (parseInput(clipboard, json)) {
@@ -185,7 +184,7 @@ shared ({ caller = creator }) persistent actor class () {
                 (400: Nat16, "Malformed input")
               };
               case (?input) {
-                switch (create_clip(input.blob, clipboard, input.expires, input.burn_after_read)) {
+                switch (create_clip(input.blob, clipboard, input.expires_after, input.burn_after_read)) {
                   case (#err(err)) {
                     (403 : Nat16, err)
                   };
