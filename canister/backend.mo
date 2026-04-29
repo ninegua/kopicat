@@ -82,7 +82,7 @@ shared ({ caller = creator }) persistent actor class () {
     }
   };
 
-  public func delete_clip(clipboard : Text) : async () {
+  func delete_clip(clipboard : Text) {
     Map.remove(clips, Text.compare, clipboard);
   };
 
@@ -189,7 +189,7 @@ shared ({ caller = creator }) persistent actor class () {
                     (403 : Nat16, err)
                   };
                   case (#ok(board)) {
-                    (201 : Nat16, board)
+                    (201 : Nat16, "\"" # board # "\"")
                   }
                 }
               }
@@ -242,7 +242,29 @@ shared ({ caller = creator }) persistent actor class () {
     })
   };
 
+  func handle_delete(req : Request, res : ResponseClass) : async Response {
+    let clipboard = do ? {
+      let map = req.params !;
+      map.get("clipboard") !;
+    };
+    let (status_code, body) = switch (clipboard) {
+      case (null) {
+        (400: Nat16, "Parameter /clip/:clipboard not found")
+      };
+      case (?cb) {
+        delete_clip(cb);
+        (200 : Nat16, "deleted")
+      }
+    };
+    res.json({
+      status_code = status_code;
+      body = body;
+      cache_strategy = #noCache;
+    })
+  };
+
   server.get("/clip/:clipboard", handle_get);
   server.put("/clip/:clipboard", handle_put);
+  server.delete("/clip/:clipboard", handle_delete);
 
 };
