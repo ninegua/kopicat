@@ -7,8 +7,7 @@
 	import { generateClipId } from '$lib/words';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import Hero from '$lib/components/Hero.svelte';
-	import CreateForm from '$lib/components/CreateForm.svelte';
+		import CreateForm from '$lib/components/CreateForm.svelte';
 	import DecryptForm from '$lib/components/DecryptForm.svelte';
 	import ResultView from '$lib/components/ResultView.svelte';
 	import ShareModal from '$lib/components/ShareModal.svelte';
@@ -149,7 +148,6 @@
 		{:else if currentMode === 'result'}
 			<ResultView />
 		{:else}
-			<Hero />
 			<CreateForm onCreate={handleCreate} />
 		{/if}
 	{/if}
@@ -167,6 +165,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		padding-top: var(--space-xl);
 		padding-bottom: var(--space-2xl);
 	}
 </style>
