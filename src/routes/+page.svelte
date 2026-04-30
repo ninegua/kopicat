@@ -88,11 +88,11 @@
 				burn_after_read: false,
 			});
 
-			if ('error' in result) {
-				setError(result.error || 'Failed to create clip');
-				clipState.update((s) => ({ ...s, loading: false }));
-				return;
-			}
+	if ('error' in result) {
+			setError(result.error || 'Failed to create clip');
+			clipState.update((s) => ({ ...s, loading: false }));
+			return;
+		}
 
 			const shareUrl = `${window.location.origin}/${clipId}#${pw}`;
 			clipState.update((s) => ({

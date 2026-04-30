@@ -16,7 +16,7 @@ function createHandlers(): HttpHandler[] {
 			const id = params.id as string;
 			const body = (await request.json()) as ClipInput;
 
-			// "clip already exists" → 403
+// "clip already exists" → 403
 			if (clipStore.has(id)) {
 				return new HttpResponse(JSON.stringify('clip already exists'), {
 					status: 403,

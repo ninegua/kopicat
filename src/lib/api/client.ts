@@ -28,16 +28,15 @@ export async function createClip(input: ClipInput): Promise<{ ok: string } | { e
 		return { error: text };
 	}
 
-	try {
-		const body = await response.json() as CreateResult | string;
-		// Backend returns a plain string (clip ID) on success, not { ok: id }
-		if (typeof body === 'string') {
-			return { ok: body };
-		}
-		return body;
-	} catch {
-		return { error: 'Failed to parse response' };
-	}
+ try {
+    const body = await response.json();
+    if (typeof body === 'string') {
+      return { ok: body };
+    }
+    return body as CreateResult;
+  } catch {
+    return { error: 'Failed to parse response' };
+  }
 }
 
 export async function fetchClip(id: string): Promise<Clip | null> {
