@@ -248,7 +248,8 @@
 	}
 
 	.btn-primary {
-		width: 100%;
+		width: 50%;
+		margin: 0 auto var(--space-md);
 		padding: var(--space-md) var(--space-lg);
 		background: var(--accent-gradient);
 		border: none;
