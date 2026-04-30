@@ -5,7 +5,7 @@
 	import { clipState } from '$lib/api/store';
 	import type { ClipState } from '$lib/api/store';
 
-	let { onCreate }: { onCreate: (text: string, password: string, ttl: number) => Promise<void> } = $props();
+	let { onCreate }: { onCreate: (text: string, password: string, ttl: number, burn_after_read: boolean) => Promise<void> } = $props();
 
 	const TTL_OPTIONS = [
 		{ label: '1 minute', value: 60 },
@@ -20,7 +20,9 @@
 	let text = $state('');
 	let password = $state('');
 	let selectedTTL = $state(900);
+	let showPasswordSection = $state(false);
 	let showPassword = $state(false);
+	let burnAfterRead = $state(false);
 
 	function regeneratePassword() {
 		password = generatePassword(11);
@@ -41,7 +43,7 @@
 			password = generatePassword(11);
 		}
 
-		await onCreate(text, password, selectedTTL);
+		await onCreate(text, password, selectedTTL, burnAfterRead);
 	}
 
 	const strength = $derived(getStrength());
@@ -80,55 +82,95 @@
 	</div>
 
 	<div class="form-group">
-		<label for="clip-password">Password</label>
-		<div class="password-input-group">
-			<input
-				id="clip-password"
-				type={showPassword ? 'text' : 'password'}
-				bind:value={password}
-				readonly
-				class="password-value"
-				placeholder="Auto-generated"
-			/>
+		<div class="toggle-row">
 			<button
 				type="button"
-				class="btn-icon"
-				onclick={regeneratePassword}
-				title="Generate new password"
+				class="password-toggle"
+				onclick={() => showPasswordSection = !showPasswordSection}
 			>
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<polyline points="23 4 23 10 17 10"/>
-					<polyline points="1 20 1 14 7 14"/>
-					<path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+					<circle cx="12" cy="12" r="3"/>
+				</svg>
+				<span>{showPasswordSection ? 'Hide password' : 'Show password'}</span>
+				<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="toggle-arrow">
+					<polyline points={showPasswordSection ? '18 15 12 9 6 15' : '6 9 12 15 18 9'} />
 				</svg>
 			</button>
+
 			<button
 				type="button"
-				class="btn-icon"
-				onclick={() => showPassword = !showPassword}
-				title={showPassword ? 'Hide password' : 'Show password'}
+				class="burn-toggle"
+				class:active={burnAfterRead}
+				onclick={() => burnAfterRead = !burnAfterRead}
 			>
-				{#if showPassword}
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-						<line x1="1" y1="1" x2="23" y2="23"/>
-					</svg>
-				{:else}
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-						<circle cx="12" cy="12" r="3"/>
-					</svg>
-				{/if}
+				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+				</svg>
+				<span>Burn after reading</span>
+				<span class="burn-indicator">
+					{#if burnAfterRead}
+						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+							<polyline points="20 6 9 17 4 12"/>
+						</svg>
+					{:else}
+						<span class="burn-off">OFF</span>
+					{/if}
+				</span>
 			</button>
 		</div>
 
-		{#if strength && password}
-			<div class="strength-bar">
-				<div class="strength-track">
-					<div class="strength-fill" style="width: {(strength.score / 3) * 100}%; background: {strength.color};"></div>
-				</div>
-				<span class="strength-label" style="color: {strength.color};">{strength.label}</span>
+		{#if showPasswordSection}
+			<label for="clip-password">Password</label>
+			<div class="password-input-group">
+				<input
+					id="clip-password"
+					type={showPassword ? 'text' : 'password'}
+					bind:value={password}
+					readonly
+					class="password-value"
+					placeholder="Auto-generated"
+				/>
+				<button
+					type="button"
+					class="btn-icon"
+					onclick={regeneratePassword}
+					title="Generate new password"
+				>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<polyline points="23 4 23 10 17 10"/>
+						<polyline points="1 20 1 14 7 14"/>
+						<path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+					</svg>
+				</button>
+				<button
+					type="button"
+					class="btn-icon"
+					onclick={() => showPassword = !showPassword}
+					title={showPassword ? 'Hide password' : 'Show password'}
+				>
+					{#if showPassword}
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+							<line x1="1" y1="1" x2="23" y2="23"/>
+						</svg>
+					{:else}
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+							<circle cx="12" cy="12" r="3"/>
+						</svg>
+					{/if}
+				</button>
 			</div>
+
+			{#if strength && password}
+				<div class="strength-bar">
+					<div class="strength-track">
+						<div class="strength-fill" style="width: {(strength.score / 3) * 100}%; background: {strength.color};"></div>
+					</div>
+					<span class="strength-label" style="color: {strength.color};">{strength.label}</span>
+				</div>
+			{/if}
 		{/if}
 	</div>
 
@@ -214,6 +256,72 @@
 		font-size: 0.8rem;
 		font-weight: 500;
 		margin-bottom: var(--space-sm);
+	}
+
+	.password-toggle {
+		display: flex;
+		align-items: center;
+		gap: var(--space-xs);
+		background: none;
+		border: none;
+		color: var(--accent);
+		font-size: 0.8rem;
+		font-weight: 500;
+		cursor: pointer;
+		padding: var(--space-xs) 0;
+		margin-bottom: var(--space-sm);
+		transition: color 0.15s;
+	}
+
+	.password-toggle:hover {
+		color: var(--accent-hover);
+	}
+
+	.toggle-row {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-xs);
+	}
+
+	.burn-toggle {
+		display: flex;
+		align-items: center;
+		gap: var(--space-xs);
+		background: none;
+		border: none;
+		color: var(--text-muted);
+		font-size: 0.8rem;
+		font-weight: 500;
+		cursor: pointer;
+		padding: var(--space-xs) 0;
+		transition: color 0.15s;
+		align-self: flex-start;
+	}
+
+	.burn-toggle:hover {
+		color: var(--text-secondary);
+	}
+
+	.burn-toggle:global(.active) {
+		color: var(--warning);
+	}
+
+	.burn-indicator {
+		margin-left: auto;
+		display: flex;
+		align-items: center;
+		gap: var(--space-xs);
+	}
+
+	.burn-off {
+		color: var(--text-muted);
+		font-size: 0.7rem;
+		font-weight: 600;
+		letter-spacing: 0.05em;
+	}
+
+	.toggle-arrow {
+		transition: transform 0.2s;
 	}
 
 	.textarea {

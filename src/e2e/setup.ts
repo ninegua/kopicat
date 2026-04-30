@@ -37,6 +37,7 @@ afterEach(() => {
 		error: null,
 		loading: false,
 		shareUrl: null,
+		showShareModal: false,
 	});
 });
 

@@ -30,6 +30,14 @@ function getPasswordInput(): HTMLInputElement {
 	return screen.getByPlaceholderText(/enter password/i) as HTMLInputElement;
 }
 
+function getPasswordValueInput(): HTMLInputElement {
+	return screen.getByLabelText(/password/i) as HTMLInputElement;
+}
+
+function getShowPasswordToggle(): HTMLButtonElement {
+	return screen.getByRole('button', { name: /show password/i }) as HTMLButtonElement;
+}
+
 // ---------------------------------------------------------------------------
 // Clip creation flow
 // ---------------------------------------------------------------------------
@@ -44,17 +52,19 @@ describe('Clip creation flow', () => {
 		expect(
 			screen.getByPlaceholderText(/paste or type/i),
 		).toBeInTheDocument();
-		expect(screen.getByLabelText('Password')).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: /show password/i })).toBeInTheDocument();
 	});
 
-	it('creates a clip successfully and shows the result view', async () => {
+	it('creates a clip successfully and shows the share modal', async () => {
 		const testText = 'This is a secret message';
 
 		const { container } = render(Page);
 		await fillText(container, testText);
 
+		await fireEvent.click(getShowPasswordToggle());
+
 		const passwordInput = screen.getByLabelText(
-			'Password',
+			/Password/i,
 		) as HTMLInputElement;
 		await fireEvent.input(passwordInput, {
 			target: { value: 'ABCDefgh12345' },
@@ -70,10 +80,8 @@ describe('Clip creation flow', () => {
 		});
 
 		await waitFor(() => {
-			expect(screen.getByText('Decrypted successfully')).toBeInTheDocument();
+			expect(screen.getByText('Share this clip')).toBeInTheDocument();
 		});
-
-		expect(screen.getByText(testText)).toBeInTheDocument();
 
 		const shareUrlEl = screen.getByText(/http:\/\/localhost\//);
 		expect(shareUrlEl).toBeInTheDocument();

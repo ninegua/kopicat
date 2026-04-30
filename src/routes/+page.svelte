@@ -11,12 +11,14 @@
 	import CreateForm from '$lib/components/CreateForm.svelte';
 	import DecryptForm from '$lib/components/DecryptForm.svelte';
 	import ResultView from '$lib/components/ResultView.svelte';
+	import ShareModal from '$lib/components/ShareModal.svelte';
 	import ClipNotFound from '$lib/components/ClipNotFound.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 
 	let currentMode = $derived($clipState.mode);
 	let currentLoading = $derived($clipState.loading);
 	let currentClip = $derived($clipState.clip);
+	let currentShareModal = $derived($clipState.showShareModal);
 
 	async function fetchClipById(id: string) {
 		clipState.update((s) => ({ ...s, clipId: id, loading: true, error: null }));
@@ -65,7 +67,11 @@
 		clipState.update((s) => ({ ...s, shareUrl: url }));
 	}
 
-	async function handleCreate(text: string, pw: string, ttl: number) {
+	function setShowShareModal(open: boolean) {
+		clipState.update((s) => ({ ...s, showShareModal: open }));
+	}
+
+	async function handleCreate(text: string, pw: string, ttl: number, burn_after_read: boolean) {
 		if (!text.trim()) {
 			setError('Please enter some text to share');
 			return;
@@ -82,7 +88,7 @@
 				id: clipId,
 				blob: encryptedBlob,
 				expires_after,
-				burn_after_read: false,
+				burn_after_read,
 			});
 
 			if ('error' in result) {
@@ -94,10 +100,10 @@
 			const shareUrl = `${window.location.origin}/${clipId}#${pw}`;
 			clipState.update((s) => ({
 				...s,
-				mode: 'result' as ClipMode,
 				clipId,
 				decryptedText: text,
 				shareUrl,
+				showShareModal: true,
 				loading: false,
 			}));
 		} catch (e: any) {
@@ -148,6 +154,10 @@
 		{/if}
 	{/if}
 </main>
+
+{#if currentShareModal && $clipState.shareUrl}
+	<ShareModal url={$clipState.shareUrl} onClose={() => setShowShareModal(false)} />
+{/if}
 
 <Footer />
 

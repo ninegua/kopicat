@@ -113,6 +113,7 @@ beforeEach(() => {
 		error: null,
 		loading: false,
 		shareUrl: null,
+		showShareModal: false,
 	});
 
 	// Mock fetch
@@ -127,6 +128,7 @@ async function simulateCreateClip(
 	text: string,
 	password: string,
 	ttl: number,
+	burn_after_read = false,
 ) {
 	const encryptedBlob = await encrypt(text, password);
 	const clipId = generateClipId();
@@ -138,7 +140,7 @@ async function simulateCreateClip(
 			id: clipId,
 			blob: encryptedBlob,
 			expires_after,
-			burn_after_read: false,
+			burn_after_read,
 		});
 	} catch (e: any) {
 		// Network errors are caught by handleCreate
@@ -158,10 +160,10 @@ async function simulateCreateClip(
 	const shareUrl = `http://localhost/${clipId}#${password}`;
 	clipState.set({
 		...get(clipState),
-		mode: 'result',
 		clipId,
 		decryptedText: text,
 		shareUrl,
+		showShareModal: true,
 		loading: false,
 		error: null,
 	});
@@ -238,7 +240,7 @@ async function simulateDecryptClip(clip: Clip | null, password: string) {
 // ---------------------------------------------------------------------------
 
 describe('Clip creation flow', () => {
-	it('creates a clip and transitions to result mode', async () => {
+	it('creates a clip and shows share modal', async () => {
 		const text = 'This is a secret message';
 		const password = 'myPassword123';
 
@@ -257,7 +259,7 @@ describe('Clip creation flow', () => {
 
 		// Verify store state
 		const finalState = get(clipState);
-		expect(finalState.mode).toBe('result');
+		expect(finalState.showShareModal).toBe(true);
 		expect(finalState.decryptedText).toBe(text);
 		expect(finalState.loading).toBe(false);
 		expect(finalState.error).toBeNull();
@@ -426,8 +428,8 @@ describe('Clip viewing flow', () => {
 		const createResult = await simulateCreateClip(text, password, 0);
 		expect(createResult.success).toBe(true);
 
-		// Step 2: Store state should be in 'result' mode
-		expect(get(clipState).mode).toBe('result');
+		// Step 2: Store state should have showShareModal true
+		expect(get(clipState).showShareModal).toBe(true);
 		expect(get(clipState).decryptedText).toBe(text);
 
 		// Step 3: Simulate navigating to the clip URL (reset state first)
@@ -440,6 +442,7 @@ describe('Clip viewing flow', () => {
 			error: null,
 			loading: false,
 			shareUrl: null,
+			showShareModal: false,
 		});
 
 		const clip = await simulateFetchClipById(createResult.clipId!);
@@ -557,6 +560,7 @@ describe('UI component state flow', () => {
 			error: null,
 			loading: false,
 			shareUrl: null,
+			showShareModal: false,
 		});
 
 		// The DecryptForm.svelte button has: disabled={loading || !password}
@@ -582,6 +586,7 @@ describe('UI component state flow', () => {
 			error: null,
 			loading: false,
 			shareUrl: null,
+			showShareModal: false,
 		});
 
 		const state = get(clipState);

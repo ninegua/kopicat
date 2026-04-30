@@ -13,6 +13,7 @@ export interface ClipState {
 	error: string | null;
 	loading: boolean;
 	shareUrl: string | null;
+	showShareModal: boolean;
 }
 
 const initial: ClipState = {
@@ -24,6 +25,7 @@ const initial: ClipState = {
 	error: null,
 	loading: false,
 	shareUrl: null,
+	showShareModal: false,
 };
 
 export const clipState = writable<ClipState>(initial);
