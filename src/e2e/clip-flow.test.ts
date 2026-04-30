@@ -34,8 +34,8 @@ function getPasswordValueInput(): HTMLInputElement {
 	return screen.getByLabelText(/password/i) as HTMLInputElement;
 }
 
-function getShowPasswordToggle(): HTMLButtonElement {
-	return screen.getByRole('button', { name: /show password/i }) as HTMLButtonElement;
+function getBurnToggle(): HTMLButtonElement {
+	return screen.getByRole('button', { name: /burn after read/i }) as HTMLButtonElement;
 }
 
 // ---------------------------------------------------------------------------
@@ -43,32 +43,38 @@ function getShowPasswordToggle(): HTMLButtonElement {
 // ---------------------------------------------------------------------------
 
 describe('Clip creation flow', () => {
-	it('shows the create form on the home page', () => {
+	it('shows the idle view on the home page', () => {
 		render(Page);
 
-		expect(
-			screen.getByRole('heading', { name: 'Create a clip' }),
-		).toBeInTheDocument();
-		expect(
-			screen.getByPlaceholderText(/paste or type/i),
-		).toBeInTheDocument();
-		expect(screen.getByRole('button', { name: /show password/i })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'Paste from clipboard' })).toBeInTheDocument();
+		expect(screen.getByText(/paste your text here/i)).toBeInTheDocument();
+		expect(screen.getByText(/ctrl\+v/i)).toBeInTheDocument();
+		expect(screen.getByText(/copy from clipboard/i)).toBeInTheDocument();
+	});
+
+	it('transitions to create form after pasting', async () => {
+		render(Page);
+
+		await fireEvent.paste(window, {
+			clipboardData: { getData: () => 'Test paste content' },
+		});
+
+		await waitFor(() => {
+			expect(screen.queryByRole('button', { name: 'Paste from clipboard' })).not.toBeInTheDocument();
+		});
+
+		expect(screen.getByPlaceholderText(/paste your text/i)).toBeInTheDocument();
 	});
 
 	it('creates a clip successfully and shows the share modal', async () => {
 		const testText = 'This is a secret message';
 
 		const { container } = render(Page);
-		await fillText(container, testText);
-
-		await fireEvent.click(getShowPasswordToggle());
-
-		const passwordInput = screen.getByLabelText(
-			/Password/i,
-		) as HTMLInputElement;
-		await fireEvent.input(passwordInput, {
-			target: { value: 'ABCDefgh12345' },
+		await fireEvent.paste(window, { clipboardData: { getData: () => testText } });
+		await waitFor(() => {
+			expect(screen.queryByRole('button', { name: 'Paste from clipboard' })).not.toBeInTheDocument();
 		});
+		await fillText(container, testText);
 
 		const createBtn = getCreateButton();
 		expect(createBtn).not.toBeDisabled();
@@ -96,7 +102,11 @@ describe('Clip creation flow', () => {
 	});
 
 	it('shows validation error for empty text', async () => {
-		const { container } = render(Page);
+		render(Page);
+		await fireEvent.paste(window, { clipboardData: { getData: () => '' } });
+		await waitFor(() => {
+			expect(screen.queryByRole('button', { name: 'Paste from clipboard' })).not.toBeInTheDocument();
+		});
 
 		const createBtn = getCreateButton();
 		await fireEvent.click(createBtn);
@@ -291,7 +301,6 @@ describe('Clip viewing flow', () => {
 describe('Burn-after-read flow', () => {
 	it('creates a clip with burn-after-read enabled and deletes it after first view', async () => {
 		const testText = 'Burn this message';
-		const password = 'burnPass123';
 
 		// Reset location to root so onMount doesn't trigger a fetch
 		Object.defineProperty(window, 'location', {
@@ -306,6 +315,10 @@ describe('Burn-after-read flow', () => {
 		});
 
 		const { container } = render(Page);
+		await fireEvent.paste(window, { clipboardData: { getData: () => testText } });
+		await waitFor(() => {
+			expect(screen.queryByRole('button', { name: 'Paste from clipboard' })).not.toBeInTheDocument();
+		});
 
 		// Wait for the page to settle (any onMount fetches complete)
 		await waitFor(() => {
@@ -315,13 +328,8 @@ describe('Burn-after-read flow', () => {
 
 		await fillText(container, testText);
 
-		await fireEvent.click(getShowPasswordToggle());
-
-		const passwordInput = screen.getByLabelText(/Password/i) as HTMLInputElement;
-		await fireEvent.input(passwordInput, { target: { value: password } });
-
 		// Enable burn-after-read by clicking the toggle
-		const burnToggle = screen.getByRole('button', { name: /burn after reading/i });
+		const burnToggle = getBurnToggle();
 		await fireEvent.click(burnToggle);
 
 		const createBtn = getCreateButton();
@@ -336,9 +344,10 @@ describe('Burn-after-read flow', () => {
 		});
 
 		const shareUrlEl = screen.getByText(/http:\/\/localhost\//);
-		const match = shareUrlEl.textContent!.match(/(http:\/\/localhost\/)([^ #]+)/);
-		expect(match).not.toBeNull();
-		const clipId = match![2];
+		const shareUrlMatch = shareUrlEl.textContent!.match(/(http:\/\/localhost\/)([^ #]+)(?:#(.+))?/);
+		expect(shareUrlMatch).not.toBeNull();
+		const createdClipId = shareUrlMatch![2];
+		const createdPassword = shareUrlMatch![3] || '';
 
 		// First access: should decrypt successfully
 		cleanup();
@@ -346,7 +355,7 @@ describe('Burn-after-read flow', () => {
 		Object.defineProperty(window, 'location', {
 			value: {
 				...window.location,
-				pathname: `/${clipId}`,
+				pathname: `/${createdClipId}`,
 				hash: '',
 				origin: 'http://localhost',
 			},
@@ -363,7 +372,7 @@ describe('Burn-after-read flow', () => {
 			).toBeInTheDocument();
 		});
 
-		await fireEvent.input(getPasswordInput(), { target: { value: password } });
+		await fireEvent.input(getPasswordInput(), { target: { value: createdPassword } });
 		await fireEvent.click(getDecryptButton());
 
 		await waitFor(() => {
@@ -377,7 +386,7 @@ describe('Burn-after-read flow', () => {
 		Object.defineProperty(window, 'location', {
 			value: {
 				...window.location,
-				pathname: `/${clipId}`,
+				pathname: `/${createdClipId}`,
 				hash: '',
 				origin: 'http://localhost',
 			},

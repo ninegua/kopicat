@@ -43,6 +43,8 @@
 		--space-lg: 1.5rem;
 		--space-xl: 2rem;
 		--space-2xl: 3rem;
+		--space-3xl: 4rem;
+		--space-4xl: 5rem;
 
 		--font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 		--font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;

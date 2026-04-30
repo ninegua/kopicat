@@ -1,9 +1,6 @@
 <script lang="ts">
 	import { generatePassword } from '$lib/crypto';
-	import { generateClipId } from '$lib/words';
-	import { estimatePasswordStrength } from '$lib/utils/helpers';
 	import { clipState } from '$lib/api/store';
-	import type { ClipState } from '$lib/api/store';
 
 	let { onCreate }: { onCreate: (text: string, password: string, ttl: number, burn_after_read: boolean) => Promise<void> } = $props();
 
@@ -20,18 +17,7 @@
 	let text = $state('');
 	let password = $state('');
 	let selectedTTL = $state(900);
-	let showPasswordSection = $state(false);
-	let showPassword = $state(false);
 	let burnAfterRead = $state(false);
-
-	function regeneratePassword() {
-		password = generatePassword(11);
-	}
-
-	function getStrength() {
-		if (!password) return null;
-		return estimatePasswordStrength(password);
-	}
 
 	async function handleCreate() {
 		if (!text.trim()) {
@@ -39,21 +25,22 @@
 			return;
 		}
 
-		if (!password) {
-			password = generatePassword(11);
-		}
-
-		await onCreate(text, password, selectedTTL, burnAfterRead);
+		const pw = password || generatePassword(11);
+		await onCreate(text, pw, selectedTTL, burnAfterRead);
 	}
 
-	const strength = $derived(getStrength());
 	const charCount = $derived(text.length);
 </script>
 
 <div class="create-card">
-	<div class="card-header">
-		<h2 class="card-title">Create a clip</h2>
-		<p class="card-subtitle">Your text is encrypted before being stored</p>
+	<div class="card-textarea-group">
+		<textarea
+			id="clip-text"
+			bind:value={text}
+			placeholder="Paste your text here..."
+			class="card-textarea"
+		></textarea>
+		<span class="char-count">{charCount} characters</span>
 	</div>
 
 	{#if $clipState.error}
@@ -68,36 +55,8 @@
 	{/if}
 
 	<div class="form-group">
-		<div class="input-header">
-			<label for="clip-text">Your text</label>
-			<span class="char-count">{charCount} characters</span>
-		</div>
-		<textarea
-			id="clip-text"
-			bind:value={text}
-			placeholder="Paste or type the text you want to share..."
-			rows={text ? Math.min(8, Math.max(3, text.split('\n').length + 2)) : 5}
-			class="textarea"
-		></textarea>
-	</div>
-
-	<div class="form-group">
-		<div class="toggle-row">
-			<button
-				type="button"
-				class="password-toggle"
-				onclick={() => showPasswordSection = !showPasswordSection}
-			>
-				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-					<circle cx="12" cy="12" r="3"/>
-				</svg>
-				<span>{showPasswordSection ? 'Hide password' : 'Show password'}</span>
-				<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="toggle-arrow">
-					<polyline points={showPasswordSection ? '18 15 12 9 6 15' : '6 9 12 15 18 9'} />
-				</svg>
-			</button>
-
+		<div class="expiry-header">
+			<label for="clip-ttl">Expiry</label>
 			<button
 				type="button"
 				class="burn-toggle"
@@ -107,7 +66,7 @@
 				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
 				</svg>
-				<span>Burn after reading</span>
+				<span>Burn after read</span>
 				<span class="burn-indicator">
 					{#if burnAfterRead}
 						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -119,63 +78,6 @@
 				</span>
 			</button>
 		</div>
-
-		{#if showPasswordSection}
-			<label for="clip-password">Password</label>
-			<div class="password-input-group">
-				<input
-					id="clip-password"
-					type={showPassword ? 'text' : 'password'}
-					bind:value={password}
-					readonly
-					class="password-value"
-					placeholder="Auto-generated"
-				/>
-				<button
-					type="button"
-					class="btn-icon"
-					onclick={regeneratePassword}
-					title="Generate new password"
-				>
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<polyline points="23 4 23 10 17 10"/>
-						<polyline points="1 20 1 14 7 14"/>
-						<path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-					</svg>
-				</button>
-				<button
-					type="button"
-					class="btn-icon"
-					onclick={() => showPassword = !showPassword}
-					title={showPassword ? 'Hide password' : 'Show password'}
-				>
-					{#if showPassword}
-						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-							<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-							<line x1="1" y1="1" x2="23" y2="23"/>
-						</svg>
-					{:else}
-						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-							<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-							<circle cx="12" cy="12" r="3"/>
-						</svg>
-					{/if}
-				</button>
-			</div>
-
-			{#if strength && password}
-				<div class="strength-bar">
-					<div class="strength-track">
-						<div class="strength-fill" style="width: {(strength.score / 3) * 100}%; background: {strength.color};"></div>
-					</div>
-					<span class="strength-label" style="color: {strength.color};">{strength.label}</span>
-				</div>
-			{/if}
-		{/if}
-	</div>
-
-	<div class="form-group">
-		<label for="clip-ttl">Expiry</label>
 		<select id="clip-ttl" bind:value={selectedTTL} class="select">
 			{#each TTL_OPTIONS as option}
 				<option value={option.value}>{option.label}</option>
@@ -204,26 +106,45 @@
 		background: var(--bg-card);
 		border: 1px solid var(--border-color);
 		border-radius: var(--radius-lg);
-		padding: var(--space-xl);
-		max-width: 520px;
+		padding: 0;
+		width: 100%;
+		max-width: 580px;
 		margin: 0 auto;
+		overflow: hidden;
 	}
 
-	.card-header {
-		margin-bottom: var(--space-lg);
-		text-align: center;
+	.card-textarea-group {
+		padding: var(--space-4xl) var(--space-3xl);
+		border-bottom: 1px solid var(--border-color);
+		width: 100%;
+		min-height: 280px;
+		height: 280px;
+		display: flex;
+		flex-direction: column;
+		position: relative;
+		overflow-y: auto;
 	}
 
-	.card-title {
-		font-size: 1.25rem;
-		font-weight: 700;
-		letter-spacing: -0.02em;
-		margin-bottom: var(--space-xs);
+	.card-textarea {
+		width: 100%;
+		padding: 0;
+		background: transparent;
+		border: none;
+		border-radius: 0;
+		color: var(--text-primary);
+		font-size: 0.9rem;
+		line-height: 1.5;
+		resize: none;
+		outline: none;
+		font-family: inherit;
 	}
 
-	.card-subtitle {
+	.card-textarea:focus {
+		box-shadow: none;
+	}
+
+	.card-textarea::placeholder {
 		color: var(--text-muted);
-		font-size: 0.85rem;
 	}
 
 	.error-banner {
@@ -240,47 +161,19 @@
 	}
 
 	.form-group {
-		margin-bottom: var(--space-md);
+		margin-bottom: var(--space-lg);
 	}
 
-	.input-header {
+	.expiry-header {
 		display: flex;
+		align-items: center;
 		justify-content: space-between;
-		align-items: center;
 		margin-bottom: var(--space-sm);
 	}
 
-	label {
-		display: block;
-		color: var(--text-secondary);
-		font-size: 0.8rem;
-		font-weight: 500;
-		margin-bottom: var(--space-sm);
-	}
-
-	.password-toggle {
-		display: flex;
-		align-items: center;
-		gap: var(--space-xs);
-		background: none;
-		border: none;
-		color: var(--accent);
-		font-size: 0.8rem;
-		font-weight: 500;
-		cursor: pointer;
-		padding: var(--space-xs) 0;
-		margin-bottom: var(--space-sm);
-		transition: color 0.15s;
-	}
-
-	.password-toggle:hover {
-		color: var(--accent-hover);
-	}
-
-	.toggle-row {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-xs);
+	.expiry-header label {
+		margin-bottom: 0;
+		margin-left: 2px;
 	}
 
 	.burn-toggle {
@@ -295,7 +188,6 @@
 		cursor: pointer;
 		padding: var(--space-xs) 0;
 		transition: color 0.15s;
-		align-self: flex-start;
 	}
 
 	.burn-toggle:hover {
@@ -318,104 +210,6 @@
 		font-size: 0.7rem;
 		font-weight: 600;
 		letter-spacing: 0.05em;
-	}
-
-	.toggle-arrow {
-		transition: transform 0.2s;
-	}
-
-	.textarea {
-		width: 100%;
-		padding: var(--space-md);
-		background: var(--bg-input);
-		border: 1px solid var(--border-color);
-		border-radius: var(--radius-md);
-		color: var(--text-primary);
-		font-size: 0.9rem;
-		line-height: 1.5;
-		resize: vertical;
-		transition: border-color 0.15s, box-shadow 0.15s;
-		outline: none;
-	}
-
-	.textarea:focus {
-		border-color: var(--border-focus);
-		box-shadow: 0 0 0 3px var(--accent-glow);
-	}
-
-	.textarea::placeholder {
-		color: var(--text-muted);
-	}
-
-	.password-input-group {
-		display: flex;
-		gap: 0;
-	}
-
-	.password-value {
-		flex: 1;
-		padding: var(--space-md);
-		background: var(--bg-input);
-		border: 1px solid var(--border-color);
-		border-right: none;
-		border-radius: var(--radius-md) 0 0 var(--radius-md);
-		color: var(--text-primary);
-		font-family: var(--font-mono);
-		font-size: 0.85rem;
-		outline: none;
-	}
-
-	.btn-icon {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: var(--space-md);
-		background: var(--bg-input);
-		border: 1px solid var(--border-color);
-		color: var(--text-secondary);
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-
-	.btn-icon:first-of-type {
-		border-left: none;
-	}
-
-	.btn-icon:last-of-type {
-		border-radius: 0 var(--radius-md) var(--radius-md) 0;
-	}
-
-	.btn-icon:hover {
-		background: var(--bg-card-hover);
-		color: var(--text-primary);
-	}
-
-	.strength-bar {
-		display: flex;
-		align-items: center;
-		gap: var(--space-sm);
-		margin-top: var(--space-sm);
-	}
-
-	.strength-track {
-		flex: 1;
-		height: 3px;
-		background: var(--border-color);
-		border-radius: 2px;
-		overflow: hidden;
-	}
-
-	.strength-fill {
-		height: 100%;
-		border-radius: 2px;
-		transition: width 0.3s, background 0.3s;
-	}
-
-	.strength-label {
-		font-size: 0.75rem;
-		font-weight: 500;
-		min-width: 45px;
-		text-align: right;
 	}
 
 	.select {
@@ -442,6 +236,9 @@
 	}
 
 	.char-count {
+		position: absolute;
+		bottom: var(--space-md);
+		right: var(--space-md);
 		color: var(--text-muted);
 		font-size: 0.75rem;
 	}

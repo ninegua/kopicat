@@ -7,7 +7,7 @@ export const load = async ({ url }: { url: URL }) => {
 	const isClip = !!path;
 
 	clipState.set({
-		mode: isClip ? ('decrypt' as ClipMode) : 'create',
+		mode: isClip ? ('decrypt' as ClipMode) : 'idle',
 		clipId: isClip ? path : null,
 		password: isClip ? hash : '',
 		decryptedText: null,

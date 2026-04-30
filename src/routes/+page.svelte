@@ -6,6 +6,7 @@
 	import { decrypt, encrypt } from '$lib/crypto';
 	import { generateClipId } from '$lib/words';
 	import Header from '$lib/components/Header.svelte';
+	import IdleView from '$lib/components/IdleView.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 		import CreateForm from '$lib/components/CreateForm.svelte';
 	import DecryptForm from '$lib/components/DecryptForm.svelte';
@@ -66,6 +67,17 @@
 		clipState.update((s) => ({ ...s, shareUrl: url }));
 	}
 
+	function handlePaste(text: string) {
+		clipState.update((s) => ({ ...s, mode: 'create' }));
+		queueMicrotask(() => {
+			const textarea = document.querySelector('textarea');
+			if (textarea) {
+				(textarea as HTMLTextAreaElement).value = text;
+				(textarea as HTMLTextAreaElement).dispatchEvent(new Event('input', { bubbles: true }));
+			}
+		});
+	}
+
 	function setShowShareModal(open: boolean) {
 		clipState.update((s) => ({ ...s, showShareModal: open }));
 	}
@@ -124,6 +136,20 @@
 			await fetchClipById(path);
 		}
 	});
+
+	onMount(() => {
+		function onPaste(event: ClipboardEvent) {
+			if (currentMode !== 'idle') return;
+			const text = event.clipboardData?.getData('text/plain');
+			if (text) {
+				event.preventDefault();
+				handlePaste(text);
+			}
+		}
+
+		window.addEventListener('paste', onPaste);
+		return () => window.removeEventListener('paste', onPaste);
+	});
 </script>
 
 <svelte:head>
@@ -147,6 +173,8 @@
 			/>
 		{:else if currentMode === 'result'}
 			<ResultView />
+		{:else if currentMode === 'idle'}
+			<IdleView onPaste={handlePaste} />
 		{:else}
 			<CreateForm onCreate={handleCreate} />
 		{/if}

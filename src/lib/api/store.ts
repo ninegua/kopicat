@@ -2,7 +2,7 @@ import { writable } from 'svelte/store';
 import { fetchClip } from './client';
 import type { Clip } from './client';
 
-export type ClipMode = 'create' | 'decrypt' | 'result' | 'not-found';
+export type ClipMode = 'idle' | 'create' | 'decrypt' | 'result' | 'not-found';
 
 export interface ClipState {
 	mode: ClipMode;
@@ -17,7 +17,7 @@ export interface ClipState {
 }
 
 const initial: ClipState = {
-	mode: 'create',
+	mode: 'idle',
 	clipId: null,
 	password: '',
 	decryptedText: null,
