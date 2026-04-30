@@ -2,6 +2,9 @@
 	import { onMount, tick } from 'svelte';
 	import { clipState } from '$lib/api/store';
 	import type { ClipState, ClipMode } from '$lib/api/store';
+	import { fetchClip, createClip } from '$lib/api/client';
+	import { decrypt, encrypt } from '$lib/crypto';
+	import { generateClipId } from '$lib/words';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import Hero from '$lib/components/Hero.svelte';
@@ -19,7 +22,6 @@
 		clipState.update((s) => ({ ...s, clipId: id, loading: true, error: null }));
 
 		try {
-			const { fetchClip } = await import('$lib/api/client');
 			const clip = await fetchClip(id);
 
 			if (!clip) {
@@ -37,7 +39,6 @@
 		clipState.update((s) => ({ ...s, loading: true }));
 
 		try {
-			const { decrypt } = await import('$lib/crypto');
 			const text = await decrypt(clip!.blob, password);
 
 			clipState.update((s) => ({
@@ -73,10 +74,6 @@
 		clipState.update((s) => ({ ...s, loading: true, error: null }));
 
 		try {
-			const { encrypt } = await import('$lib/crypto');
-			const { generateClipId } = await import('$lib/words');
-			const { createClip } = await import('$lib/api/client');
-
 			const encryptedBlob = await encrypt(text, pw);
 			const clipId = generateClipId();
 			const expires_after = ttl === 0 ? undefined : ttl;
@@ -88,11 +85,11 @@
 				burn_after_read: false,
 			});
 
-	if ('error' in result) {
-			setError(result.error || 'Failed to create clip');
-			clipState.update((s) => ({ ...s, loading: false }));
-			return;
-		}
+			if ('error' in result) {
+				setError(result.error || 'Failed to create clip');
+				clipState.update((s) => ({ ...s, loading: false }));
+				return;
+			}
 
 			const shareUrl = `${window.location.origin}/${clipId}#${pw}`;
 			clipState.update((s) => ({
