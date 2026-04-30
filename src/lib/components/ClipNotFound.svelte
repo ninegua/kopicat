@@ -1,0 +1,87 @@
+<script lang="ts">
+	import { fade, fly } from 'svelte/transition';
+</script>
+
+<div class="notfound" transition:fly="{{ duration: 400, y: 20 }}">
+	<div class="notfound-icon">
+		<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+			<circle cx="12" cy="12" r="10"/>
+			<line x1="12" y1="8" x2="12" y2="12"/>
+			<line x1="12" y1="16" x2="12.01" y2="16"/>
+		</svg>
+	</div>
+
+	<h2 class="notfound-title">Clip not found</h2>
+
+	<p class="notfound-desc">
+		This clip either doesn't exist, has expired, or has already been burned after reading.
+	</p>
+
+	<button class="btn-secondary" onclick={() => window.location.href = '/'}>
+		<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<line x1="19" y1="12" x2="5" y2="12"/>
+			<polyline points="12 19 5 12 12 5"/>
+		</svg>
+		Create a new clip
+	</button>
+</div>
+
+<style>
+	.notfound {
+		text-align: center;
+		padding: var(--space-2xl) var(--space-lg);
+		max-width: 400px;
+		margin: 2rem auto;
+	}
+
+	.notfound-icon {
+		width: 64px;
+		height: 64px;
+		margin: 0 auto var(--space-lg);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--error-bg);
+		border-radius: 50%;
+	}
+
+	.notfound-icon svg {
+		stroke: var(--error);
+		width: 32px;
+		height: 32px;
+	}
+
+	.notfound-title {
+		font-size: 1.25rem;
+		font-weight: 700;
+		margin-bottom: var(--space-sm);
+	}
+
+	.notfound-desc {
+		color: var(--text-muted);
+		font-size: 0.9rem;
+		line-height: 1.6;
+		margin-bottom: var(--space-lg);
+	}
+
+	.btn-secondary {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-sm);
+		padding: var(--space-sm) var(--space-lg);
+		background: var(--bg-card);
+		border: 1px solid var(--border-color);
+		border-radius: var(--radius-md);
+		color: var(--text-secondary);
+		font-size: 0.9rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+
+	.btn-secondary:hover {
+		border-color: var(--accent);
+		color: var(--accent);
+		background: var(--accent-glow);
+	}
+</style>

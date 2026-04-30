@@ -6,16 +6,25 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite dev",
-    "check": "svelte-check"
+    "check": "svelte-check",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.10",
     "@sveltejs/kit": "^2.58.0",
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
+    "@testing-library/jest-dom": "6.9.0",
+    "@testing-library/svelte": "^5.3.1",
+    "esm-env": "^1.2.2",
+    "happy-dom": "^20.9.0",
+    "jsdom": "26.1.0",
+    "msw": "2.14.2",
     "svelte": "^5.55.5",
     "svelte-check": "^4.4.6",
     "typescript": "^6.0.3",
-    "vite": "^8.0.10"
+    "vite": "^8.0.10",
+    "vitest": "^4.1.5"
   },
   "dependencies": {
     "qrcode": "^1.5.4"
