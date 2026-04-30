@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { clipState } from '$lib/api/store';
 
-	
-	let copyFeedback = $state<'text' | 'link' | null>(null);
+	let { onNewClip }: { onNewClip: () => void } = $props();
+
+	let copyFeedback = $state<'text' | null>(null);
 
 	async function copyText() {
 		const text = $clipState.decryptedText;
@@ -16,22 +17,11 @@
 		}
 	}
 
-	async function copyLink() {
-		const url = $clipState.shareUrl;
-		if (!url) return;
-		try {
-			await navigator.clipboard.writeText(url);
-			copyFeedback = 'link';
-			setTimeout(() => (copyFeedback = null), 2000);
-		} catch {
-			clipState.update((s) => ({ ...s, error: 'Failed to copy link' }));
-		}
-	}
-</script>
+	</script>
 
 <div class="result-card">
-	<div class="result-header">
-		<div class="result-status">
+	<div class="card-header">
+		<div class="card-status">
 			<svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 				<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
 				<polyline points="22 4 12 14.01 9 11.01"/>
@@ -60,8 +50,8 @@
 			<pre class="clipped-text">{$clipState.decryptedText}</pre>
 		</div>
 
-		<div class="result-actions">
-			<button class="btn-action" onclick={copyText} disabled={copyFeedback === 'text'}>
+		<div class="btn-group">
+			<button class="btn-primary" onclick={copyText} disabled={copyFeedback === 'text'}>
 				{#if copyFeedback === 'text'}
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
 						<polyline points="20 6 9 17 4 12"/>
@@ -76,55 +66,39 @@
 				{/if}
 			</button>
 
-			<button class="btn-action" onclick={() => clipState.update((s) => ({ ...s, showShareModal: true }))} disabled={copyFeedback === 'link'}>
+			<button class="btn-secondary" onclick={onNewClip}>
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
-					<polyline points="16 6 12 2 8 6"/>
-					<line x1="12" y1="2" x2="12" y2="15"/>
+					<line x1="12" y1="5" x2="12" y2="19"/>
+					<line x1="5" y1="12" x2="19" y2="12"/>
 				</svg>
-				Share
+				New clip
 			</button>
 		</div>
 	{/if}
 
-	{#if $clipState.shareUrl}
-		<div class="share-bar">
-			<span class="share-label">Share link:</span>
-			<span class="share-url">{$clipState.shareUrl}</span>
-			<button class="btn-icon-sm" onclick={copyLink} title="Copy link">
-				{#if copyFeedback === 'link'}
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-						<polyline points="20 6 9 17 4 12"/>
-					</svg>
-				{:else}
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-						<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-					</svg>
-				{/if}
-			</button>
-		</div>
-	{/if}
-</div>
+	</div>
 
 <style>
 	.result-card {
 		background: var(--bg-card);
 		border: 1px solid var(--border-color);
 		border-radius: var(--radius-lg);
-		padding: var(--space-xl);
-		max-width: 520px;
+		padding: 0;
+		width: 100%;
+		max-width: 480px;
 		margin: 0 auto;
+		overflow: hidden;
 	}
 
-	.result-header {
+	.card-header {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		margin-bottom: var(--space-md);
+		padding: var(--space-xl) var(--space-md);
+		border-bottom: 1px solid var(--border-color);
 	}
 
-	.result-status {
+	.card-status {
 		display: flex;
 		align-items: center;
 		gap: var(--space-sm);
@@ -161,11 +135,11 @@
 		border-radius: var(--radius-md);
 		color: var(--error);
 		font-size: 0.85rem;
-		margin-bottom: var(--space-md);
+		margin: var(--space-md) var(--space-md) 0;
 	}
 
 	.result-content {
-		margin-bottom: var(--space-lg);
+		padding: var(--space-md);
 	}
 
 	.clipped-text {
@@ -182,82 +156,69 @@
 		max-height: 300px;
 	}
 
-	.result-actions {
+	.btn-group {
 		display: flex;
 		gap: var(--space-sm);
-		margin-bottom: var(--space-md);
+		padding: var(--space-md);
 	}
 
-	.btn-action {
+	.btn-primary {
 		flex: 1;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		gap: var(--space-sm);
-		padding: var(--space-sm) var(--space-md);
+		padding: var(--space-md) var(--space-lg);
+		background: var(--accent-gradient);
+		border: none;
+		border-radius: var(--radius-md);
+		color: white;
+		font-size: 0.9rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.15s;
+		box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
+	}
+
+	.btn-primary:hover:not(:disabled) {
+		box-shadow: 0 4px 16px rgba(139, 92, 246, 0.35);
+		transform: translateY(-1px);
+	}
+
+	.btn-primary:active:not(:disabled) {
+		transform: translateY(0);
+	}
+
+	.btn-primary:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.btn-secondary {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-sm);
+		padding: var(--space-md) var(--space-lg);
 		background: var(--bg-input);
 		border: 1px solid var(--border-color);
 		border-radius: var(--radius-md);
 		color: var(--text-secondary);
-		font-size: 0.85rem;
+		font-size: 0.9rem;
 		font-weight: 500;
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 
-	.btn-action:hover:not(:disabled) {
+	.btn-secondary:hover {
 		border-color: var(--accent);
 		color: var(--accent);
 		background: var(--accent-glow);
 	}
 
-	.btn-action:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
+	.btn-secondary:active {
+		transform: translateY(0);
 	}
 
-	.share-bar {
-		display: flex;
-		align-items: center;
-		gap: var(--space-sm);
-		padding: var(--space-sm) var(--space-md);
-		background: var(--bg-input);
-		border: 1px solid var(--border-color);
-		border-radius: var(--radius-md);
-		font-size: 0.8rem;
-	}
-
-	.share-label {
-		color: var(--text-muted);
-		white-space: nowrap;
-	}
-
-	.share-url {
-		flex: 1;
-		color: var(--text-secondary);
-		font-family: var(--font-mono);
-		font-size: 0.75rem;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.btn-icon-sm {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: var(--space-xs);
-		background: transparent;
-		border: none;
-		color: var(--text-muted);
-		cursor: pointer;
-		border-radius: var(--radius-sm);
-		transition: all 0.15s;
-		flex-shrink: 0;
-	}
-
-	.btn-icon-sm:hover {
-		color: var(--accent);
-		background: var(--accent-glow);
-	}
 </style>

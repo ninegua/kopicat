@@ -11,16 +11,14 @@
 		import CreateForm from '$lib/components/CreateForm.svelte';
 	import DecryptForm from '$lib/components/DecryptForm.svelte';
 	import ResultView from '$lib/components/ResultView.svelte';
-	import ShareModal from '$lib/components/ShareModal.svelte';
+	import ShareCard from '$lib/components/ShareCard.svelte';
 	import ClipNotFound from '$lib/components/ClipNotFound.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 
 	let currentMode = $derived($clipState.mode);
 	let currentLoading = $derived($clipState.loading);
 	let currentClip = $derived($clipState.clip);
-	let currentShareModal = $derived($clipState.showShareModal);
-
-	async function fetchClipById(id: string) {
+		async function fetchClipById(id: string) {
 		clipState.update((s) => ({ ...s, clipId: id, loading: true, error: null }));
 
 		try {
@@ -76,10 +74,6 @@
 				(textarea as HTMLTextAreaElement).dispatchEvent(new Event('input', { bubbles: true }));
 			}
 		});
-	}
-
-	function setShowShareModal(open: boolean) {
-		clipState.update((s) => ({ ...s, showShareModal: open }));
 	}
 
 	async function handleCreate(text: string, pw: string, ttl: number, burn_after_read: boolean) {
@@ -172,18 +166,16 @@
 				onSetPassword={setPassword}
 			/>
 		{:else if currentMode === 'result'}
-			<ResultView />
+			<ResultView onNewClip={() => clipState.update((s) => ({ ...s, mode: 'idle' }))} />
 		{:else if currentMode === 'idle'}
 			<IdleView onPaste={handlePaste} />
+		{:else if $clipState.showShareModal && $clipState.shareUrl}
+			<ShareCard url={$clipState.shareUrl} onNewClip={() => clipState.update((s) => ({ ...s, showShareModal: false, mode: 'idle', shareUrl: null }))} />
 		{:else}
 			<CreateForm onCreate={handleCreate} />
 		{/if}
 	{/if}
 </main>
-
-{#if currentShareModal && $clipState.shareUrl}
-	<ShareModal url={$clipState.shareUrl} onClose={() => setShowShareModal(false)} />
-{/if}
 
 <Footer />
 
@@ -196,4 +188,5 @@
 		padding-top: var(--space-xl);
 		padding-bottom: var(--space-2xl);
 	}
+
 </style>

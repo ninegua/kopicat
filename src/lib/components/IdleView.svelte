@@ -37,11 +37,18 @@
 			</svg>
 		</div>
 		<p class="idle-title">Paste your text here</p>
-		<p class="idle-hint">
-			<span>Press <kbd>Ctrl+V</kbd> or <kbd>⌘+V</kbd></span>
-			<span class="idle-separator">or</span>
-			<button type="button" class="idle-link" onclick={(e) => { e.stopPropagation(); copyFromClipboard(); }}>Copy from clipboard</button>
-		</p>
+		<div class="idle-actions">
+			<div class="idle-keyboard">
+				<span>Press <kbd>Ctrl+V</kbd> or <kbd>⌘+V</kbd></span>
+			</div>
+			<button type="button" class="btn-clipboard" onclick={(e) => { e.stopPropagation(); copyFromClipboard(); }}>
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+					<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+				</svg>
+				Copy from clipboard
+			</button>
+		</div>
 	</div>
 </div>
 
@@ -98,18 +105,16 @@
 		margin-bottom: var(--space-sm);
 	}
 
-	.idle-hint {
+	.idle-actions {
 		display: flex;
+		flex-direction: column;
 		align-items: center;
-		justify-content: center;
-		gap: var(--space-sm);
-		color: var(--text-muted);
-		font-size: 0.85rem;
+		gap: var(--space-md);
 	}
 
-	.idle-separator {
+	.idle-keyboard {
 		color: var(--text-muted);
-		opacity: 0.5;
+		font-size: 0.85rem;
 	}
 
 	kbd {
@@ -124,19 +129,29 @@
 		line-height: 1.4;
 	}
 
-	.idle-link {
-		color: var(--accent);
-		background: none;
-		border: none;
+	.btn-clipboard {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-sm);
+		padding: var(--space-md) var(--space-lg);
+		background: var(--bg-input);
+		border: 1px solid var(--border-color);
+		border-radius: var(--radius-md);
+		color: var(--text-secondary);
+		font-size: 0.9rem;
 		font-weight: 500;
 		cursor: pointer;
-		font-size: inherit;
-		padding: 0;
-		text-decoration: underline;
-		transition: color 0.15s;
+		transition: all 0.15s;
 	}
 
-	.idle-link:hover {
-		color: var(--accent-hover);
+	.btn-clipboard:hover {
+		border-color: var(--accent);
+		color: var(--accent);
+		background: var(--accent-glow);
+	}
+
+	.btn-clipboard:active {
+		transform: translateY(0);
 	}
 </style>
