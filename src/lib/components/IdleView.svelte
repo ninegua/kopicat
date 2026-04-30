@@ -51,7 +51,7 @@
 		border: 2px dashed var(--border-color);
 		border-radius: var(--radius-lg);
 		width: 100%;
-		max-width: 580px;
+		max-width: 480px;
 		min-height: 280px;
 		display: flex;
 		flex-direction: column;

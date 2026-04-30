@@ -108,13 +108,13 @@
 		border-radius: var(--radius-lg);
 		padding: 0;
 		width: 100%;
-		max-width: 580px;
+		max-width: 480px;
 		margin: 0 auto;
 		overflow: hidden;
 	}
 
 	.card-textarea-group {
-		padding: var(--space-4xl) var(--space-3xl);
+		padding: var(--space-xl) var(--space-md);
 		border-bottom: 1px solid var(--border-color);
 		width: 100%;
 		min-height: 280px;
@@ -127,6 +127,7 @@
 
 	.card-textarea {
 		width: 100%;
+		height: 100%;
 		padding: 0;
 		background: transparent;
 		border: none;
@@ -169,11 +170,13 @@
 		align-items: center;
 		justify-content: space-between;
 		margin-bottom: var(--space-sm);
+		margin-top: var(--space-sm);
 	}
 
 	.expiry-header label {
 		margin-bottom: 0;
-		margin-left: 2px;
+		margin-left: var(--space-sm);
+		font-size: 0.8rem;
 	}
 
 	.burn-toggle {
@@ -188,6 +191,7 @@
 		cursor: pointer;
 		padding: var(--space-xs) 0;
 		transition: color 0.15s;
+		margin-right: var(--space-sm);
 	}
 
 	.burn-toggle:hover {
@@ -207,7 +211,7 @@
 
 	.burn-off {
 		color: var(--text-muted);
-		font-size: 0.7rem;
+		font-size: 0.8rem;
 		font-weight: 600;
 		letter-spacing: 0.05em;
 	}
