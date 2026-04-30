@@ -3,6 +3,10 @@ import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 import { clipState } from '$lib/api/store';
 import { createMockServer, resetClipStore } from './msw-handlers';
 
+vi.mock('qrcode', () => ({
+  toCanvas: vi.fn((_canvas: unknown, _data: string, _opts: unknown, cb: (err: Error | null) => void) => cb(null)),
+}));
+
 // $app/paths mock — needed by Header.svelte
 vi.mock('$app/paths', () => ({
 	base: '',
