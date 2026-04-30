@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/svelte';
 import { clipState } from '$lib/api/store';
 import { get } from 'svelte/store';
 import { encrypt } from '$lib/crypto';
@@ -281,5 +281,115 @@ describe('Clip viewing flow', () => {
 		expect(pwInput).toHaveValue(password);
 
 		expect(getDecryptButton()).not.toBeDisabled();
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Burn-after-read flow
+// ---------------------------------------------------------------------------
+
+describe('Burn-after-read flow', () => {
+	it('creates a clip with burn-after-read enabled and deletes it after first view', async () => {
+		const testText = 'Burn this message';
+		const password = 'burnPass123';
+
+		// Reset location to root so onMount doesn't trigger a fetch
+		Object.defineProperty(window, 'location', {
+			value: {
+				...window.location,
+				pathname: '/',
+				hash: '',
+				origin: 'http://localhost',
+			},
+			writable: true,
+			configurable: true,
+		});
+
+		const { container } = render(Page);
+
+		// Wait for the page to settle (any onMount fetches complete)
+		await waitFor(() => {
+			const btn = screen.getByRole('button', { name: /create clip/i });
+			expect(btn).not.toBeDisabled();
+		});
+
+		await fillText(container, testText);
+
+		await fireEvent.click(getShowPasswordToggle());
+
+		const passwordInput = screen.getByLabelText(/Password/i) as HTMLInputElement;
+		await fireEvent.input(passwordInput, { target: { value: password } });
+
+		// Enable burn-after-read by clicking the toggle
+		const burnToggle = screen.getByRole('button', { name: /burn after reading/i });
+		await fireEvent.click(burnToggle);
+
+		const createBtn = getCreateButton();
+		await fireEvent.click(createBtn);
+
+		await waitFor(() => {
+			expect(createBtn).toBeDisabled();
+		});
+
+		await waitFor(() => {
+			expect(screen.getByText('Share this clip')).toBeInTheDocument();
+		});
+
+		const shareUrlEl = screen.getByText(/http:\/\/localhost\//);
+		const match = shareUrlEl.textContent!.match(/(http:\/\/localhost\/)([^ #]+)/);
+		expect(match).not.toBeNull();
+		const clipId = match![2];
+
+		// First access: should decrypt successfully
+		cleanup();
+
+		Object.defineProperty(window, 'location', {
+			value: {
+				...window.location,
+				pathname: `/${clipId}`,
+				hash: '',
+				origin: 'http://localhost',
+			},
+			writable: true,
+			configurable: true,
+		});
+
+		const { default: Page2 } = await import('../routes/+page.svelte');
+		render(Page2);
+
+		await waitFor(() => {
+			expect(
+				screen.getByRole('heading', { name: 'This clip is encrypted' }),
+			).toBeInTheDocument();
+		});
+
+		await fireEvent.input(getPasswordInput(), { target: { value: password } });
+		await fireEvent.click(getDecryptButton());
+
+		await waitFor(() => {
+			expect(screen.getByText('Decrypted successfully')).toBeInTheDocument();
+		});
+		expect(screen.getByText(testText)).toBeInTheDocument();
+
+		// Second access: clip should be gone (burned)
+		cleanup();
+
+		Object.defineProperty(window, 'location', {
+			value: {
+				...window.location,
+				pathname: `/${clipId}`,
+				hash: '',
+				origin: 'http://localhost',
+			},
+			writable: true,
+			configurable: true,
+		});
+
+		const { default: Page3 } = await import('../routes/+page.svelte');
+		render(Page3);
+
+		await waitFor(() => {
+			expect(screen.getByText(/not found/i)).toBeInTheDocument();
+		});
 	});
 });

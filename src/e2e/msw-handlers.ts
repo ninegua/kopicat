@@ -56,6 +56,10 @@ function createHandlers(): HttpHandler[] {
 				});
 			}
 
+			if (clip.burn_after_read) {
+				clipStore.delete(id);
+			}
+
 			return new HttpResponse(JSON.stringify(clip), {
 				status: 200,
 				headers: { 'Content-Type': 'application/json' },
