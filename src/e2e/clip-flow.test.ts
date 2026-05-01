@@ -194,7 +194,7 @@ describe('Clip viewing flow', () => {
 		});
 
 		const { default: Page2 } = await import('../routes/+page.svelte');
-		render(Page2);
+		const { container } = render(Page2);
 
 		await waitFor(() => {
 			expect(
@@ -212,6 +212,11 @@ describe('Clip viewing flow', () => {
 			expect(screen.getByText('Decrypted successfully')).toBeInTheDocument();
 		});
 		expect(screen.getByText(text)).toBeInTheDocument();
+		expect(screen.queryByText(/password may be incorrect/i)).not.toBeInTheDocument();
+		expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+		const errorBanners = container.querySelectorAll('.error-banner');
+		expect(errorBanners.length).toBe(0);
 	});
 
 	it('shows error when decryption fails with wrong password', async () => {
@@ -235,7 +240,7 @@ describe('Clip viewing flow', () => {
 		});
 
 		const { default: Page2 } = await import('../routes/+page.svelte');
-		render(Page2);
+		const { container } = render(Page2);
 
 		await waitFor(() => {
 			expect(
@@ -254,6 +259,22 @@ describe('Clip viewing flow', () => {
 				screen.getByText(/password may be incorrect/i),
 			).toBeInTheDocument();
 		});
+
+		await fireEvent.input(getPasswordInput(), {
+			target: { value: correctPassword },
+		});
+
+		await fireEvent.click(getDecryptButton());
+
+		await waitFor(() => {
+			expect(screen.getByText('Decrypted successfully')).toBeInTheDocument();
+		});
+		expect(screen.getByText(text)).toBeInTheDocument();
+		expect(screen.queryByText(/password may be incorrect/i)).not.toBeInTheDocument();
+		expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+		const errorBanners = container.querySelectorAll('.error-banner');
+		expect(errorBanners.length).toBe(0);
 	});
 
 	it('pre-fills password from URL hash', async () => {
@@ -379,6 +400,8 @@ describe('Burn-after-read flow', () => {
 			expect(screen.getByText('Decrypted successfully')).toBeInTheDocument();
 		});
 		expect(screen.getByText(testText)).toBeInTheDocument();
+		expect(screen.queryByText(/password may be incorrect/i)).not.toBeInTheDocument();
+		expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 
 		// Second access: clip should be gone (burned)
 		cleanup();
