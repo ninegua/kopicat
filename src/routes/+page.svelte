@@ -68,7 +68,7 @@
 	}
 
 	function handlePaste(text: string) {
-		clipState.update((s) => ({ ...s, mode: 'create' }));
+		clipState.update((s) => ({ ...s, mode: 'create', error: null }));
 		queueMicrotask(() => {
 			const textarea = document.querySelector('textarea');
 			if (textarea) {

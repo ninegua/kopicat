@@ -14,6 +14,11 @@
 		}
 	}
 
+	function handleBoxClick() {
+		clipState.update((s) => ({ ...s, error: null }));
+		copyFromClipboard();
+	}
+
 	function handleKeyDown(e: KeyboardEvent) {
 		if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
 			// Let the window paste event handle this
@@ -23,7 +28,7 @@
 
 <div
 	class="idle-box"
-	onclick={copyFromClipboard}
+	onclick={handleBoxClick}
 	onkeydown={handleKeyDown}
 	tabindex="0"
 	role="button"
@@ -37,11 +42,21 @@
 			</svg>
 		</div>
 		<p class="idle-title">Paste your text to share</p>
+		{#if $clipState.error}
+			<div class="idle-error">
+				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<circle cx="12" cy="12" r="10"/>
+					<line x1="15" y1="9" x2="9" y2="15"/>
+					<line x1="9" y1="9" x2="15" y2="15"/>
+				</svg>
+				<span>{$clipState.error}</span>
+			</div>
+		{/if}
 		<div class="idle-actions">
 			<div class="idle-keyboard">
 				<span>Press <kbd>Ctrl+V</kbd> or <kbd>⌘+V</kbd></span>
 			</div>
-			<button type="button" class="btn-secondary" onclick={(e) => { e.stopPropagation(); copyFromClipboard(); }}>
+			<button type="button" class="btn-secondary" onclick={(e) => { e.stopPropagation(); clipState.update(s => ({...s, error: null})); copyFromClipboard(); }}>
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
 					<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
@@ -103,6 +118,23 @@
 		font-weight: 600;
 		color: var(--text-primary);
 		margin-bottom: var(--space-sm);
+	}
+
+	.idle-error {
+		display: flex;
+		align-items: center;
+		gap: var(--space-xs);
+		padding: var(--space-sm) var(--space-md);
+		background: var(--error-bg);
+		border: 1px solid rgba(239, 68, 68, 0.2);
+		border-radius: var(--radius-sm);
+		color: var(--error);
+		font-size: 0.8rem;
+		margin-bottom: var(--space-md);
+	}
+
+	.idle-error svg {
+		flex-shrink: 0;
 	}
 
 	.idle-actions {
