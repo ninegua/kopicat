@@ -43,6 +43,7 @@
 
 			clipState.update((s) => ({
 				...s,
+				error: null,
 				decryptedText: text,
 				mode: 'result' as ClipMode,
 				shareUrl: `${window.location.origin}/${s.clipId}#${password}`,
