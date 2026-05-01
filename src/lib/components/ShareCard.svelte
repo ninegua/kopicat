@@ -83,4 +83,8 @@
 		line-height: 1.5;
 	}
 
+	.btn-primary,
+	.btn-secondary {
+		flex: 1;
+	}
 	</style>
