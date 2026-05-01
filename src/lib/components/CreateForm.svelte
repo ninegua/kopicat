@@ -113,7 +113,7 @@
 		border-bottom: 1px solid var(--border-color);
 		width: 100%;
 		min-height: 280px;
-		height: 280px;
+		height: 240px;
 		display: flex;
 		flex-direction: column;
 		position: relative;
