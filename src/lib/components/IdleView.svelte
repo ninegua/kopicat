@@ -36,7 +36,7 @@
 				<rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
 			</svg>
 		</div>
-		<p class="idle-title">Paste your text here</p>
+		<p class="idle-title">Paste your text to share</p>
 		<div class="idle-actions">
 			<div class="idle-keyboard">
 				<span>Press <kbd>Ctrl+V</kbd> or <kbd>⌘+V</kbd></span>

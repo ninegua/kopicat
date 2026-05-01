@@ -4,10 +4,7 @@
 <header class="header">
 	<div class="header-inner">
 		<a href="/" class="logo">
-			<svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
-				<polyline points="13 2 13 9 20 9"/>
-			</svg>
+			<img src="/kopicat-logo.png" alt="KopiCat" class="logo-img" />
 			<span>KopiCat</span>
 		</a>
 
@@ -33,21 +30,22 @@
 
 	.logo {
 		display: flex;
-		align-items: center;
+		align-items: flex-end;
 		gap: var(--space-sm);
 		color: var(--text-primary);
 		font-weight: 700;
 		font-size: 1.15rem;
 		letter-spacing: -0.02em;
+		line-height: 1;
 	}
 
 	.logo:hover {
 		color: var(--accent);
 	}
 
-	.logo-icon {
-		width: 22px;
-		height: 22px;
-		stroke: var(--accent);
+	.logo-img {
+		width: 48px;
+		height: 48px;
+		border-radius: 4px;
 	}
 </style>
