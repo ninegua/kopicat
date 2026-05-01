@@ -30,6 +30,7 @@
 			}
 
 			clipState.update((s) => ({ ...s, clip, mode: 'decrypt', loading: false }));
+			history.replaceState(null, '', '/');
 		} catch (e: any) {
 			clipState.update((s) => ({ ...s, error: e.message || 'Failed to fetch clip', loading: false }));
 		}
