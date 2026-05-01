@@ -8,7 +8,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import IdleView from '$lib/components/IdleView.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-		import CreateForm from '$lib/components/CreateForm.svelte';
+	import CreateForm from '$lib/components/CreateForm.svelte';
 	import DecryptForm from '$lib/components/DecryptForm.svelte';
 	import ResultView from '$lib/components/ResultView.svelte';
 	import ShareCard from '$lib/components/ShareCard.svelte';
@@ -149,7 +149,7 @@
 </script>
 
 <svelte:head>
-	<title>KopiCat - Secure text sharing</title>
+	<title>KopiCat - copying securely across devices</title>
 	<meta name="description" content="Share encrypted text via simple links. Your data is encrypted client-side before being stored on the Internet Computer." />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 </svelte:head>
