@@ -65,23 +65,7 @@
 	}
 
 	.btn-secondary {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--space-sm);
 		padding: var(--space-sm) var(--space-lg);
 		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		border-radius: var(--radius-md);
-		color: var(--text-secondary);
-		font-size: 0.9rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-
-	.btn-secondary:hover {
-		border-color: var(--accent);
-		color: var(--accent);
-		background: var(--accent-glow);
 	}
 </style>

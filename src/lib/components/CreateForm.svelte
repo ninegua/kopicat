@@ -32,7 +32,7 @@
 	const charCount = $derived(text.length);
 </script>
 
-<div class="create-card">
+<div class="card">
 	<div class="card-textarea-group">
 		<textarea
 			id="clip-text"
@@ -102,17 +102,6 @@
 </div>
 
 <style>
-	.create-card {
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		border-radius: var(--radius-lg);
-		padding: 0;
-		width: 100%;
-		max-width: 480px;
-		margin: 0 auto;
-		overflow: hidden;
-	}
-
 	.card-textarea-group {
 		padding: var(--space-xl) var(--space-md);
 		border-bottom: 1px solid var(--border-color);
@@ -146,23 +135,6 @@
 
 	.card-textarea::placeholder {
 		color: var(--text-muted);
-	}
-
-	.error-banner {
-		display: flex;
-		align-items: center;
-		gap: var(--space-sm);
-		padding: var(--space-sm) var(--space-md);
-		background: var(--error-bg);
-		border: 1px solid rgba(239, 68, 68, 0.2);
-		border-radius: var(--radius-md);
-		color: var(--error);
-		font-size: 0.85rem;
-		margin-bottom: var(--space-md);
-	}
-
-	.form-group {
-		margin-bottom: var(--space-lg);
 	}
 
 	.expiry-header {
@@ -250,43 +222,6 @@
 	.btn-primary {
 		width: 50%;
 		margin: 0 auto var(--space-md);
-		padding: var(--space-md) var(--space-lg);
-		background: var(--accent-gradient);
-		border: none;
-		border-radius: var(--radius-md);
-		color: white;
 		font-size: 0.95rem;
-		font-weight: 600;
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: var(--space-sm);
-		transition: all 0.15s;
-		box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
-	}
-
-	.btn-primary:hover:not(:disabled) {
-		box-shadow: 0 4px 16px rgba(139, 92, 246, 0.35);
-		transform: translateY(-1px);
-	}
-
-	.btn-primary:active:not(:disabled) {
-		transform: translateY(0);
-	}
-
-	.btn-primary:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.spinner {
-		animation: spin 1s linear infinite;
-		width: 18px;
-		height: 18px;
-	}
-
-	@keyframes spin {
-		to { transform: rotate(360deg); }
 	}
 </style>

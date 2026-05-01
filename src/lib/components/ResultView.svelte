@@ -19,7 +19,7 @@
 
 	</script>
 
-<div class="result-card">
+<div class="card">
 	<div class="card-header">
 		<div class="card-status">
 			<svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -79,23 +79,10 @@
 	</div>
 
 <style>
-	.result-card {
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		border-radius: var(--radius-lg);
-		padding: 0;
-		width: 100%;
-		max-width: 480px;
-		margin: 0 auto;
-		overflow: hidden;
-	}
-
 	.card-header {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: var(--space-xl) var(--space-md);
-		border-bottom: 1px solid var(--border-color);
 	}
 
 	.card-status {
@@ -126,15 +113,6 @@
 	}
 
 	.error-banner {
-		display: flex;
-		align-items: center;
-		gap: var(--space-sm);
-		padding: var(--space-sm) var(--space-md);
-		background: var(--error-bg);
-		border: 1px solid rgba(239, 68, 68, 0.2);
-		border-radius: var(--radius-md);
-		color: var(--error);
-		font-size: 0.85rem;
 		margin: var(--space-md) var(--space-md) 0;
 	}
 
@@ -162,63 +140,8 @@
 		padding: var(--space-md);
 	}
 
-	.btn-primary {
-		flex: 1;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: var(--space-sm);
-		padding: var(--space-md) var(--space-lg);
-		background: var(--accent-gradient);
-		border: none;
-		border-radius: var(--radius-md);
-		color: white;
-		font-size: 0.9rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.15s;
-		box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
-	}
-
-	.btn-primary:hover:not(:disabled) {
-		box-shadow: 0 4px 16px rgba(139, 92, 246, 0.35);
-		transform: translateY(-1px);
-	}
-
-	.btn-primary:active:not(:disabled) {
-		transform: translateY(0);
-	}
-
-	.btn-primary:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
+	.btn-primary,
 	.btn-secondary {
 		flex: 1;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: var(--space-sm);
-		padding: var(--space-md) var(--space-lg);
-		background: var(--bg-input);
-		border: 1px solid var(--border-color);
-		border-radius: var(--radius-md);
-		color: var(--text-secondary);
-		font-size: 0.9rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all 0.15s;
 	}
-
-	.btn-secondary:hover {
-		border-color: var(--accent);
-		color: var(--accent);
-		background: var(--accent-glow);
-	}
-
-	.btn-secondary:active {
-		transform: translateY(0);
-	}
-
 </style>

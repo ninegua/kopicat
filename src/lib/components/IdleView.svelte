@@ -41,7 +41,7 @@
 			<div class="idle-keyboard">
 				<span>Press <kbd>Ctrl+V</kbd> or <kbd>⌘+V</kbd></span>
 			</div>
-			<button type="button" class="btn-clipboard" onclick={(e) => { e.stopPropagation(); copyFromClipboard(); }}>
+			<button type="button" class="btn-secondary" onclick={(e) => { e.stopPropagation(); copyFromClipboard(); }}>
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
 					<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
@@ -127,31 +127,5 @@
 		font-size: 0.8rem;
 		color: var(--text-secondary);
 		line-height: 1.4;
-	}
-
-	.btn-clipboard {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: var(--space-sm);
-		padding: var(--space-md) var(--space-lg);
-		background: var(--bg-input);
-		border: 1px solid var(--border-color);
-		border-radius: var(--radius-md);
-		color: var(--text-secondary);
-		font-size: 0.9rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-
-	.btn-clipboard:hover {
-		border-color: var(--accent);
-		color: var(--accent);
-		background: var(--accent-glow);
-	}
-
-	.btn-clipboard:active {
-		transform: translateY(0);
 	}
 </style>
