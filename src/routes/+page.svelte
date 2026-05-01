@@ -149,7 +149,7 @@
 </script>
 
 <svelte:head>
-	<title>ClipDrop - Secure text sharing</title>
+	<title>KopiCat - Secure text sharing</title>
 	<meta name="description" content="Share encrypted text via simple links. Your data is encrypted client-side before being stored on the Internet Computer." />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 </svelte:head>
