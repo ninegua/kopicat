@@ -42,6 +42,7 @@ afterEach(() => {
 		loading: false,
 		shareUrl: null,
 		showShareModal: false,
+		prefillText: null,
 	});
 });
 

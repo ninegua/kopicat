@@ -68,7 +68,7 @@
 	}
 
 	function handlePaste(text: string) {
-		clipState.update((s) => ({ ...s, mode: 'create', error: null }));
+		clipState.update((s) => ({ ...s, mode: 'create', error: null, prefillText: null }));
 		queueMicrotask(() => {
 			const textarea = document.querySelector('textarea');
 			if (textarea) {
@@ -112,6 +112,7 @@
 				shareUrl,
 				showShareModal: true,
 				loading: false,
+				prefillText: null,
 			}));
 		} catch (e: any) {
 			setError(e.message || 'Failed to create clip');
@@ -149,7 +150,7 @@
 </script>
 
 <svelte:head>
-	<title>KopiCat - copying securely across devices</title>
+	<title>KopiCat - Share secret clips end-to-end encrypted</title>
 	<meta name="description" content="Share encrypted text via simple links. Your data is encrypted client-side before being stored on the Internet Computer." />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 </svelte:head>
@@ -168,11 +169,11 @@
 				onSetPassword={setPassword}
 			/>
 		{:else if currentMode === 'result'}
-			<ResultView onNewClip={() => clipState.update((s) => ({ ...s, mode: 'idle' }))} />
-		{:else if currentMode === 'idle'}
+			<ResultView onNewClip={() => clipState.update((s) => ({ ...s, mode: 'idle', prefillText: null }))} />
+		{:else if currentMode === 'idle' && !$clipState.prefillText}
 			<IdleView onPaste={handlePaste} />
 		{:else if $clipState.showShareModal && $clipState.shareUrl}
-			<ShareCard url={$clipState.shareUrl} onNewClip={() => clipState.update((s) => ({ ...s, showShareModal: false, mode: 'idle', shareUrl: null }))} />
+			<ShareCard url={$clipState.shareUrl} onNewClip={() => clipState.update((s) => ({ ...s, showShareModal: false, mode: 'idle', shareUrl: null, prefillText: null }))} />
 		{:else}
 			<CreateForm onCreate={handleCreate} />
 		{/if}

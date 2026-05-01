@@ -7,5 +7,5 @@ let
 in dfx-env.overrideAttrs (old: {
   DFX_WARNING = "-mainnet_plaintext_identity";
   buildInputs = old.buildInputs
-    ++ [ nodejs typescript prettier webpack-cli pnpm ];
+    ++ [ nodejs typescript prettier webpack-cli pnpm imagemagick ];
 })

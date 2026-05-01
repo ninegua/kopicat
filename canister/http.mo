@@ -8,6 +8,7 @@ import Result "mo:core/Result";
 import Principal "mo:core/Principal";
 import Int "mo:core/Int";
 import Nat "mo:core/Nat";
+import Option "mo:core/Option";
 
 mixin(creator: Principal) {
 
@@ -150,16 +151,17 @@ mixin(creator: Principal) {
   };
 
   public query func http_request(req : HttpRequest) : async HttpResponse {
-    server.http_request(req)
+    var url = Option.get(Text.split(req.url, #char '?').next(), "/");
+    server.http_request({ method = req.method; url; headers = req.headers; body = req.body });
   };
 
   public func http_request_update(req : HttpRequest) : async HttpResponse {
-    await server.http_request_update(req)
+    var url = Option.get(Text.split(req.url, #char '?').next(), "/");
+    await server.http_request_update({ method = req.method; url; headers = req.headers; body = req.body });
   };
 
   public shared ({ caller }) func invalidate_cache() : async () {
     assert(caller == creator);
     ignore server.cache.pruneAll();
   };
-
 } 

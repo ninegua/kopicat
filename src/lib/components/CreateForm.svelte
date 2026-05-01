@@ -14,7 +14,13 @@
 		{ label: 'Never', value: 0 },
 	];
 
-	let text = $state('');
+	let text = $state($clipState.prefillText ?? '');
+
+	$effect(() => {
+		if ($clipState.prefillText && text === '') {
+			text = $clipState.prefillText;
+		}
+	});
 	let password = $state('');
 	let selectedTTL = $state(900);
 	let burnAfterRead = $state(false);

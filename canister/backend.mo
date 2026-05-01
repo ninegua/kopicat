@@ -241,4 +241,11 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
   server.get("/clip/:id", handle_get);
   server.put("/clip/:id", handle_put);
 
+  system func preupgrade() {
+    serializedEntries := server.entries();
+  };
+
+  system func postupgrade() {
+    ignore server.cache.pruneAll();
+  };
 };

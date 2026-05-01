@@ -7,16 +7,17 @@ export default defineConfig({
 		sveltekit(),
 		SvelteKitPWA({
 			registerType: 'autoUpdate',
-			manifest: false,
-			manifestFilename: 'manifest.json',
 			devOptions: {
 				enabled: true,
 				type: 'module',
 			},
+			kit: {
+				spa: true,
+			},
 			workbox: {
 				globPatterns: ['**/*.{html,js,css,woff2,png,svg,json}'],
-				globDirectory: 'dist',
 				navigateFallback: '/',
+				navigateFallbackDenylist: [/^\/_app\//],
 				cleanupOutdatedCaches: true,
 				offlineGoogleAnalytics: false,
 				runtimeCaching: [
