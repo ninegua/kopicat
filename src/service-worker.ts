@@ -14,7 +14,7 @@ self.addEventListener('install', () => {
   console.log('[SW] install event');
 });
 
-precacheAndRoute(self.__WB_MANIFEST);
+precacheAndRoute(self.__WB_MANIFEST || []);
 cleanupOutdatedCaches();
 
 registerRoute(

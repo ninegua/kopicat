@@ -10,7 +10,6 @@ export default defineConfig({
 			srcDir: 'src',
 			filename: 'service-worker.ts',
 			injectRegister: false,
-			registerType: 'autoUpdate',
 			devtools: {
 				events: {
 					printWarning: true,
