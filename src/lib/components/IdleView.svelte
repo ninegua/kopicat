@@ -126,7 +126,7 @@
 		gap: var(--space-xs);
 		padding: var(--space-sm) var(--space-md);
 		background: var(--error-bg);
-		border: 1px solid rgba(239, 68, 68, 0.2);
+		border: 1px solid rgba(196, 69, 54, 0.2);
 		border-radius: var(--radius-sm);
 		color: var(--error);
 		font-size: 0.8rem;

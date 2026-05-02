@@ -12,7 +12,7 @@
 					QRCode.toCanvas(canvas, url, {
 						width: 200,
 						margin: 1,
-						color: { dark: '#0a0a0f', light: '#ffffff' },
+						color: { dark: '#150D08', light: '#F7EFD2' },
 					}, (err: Error | null) => {
 						if (err) console.error('QR generation failed:', err);
 					});
@@ -63,7 +63,7 @@
 		display: block;
 		margin: 0 auto var(--space-lg);
 		border-radius: var(--radius-md);
-		background: white;
+		background: var(--bg-card-hover);
 		padding: var(--space-md);
 	}
 

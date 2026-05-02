@@ -4,8 +4,8 @@
   "description": "Share secret clips end-to-end encrypted",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0a0f",
-  "theme_color": "#0a0a0f",
+  "background_color": "#F4ECD0",
+  "theme_color": "#F4ECD0",
   "orientation": "any",
   "categories": ["utilities"],
   "share_target": {

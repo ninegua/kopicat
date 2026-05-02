@@ -1,41 +1,41 @@
 <style>
 	:root {
-		--bg-primary: #0a0a0f;
-		--bg-secondary: #12121a;
-		--bg-card: #1a1a26;
-		--bg-card-hover: #1f1f2e;
-		--bg-input: #0f0f18;
-		--bg-input-focus: #141420;
+		--bg-primary: #F4ECD0;
+		--bg-secondary: #E8DFC0;
+		--bg-card: #FCF6E0;
+		--bg-card-hover: #F7EFD2;
+		--bg-input: #E8DFC0;
+		--bg-input-focus: #F0E9D2;
 
-		--text-primary: #f0f0f5;
-		--text-secondary: #9090a8;
-		--text-muted: #606078;
+		--text-primary: #150D08;
+		--text-secondary: #6A4522;
+		--text-muted: #8E6E4E;
 
-		--accent: #8b5cf6;
-		--accent-hover: #7c3aed;
-		--accent-active: #6d28d9;
-		--accent-glow: rgba(139, 92, 246, 0.15);
-		--accent-gradient: linear-gradient(135deg, #8b5cf6, #6366f1);
+		--accent: #C59645;
+		--accent-hover: #B58520;
+		--accent-active: #9A7018;
+		--accent-glow: rgba(197, 150, 69, 0.15);
+		--accent-gradient: linear-gradient(135deg, #C59645, #A38660);
 
-		--border-color: #2a2a3d;
-		--border-focus: #8b5cf6;
+		--border-color: #CBB796;
+		--border-focus: #C59645;
 
 		--success: #22c55e;
 		--success-bg: rgba(34, 197, 94, 0.1);
-		--warning: #f59e0b;
-		--warning-bg: rgba(245, 158, 11, 0.1);
-		--error: #ef4444;
-		--error-bg: rgba(239, 68, 68, 0.1);
+		--warning: #FF495C;
+		--warning-bg: rgba(212, 135, 28, 0.1);
+		--error: #C44536;
+		--error-bg: rgba(196, 69, 54, 0.1);
 
 		--radius-sm: 6px;
 		--radius-md: 10px;
 		--radius-lg: 16px;
 		--radius-xl: 24px;
 
-		--shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
-		--shadow-md: 0 4px 12px rgba(0,0,0,0.4);
-		--shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
-		--shadow-glow: 0 0 30px rgba(139, 92, 246, 0.1);
+		--shadow-sm: 0 1px 2px rgba(21,13,8,0.06);
+		--shadow-md: 0 4px 12px rgba(21,13,8,0.08);
+		--shadow-lg: 0 8px 32px rgba(21,13,8,0.1);
+		--shadow-glow: 0 0 30px rgba(197, 150, 69, 0.12);
 
 		--space-xs: 0.25rem;
 		--space-sm: 0.5rem;
@@ -109,7 +109,7 @@
 	}
 
 	:global(::-webkit-scrollbar-thumb:hover) {
-		background: var(--text-muted);
+		background: var(--text-secondary);
 	}
 
 	:global(.app-main) {
@@ -180,11 +180,11 @@
 		justify-content: center;
 		gap: var(--space-sm);
 		transition: all 0.15s;
-		box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
+		box-shadow: 0 2px 8px rgba(197, 150, 69, 0.3);
 	}
 
 	:global(.btn-primary:hover:not(:disabled)) {
-		box-shadow: 0 4px 16px rgba(139, 92, 246, 0.35);
+		box-shadow: 0 4px 16px rgba(197, 150, 69, 0.4);
 		transform: translateY(-1px);
 	}
 
@@ -232,7 +232,7 @@
 		gap: var(--space-sm);
 		padding: var(--space-sm) var(--space-md);
 		background: var(--error-bg);
-		border: 1px solid rgba(239, 68, 68, 0.2);
+		border: 1px solid rgba(196, 69, 54, 0.2);
 		border-radius: var(--radius-md);
 		color: var(--error);
 		font-size: 0.85rem;

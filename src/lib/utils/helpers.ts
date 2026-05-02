@@ -31,7 +31,7 @@ export function estimatePasswordStrength(password: string): { score: number; lab
 	if (/[0-9]/.test(password)) score++;
 	if (/[^a-zA-Z0-9]/.test(password)) score++;
 
-	if (score <= 2) return { score: 1, label: 'Weak', color: 'var(--color-error)' };
-	if (score <= 4) return { score: 2, label: 'Medium', color: 'var(--color-warning)' };
-	return { score: 3, label: 'Strong', color: 'var(--color-success)' };
+	if (score <= 2) return { score: 1, label: 'Weak', color: 'var(--error)' };
+	if (score <= 4) return { score: 2, label: 'Medium', color: 'var(--warning)' };
+	return { score: 3, label: 'Strong', color: 'var(--success)' };
 }
