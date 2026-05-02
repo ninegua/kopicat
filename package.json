@@ -16,7 +16,6 @@
     "@sveltejs/vite-plugin-svelte": "^6.0.0",
     "@testing-library/jest-dom": "6.9.0",
     "@testing-library/svelte": "^5.3.1",
-    "@vite-pwa/sveltekit": "^1.1.0",
     "esm-env": "^1.2.2",
     "happy-dom": "^20.9.0",
     "jsdom": "26.1.0",
