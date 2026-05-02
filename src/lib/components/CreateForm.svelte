@@ -25,6 +25,12 @@
 	let selectedTTL = $state(900);
 	let burnAfterRead = $state(false);
 
+	$effect(() => {
+		if (text.trim() && $clipState.error) {
+			clipState.update((s) => ({ ...s, error: '' }));
+		}
+	});
+
 	async function handleCreate() {
 		if (!text.trim()) {
 			clipState.update((s) => ({ ...s, error: 'Please enter some text to share' }));
