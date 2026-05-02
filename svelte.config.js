@@ -11,6 +11,9 @@ const config = {
 		paths: {
 			base: '',
 		},
+		files: {
+			serviceWorker: "non-existent",
+		},
 	},
 };
 
