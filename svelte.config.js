@@ -6,7 +6,7 @@ const config = {
 		adapter: adapter({
 			pages: 'dist',
 			assets: 'dist',
-			fallback: undefined,
+			fallback: 'index.html',
 		}),
 		paths: {
 			base: '',
