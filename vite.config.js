@@ -10,13 +10,9 @@ export default defineConfig({
 			srcDir: 'src',
 			filename: 'service-worker.ts',
 			injectRegister: false,
-			devtools: {
-				events: {
-					printWarning: true,
-					printCompilationError: true,
-				},
+			injectManifest: {
+				globPatterns: ['**/*.{html,js,css,woff2,png,svg,json}'],
 			},
-			globPatterns: ['**/*.{html,js,css,woff2,png,svg,json}'],
 			manifest: false,
 		}),
 	],

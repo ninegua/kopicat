@@ -22,7 +22,6 @@ registerRoute(
   new StaleWhileRevalidate({
     cacheName: 'images',
   }),
-  'cache',
 );
 
 registerRoute(
@@ -36,7 +35,6 @@ registerRoute(
       }),
     ],
   }),
-  'fetch',
 );
 
 registerRoute(
@@ -50,7 +48,6 @@ registerRoute(
       }),
     ],
   }),
-  'fetch',
 );
 
 self.addEventListener('fetch', (event) => {
