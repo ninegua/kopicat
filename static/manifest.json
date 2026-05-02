@@ -2,14 +2,14 @@
   "name": "KopiCat",
   "short_name": "KopiCat",
   "description": "Share secret clips end-to-end encrypted",
-  "start_url": "/?share=1",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0f",
   "theme_color": "#0a0a0f",
   "orientation": "any",
   "categories": ["utilities"],
   "share_target": {
-    "action": "/",
+    "action": "/?share=1",
     "method": "GET",
     "enctype": "application/x-www-form-urlencoded",
     "params": {
@@ -26,7 +26,7 @@
     },
     {
       "src": "/screenshot-2.png",
-      "sizes": "900x625",
+      "sizes": "900x541",
       "type": "image/png",
       "form_factor": "wide"
     }

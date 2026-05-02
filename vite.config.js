@@ -1,56 +1,24 @@
 import { sveltekit } from '@sveltejs/kit/vite';
-import { SvelteKitPWA } from '@vite-pwa/sveltekit';
+import { VitePWA } from 'vite-plugin-pwa';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
 	plugins: [
 		sveltekit(),
-		SvelteKitPWA({
+		VitePWA({
+			strategies: 'injectManifest',
+			srcDir: 'src',
+			filename: 'service-worker.ts',
+			injectRegister: false,
 			registerType: 'autoUpdate',
-			devOptions: {
-				enabled: true,
-				type: 'module',
+			devtools: {
+				events: {
+					printWarning: true,
+					printCompilationError: true,
+				},
 			},
-			kit: {
-				spa: true,
-			},
-			workbox: {
-				globPatterns: ['**/*.{html,js,css,woff2,png,svg,json}'],
-				navigateFallback: '/',
-				navigateFallbackDenylist: [/^\/_app\//],
-				cleanupOutdatedCaches: true,
-				offlineGoogleAnalytics: false,
-				runtimeCaching: [
-					{
-						urlPattern: /^https:\/\/backend\.local\.localhost\/clip.*/,
-						handler: 'NetworkFirst',
-						options: {
-							cacheName: 'api-cache',
-							expiration: {
-								maxEntries: 50,
-								maxAgeSeconds: 60 * 60 * 24,
-							},
-							cacheableResponse: {
-								statuses: [0, 200],
-							},
-						},
-					},
-					{
-						urlPattern: /^https:\/\/backend\.local\.localhost.*/,
-						handler: 'NetworkFirst',
-						options: {
-							cacheName: 'api-cache',
-							expiration: {
-								maxEntries: 50,
-								maxAgeSeconds: 60 * 60 * 24,
-							},
-							cacheableResponse: {
-								statuses: [0, 200],
-							},
-						},
-					},
-				],
-			},
+			globPatterns: ['**/*.{html,js,css,woff2,png,svg,json}'],
+			manifest: false,
 		}),
 	],
 	server: {

@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "node scripts/build-assets.js && vite build && node scripts/cleanup.js",
+    "build": "node scripts/build-assets.js && vite build",
     "dev": "vite dev",
     "check": "svelte-check",
     "test": "vitest run",
@@ -30,6 +30,12 @@
     "workbox-window": "^7.4.0"
   },
   "dependencies": {
-    "qrcode": "^1.5.4"
+    "qrcode": "^1.5.4",
+    "vite-plugin-pwa": "^1.2.0",
+    "workbox-core": "^7.4.0",
+    "workbox-expiration": "^7.4.0",
+    "workbox-precaching": "^7.4.0",
+    "workbox-routing": "^7.4.0",
+    "workbox-strategies": "^7.4.0"
   }
 }

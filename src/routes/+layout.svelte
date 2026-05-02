@@ -287,6 +287,26 @@
 	}
 </style>
 
+<script>
+	import { onMount } from 'svelte';
+
+	onMount(() => {
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker
+				.register('/service-worker.js', { scope: '/' })
+				.then((registration) => {
+					console.log('[SW] Registered with scope:', registration.scope);
+					registration.addEventListener('updatefound', () => {
+						console.log('[SW] New version available, installing...');
+					});
+				})
+				.catch((error) => {
+					console.error('[SW] Registration failed:', error);
+				});
+		}
+	});
+</script>
+
 <svelte:head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
