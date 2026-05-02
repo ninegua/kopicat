@@ -64,10 +64,11 @@ describe('encrypt / decrypt roundtrip', () => {
 
   it('encrypts and decrypts a long string', async () => {
     const password = 'Secure#1';
-    const text = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '
-      + 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. '
-      + 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris '
-      + 'nisi ut aliquip ex ea commodo consequat.';
+    const text =
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
+      'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ' +
+      'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris ' +
+      'nisi ut aliquip ex ea commodo consequat.';
     const encrypted = await encrypt(text, password);
     const decrypted = await decrypt(encrypted, password);
     expect(decrypted).toBe(text);

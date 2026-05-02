@@ -4,23 +4,25 @@ import { clipState } from '$lib/api/store';
 import { createMockServer, resetClipStore } from './msw-handlers';
 
 vi.mock('qrcode', () => ({
-  toCanvas: vi.fn((_canvas: unknown, _data: string, _opts: unknown, cb: (err: Error | null) => void) => cb(null)),
+  toCanvas: vi.fn(
+    (_canvas: unknown, _data: string, _opts: unknown, cb: (err: Error | null) => void) => cb(null),
+  ),
 }));
 
 // $app/paths mock — needed by Header.svelte
 vi.mock('$app/paths', () => ({
-	base: '',
+  base: '',
 }));
 
 // Mock element.animate (not supported by jsdom)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-Element.prototype.animate = function() {
-	return {
-		cancel: () => {},
-		finish: Promise.resolve(),
-		addEventListener: () => {},
-		removeEventListener: () => {},
-	} as unknown as Animation;
+Element.prototype.animate = function () {
+  return {
+    cancel: () => {},
+    finish: Promise.resolve(),
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  } as unknown as Animation;
 };
 
 // Start MSW server once per test file
@@ -30,20 +32,20 @@ beforeAll(() => server.listen());
 
 // Reset clip store + MSW state between tests
 afterEach(() => {
-	server.resetHandlers();
-	resetClipStore();
-	clipState.set({
-		mode: 'create',
-		clipId: null,
-		password: '',
-		decryptedText: null,
-		clip: null,
-		error: null,
-		loading: false,
-		shareUrl: null,
-		showShareModal: false,
-		prefillText: null,
-	});
+  server.resetHandlers();
+  resetClipStore();
+  clipState.set({
+    mode: 'create',
+    clipId: null,
+    password: '',
+    decryptedText: null,
+    clip: null,
+    error: null,
+    loading: false,
+    shareUrl: null,
+    showShareModal: false,
+    prefillText: null,
+  });
 });
 
 // Stop server after all tests in file

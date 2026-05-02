@@ -15,13 +15,20 @@ export function generatePassword(byteCount = 8): string {
 
 async function deriveCryptoKey(password: string, salt: Uint8Array): Promise<CryptoKey> {
   const passwordBuffer = new TextEncoder().encode(password);
-  const keyMaterial = await crypto.subtle.importKey('raw', passwordBuffer, 'PBKDF2', false, ['deriveKey']);
+  const keyMaterial = await crypto.subtle.importKey('raw', passwordBuffer, 'PBKDF2', false, [
+    'deriveKey',
+  ]);
   return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt: salt as unknown as ArrayBuffer, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
+    {
+      name: 'PBKDF2',
+      salt: salt as unknown as ArrayBuffer,
+      iterations: PBKDF2_ITERATIONS,
+      hash: 'SHA-256',
+    },
     keyMaterial,
     { name: 'AES-GCM', length: 256 },
     false,
-    ['encrypt', 'decrypt']
+    ['encrypt', 'decrypt'],
   );
 }
 
@@ -49,11 +56,7 @@ export async function encrypt(text: string, password: string): Promise<string> {
   const key = await deriveCryptoKey(password, salt);
   const plaintext = new TextEncoder().encode(text);
 
-  const ciphertext = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv },
-    key,
-    plaintext
-  );
+  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plaintext);
 
   const blob = new Uint8Array(SALT_BYTES + IV_BYTES + ciphertext.byteLength);
   blob.set(salt, 0);
@@ -76,11 +79,7 @@ export async function decrypt(blobB64: string, password: string): Promise<string
 
   const key = await deriveCryptoKey(password, salt);
 
-  const plaintext = await crypto.subtle.decrypt(
-    { name: 'AES-GCM', iv },
-    key,
-    ciphertext
-  );
+  const plaintext = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
 
   return new TextDecoder().decode(plaintext);
 }
