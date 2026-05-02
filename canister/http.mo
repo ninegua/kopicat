@@ -1,6 +1,7 @@
 import Server "mo:server";
 import Assets "mo:assets";
 import AssetsTypes "mo:assets/Types";
+import Blob "mo:core/Blob";
 import Map "mo:core/Map";
 import Text "mo:core/Text";
 import Time "mo:core/Time";
@@ -9,6 +10,7 @@ import Principal "mo:core/Principal";
 import Int "mo:core/Int";
 import Nat "mo:core/Nat";
 import Option "mo:core/Option";
+import Debug "mo:core/Debug";
 
 mixin(creator: Principal) {
 
@@ -97,6 +99,27 @@ mixin(creator: Principal) {
       caller;
       args;
     });
+    Debug.print("commit_batch " # debug_show(args.batch_id));
+    for (arg in args.operations.vals()) {
+      Debug.print("  :" # debug_show(arg));
+      // Force cetificate generation
+      let url = switch (arg) {
+        case (#CreateAsset(x)) { x.key };
+        case (#DeleteAsset(x)) { x.key };
+        case (#SetAssetContent(x)) { x.key };
+        case (#UnsetAssetContent(x)) { x.key };
+        case (_) { ""};
+      };
+      if (url != "") {
+        let request = {
+          url;
+          method = "GET";
+          headers = [];
+          body = Blob.empty();
+        };
+        let _ = await server.http_request_update(request);
+      };
+    };
   };
 
   public shared ({ caller }) func create_asset(arg : AssetsTypes.CreateAssetArguments) : async () {
@@ -111,6 +134,7 @@ mixin(creator: Principal) {
       caller;
       arg;
     });
+    Debug.print("set_asset_content: " # debug_show(arg.key) # ", " # debug_show(arg.sha256));
   };
 
   public shared ({ caller }) func unset_asset_content(args : AssetsTypes.UnsetAssetContentArguments) : async () {
@@ -151,13 +175,18 @@ mixin(creator: Principal) {
   };
 
   public query func http_request(req : HttpRequest) : async HttpResponse {
+    // Strip away params and headers, because our backend doesn't need them.
+    // This simplifies caching mechanism.
     var url = Option.get(Text.split(req.url, #char '?').next(), "/");
-    server.http_request({ method = req.method; url; headers = req.headers; body = req.body });
+    server.http_request({ method = req.method; url; headers = []; body = req.body });
   };
 
   public func http_request_update(req : HttpRequest) : async HttpResponse {
+    Debug.print("http_request_update: " # debug_show(req));
+    // Strip away params and headers, because our backend doesn't need them.
+    // This simplifies caching mechanism.
     var url = Option.get(Text.split(req.url, #char '?').next(), "/");
-    await server.http_request_update({ method = req.method; url; headers = req.headers; body = req.body });
+    await server.http_request_update({ method = req.method; url; headers = []; body = req.body });
   };
 
   public shared ({ caller }) func invalidate_cache() : async () {
