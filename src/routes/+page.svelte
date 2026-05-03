@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, tick } from 'svelte';
+  import { onMount } from 'svelte';
   import { clipState } from '$lib/api/store';
   import type { ClipState, ClipMode } from '$lib/api/store';
   import { fetchClip, createClip } from '$lib/api/client';
@@ -19,7 +19,7 @@
   let currentLoading = $derived($clipState.loading);
   let currentClip = $derived($clipState.clip);
   async function fetchClipById(id: string) {
-    clipState.update((s) => ({ ...s, clipId: id, loading: true, error: null }));
+    clipState.update((s) => ({ ...s, loading: true, error: null }));
 
     try {
       const clip = await fetchClip(id);
@@ -30,7 +30,7 @@
       }
 
       clipState.update((s) => ({ ...s, clip, mode: 'decrypt', loading: false }));
-      history.replaceState(null, '', '/');
+      history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
     } catch (e: any) {
       clipState.update((s) => ({
         ...s,
@@ -142,7 +142,6 @@
   }
 
   onMount(async () => {
-    await tick();
     const clipId = window.location.search?.replace(/^\?/, '') || '';
     const hash = window.location.hash.slice(1);
 
