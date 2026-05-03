@@ -6,7 +6,6 @@ import Text "mo:core/Text";
 import Time "mo:core/Time";
 import Result "mo:core/Result";
 import Option "mo:core/Option";
-import Debug "mo:core/Debug";
 
 import JSON "mo:json/JSON";
 import ServeHttpRequest "./http";
@@ -225,7 +224,6 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
       let map = req.params !;
       map.get("id") !;
     };
-    Debug.print(debug_show("handle_get", board));
     let (status_code, body, cache_strategy) = switch (board) {
       case (null) {
         (400: Nat16, "\"" # "Parameter /clip/:id not found" # "\"", #noCache)
@@ -262,7 +260,6 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
         }
       }
     };
-    Debug.print(debug_show("handle_get", status_code, body, cache_strategy));
     res.json({ status_code; body; cache_strategy; })
   };
 
