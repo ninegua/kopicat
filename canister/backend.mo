@@ -6,6 +6,7 @@ import Text "mo:core/Text";
 import Time "mo:core/Time";
 import Result "mo:core/Result";
 import Option "mo:core/Option";
+import Debug "mo:core/Debug";
 
 import JSON "mo:json/JSON";
 import ServeHttpRequest "./http";
@@ -49,7 +50,10 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
       case (null) MAX_SECONDS_TO_LIVE;
       case (?{ max_seconds_to_live }) max_seconds_to_live;
     };
-    let available_clips = Map.size(clips);
+    let now = now_secs();
+    var num_clips = Int.fromNat(Map.size(clips));
+    mapOverExpired(now, func(key, _) { num_clips := num_clips - 1; });
+    let available_clips = if (num_clips < 0) 0 else Int.abs(num_clips);
     { max_seconds_to_live; total_clips_created; available_clips }
   };
 
@@ -109,9 +113,13 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
    * Internal: remove all expired clips
    */
   func cleanupExpired(now : Int) {
+    mapOverExpired(now, func(key, _) { Map.remove(clips, Text.compare, key) });
+  };
+
+  func mapOverExpired(now : Int, f : (Text, Clip) -> ()) {
     for ((key, clip) in Map.entries(clips)) {
       if (now > clip.expires_at) {
-        Map.remove(clips, Text.compare, key);
+        f(key, clip);
       };
     }
   };
@@ -217,6 +225,7 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
       let map = req.params !;
       map.get("id") !;
     };
+    Debug.print(debug_show("handle_get", board));
     let (status_code, body, cache_strategy) = switch (board) {
       case (null) {
         (400: Nat16, "\"" # "Parameter /clip/:id not found" # "\"", #noCache)
@@ -253,6 +262,7 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
         }
       }
     };
+    Debug.print(debug_show("handle_get", status_code, body, cache_strategy));
     res.json({ status_code; body; cache_strategy; })
   };
 
