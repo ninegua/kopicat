@@ -87,46 +87,29 @@
   <div class="form-group">
     <div class="expiry-header">
       <label for="clip-ttl">Expiry</label>
-      <button
-        type="button"
-        class="burn-toggle"
-        class:active={burnAfterRead}
-        onclick={() => (burnAfterRead = !burnAfterRead)}
-      >
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path
-            d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
-          />
-        </svg>
-        <span>Burn after read</span>
-        <span class="burn-indicator">
-          {#if burnAfterRead}
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          {:else}
-            <span class="burn-off">OFF</span>
-          {/if}
-        </span>
-      </button>
+      <label class="burn-checkbox-label">
+        <input
+          type="checkbox"
+          checked={burnAfterRead}
+          onchange={() => (burnAfterRead = !burnAfterRead)}
+        />
+        <span class:burn-active={burnAfterRead}>Burn after read</span>
+       <svg
+         class="fire-icon"
+         width="14"
+         height="14"
+         viewBox="0 0 24 24"
+         fill="none"
+         stroke="#e74c3c"
+         stroke-width="2"
+         stroke-linecap="round"
+         stroke-linejoin="round"
+       >
+         <path
+           d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
+         />
+       </svg>
+      </label>
     </div>
     <select id="clip-ttl" bind:value={selectedTTL} class="select">
       {#each TTL_OPTIONS as option}
@@ -153,7 +136,7 @@
     border-bottom: 1px solid var(--border-color);
     width: 100%;
     min-height: 280px;
-    height: 240px;
+    height: 280px;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -197,41 +180,33 @@
     font-size: 0.8rem;
   }
 
-  .burn-toggle {
+  .burn-checkbox-label {
     display: flex;
     align-items: center;
     gap: var(--space-xs);
-    background: none;
-    border: none;
     color: var(--text-muted);
     font-size: 0.8rem;
     font-weight: 500;
     cursor: pointer;
-    padding: var(--space-xs) 0;
-    transition: color 0.15s;
-    margin-right: var(--space-sm);
+    user-select: none;
   }
 
-  .burn-toggle:hover {
+  .burn-checkbox-label:hover {
     color: var(--text-secondary);
   }
 
-  .burn-toggle:global(.active) {
-    color: var(--warning);
+  .burn-checkbox-label input[type="checkbox"] {
+    accent-color: var(--warning);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
   }
 
-  .burn-indicator {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
+  .fire-icon {
   }
 
-  .burn-off {
-    color: var(--text-muted);
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
+  .burn-active {
+    color: #e74c3c;
   }
 
   .select {
@@ -261,7 +236,7 @@
 
   .char-count {
     position: absolute;
-    bottom: var(--space-md);
+    bottom: var(--space-sm);
     right: var(--space-md);
     color: var(--text-muted);
     font-size: 0.75rem;

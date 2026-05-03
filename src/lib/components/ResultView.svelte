@@ -19,11 +19,12 @@
 </script>
 
 <div class="card">
-  {#if $clipState.decryptedText}
-    <div class="result-content">
-      <pre class="clipped-text">{$clipState.decryptedText}</pre>
-    </div>
-  {/if}
+   {#if $clipState.decryptedText}
+     <div class="result-content">
+       <pre class="clipped-text">{$clipState.decryptedText}</pre>
+       <span class="char-count">{$clipState.decryptedText.length} characters</span>
+     </div>
+   {/if}
 
   <div class="card-status-header">
     <div class="card-status">
@@ -162,23 +163,36 @@
     margin: var(--space-md) var(--space-md) 0;
   }
 
-  .result-content {
-    padding: var(--space-md);
-  }
-
   .clipped-text {
     background: transparent;
-    border: 0;
-    border-radius: 0;
-    padding: var(--space-sm);
+    padding: 0;
     color: var(--text-primary);
     font-size: 0.8rem;
     line-height: 1.5;
     white-space: pre-wrap;
     word-break: break-word;
     overflow-y: auto;
+    height: 50%;
+  }
+
+  .result-content {
+    padding: var(--space-xl) var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+    width: 100%;
     min-height: 100px;
     max-height: 280px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow-y: auto;
+  }
+
+  .char-count {
+    position: absolute;
+    bottom: var(--space-sm);
+    right: var(--space-md);
+    color: var(--text-muted);
+    font-size: 0.75rem;
   }
 
   .btn-primary,

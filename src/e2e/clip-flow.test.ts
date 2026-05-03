@@ -34,8 +34,8 @@ function getPasswordValueInput(): HTMLInputElement {
   return screen.getByLabelText(/password/i) as HTMLInputElement;
 }
 
-function getBurnToggle(): HTMLButtonElement {
-  return screen.getByRole('button', { name: /burn after read/i }) as HTMLButtonElement;
+function getBurnCheckbox(): HTMLInputElement {
+  return screen.getByLabelText(/burn after read/i) as HTMLInputElement;
 }
 
 // ---------------------------------------------------------------------------
@@ -343,9 +343,9 @@ describe('Burn-after-read flow', () => {
 
     await fillText(container, testText);
 
-    // Enable burn-after-read by clicking the toggle
-    const burnToggle = getBurnToggle();
-    await fireEvent.click(burnToggle);
+    // Enable burn-after-read by checking the checkbox
+    const burnCheckbox = getBurnCheckbox();
+    await fireEvent.click(burnCheckbox);
 
     const createBtn = getCreateButton();
     await fireEvent.click(createBtn);
