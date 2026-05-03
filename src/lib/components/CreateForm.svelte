@@ -203,9 +203,6 @@
   }
 
   .fire-icon {
-  }
-
-  .burn-active {
     color: #e74c3c;
   }
 

@@ -109,9 +109,6 @@
     margin-bottom: var(--space-md);
   }
 
-  .card-header {
-  }
-
   .error-banner {
     justify-content: center;
     margin: var(--space-md) auto;
