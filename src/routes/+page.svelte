@@ -51,7 +51,7 @@
         error: null,
         decryptedText: text,
         mode: 'result' as ClipMode,
-        shareUrl: `${window.location.origin}/${s.clipId}#${password}`,
+        shareUrl: `${window.location.origin}/?${s.clipId}#${password}`,
         loading: false,
       }));
     } catch {
@@ -122,7 +122,7 @@
         return;
       }
 
-      const shareUrl = `${window.location.origin}/${clipId}#${pw}`;
+      const shareUrl = `${window.location.origin}/?${clipId}#${pw}`;
       clipState.update((s) => ({
         ...s,
         clipId,
@@ -143,15 +143,15 @@
 
   onMount(async () => {
     await tick();
-    const path = window.location.pathname.slice(1).replace(/\/+$/, '');
+    const clipId = window.location.search?.replace(/^\?/, '') || '';
     const hash = window.location.hash.slice(1);
 
     if (hash) {
       setPassword(hash);
     }
 
-    if (path) {
-      await fetchClipById(path);
+    if (clipId) {
+      await fetchClipById(clipId);
     }
   });
 

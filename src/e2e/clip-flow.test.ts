@@ -139,7 +139,8 @@ describe('Clip viewing flow', () => {
     Object.defineProperty(window, 'location', {
       value: {
         ...window.location,
-        pathname: `/${clipId}`,
+        pathname: '/',
+        search: `?${clipId}`,
         hash: '',
         origin: 'http://localhost',
       },
@@ -159,7 +160,8 @@ describe('Clip viewing flow', () => {
     Object.defineProperty(window, 'location', {
       value: {
         ...window.location,
-        pathname: '/does-not-exist-xyz',
+        pathname: '/',
+        search: '?does-not-exist-xyz',
         hash: '',
         origin: 'http://localhost',
       },
@@ -187,7 +189,8 @@ describe('Clip viewing flow', () => {
     Object.defineProperty(window, 'location', {
       value: {
         ...window.location,
-        pathname: `/${clipId}`,
+        pathname: '/',
+        search: `?${clipId}`,
         hash: '',
         origin: 'http://localhost',
       },
@@ -231,7 +234,8 @@ describe('Clip viewing flow', () => {
     Object.defineProperty(window, 'location', {
       value: {
         ...window.location,
-        pathname: `/${clipId}`,
+        pathname: '/',
+        search: `?${clipId}`,
         hash: '',
         origin: 'http://localhost',
       },
@@ -285,7 +289,8 @@ describe('Clip viewing flow', () => {
     Object.defineProperty(window, 'location', {
       value: {
         ...window.location,
-        pathname: `/${clipId}`,
+        pathname: '/',
+        search: `?${clipId}`,
         hash: `#${password}`,
         origin: 'http://localhost',
       },
@@ -320,6 +325,7 @@ describe('Burn-after-read flow', () => {
       value: {
         ...window.location,
         pathname: '/',
+        search: '',
         hash: '',
         origin: 'http://localhost',
       },
@@ -358,8 +364,10 @@ describe('Burn-after-read flow', () => {
       expect(screen.getByText('Share this clip')).toBeInTheDocument();
     });
 
-    const shareUrlEl = screen.getByText(/http:\/\/localhost\//);
-    const shareUrlMatch = shareUrlEl.textContent!.match(/(http:\/\/localhost\/)([^ #]+)(?:#(.+))?/);
+    const shareUrlEl = screen.getByText(/http:\/\/localhost\/\?/);
+    const shareUrlMatch = shareUrlEl.textContent!.match(
+      /(http:\/\/localhost\/\?)([^ #]+)(?:#(.+))?/,
+    );
     expect(shareUrlMatch).not.toBeNull();
     const createdClipId = shareUrlMatch![2];
     const createdPassword = shareUrlMatch![3] || '';
@@ -370,7 +378,8 @@ describe('Burn-after-read flow', () => {
     Object.defineProperty(window, 'location', {
       value: {
         ...window.location,
-        pathname: `/${createdClipId}`,
+        pathname: '/',
+        search: `?${createdClipId}`,
         hash: '',
         origin: 'http://localhost',
       },
@@ -401,7 +410,8 @@ describe('Burn-after-read flow', () => {
     Object.defineProperty(window, 'location', {
       value: {
         ...window.location,
-        pathname: `/${createdClipId}`,
+        pathname: '/',
+        search: `?${createdClipId}`,
         hash: '',
         origin: 'http://localhost',
       },

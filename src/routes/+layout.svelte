@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
 
   onMount(() => {
+    if (import.meta.env.DEV) return;
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/service-worker.js', { scope: '/' })

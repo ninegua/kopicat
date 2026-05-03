@@ -3,9 +3,14 @@ import type { Handle } from '@sveltejs/kit';
 const clipPattern = /^[a-z]+-[a-z]+-[a-z]+$/i;
 
 export const handle: Handle = async ({ event, resolve }) => {
-  const path = event.url.pathname.slice(1);
+  let clipId = '';
+  try {
+    clipId = event.url.search?.replace(/^\?/, '') || '';
+  } catch {
+    // prerendering doesn't support url.search
+  }
 
-  if (path && clipPattern.test(path)) {
+  if (clipId && clipPattern.test(clipId)) {
     const homeResponse = await event.fetch('/');
     const homeHtml = await homeResponse.text();
     return new Response(homeHtml, {

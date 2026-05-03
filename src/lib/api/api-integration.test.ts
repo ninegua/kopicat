@@ -138,7 +138,7 @@ async function simulateCreateClip(
     };
   }
 
-  const shareUrl = `http://localhost/${clipId}#${password}`;
+  const shareUrl = `http://localhost/?${clipId}#${password}`;
   clipState.set({
     ...get(clipState),
     clipId,
@@ -203,7 +203,7 @@ async function simulateDecryptClip(clip: Clip | null, password: string) {
       ...get(clipState),
       decryptedText: text,
       mode: 'result',
-      shareUrl: `http://localhost/${get(clipState).clipId}#${password}`,
+      shareUrl: `http://localhost/?${get(clipState).clipId}#${password}`,
       loading: false,
       error: null,
     });

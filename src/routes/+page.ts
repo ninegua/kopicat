@@ -3,7 +3,7 @@ import type { ClipMode } from '$lib/api/store';
 
 export const load = async ({ url }: { url: URL }) => {
   const fullUrl = new URL(url.href);
-  const path = fullUrl.pathname.replace(/\/+$/, '');
+  const clipId = fullUrl.search?.replace(/^\?/, '') || '';
   const hash = fullUrl.hash.slice(1);
   const query = fullUrl.searchParams;
   const shareParam = query.get('share');
@@ -14,9 +14,9 @@ export const load = async ({ url }: { url: URL }) => {
   let prefillText: string | null = null;
   if (
     shareParam === '1' ||
-    (sharedText && !path) ||
-    (sharedUrl && !path) ||
-    (sharedTitle && !path)
+    (sharedText && !clipId) ||
+    (sharedUrl && !clipId) ||
+    (sharedTitle && !clipId)
   ) {
     if (sharedUrl && !sharedText) {
       prefillText = sharedUrl;
@@ -29,11 +29,11 @@ export const load = async ({ url }: { url: URL }) => {
     }
   }
 
-  const isClip = !!path;
+  const isClip = !!clipId;
 
   clipState.set({
     mode: isClip ? ('decrypt' as ClipMode) : 'idle',
-    clipId: isClip ? path : null,
+    clipId: isClip ? clipId : null,
     password: isClip ? hash : '',
     decryptedText: null,
     clip: null,
