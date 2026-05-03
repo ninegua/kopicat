@@ -3,7 +3,7 @@ const SALT_BYTES = 16;
 const IV_BYTES = 12;
 
 export function generatePassword(byteCount = 8): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%&*';
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@$&*-:';
   const bytes = new Uint8Array(byteCount);
   crypto.getRandomValues(bytes);
   let result = '';
