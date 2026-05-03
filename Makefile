@@ -19,8 +19,13 @@ build/$(NAME).wasm build/$(NAME).did &: ${BACKEND_SRC} $(MOC) | .vessel/ build/
 $(MOC): | .vessel/
 	vessel bin
 
+# Notes on post processing:
+# 1. "mo:server" needs a critical bug fix on route math
+# 2. Force packages to use the same "mo:base" version
 .vessel/: vessel.dhall package-set.dhall
-	vessel install && sed -i 's/base-0.7.3/base/g' $$(find .vessel -type f)
+	vessel install && \
+		sed -i '158c\// return null;' .vessel/server/*/src/lib.mo && \
+		sed -i 's/base-0.7.3/base/g' $$(find .vessel -type f)
 
 build/:
 	mkdir -p $@

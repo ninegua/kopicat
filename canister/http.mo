@@ -99,10 +99,9 @@ mixin(creator: Principal) {
       caller;
       args;
     });
-/*
-    Debug.print("commit_batch " # debug_show(args.batch_id));
+    // Debug.print("commit_batch " # debug_show(args.batch_id));
     for (arg in args.operations.vals()) {
-      Debug.print("  :" # debug_show(arg));
+      // Debug.print("  :" # debug_show(arg));
       // Force cetificate generation
       let url = switch (arg) {
         case (#CreateAsset(x)) { x.key };
@@ -121,7 +120,6 @@ mixin(creator: Principal) {
         let _ = await server.http_request_update(request);
       };
     };
-*/
   };
 
   public shared ({ caller }) func create_asset(arg : AssetsTypes.CreateAssetArguments) : async () {
