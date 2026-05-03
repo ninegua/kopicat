@@ -99,6 +99,7 @@ mixin(creator: Principal) {
       caller;
       args;
     });
+/*
     Debug.print("commit_batch " # debug_show(args.batch_id));
     for (arg in args.operations.vals()) {
       Debug.print("  :" # debug_show(arg));
@@ -120,6 +121,7 @@ mixin(creator: Principal) {
         let _ = await server.http_request_update(request);
       };
     };
+*/
   };
 
   public shared ({ caller }) func create_asset(arg : AssetsTypes.CreateAssetArguments) : async () {
@@ -134,7 +136,7 @@ mixin(creator: Principal) {
       caller;
       arg;
     });
-    Debug.print("set_asset_content: " # debug_show(arg.key) # ", " # debug_show(arg.sha256));
+    // Debug.print("set_asset_content: " # debug_show(arg.key) # ", " # debug_show(arg.sha256));
   };
 
   public shared ({ caller }) func unset_asset_content(args : AssetsTypes.UnsetAssetContentArguments) : async () {
@@ -182,7 +184,6 @@ mixin(creator: Principal) {
   };
 
   public func http_request_update(req : HttpRequest) : async HttpResponse {
-    Debug.print("http_request_update: " # debug_show(req));
     // Strip away params and headers, because our backend doesn't need them.
     // This simplifies caching mechanism.
     var url = Option.get(Text.split(req.url, #char '?').next(), "/");

@@ -217,7 +217,7 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
               #noCache
             } else {
               // certified-cache has expiration related bugs. So always noCache for now.
-              # noCache
+              #noCache
               // Since get_clip already handles expiry, nanoseconds is always > 0
               // let nanoseconds = (clip.expires_at - now_secs()) * 1_000_000_000;
               // #expireAfter{ nanoseconds = Int.abs(nanoseconds) }
