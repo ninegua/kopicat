@@ -158,7 +158,6 @@
 
   :global(.card-header) {
     padding: var(--space-xl) var(--space-md);
-    border-bottom: 1px solid var(--border-color);
     text-align: center;
   }
 

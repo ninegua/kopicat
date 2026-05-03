@@ -28,10 +28,9 @@
     position: sticky;
     top: 0;
     z-index: 50;
-    background: rgba(232, 223, 192, 0.85);
+    background: linear-gradient(180deg, rgba(232, 223, 192, 0.85), rgba(244, 236, 208, 0.85));
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border-color);
   }
 
   .header-inner {

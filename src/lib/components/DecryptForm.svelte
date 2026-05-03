@@ -95,9 +95,10 @@
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
     padding: var(--space-xl);
-    max-width: 440px;
-    margin: 2rem auto;
     text-align: center;
   }
 
@@ -109,7 +110,6 @@
   }
 
   .card-header {
-    margin-bottom: var(--space-lg);
   }
 
   .error-banner {

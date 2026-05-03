@@ -19,7 +19,13 @@
 </script>
 
 <div class="card">
-  <div class="card-header">
+  {#if $clipState.decryptedText}
+    <div class="result-content">
+      <pre class="clipped-text">{$clipState.decryptedText}</pre>
+    </div>
+  {/if}
+
+  <div class="card-status-header">
     <div class="card-status">
       <svg
         class="status-icon"
@@ -62,10 +68,6 @@
   {/if}
 
   {#if $clipState.decryptedText}
-    <div class="result-content">
-      <pre class="clipped-text">{$clipState.decryptedText}</pre>
-    </div>
-
     <div class="btn-row">
       <button class="btn-primary" onclick={copyText} disabled={copyFeedback === 'text'}>
         {#if copyFeedback === 'text'}
@@ -121,7 +123,9 @@
 </div>
 
 <style>
-  .card-header {
+  .card-status-header {
+    padding: var(--space-sm) var(--space-md);
+    text-align: center;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -163,17 +167,18 @@
   }
 
   .clipped-text {
-    background: var(--bg-input);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: var(--space-lg);
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    padding: var(--space-sm);
     color: var(--text-primary);
-    font-size: 0.9rem;
-    line-height: 1.6;
+    font-size: 0.8rem;
+    line-height: 1.5;
     white-space: pre-wrap;
     word-break: break-word;
     overflow-y: auto;
-    max-height: 300px;
+    min-height: 100px;
+    max-height: 280px;
   }
 
   .btn-primary,

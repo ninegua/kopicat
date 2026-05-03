@@ -168,11 +168,11 @@
     border: none;
     border-radius: 0;
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     line-height: 1.5;
     resize: none;
     outline: none;
-    font-family: inherit;
+    font-family: monospace;
   }
 
   .card-textarea:focus {

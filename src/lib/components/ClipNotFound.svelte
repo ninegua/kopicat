@@ -48,7 +48,8 @@
   .notfound {
     text-align: center;
     padding: var(--space-2xl) var(--space-lg);
-    max-width: 400px;
+    width: 100%;
+    max-width: 480px;
     margin: 2rem auto;
   }
 
