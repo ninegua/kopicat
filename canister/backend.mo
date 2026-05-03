@@ -26,8 +26,10 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
 
   let clips : Map.Map<Text, Clip> = Map.empty<Text, Clip>();
 
+  var total_clips_created : Nat = 0;
+
   // Default max time to live is 7 days or a week.
-  let DEFAULT_MAX_SECONDS_TO_LIVE: Nat = 3600 * 24 * 7;
+  let MAX_SECONDS_TO_LIVE: Nat = 3600 * 24 * 7;
 
   type Input = {
     id : Text;
@@ -36,18 +38,36 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
     burn_after_read : Bool;
   };
 
+  type Stats = {
+    max_seconds_to_live: Nat;
+    total_clips_created: Nat;
+    available_clips: Nat;
+  };
+
+  public func get_stats() : async Stats {
+    let max_seconds_to_live = switch (init_arg) {
+      case (null) MAX_SECONDS_TO_LIVE;
+      case (?{ max_seconds_to_live }) max_seconds_to_live;
+    };
+    let available_clips = Map.size(clips);
+    { max_seconds_to_live; total_clips_created; available_clips }
+  };
+
   func create_clip(input : Input) : (Result.Result<Text, Text>) {
     let { id; blob; expires_after; burn_after_read } = input;
     if (Map.containsKey(clips, Text.compare, id)) {
-      return #err("clip already exists");
+      return #err("Clip already exists");
     };
 
-    let default_ttl = switch (init_arg) {
-      case (null) DEFAULT_MAX_SECONDS_TO_LIVE;
+    let max_ttl = switch (init_arg) {
+      case (null) MAX_SECONDS_TO_LIVE;
       case (?{ max_seconds_to_live }) max_seconds_to_live;
     };
     let now = now_secs();
-    let expires_at = now + Option.get(expires_after, default_ttl);
+    let expires_at = now + Option.get(expires_after, max_ttl);
+    if (expires_at > now + max_ttl) {
+      return #err("Expiration must be within " # Nat.toText(max_ttl) # " seconds.");
+    };
     let clip : Clip = {
       blob;
       created_at = now;
@@ -59,7 +79,7 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
 
     // Lazy cleanup of expired clips
     cleanupExpired(now);
-
+    total_clips_created := total_clips_created + 1;
     #ok(id)
   };
 
@@ -209,9 +229,6 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
           case (?clip) {
             // TODO: encode blob with base64
             let blob = clip.blob;
-            let created_at = Int.toText(clip.created_at);
-            let expires_at = Int.toText(clip.expires_at);
-            let burn_after_read = debug_show(clip.burn_after_read);
             let cache_strategy = if (clip.burn_after_read) {
               delete_clip(id);
               #noCache
@@ -224,11 +241,12 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
             };
             (
               200 : Nat16,
-              "{\"blob\": \"" # clip.blob #
-              "\",\"created_at\": " # created_at #
-              ",\"expires_at\": " # expires_at #
-              ",\"burn_after_read\": " # burn_after_read #
-              "}",
+              JSON.show(#Object([
+                ("blob", #String(clip.blob)),
+                ("created_at", #Number(clip.created_at)),
+                ("expires_at", #Number(clip.expires_at)),
+                ("burn_after_read", #Boolean(clip.burn_after_read)),
+              ])),
               cache_strategy
             )
           }
@@ -238,8 +256,19 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
     res.json({ status_code; body; cache_strategy; })
   };
 
+  func handle_stats(_ : Request, res : ResponseClass) : async Response {
+    let stats = await get_stats();
+    let json = #Object([
+        ("max_seconds_to_live", #Number(stats.max_seconds_to_live)),
+        ("total_clips_created", #Number(stats.total_clips_created)),
+        ("available_clips", #Number(stats.available_clips)),
+      ]);
+    res.json({ status_code = 200; body = JSON.show(json); cache_strategy = #noCache; })
+  };
+
   server.get("/clip/:id", handle_get);
   server.put("/clip/:id", handle_put);
+  server.get("/api/stats", handle_stats);
 
   system func preupgrade() {
     serializedEntries := server.entries();

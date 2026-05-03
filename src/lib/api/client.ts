@@ -14,28 +14,34 @@ export interface Clip {
   burn_after_read: boolean;
 }
 
-export type CreateResult = { ok: string } | { error: string };
+export type CreateResult = { ok: string } | { error: string; status: number | null };
 
-export async function createClip(input: ClipInput): Promise<{ ok: string } | { error: string }> {
-  const response = await fetch(`${API_BASE}/clip/${input.id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(input),
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    return { error: text };
-  }
-
+export async function createClip(
+  input: ClipInput,
+): Promise<{ ok: string } | { error: string; status: number | null }> {
   try {
-    const body = await response.json();
-    if (typeof body === 'string') {
-      return { ok: body };
+    const response = await fetch(`${API_BASE}/clip/${input.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      return { error: text, status: response.status };
     }
-    return body as CreateResult;
+
+    try {
+      const body = await response.json();
+      if (typeof body === 'string') {
+        return { ok: body };
+      }
+      return body as CreateResult;
+    } catch {
+      return { error: 'Failed to parse response', status: response.status };
+    }
   } catch {
-    return { error: 'Failed to parse response' };
+    return { error: 'Network Error. Please check your connection and try again.', status: null };
   }
 }
 

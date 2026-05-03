@@ -20,7 +20,6 @@
     { label: '1 hour', value: 3600 },
     { label: '1 day', value: 86400 },
     { label: '7 days', value: 604800 },
-    { label: 'Never', value: 0 },
   ];
 
   let text = $state($clipState.prefillText ?? '');
@@ -34,18 +33,13 @@
   let selectedTTL = $state(900);
   let burnAfterRead = $state(false);
 
-  $effect(() => {
-    if (text.trim() && $clipState.error) {
-      clipState.update((s) => ({ ...s, error: '' }));
-    }
-  });
-
   async function handleCreate() {
     if (!text.trim()) {
       clipState.update((s) => ({ ...s, error: 'Please enter some text to share' }));
       return;
     }
 
+    clipState.update((s) => ({ ...s, error: null }));
     const pw = password || generatePassword(11);
     await onCreate(text, pw, selectedTTL, burnAfterRead);
   }
@@ -94,21 +88,21 @@
           onchange={() => (burnAfterRead = !burnAfterRead)}
         />
         <span class:burn-active={burnAfterRead}>Burn after read</span>
-       <svg
-         class="fire-icon"
-         width="14"
-         height="14"
-         viewBox="0 0 24 24"
-         fill="none"
-         stroke="#e74c3c"
-         stroke-width="2"
-         stroke-linecap="round"
-         stroke-linejoin="round"
-       >
-         <path
-           d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
-         />
-       </svg>
+        <svg
+          class="fire-icon"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#e74c3c"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
+          />
+        </svg>
       </label>
     </div>
     <select id="clip-ttl" bind:value={selectedTTL} class="select">
@@ -195,7 +189,7 @@
     color: var(--text-secondary);
   }
 
-  .burn-checkbox-label input[type="checkbox"] {
+  .burn-checkbox-label input[type='checkbox'] {
     accent-color: var(--warning);
     width: 14px;
     height: 14px;

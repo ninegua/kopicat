@@ -19,12 +19,12 @@
 </script>
 
 <div class="card">
-   {#if $clipState.decryptedText}
-     <div class="result-content">
-       <pre class="clipped-text">{$clipState.decryptedText}</pre>
-       <span class="char-count">{$clipState.decryptedText.length} characters</span>
-     </div>
-   {/if}
+  {#if $clipState.decryptedText}
+    <div class="result-content">
+      <pre class="clipped-text">{$clipState.decryptedText}</pre>
+      <span class="char-count">{$clipState.decryptedText.length} characters</span>
+    </div>
+  {/if}
 
   <div class="card-status-header">
     <div class="card-status">
