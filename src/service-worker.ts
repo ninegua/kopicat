@@ -24,32 +24,6 @@ registerRoute(
   }),
 );
 
-registerRoute(
-  /^https:\/\/backend\.local\.localhost\/clip.*/,
-  new NetworkFirst({
-    cacheName: 'api-cache',
-    plugins: [
-      new ExpirationPlugin({
-        maxEntries: 50,
-        maxAgeSeconds: 60 * 60 * 24,
-      }),
-    ],
-  }),
-);
-
-registerRoute(
-  /^https:\/\/backend\.local\.localhost.*/,
-  new NetworkFirst({
-    cacheName: 'api-cache',
-    plugins: [
-      new ExpirationPlugin({
-        maxEntries: 50,
-        maxAgeSeconds: 60 * 60 * 24,
-      }),
-    ],
-  }),
-);
-
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (url.origin !== location.origin) {

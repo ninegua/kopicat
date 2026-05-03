@@ -11,8 +11,8 @@ const clipStore = new Map<string, Clip>();
 
 function createHandlers(): HttpHandler[] {
   return [
-    // PUT /clip/:id — create clip
-    http.put('/clip/:id', async ({ params, request }) => {
+    // PUT /api/clip/:id — create clip
+    http.put('/api/clip/:id', async ({ params, request }) => {
       const id = params.id as string;
       const body = (await request.json()) as ClipInput;
 
@@ -42,8 +42,8 @@ function createHandlers(): HttpHandler[] {
       });
     }),
 
-    // GET /clip/:id — fetch clip
-    http.get('/clip/:id', ({ params }) => {
+    // GET /api/clip/:id — fetch clip
+    http.get('/api/clip/:id', ({ params }) => {
       const id = params.id as string;
       const clip = clipStore.get(id);
 

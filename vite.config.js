@@ -18,7 +18,7 @@ export default defineConfig({
 	],
 	server: {
 		proxy: {
-			'/clip': {
+			'/api': {
 				target: 'http://backend.local.localhost:8000',
 				changeOrigin: true,
 			},

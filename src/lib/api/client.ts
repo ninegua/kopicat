@@ -1,4 +1,4 @@
-const API_BASE = '';
+const API_BASE = '/api';
 
 export interface ClipInput {
   id: string;

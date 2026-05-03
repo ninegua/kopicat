@@ -5,7 +5,7 @@ PASS=0
 FAIL=0
 ERRORS=0
 
-BASE_URL="http://backend.local.localhost:8000/clip"
+BASE_URL="http://backend.local.localhost:8000/api/clip"
 
 pass() {
   echo "  PASS: $1"
@@ -256,7 +256,7 @@ echo "=== Test 10: PUT error cases ==="
 
 # 10a: PUT with no body (empty string)
 echo "  -- PUT missing body (empty string) --"
-RESP=$(curl -s -w "\n%{http_code}" -X PUT -H "Content-Type: application/json" -d "" "http://backend.local.localhost:8000/clip/test-missing-body" 2>/dev/null)
+RESP=$(curl -s -w "\n%{http_code}" -X PUT -H "Content-Type: application/json" -d "" "http://backend.local.localhost:8000/api/clip/test-missing-body" 2>/dev/null)
 BODY=$(get_body "$RESP")
 if check_status "$RESP" "400"; then
   if echo "$BODY" | jq '.' >/dev/null 2>&1; then
@@ -270,7 +270,7 @@ fi
 
 # 10b: PUT with malformed JSON
 echo "  -- PUT malformed JSON body --"
-RESP=$(curl -s -w "\n%{http_code}" -X PUT -H "Content-Type: application/json" -d "{not json}" "http://backend.local.localhost:8000/clip/test-malformed" 2>/dev/null)
+RESP=$(curl -s -w "\n%{http_code}" -X PUT -H "Content-Type: application/json" -d "{not json}" "http://backend.local.localhost:8000/api/clip/test-malformed" 2>/dev/null)
 BODY=$(get_body "$RESP")
 if check_status "$RESP" "400"; then
   if echo "$BODY" | jq '.' >/dev/null 2>&1; then
@@ -284,7 +284,7 @@ fi
 
 # 10c: PUT with malformed input (missing required field 'blob')
 echo "  -- PUT malformed input (missing blob) --"
-RESP=$(curl -s -w "\n%{http_code}" -X PUT -H "Content-Type: application/json" -d '{"clipboard": "test"}' "http://backend.local.localhost:8000/clip/test-malformed-input" 2>/dev/null)
+RESP=$(curl -s -w "\n%{http_code}" -X PUT -H "Content-Type: application/json" -d '{"clipboard": "test"}' "http://backend.local.localhost:8000/api/clip/test-malformed-input" 2>/dev/null)
 BODY=$(get_body "$RESP")
 if check_status "$RESP" "400"; then
   if echo "$BODY" | jq '.' >/dev/null 2>&1; then
@@ -298,7 +298,7 @@ fi
 
 # 10d: PUT with malformed input (blob is not a string)
 echo "  -- PUT malformed input (blob is number) --"
-RESP=$(curl -s -w "\n%{http_code}" -X PUT -H "Content-Type: application/json" -d '{"blob": 12345}' "http://backend.local.localhost:8000/clip/test-blob-type" 2>/dev/null)
+RESP=$(curl -s -w "\n%{http_code}" -X PUT -H "Content-Type: application/json" -d '{"blob": 12345}' "http://backend.local.localhost:8000/api/clip/test-blob-type" 2>/dev/null)
 BODY=$(get_body "$RESP")
 if check_status "$RESP" "400"; then
   if echo "$BODY" | jq '.' >/dev/null 2>&1; then
@@ -312,7 +312,7 @@ fi
 
 # 10e: PUT with extra unknown fields (should still succeed)
 echo "  -- PUT with extra fields (should succeed) --"
-RESP=$(curl -s -w "\n%{http_code}" -X PUT -H "Content-Type: application/json" -d '{"blob": "test", "extra": "ignored"}' "http://backend.local.localhost:8000/clip/test-extra-fields" 2>/dev/null)
+RESP=$(curl -s -w "\n%{http_code}" -X PUT -H "Content-Type: application/json" -d '{"blob": "test", "extra": "ignored"}' "http://backend.local.localhost:8000/api/clip/test-extra-fields" 2>/dev/null)
 BODY=$(get_body "$RESP")
 if check_status "$RESP" "200"; then
   if echo "$BODY" | jq '.' >/dev/null 2>&1; then

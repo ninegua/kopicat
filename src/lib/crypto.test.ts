@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generatePassword, encrypt, decrypt } from './crypto';
+import { generatePassword, encrypt, decrypt, PASSWORD_CHARSET } from './crypto';
 
 describe('generatePassword', () => {
   it('returns a string of exactly 8 characters', () => {
@@ -10,7 +10,7 @@ describe('generatePassword', () => {
   });
 
   it('only contains allowed characters', () => {
-    const allowed = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%&*';
+    const allowed = PASSWORD_CHARSET;
     for (let i = 0; i < 50; i++) {
       const pw = generatePassword();
       for (const char of pw) {
@@ -35,7 +35,7 @@ describe('generatePassword', () => {
   });
 
   it('custom length passwords only contain allowed characters', () => {
-    const allowed = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%&*';
+    const allowed = PASSWORD_CHARSET;
     const pw = generatePassword(16);
     for (const char of pw) {
       expect(allowed).toContain(char);

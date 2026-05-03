@@ -182,7 +182,7 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
     };
     let (status_code, body) = switch (id, req.body) {
       case (null, _) {
-        (400: Nat16, "\"" # "Parameter /clip/:id not found" # "\"")
+        (400: Nat16, "\"" # "Parameter /api/clip/:id not found" # "\"")
       };
       case (_, null) {
          (400: Nat16, "\"" # "Missing body" # "\"")
@@ -226,7 +226,7 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
     };
     let (status_code, body, cache_strategy) = switch (board) {
       case (null) {
-        (400: Nat16, "\"" # "Parameter /clip/:id not found" # "\"", #noCache)
+        (400: Nat16, "\"" # "Parameter /api/clip/:id not found" # "\"", #noCache)
       };
       case (?id) {
         switch (get_clip(id)) {
@@ -273,8 +273,8 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
     res.json({ status_code = 200; body = JSON.show(json); cache_strategy = #noCache; })
   };
 
-  server.get("/clip/:id", handle_get);
-  server.put("/clip/:id", handle_put);
+  server.get("/api/clip/:id", handle_get);
+  server.put("/api/clip/:id", handle_put);
   server.get("/api/stats", handle_stats);
 
   system func preupgrade() {

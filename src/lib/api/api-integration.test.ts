@@ -19,8 +19,8 @@ function mockFetch(): ReturnType<typeof vi.fn> {
     .mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = typeof input === 'string' ? input : String(input);
 
-      // --- PUT /clip/:id  (create clip) ---
-      if (url.includes('/clip/') && init?.method === 'PUT') {
+      // --- PUT /api/clip/:id  (create clip) ---
+      if (url.includes('/api/clip/') && init?.method === 'PUT') {
         try {
           const body: ClipInput = JSON.parse(init.body as string);
           const id = body.id;
@@ -60,11 +60,11 @@ function mockFetch(): ReturnType<typeof vi.fn> {
         }
       }
 
-      // --- GET /clip/:id  (fetch clip) ---
-      if (url.includes('/clip/')) {
-        const id = url.split('/clip/')[1]?.split('?')[0];
+      // --- GET /api/clip/:id  (fetch clip) ---
+      if (url.includes('/api/clip/')) {
+        const id = url.split('/api/clip/')[1]?.split('?')[0];
         if (!id) {
-          return new Response(JSON.stringify('Parameter /clip/:id not found'), { status: 400 });
+          return new Response(JSON.stringify('Parameter /api/clip/:id not found'), { status: 400 });
         }
         const clip = clipStore.get(id);
         if (!clip) {

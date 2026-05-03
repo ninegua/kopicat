@@ -1,9 +1,10 @@
 const PBKDF2_ITERATIONS = 100_000;
 const SALT_BYTES = 16;
 const IV_BYTES = 12;
+export const PASSWORD_CHARSET = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@$&*-:';
 
 export function generatePassword(byteCount = 8): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@$&*-:';
+  const chars = PASSWORD_CHARSET;
   const bytes = new Uint8Array(byteCount);
   crypto.getRandomValues(bytes);
   let result = '';
