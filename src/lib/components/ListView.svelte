@@ -1,8 +1,10 @@
 <script lang="ts">
   import { clipState } from '$lib/api/store';
   import ShareCard from './ShareCard.svelte';
-  import { generatePassword } from '$lib/crypto';
+  import { generatePassword, encrypt } from '$lib/crypto';
   import { generateClipId } from '$lib/words';
+  import { createClip } from '$lib/api/client';
+  import { updateLocalClip } from '$lib/api/local-store';
 
   let focusedClip = $state<string | null>(null);
   let pendingClips: string[] = [];
@@ -170,10 +172,6 @@
     if (isExpired) {
       sharingClip = clip.id;
       try {
-        const { createClip } = await import('$lib/api/client');
-        const { encrypt } = await import('$lib/crypto');
-        const { updateLocalClip } = await import('$lib/api/local-store');
-
         const newId = generateClipId();
         const newPw = generatePassword();
         const encryptedBlob = await encrypt(clip.text, newPw);

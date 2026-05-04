@@ -163,9 +163,4 @@
   .error-banner {
     margin: var(--space-md) var(--space-md) 0;
   }
-
-  .btn-primary,
-  .btn-secondary {
-    flex: 1;
-  }
 </style>

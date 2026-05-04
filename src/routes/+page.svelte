@@ -3,7 +3,7 @@
   import { clipState } from '$lib/api/store';
   import type { ClipState, ClipMode } from '$lib/api/store';
   import { fetchClip, createClip } from '$lib/api/client';
-  import { getLocalClips } from '$lib/api/local-store';
+  import { getLocalClips, addLocalClip } from '$lib/api/local-store';
   import { decrypt, encrypt } from '$lib/crypto';
   import { generateClipId } from '$lib/words';
   import Header from '$lib/components/Header.svelte';
@@ -153,7 +153,6 @@
         password: pw,
       };
 
-      const { addLocalClip } = await import('$lib/api/local-store');
       const allClips = addLocalClip(newClip);
 
       clipState.update((s) => ({

@@ -240,7 +240,7 @@
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
-    display: flex;
+    flex: 1;
     align-items: center;
     justify-content: center;
     gap: var(--space-sm);
@@ -271,7 +271,7 @@
     font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
-    display: flex;
+    flex: 1;
     align-items: center;
     justify-content: center;
     gap: var(--space-sm);
