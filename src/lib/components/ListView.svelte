@@ -1,11 +1,15 @@
 <script lang="ts">
   import { clipState } from '$lib/api/store';
   import ShareCard from './ShareCard.svelte';
+  import { generatePassword } from '$lib/crypto';
+  import { generateClipId } from '$lib/words';
 
   let focusedClip = $state<string | null>(null);
-  let pendingClips = [];
+  let pendingClips: string[] = [];
   let showShareCard = $state(false);
   let shareUrl = $state('');
+  let sharingClip = $state<string | null>(null);
+  let shareError = $state<string | null>(null);
 
   $effect(() => {
     if ($clipState.mode === 'list' && $clipState.clipId) {
@@ -13,7 +17,7 @@
     }
   });
 
-  const clips = $derived($clipState.localClips.sort((a, b) => b.created_at - a.created_at));
+  const clips = $derived($clipState.localClips);
 
   function formatTimeAgo(timestamp: number): string {
     const diff = Date.now() - timestamp;
@@ -73,11 +77,75 @@
 
   function handleFocus(clipId: string) {
     focusedClip = clipId;
+    shareError = null;
   }
 
-  function handleShare(clip: (typeof clips)[0]) {
-    shareUrl = `${window.location.origin}/?${clip.id}#${clip.password}`;
-    showShareCard = true;
+  function resetShareState() {
+    sharingClip = null;
+    shareError = null;
+  }
+
+  async function handleShare(clip: (typeof clips)[0], clipIndex: number) {
+    shareError = null;
+
+    const isExpired = clip.expires_at && clip.expires_at <= Date.now();
+
+    if (isExpired && !clip.password) {
+      shareError = 'Cannot share: missing decryption key for this expired clip.';
+      return;
+    }
+
+    if (isExpired) {
+      sharingClip = clip.id;
+      try {
+        const { createClip } = await import('$lib/api/client');
+        const { encrypt } = await import('$lib/crypto');
+        const { updateLocalClip } = await import('$lib/api/local-store');
+
+        const newId = generateClipId();
+        const newPw = generatePassword();
+        const encryptedBlob = await encrypt(clip.text, newPw);
+        const result = await createClip({
+          id: newId,
+          blob: encryptedBlob,
+          burn_after_read: clip.burn_after_read,
+        });
+
+        if ('error' in result) {
+          shareError = result.error || 'Failed to create clip on server.';
+          return;
+        }
+
+        const now = Date.now();
+        const newClip = {
+          id: newId,
+          text: clip.text,
+          created_at: now,
+          expires_at: now + 900 * 1000,
+          burn_after_read: clip.burn_after_read,
+          blob: encryptedBlob,
+          password: newPw,
+        };
+
+        let allClips = [...clips];
+        allClips[clipIndex] = newClip;
+        updateLocalClip(sharingClip, newClip);
+        focusedClip = newClip.id;
+        console.log("setting focusedClip ", focusedClip);
+        clipState.update((s) => ({ ...s, localClips: allClips }));
+
+        shareUrl = `${window.location.origin}/?${newId}#${newPw}`;
+        showShareCard = true;
+      } catch (e: any) {
+        shareError = e.message || 'Failed to re-create clip.';
+        return;
+      } finally {
+        sharingClip = null;
+      }
+    } else {
+      shareUrl = `${window.location.origin}/?${clip.id}#${clip.password}`;
+      showShareCard = true;
+    }
   }
 
   async function handleCloseShare() {
@@ -95,7 +163,7 @@
     </div>
   {:else}
     <div class="clips-list" class:clips-list-disabled={showShareCard}>
-      {#each clips as clip (clip.id)}
+      {#each clips as clip, i (clip.id)}
         <div
           class="clip-item"
           class:clip-focused={focusedClip === clip.id}
@@ -116,28 +184,47 @@
             <div class="card-textarea-group">
               <pre class="clipped-text">{clip.text}</pre>
               <span class="char-count">{clip.text.length} characters</span>
+              {#if shareError}
+                <span class="share-error">{shareError}</span>
+              {/if}
               <button
                 class="share-btn"
                 aria-label="Share this clip"
+                disabled={sharingClip !== null}
                 onclick={(e) => {
                   e.stopPropagation();
-                  handleShare(clip);
+                  handleShare(clip, i);
                 }}
               >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                  <polyline points="16 6 12 2 8 6" />
-                  <line x1="12" y1="2" x2="12" y2="15" />
-                </svg>
+                {#if sharingClip === clip.id}
+                  <svg class="spinner-svg" viewBox="0 0 40 40">
+                    <circle class="spinner-track" cx="20" cy="20" r="16" fill="none" stroke-width="3" />
+                    <circle
+                      class="spinner-head"
+                      cx="20"
+                      cy="20"
+                      r="16"
+                      fill="none"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                {:else}
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                    <polyline points="16 6 12 2 8 6" />
+                    <line x1="12" y1="2" x2="12" y2="15" />
+                  </svg>
+                {/if}
               </button>
             </div>
             <div class="clip-expanded-footer">
@@ -294,6 +381,48 @@
   .share-btn:hover {
     background: var(--accent-glow);
     border-color: var(--accent);
+  }
+
+  .share-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .share-error {
+    color: var(--error);
+    font-size: 0.75rem;
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--error-bg);
+    border-radius: var(--radius-sm);
+    width: 100%;
+    text-align: center;
+  }
+
+  .share-btn .spinner-svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .share-btn .spinner-track {
+    stroke: var(--border-color);
+  }
+
+  .share-btn .spinner-head {
+    stroke: var(--accent);
+    stroke-dasharray: 75;
+    stroke-dashoffset: 55;
+    animation: list-spinner 1.2s linear infinite;
+  }
+
+  @keyframes list-spinner {
+    0% {
+      transform: rotate(0deg);
+      stroke-dashoffset: 75;
+    }
+    100% {
+      transform: rotate(360deg);
+      stroke-dashoffset: 0;
+    }
   }
 
   .clip-expanded-content {

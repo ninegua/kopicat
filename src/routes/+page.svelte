@@ -240,8 +240,7 @@
   {:else if $clipState.showShareModal && $clipState.shareUrl}
     <ShareCard
       url={$clipState.shareUrl}
-      onDismiss={(e) => {
-        e.preventDefault();
+      onDismiss={() => {
         clipState.update((s) => ({
           ...s,
           showShareModal: false,

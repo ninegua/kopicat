@@ -21,7 +21,8 @@ function writeClips(clips: LocalClip[]) {
 }
 
 export function getLocalClips(): LocalClip[] {
-  return readClips();
+  // In reverse order of when they are added to storage
+  return readClips().reverse();
 }
 
 export function addLocalClip(clip: LocalClip): LocalClip[] {
@@ -45,7 +46,9 @@ export function updateLocalClip(id: string, updates: Partial<LocalClip>): void {
   const clips = readClips();
   const index = clips.findIndex((c) => c.id === id);
   if (index !== -1) {
+    console.log("updateLocalClip(old)", index, clips[index]);
     clips[index] = { ...clips[index], ...updates };
+    console.log("updateLocalClip(new)", index, clips[index]);
     writeClips(clips);
   }
 }
