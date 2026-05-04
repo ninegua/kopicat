@@ -21,12 +21,25 @@
   }
 
   const clips = $derived($clipState.localClips);
+  const mode = $derived($clipState.mode);
+  const storeClipId = $derived($clipState.clipId);
   const now = $derived(Date.now() + refresh);
   const expiredClips = $derived(clips.filter((c) => c.expires_at && c.expires_at <= now));
   const visibleClips = $derived(clips.filter((c) => {
     if (showExpired) return true;
     return !c.expires_at || c.expires_at > now;
   }));
+
+  $effect(() => {
+    const _m = mode;
+    const _id = storeClipId;
+    if (_m === 'list' && _id && focusedClip === null) {
+      const exists = clips.some((c) => c.id === _id);
+      if (exists) {
+        focusedClip = _id;
+      }
+    }
+  });
 
   $effect(() => {
     const SOON_THRESHOLD = 300000; // 5 minutes
@@ -335,6 +348,7 @@
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
+    padding: 0 var(--space-sm);
     margin-bottom: var(--space-sm);
   }
 

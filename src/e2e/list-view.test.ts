@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/svelte';
+import { render, screen, fireEvent, waitFor, cleanup, tick } from '@testing-library/svelte';
 import { clipState } from '$lib/api/store';
 import type { LocalClip } from '$lib/api/store';
 import { addLocalClip, getLocalClips } from '$lib/api/local-store';
@@ -736,6 +736,40 @@ describe('Clip order', () => {
     expect(clipItems[0].querySelector('.clip-preview')!.textContent).toContain('Third clip');
     expect(clipItems[1].querySelector('.clip-preview')!.textContent).toContain('Second clip');
     expect(clipItems[2].querySelector('.clip-preview')!.textContent).toContain('First clip');
+  });
+
+  it('auto-focuses the new clip when clipId is set in store', async () => {
+    const clip1 = makeClip({ id: 'clip-one', text: 'First clip' });
+    const newClip = makeClip({ id: 'clip-two', text: 'New clip content' });
+
+    setListMode([clip1, newClip]);
+    render(Page);
+
+    // Initially no clip is focused
+    const firstBtn = getClipButton('first clip');
+    expect(firstBtn).toHaveAttribute('aria-pressed', 'false');
+
+    // Set the clipId to the new clip (simulating handleCreate transition)
+    clipState.update((s) => ({ ...s, clipId: newClip.id }));
+
+    await waitFor(() => {
+      expect(newClip.id).toBeTruthy();
+    });
+
+    // The new clip should now be focused
+    const clipButton = getClipButton('new clip content');
+    await waitFor(() => {
+      expect(clipButton).toHaveAttribute('aria-pressed', 'true');
+    });
+  });
+
+  it('does not auto-focus when clipId is null', () => {
+    const clip1 = makeClip({ id: 'clip-a', text: 'Clip A' });
+    setListMode([clip1]);
+    render(Page);
+
+    const clipButton = getClipButton('clip a');
+    expect(clipButton).toHaveAttribute('aria-pressed', 'false');
   });
 });
 
