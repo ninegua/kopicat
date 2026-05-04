@@ -21,8 +21,7 @@ function writeClips(clips: LocalClip[]) {
 }
 
 export function getLocalClips(): LocalClip[] {
-  const now = Date.now();
-  return readClips().filter((c) => c.expires_at > now);
+  return readClips();
 }
 
 export function addLocalClip(clip: LocalClip): LocalClip[] {

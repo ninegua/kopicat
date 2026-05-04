@@ -155,7 +155,9 @@
     width: 100%;
     max-width: 480px;
     margin: 0 auto;
-    height: 350px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
 
   :global(.card-header) {
@@ -190,6 +192,42 @@
   :global(.card-subtitle) {
     color: var(--text-muted);
     font-size: 0.85rem;
+  }
+
+  :global(.card-textarea-group) {
+    padding: var(--space-lg) var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+    width: 100%;
+    min-height: 180px;
+    height: 195px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow-y: auto;
+    margin-bottom: var(--space-sm);
+  }
+
+  :global(.card-textarea) {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    resize: none;
+    outline: none;
+    font-family: monospace;
+  }
+
+  :global(.card-textarea:focus) {
+    box-shadow: none;
+  }
+
+  :global(.card-textarea::placeholder) {
+    color: var(--text-muted);
   }
 
   /* --- Buttons --- */
@@ -263,13 +301,26 @@
     border-radius: var(--radius-md);
     color: var(--error);
     font-size: 0.85rem;
-    margin: var(--space-md);
+    margin: 0;
   }
 
   /* --- Form elements --- */
   :global(.form-group) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     margin-bottom: var(--space-md);
     padding: 0 var(--space-md);
+  }
+
+  :global(.form-row) {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+  }
+
+  :global(.form-row > *) {
+    flex: 1;
   }
 
   :global(label) {

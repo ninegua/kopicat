@@ -7,9 +7,7 @@
   let shareUrl = $state('');
 
   const clips = $derived(
-    $clipState.localClips
-      .filter((c) => c.expires_at > Date.now())
-      .sort((a, b) => b.created_at - a.created_at),
+    $clipState.localClips.sort((a, b) => b.created_at - a.created_at),
   );
 
   const newestClip = $derived(clips[0] ?? null);
@@ -36,6 +34,12 @@
     if (hours > 0) return `expires in ${hours}h${minutes > 0 ? ` ${minutes}m` : ''}`;
     if (minutes > 0) return `expires in ${minutes}m`;
     return `expires in ${seconds}s`;
+  }
+
+  function formatExpiryDisplay(clip: (typeof clips)[0]): { label: string; expired: boolean } {
+    if (!clip.expires_at || clip.expires_at === 0) return { label: 'No expiry', expired: false };
+    if (clip.expires_at > Date.now()) return { label: formatTimeUntilExpire(clip.expires_at), expired: false };
+    return { label: 'Expired', expired: true };
   }
 
   function truncate(text: string, maxLength: number): string {
@@ -141,8 +145,8 @@
               </div>
               <div class="clip-expanded-footer">
                 <span class="clip-time">Created {formatTimeAgo(clip.created_at)}</span>
-                <span class="clip-expiry" class:clip-expiry-soon={clip.expires_at - Date.now() < 300000}>
-                  {formatTimeUntilExpire(clip.expires_at)}
+                <span class="clip-expiry" class:clip-expiry-soon={clip.expires_at - Date.now() < 300000 && clip.expires_at > Date.now()} class:clip-expired={clip.expires_at && clip.expires_at <= Date.now()}>
+                  {formatExpiryDisplay(clip).label}
                 </span>
                 {#if clip.burn_after_read}
                   <span class="burn-badge">Burn after read</span>
@@ -154,10 +158,9 @@
               <span class="clip-preview">{truncate(clip.text, 40)}</span>
               <div class="clip-meta">
                 <span class="clip-time">{formatTimeAgo(clip.created_at)}</span>
-                <span class="clip-expiry" class:clip-expiry-soon={clip.expires_at - Date.now() < 300000}>
-                  {formatTimeUntilExpire(clip.expires_at)}
+                <span class="clip-expiry" class:clip-expiry-soon={clip.expires_at - Date.now() < 300000 && clip.expires_at > Date.now()} class:clip-expired={clip.expires_at && clip.expires_at <= Date.now()}>
+                  {formatExpiryDisplay(clip).label}
                 </span>
-                <span class="clip-chars">{clip.text.length}</span>
               </div>
             </div>
           {/if}
@@ -224,7 +227,7 @@
   }
 
   .clip-item {
-    background: var(--bg-card);
+    background: transparent;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: var(--space-md);
@@ -236,14 +239,13 @@
   }
 
   .clip-item:hover {
-    border-color: var(--accent);
-    background: var(--bg-card-hover);
+    border-color: var(--border-color);
   }
 
   .clip-focused {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-glow);
-    background: var(--bg-card-hover);
+    background: var(--bg-card);
   }
 
   .clip-collapsed {
@@ -283,12 +285,8 @@
     color: var(--warning);
   }
 
-  .clip-chars {
-    color: var(--text-muted);
-    font-size: 0.7rem;
-    background: var(--bg-input);
-    padding: var(--space-xs) var(--space-xs);
-    border-radius: var(--radius-sm);
+  .clip-expired {
+    color: var(--error);
   }
 
   .clip-expanded {

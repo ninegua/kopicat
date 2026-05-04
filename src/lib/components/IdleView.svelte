@@ -122,7 +122,7 @@
   }
 
   .idle-inner {
-    padding: var(--space-4xl) var(--space-3xl);
+    padding: var(--space-xl) var(--space-2xl) var(--space-2xl) var(--space-2xl);
     width: 100%;
   }
 

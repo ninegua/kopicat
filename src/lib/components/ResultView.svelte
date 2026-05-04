@@ -20,12 +20,13 @@
 
 <div class="card">
   {#if $clipState.decryptedText}
-    <div class="result-content">
+    <div class="card-textarea-group">
       <pre class="clipped-text">{$clipState.decryptedText}</pre>
       <span class="char-count">{$clipState.decryptedText.length} characters</span>
     </div>
   {/if}
 
+    <div class="form-group">
   <div class="card-status-header">
     <div class="card-status">
       <svg
@@ -69,7 +70,7 @@
   {/if}
 
   {#if $clipState.decryptedText}
-    <div class="btn-row">
+    <div class="form-row">
       <button class="btn-primary" onclick={copyText} disabled={copyFeedback === 'text'}>
         {#if copyFeedback === 'text'}
           <svg
@@ -121,10 +122,11 @@
     </div>
   {/if}
 </div>
+</div>
 
 <style>
   .card-status-header {
-    padding: var(--space-sm) var(--space-md);
+    margin: var(--space-sm) 0;
     text-align: center;
     display: flex;
     align-items: center;
@@ -175,11 +177,10 @@
   }
 
   .result-content {
-    padding: var(--space-xl) var(--space-md);
+    padding: var(--space-lg) var(--space-md);
     border-bottom: 1px solid var(--border-color);
     width: 100%;
-    min-height: 100px;
-    max-height: 280px;
+    height: 200px;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -188,7 +189,7 @@
 
   .char-count {
     position: absolute;
-    bottom: var(--space-sm);
+    bottom: var(--space-xs);
     right: var(--space-md);
     color: var(--text-muted);
     font-size: 0.75rem;

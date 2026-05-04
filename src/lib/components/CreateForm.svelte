@@ -45,6 +45,12 @@
   }
 
   const charCount = $derived(text.length);
+
+  function handleInput() {
+    if ($clipState.error) {
+      clipState.update((s) => ({ ...s, error: null }));
+    }
+  }
 </script>
 
 <div class="card">
@@ -54,6 +60,7 @@
       bind:value={text}
       placeholder="Enter your text here..."
       class="card-textarea"
+      oninput={handleInput}
     ></textarea>
     <span class="char-count">{charCount} characters</span>
   </div>
@@ -105,14 +112,13 @@
         </svg>
       </label>
     </div>
-    <select id="clip-ttl" bind:value={selectedTTL} class="select">
-      {#each TTL_OPTIONS as option}
-        <option value={option.value}>{option.label}</option>
-      {/each}
-    </select>
-  </div>
-
-  <button class="btn-primary" onclick={handleCreate} disabled={$clipState.loading}>
+    <div class="form-row">
+      <select id="clip-ttl" bind:value={selectedTTL} class="select">
+        {#each TTL_OPTIONS as option}
+          <option value={option.value}>{option.label}</option>
+        {/each}
+      </select>
+      <button class="btn-primary" onclick={handleCreate} disabled={$clipState.loading}>
     {#if $clipState.loading}
       <svg class="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="15" />
@@ -120,52 +126,18 @@
       Creating...
     {:else}
       Create clip
-    {/if}
-  </button>
+     {/if}
+      </button>
+    </div>
+  </div>
 </div>
 
 <style>
-  .card-textarea-group {
-    padding: var(--space-xl) var(--space-md);
-    border-bottom: 1px solid var(--border-color);
-    width: 100%;
-    min-height: 180px;
-    height: 195px;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow-y: auto;
-  }
-
-  .card-textarea {
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    color: var(--text-primary);
-    font-size: 0.8rem;
-    line-height: 1.5;
-    resize: none;
-    outline: none;
-    font-family: monospace;
-  }
-
-  .card-textarea:focus {
-    box-shadow: none;
-  }
-
-  .card-textarea::placeholder {
-    color: var(--text-muted);
-  }
-
   .expiry-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--space-sm);
-    margin-top: var(--space-sm);
+    margin: var(--space-sm) 0;
   }
 
   .expiry-header label {
@@ -201,8 +173,7 @@
   }
 
   .select {
-    width: 100%;
-    padding: var(--space-sm);
+    padding: var(--space-md);
     background: var(--bg-input);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
@@ -234,8 +205,7 @@
   }
 
   .btn-primary {
-    width: 50%;
-    margin: 0 auto var(--space-md);
+    padding: var(--space-md) var(--space-md);
     font-size: 0.95rem;
   }
 </style>
