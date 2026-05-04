@@ -15,7 +15,7 @@ const sizes = [
 	{ name: 'apple-touch-icon.png', size: 180 },
 ];
 
-const src = resolve(STATIC, 'kopicat.png');
+const src = resolve(__dirname, '..', 'kopicat.png');
 
 for (const { name, size } of sizes) {
 	await sharp(src)

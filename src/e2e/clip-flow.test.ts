@@ -49,7 +49,7 @@ describe('Clip creation flow', () => {
     expect(screen.getByRole('button', { name: 'Paste from clipboard' })).toBeInTheDocument();
     expect(screen.getByText(/paste your text to share/i)).toBeInTheDocument();
     expect(screen.getByText(/ctrl\+v/i)).toBeInTheDocument();
-    expect(screen.getByText(/copy from clipboard/i)).toBeInTheDocument();
+    expect(screen.getByText(/Paste from clipboard/i)).toBeInTheDocument();
   });
 
   it('transitions to create form after pasting', async () => {

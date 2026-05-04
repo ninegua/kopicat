@@ -263,7 +263,7 @@
   }
 
   :global(.btn-secondary) {
-    padding: var(--space-md) var(--space-lg);
+    padding: var(--space-md);
     background: var(--bg-input);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
@@ -271,7 +271,7 @@
     font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: var(--space-sm);

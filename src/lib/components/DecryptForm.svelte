@@ -75,23 +75,29 @@
         if (e.key === 'Enter') handleDecrypt();
       }}
     />
-  </div>
 
-  <button class="btn-primary" onclick={handleDecrypt} disabled={$clipState.loading || !password}>
-    {#if $clipState.loading}
-      <svg class="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="15" />
-      </svg>
-      Decrypting...
-    {:else}
-      Decrypt
-    {/if}
-  </button>
+    <button class="btn-primary" onclick={handleDecrypt} disabled={$clipState.loading || !password}>
+      {#if $clipState.loading}
+        <svg
+          class="spinner"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
+          <circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="15" />
+        </svg>
+        Decrypting...
+      {:else}
+        Decrypt
+      {/if}
+    </button>
+  </div>
 </div>
 
 <style>
   .card {
-    padding: var(--space-xl);
+    padding: var(--space-lg);
     text-align: center;
   }
 
@@ -99,7 +105,7 @@
     width: 32px;
     height: 32px;
     stroke: var(--accent);
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-sm);
   }
 
   .error-banner {
@@ -109,9 +115,16 @@
 
   .form-group {
     padding: 0;
+    gap: var(--space-sm);
+    label {
+      margin: 0;
+    }
+  }
+
+  .input {
+    margin-bottom: var(--space-md);
   }
 
   .btn-primary {
-    width: 100%;
   }
 </style>

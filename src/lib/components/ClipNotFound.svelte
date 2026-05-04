@@ -51,6 +51,9 @@
     width: 100%;
     max-width: 480px;
     margin: 2rem auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .notfound-icon {
@@ -84,7 +87,6 @@
   }
 
   .btn-secondary {
-    padding: var(--space-sm) var(--space-lg);
     background: var(--bg-card);
   }
 </style>

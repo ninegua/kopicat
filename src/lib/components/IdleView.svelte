@@ -69,7 +69,7 @@
     {/if}
     <div class="idle-actions">
       <div class="idle-keyboard">
-        <span>Or press <kbd>Ctrl+V</kbd> or <kbd>⌘+V</kbd> to copy from clipboard</span>
+        <span>Or press <kbd>Ctrl+V</kbd> or <kbd>⌘+V</kbd></span>
       </div>
       <button
         type="button"
@@ -107,14 +107,13 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin: 0 auto;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s ease;
   }
 
   .idle-inner {
-    padding: var(--space-xl) var(--space-2xl) var(--space-2xl) var(--space-2xl);
+    padding: var(--space-xl) var(--space-2xl) var(--space-xl) var(--space-2xl);
     width: 100%;
   }
 
