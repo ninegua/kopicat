@@ -1,9 +1,10 @@
 <script lang="ts">
+  let { onReset }: { onReset?: () => void } = $props();
 </script>
 
 <header class="header">
-  <div class="header-inner">
-    <a href="/" class="logo">
+<div class="header-inner">
+    <a href="/" class="logo" tabindex="0" role="button" aria-label="Home" onclick={onReset}>
       <img src="/kopicat-logo.png" alt="KopiCat" class="logo-img" />
       <span class="logo-text">KopiCat</span>
     </a>

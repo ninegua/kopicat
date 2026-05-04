@@ -2,7 +2,17 @@ import { writable } from 'svelte/store';
 import { fetchClip } from './client';
 import type { Clip } from './client';
 
-export type ClipMode = 'idle' | 'create' | 'decrypt' | 'result' | 'not-found';
+export type ClipMode = 'idle' | 'create' | 'decrypt' | 'result' | 'not-found' | 'list';
+
+export interface LocalClip {
+  id: string;
+  text: string;
+  created_at: number;
+  expires_at: number;
+  burn_after_read: boolean;
+  blob?: string;
+  password?: string;
+}
 
 export interface ClipState {
   mode: ClipMode;
@@ -15,6 +25,7 @@ export interface ClipState {
   shareUrl: string | null;
   showShareModal: boolean;
   prefillText: string | null;
+  localClips: LocalClip[];
 }
 
 const initial: ClipState = {
@@ -28,6 +39,7 @@ const initial: ClipState = {
   shareUrl: null,
   showShareModal: false,
   prefillText: null,
+  localClips: [],
 };
 
 export const clipState = writable<ClipState>(initial);

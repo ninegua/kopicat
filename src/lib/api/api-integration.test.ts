@@ -95,6 +95,7 @@ beforeEach(() => {
     shareUrl: null,
     showShareModal: false,
     prefillText: null,
+    localClips: [],
   });
 
   // Mock fetch
@@ -421,6 +422,7 @@ describe('Clip viewing flow', () => {
       shareUrl: null,
       showShareModal: false,
       prefillText: null,
+      localClips: [],
     });
 
     const clip = await simulateFetchClipById(createResult.clipId!);
@@ -540,9 +542,11 @@ describe('UI component state flow', () => {
       shareUrl: null,
       showShareModal: false,
       prefillText: null,
+      localClips: [],
     });
 
-    // The DecryptForm.svelte button has: disabled={loading || !password}
+    // The DecryptForm.svelte button has: disabled={$clipState.loading || !password}
+    // where password is the local input state, initialized from $clipState.password
     const state = get(clipState);
     expect(state.loading || !state.password).toBe(true); // button should be disabled
   });
@@ -565,6 +569,7 @@ describe('UI component state flow', () => {
       shareUrl: null,
       showShareModal: false,
       prefillText: null,
+      localClips: [],
     });
 
     const state = get(clipState);

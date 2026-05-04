@@ -68,7 +68,7 @@ describe('Clip creation flow', () => {
     expect(screen.getByPlaceholderText(/paste your text/i)).toBeInTheDocument();
   });
 
-  it('creates a clip successfully and shows the share modal', async () => {
+  it('creates a clip successfully and shows the list view', async () => {
     const testText = 'This is a secret message';
 
     const { container } = render(Page);
@@ -90,11 +90,12 @@ describe('Clip creation flow', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Share this clip')).toBeInTheDocument();
+      expect(screen.getByText('Your Clips')).toBeInTheDocument();
     });
 
-    const shareUrlEl = screen.getByText(/http:\/\/localhost\//);
-    expect(shareUrlEl).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(testText)).toBeInTheDocument();
+    });
 
     const state = get(clipState);
     const createdClipId = state.clipId;
@@ -361,16 +362,18 @@ describe('Burn-after-read flow', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Share this clip')).toBeInTheDocument();
+      expect(screen.getByText('Your Clips')).toBeInTheDocument();
     });
 
-    const shareUrlEl = screen.getByText(/http:\/\/localhost\/\?/);
-    const shareUrlMatch = shareUrlEl.textContent!.match(
-      /(http:\/\/localhost\/\?)([^ #]+)(?:#(.+))?/,
-    );
-    expect(shareUrlMatch).not.toBeNull();
-    const createdClipId = shareUrlMatch![2];
-    const createdPassword = shareUrlMatch![3] || '';
+    await waitFor(() => {
+      expect(screen.getByText('Burn this message')).toBeInTheDocument();
+    });
+
+    const state = get(clipState);
+    const createdClipId = state.clipId;
+    const createdPassword = state.localClips.find((c) => c.id === createdClipId)?.password || '';
+    expect(createdClipId).not.toBeNull();
+    expect(createdPassword).not.toBe('');
 
     // First access: should decrypt successfully
     cleanup();

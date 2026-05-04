@@ -27,7 +27,8 @@
       // Let the window paste event handle this
     }
   }
-</script>
+
+  </script>
 
 <div
   class="card"

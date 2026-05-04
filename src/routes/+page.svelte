@@ -3,6 +3,7 @@
   import { clipState } from '$lib/api/store';
   import type { ClipState, ClipMode } from '$lib/api/store';
   import { fetchClip, createClip } from '$lib/api/client';
+  import { getLocalClips } from '$lib/api/local-store';
   import { decrypt, encrypt } from '$lib/crypto';
   import { generateClipId } from '$lib/words';
   import Header from '$lib/components/Header.svelte';
@@ -12,8 +13,10 @@
   import DecryptForm from '$lib/components/DecryptForm.svelte';
   import ResultView from '$lib/components/ResultView.svelte';
   import ShareCard from '$lib/components/ShareCard.svelte';
+  import ListView from '$lib/components/ListView.svelte';
   import ClipNotFound from '$lib/components/ClipNotFound.svelte';
   import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+  import ViewClipsLink from '$lib/components/ViewClipsLink.svelte';
 
   let currentMode = $derived($clipState.mode);
   let currentLoading = $derived($clipState.loading);
@@ -75,6 +78,11 @@
     clipState.update((s) => ({ ...s, shareUrl: url }));
   }
 
+  function handleReset() {
+    clipState.update((s) => ({ ...s, mode: 'idle', prefillText: null, localClips: getLocalClips(), clip: null, decryptedText: null, shareUrl: null, error: null, showShareModal: false }));
+    history.replaceState(null, '', '/');
+  }
+
   function handlePaste(text: string) {
     clipState.update((s) => ({ ...s, mode: 'create', error: null, prefillText: null }));
     queueMicrotask(() => {
@@ -123,14 +131,31 @@
       }
 
       const shareUrl = `${window.location.origin}/?${clipId}#${pw}`;
+      const now = Date.now();
+      const ttlSeconds = ttl === 0 ? 900 : ttl;
+      const newClip = {
+        id: clipId,
+        text,
+        created_at: now,
+        expires_at: now + ttlSeconds * 1000,
+        burn_after_read,
+        blob: encryptedBlob,
+        password: pw,
+      };
+
+      const { addLocalClip } = await import('$lib/api/local-store');
+      const allClips = addLocalClip(newClip);
+
       clipState.update((s) => ({
         ...s,
+        mode: 'list',
         clipId,
         decryptedText: text,
         shareUrl,
-        showShareModal: true,
-        loading: false,
+        showShareModal: false,
         prefillText: null,
+        localClips: allClips,
+        loading: false,
       }));
     } catch (e: any) {
       clipState.update((s) => ({
@@ -178,7 +203,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </svelte:head>
 
-<Header />
+<Header onReset={handleReset} />
 
 <main class="app-main">
   {#if currentLoading && !currentClip && currentMode === 'decrypt'}
@@ -189,10 +214,14 @@
     <DecryptForm onDecrypt={decryptClip} onSetPassword={setPassword} />
   {:else if currentMode === 'result'}
     <ResultView
-      onNewClip={() => clipState.update((s) => ({ ...s, mode: 'idle', prefillText: null }))}
+      onNewClip={() => clipState.update((s) => ({ ...s, mode: 'idle', prefillText: null, localClips: getLocalClips() }))}
     />
+  {:else if currentMode === 'list'}
+    <ListView />
   {:else if currentMode === 'idle' && !$clipState.prefillText}
     <IdleView onPaste={handlePaste} />
+    <ViewClipsLink />
+
   {:else if $clipState.showShareModal && $clipState.shareUrl}
     <ShareCard
       url={$clipState.shareUrl}
@@ -207,6 +236,8 @@
     />
   {:else}
     <CreateForm onCreate={handleCreate} />
+    <ViewClipsLink />
+
   {/if}
 </main>
 

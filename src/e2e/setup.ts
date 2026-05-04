@@ -45,6 +45,7 @@ afterEach(() => {
     shareUrl: null,
     showShareModal: false,
     prefillText: null,
+    localClips: [],
   });
 });
 

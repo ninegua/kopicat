@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import * as QRCode from 'qrcode';
 
   let { url, onNewClip }: { url: string; onNewClip: () => void } = $props();
@@ -24,77 +24,112 @@
         }
       });
     });
+
+    function handleKeydown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        onNewClip();
+      }
+    }
+
+    document.addEventListener('keydown', handleKeydown);
+    onDestroy(() => document.removeEventListener('keydown', handleKeydown));
   });
+
+  function handleBackdropClick(e: MouseEvent) {
+    if ((e.target as HTMLElement).classList.contains('modal-backdrop')) {
+      onNewClip();
+    }
+  }
 </script>
 
-<div class="card">
-  <div class="card-header card-header--centered">
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    >
-      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-      <polyline points="16 6 12 2 8 6" />
-      <line x1="12" y1="2" x2="12" y2="15" />
-    </svg>
-    <h3>Share this clip</h3>
-  </div>
+<div class="modal-backdrop" onclick={handleBackdropClick} role="presentation">
+  <div class="modal-content">
+    <div class="card">
+      <div class="card-header card-header--centered">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+          <polyline points="16 6 12 2 8 6" />
+          <line x1="12" y1="2" x2="12" y2="15" />
+        </svg>
+        <h3>Share this clip</h3>
+      </div>
 
-  <canvas class="qr-canvas" id="qr-canvas"></canvas>
+      <canvas class="qr-canvas" id="qr-canvas"></canvas>
 
-  <div class="share-url-box">
-    <span class="share-url-text">{url}</span>
-  </div>
+      <div class="share-url-box">
+        <span class="share-url-text">{url}</span>
+      </div>
 
-  <div class="btn-row">
-    <button
-      class="btn-primary"
-      onclick={() => {
-        navigator.clipboard.writeText(url);
-      }}
-    >
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-      </svg>
-      Copy link
-    </button>
+      <div class="btn-row">
+        <button
+          class="btn-primary"
+          onclick={() => {
+            navigator.clipboard.writeText(url);
+          }}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+          Copy link
+        </button>
 
-    <button class="btn-secondary" onclick={onNewClip}>
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <line x1="12" y1="5" x2="12" y2="19" />
-        <line x1="5" y1="12" x2="19" y2="12" />
-      </svg>
-      New clip
-    </button>
+        <button class="btn-secondary" onclick={onNewClip}>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          New clip
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
 <style>
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(21, 13, 8, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: var(--space-lg);
+  }
+
+  .modal-content {
+    width: 100%;
+    max-width: 420px;
+  }
+
   .card {
     height: auto;
   }
