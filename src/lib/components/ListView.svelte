@@ -15,8 +15,6 @@
 
   const clips = $derived($clipState.localClips.sort((a, b) => b.created_at - a.created_at));
 
-  const newestClip = $derived(clips[0] ?? null);
-
   function formatTimeAgo(timestamp: number): string {
     const diff = Date.now() - timestamp;
     const seconds = Math.floor(diff / 1000);
@@ -88,37 +86,9 @@
     await delay(50);
     pendingClips = [];
   }
-
-  function handleNewClip() {
-    clipState.update((s) => ({
-      ...s,
-      mode: 'create',
-      localClips: clips,
-    }));
-  }
 </script>
 
 <div class="list-container">
-  <div class="list-header">
-    <h2 class="list-title">Your Clips</h2>
-    <button class="btn-new-clip" onclick={handleNewClip}>
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <line x1="12" y1="5" x2="12" y2="19" />
-        <line x1="5" y1="12" x2="19" y2="12" />
-      </svg>
-      New clip
-    </button>
-  </div>
-
   {#if clips.length === 0}
     <div class="empty-state">
       <p>No clips yet. Create one to get started.</p>
@@ -215,38 +185,6 @@
     width: 100%;
     max-width: 480px;
     margin: 0 auto;
-  }
-
-  .list-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-sm) 0 var(--space-md);
-  }
-
-  .list-title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-primary);
-  }
-
-  .btn-new-clip {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-xs);
-    padding: var(--space-xs) var(--space-sm);
-    background: none;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    color: var(--text-secondary);
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .btn-new-clip:hover {
-    border-color: var(--accent);
-    color: var(--accent);
   }
 
   .empty-state {

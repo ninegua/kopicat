@@ -1,5 +1,14 @@
 <script lang="ts">
+  import { clipState } from '$lib/api/store';
   let { onReset }: { onReset?: () => void } = $props();
+
+  function handleNewClip() {
+    clipState.update((s) => ({
+      ...s,
+      mode: 'create',
+      localClips: s.localClips,
+    }));
+  }
 </script>
 
 <header class="header">
@@ -8,6 +17,24 @@
       <img src="/kopicat-logo.png" alt="KopiCat" class="logo-img" />
       <span class="logo-text">KopiCat</span>
     </a>
+    {#if $clipState.mode === 'list'}
+      <button class="btn-secondary" onclick={handleNewClip}>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        New clip
+      </button>
+    {/if}
   </div>
 </header>
 
@@ -35,9 +62,13 @@
   }
 
   .header-inner {
-    max-width: 720px;
+    max-width: 700px;
     margin: 0 auto;
-    padding: var(--space-md) var(--space-lg) 0 var(--space-lg);
+    padding: var(--space-md) var(--space-md) 0 var(--space-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: var(--space-md);
   }
 
   .logo {
@@ -52,6 +83,19 @@
   }
 
   .logo:hover {
+    color: var(--accent);
+  }
+
+  .btn-secondary {
+    margin: 0;
+    padding: 0 var(--space-sm);
+    font-size: 0.8rem;
+    height: 2rem;
+    gap: var(--space-xs);
+  }
+
+  .btn-new-clip:hover {
+    border-color: var(--accent);
     color: var(--accent);
   }
 

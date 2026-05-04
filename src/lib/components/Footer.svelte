@@ -12,9 +12,8 @@
 
 <style>
   .footer {
-    padding: var(--space-xl) var(--space-lg);
+    padding: var(--space-lg) var(--space-md);
     text-align: center;
-    border-top: 1px solid var(--border-color);
     margin-top: auto;
   }
 
