@@ -164,8 +164,8 @@
 </script>
 
 <div class="list-container">
-  <h2 class="list-title">Your Clips</h2>
   <div class="list-header">
+    <h2 class="list-title">Your Clips</h2>
     <div class="toggle-label" onclick={() => toggleShowExpired()} role="switch" tabindex="0" aria-checked={showExpired} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleShowExpired(); } }}>
       <span class="toggle-track"></span>
       <span class="label-text">{clips.length} clips</span>
@@ -259,17 +259,14 @@
           {:else}
             <div class="clip-collapsed">
               <span class="clip-preview">{truncate(clip.text, 40)}</span>
-              <div class="clip-meta">
-                <span class="clip-time">{formatTimeAgo(clip.created_at)}</span>
-                <span
-                  class="clip-expiry"
-                  class:clip-expiry-soon={clip.expires_at - Date.now() < 300000 &&
-                    clip.expires_at > Date.now()}
-                  class:clip-expired={clip.expires_at && clip.expires_at <= Date.now()}
-                >
-                  {formatExpiryDisplay(clip).label}
-                </span>
-              </div>
+               <span
+                 class="clip-expiry"
+                 class:clip-expiry-soon={clip.expires_at - Date.now() < 300000 &&
+                   clip.expires_at > Date.now()}
+                 class:clip-expired={clip.expires_at && clip.expires_at <= Date.now()}
+               >
+                 {formatExpiryDisplay(clip).label}
+               </span>
             </div>
           {/if}
         </div>
@@ -290,7 +287,14 @@
   }
 
   .list-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
     margin-bottom: var(--space-sm);
+  }
+
+  .list-title {
+    margin: 0;
   }
 
   .toggle-label {
@@ -405,19 +409,9 @@
     line-height: 1.4;
   }
 
-  .clip-meta {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    flex-shrink: 0;
-    font-size: 0.75rem;
-  }
-
-  .clip-time {
-    color: var(--text-muted);
-  }
-
   .clip-expiry {
+    font-size: 0.8rem;
+    flex-shrink: 0;
     color: var(--text-muted);
   }
 
