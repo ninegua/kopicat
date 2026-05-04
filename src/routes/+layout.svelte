@@ -155,10 +155,11 @@
     width: 100%;
     max-width: 480px;
     margin: 0 auto;
+    height: 350px;
   }
 
   :global(.card-header) {
-    padding: var(--space-xl) var(--space-md);
+    padding: var(--space-lg) 0;
     text-align: center;
   }
 
@@ -181,10 +182,9 @@
   }
 
   :global(.card-title) {
-    font-size: 1.25rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin-bottom: var(--space-xs);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
   }
 
   :global(.card-subtitle) {

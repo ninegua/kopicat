@@ -95,6 +95,10 @@
 </div>
 
 <style>
+  .card {
+    height: auto;
+  }
+
   .qr-canvas {
     display: block;
     margin: 0 auto var(--space-lg);

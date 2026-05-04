@@ -30,7 +30,7 @@
 </script>
 
 <div
-  class="idle-box"
+  class="card"
   onclick={handleBoxClick}
   onkeydown={handleKeyDown}
   tabindex="0"
@@ -38,6 +38,7 @@
   aria-label="Paste from clipboard"
 >
   <div class="idle-inner">
+    <div class="card-header">
     <div class="idle-icon">
       <svg
         width="32"
@@ -53,7 +54,8 @@
         <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
       </svg>
     </div>
-    <p class="idle-title">Paste your text to share</p>
+    <p class="card-title">Paste your text to share</p>
+    </div>
     {#if $clipState.error}
       <div class="idle-error">
         <svg
@@ -106,13 +108,7 @@
 </div>
 
 <style>
-  .idle-box {
-    background: var(--bg-card);
-    border: 2px dashed var(--border-color);
-    border-radius: var(--radius-lg);
-    width: 100%;
-    max-width: 480px;
-    min-height: 280px;
+  .card {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -121,7 +117,6 @@
     text-align: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    outline: none;
   }
 
   .idle-inner {
@@ -129,12 +124,12 @@
     width: 100%;
   }
 
-  .idle-box:focus-visible {
+  .card:focus-visible {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-glow);
   }
 
-  .idle-box:hover {
+  .card:hover {
     border-color: var(--accent);
     background: var(--bg-card-hover);
     transform: translateY(-2px);
@@ -147,15 +142,8 @@
     transition: color 0.2s;
   }
 
-  .idle-box:hover .idle-icon {
+  .card:hover .idle-icon {
     color: var(--accent);
-  }
-
-  .idle-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--space-sm);
   }
 
   .idle-error {
@@ -169,6 +157,7 @@
     color: var(--error);
     font-size: 0.8rem;
     margin-bottom: var(--space-md);
+    text-align: left;
   }
 
   .idle-error svg {

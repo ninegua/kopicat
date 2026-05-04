@@ -25,7 +25,7 @@
   }
 </script>
 
-<div class="decrypt-card">
+<div class="card">
   <div class="card-header">
     <svg
       class="lock-icon"
@@ -40,7 +40,6 @@
       <path d="M7 11V7a5 5 0 0 1 10 0v4" />
     </svg>
     <h2 class="card-title">This clip is encrypted</h2>
-    <p class="card-subtitle">Enter the password from the share link to decrypt</p>
   </div>
 
   {#if $clipState.error}
@@ -91,20 +90,14 @@
 </div>
 
 <style>
-  .decrypt-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    width: 100%;
-    max-width: 480px;
-    margin: 0 auto;
+  .card {
     padding: var(--space-xl);
     text-align: center;
   }
 
   .lock-icon {
-    width: 48px;
-    height: 48px;
+    width: 32px;
+    height: 32px;
     stroke: var(--accent);
     margin-bottom: var(--space-md);
   }
@@ -120,6 +113,5 @@
 
   .btn-primary {
     width: 100%;
-    font-size: 0.95rem;
   }
 </style>

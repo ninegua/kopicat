@@ -129,8 +129,8 @@
     padding: var(--space-xl) var(--space-md);
     border-bottom: 1px solid var(--border-color);
     width: 100%;
-    min-height: 280px;
-    height: 280px;
+    min-height: 180px;
+    height: 195px;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -202,7 +202,7 @@
 
   .select {
     width: 100%;
-    padding: var(--space-md);
+    padding: var(--space-sm);
     background: var(--bg-input);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
@@ -227,7 +227,7 @@
 
   .char-count {
     position: absolute;
-    bottom: var(--space-sm);
+    bottom: var(--space-xs);
     right: var(--space-md);
     color: var(--text-muted);
     font-size: 0.75rem;
