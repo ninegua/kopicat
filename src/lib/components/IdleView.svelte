@@ -28,12 +28,7 @@
   }
 </script>
 
-<div
-  class="card"
-  role="presentation"
-  onclick={handleBoxClick}
-  onkeydown={handleKeyDown}
->
+<div class="card" role="presentation" onclick={handleBoxClick} onkeydown={handleKeyDown}>
   <div class="idle-inner">
     <div class="card-header">
       <div class="idle-icon">

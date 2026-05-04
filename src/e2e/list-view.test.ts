@@ -58,7 +58,13 @@ describe('ListView empty state', () => {
   beforeEach(() => {
     localStorage.clear();
     Object.defineProperty(window, 'location', {
-      value: { ...window.location, pathname: '/', search: '', hash: '', origin: 'http://localhost' },
+      value: {
+        ...window.location,
+        pathname: '/',
+        search: '',
+        hash: '',
+        origin: 'http://localhost',
+      },
       writable: true,
       configurable: true,
     });
@@ -84,7 +90,13 @@ describe('Clip list display', () => {
   beforeEach(() => {
     localStorage.clear();
     Object.defineProperty(window, 'location', {
-      value: { ...window.location, pathname: '/', search: '', hash: '', origin: 'http://localhost' },
+      value: {
+        ...window.location,
+        pathname: '/',
+        search: '',
+        hash: '',
+        origin: 'http://localhost',
+      },
       writable: true,
       configurable: true,
     });
@@ -158,7 +170,13 @@ describe('Focus and expand', () => {
   beforeEach(() => {
     localStorage.clear();
     Object.defineProperty(window, 'location', {
-      value: { ...window.location, pathname: '/', search: '', hash: '', origin: 'http://localhost' },
+      value: {
+        ...window.location,
+        pathname: '/',
+        search: '',
+        hash: '',
+        origin: 'http://localhost',
+      },
       writable: true,
       configurable: true,
     });
@@ -243,7 +261,13 @@ describe('Expired clips toggle', () => {
     vi.useFakeTimers();
     localStorage.clear();
     Object.defineProperty(window, 'location', {
-      value: { ...window.location, pathname: '/', search: '', hash: '', origin: 'http://localhost' },
+      value: {
+        ...window.location,
+        pathname: '/',
+        search: '',
+        hash: '',
+        origin: 'http://localhost',
+      },
       writable: true,
       configurable: true,
     });
@@ -334,7 +358,13 @@ describe('Expiry status', () => {
     vi.useFakeTimers();
     localStorage.clear();
     Object.defineProperty(window, 'location', {
-      value: { ...window.location, pathname: '/', search: '', hash: '', origin: 'http://localhost' },
+      value: {
+        ...window.location,
+        pathname: '/',
+        search: '',
+        hash: '',
+        origin: 'http://localhost',
+      },
       writable: true,
       configurable: true,
     });
@@ -446,7 +476,13 @@ describe('Keyboard interaction', () => {
   beforeEach(() => {
     localStorage.clear();
     Object.defineProperty(window, 'location', {
-      value: { ...window.location, pathname: '/', search: '', hash: '', origin: 'http://localhost' },
+      value: {
+        ...window.location,
+        pathname: '/',
+        search: '',
+        hash: '',
+        origin: 'http://localhost',
+      },
       writable: true,
       configurable: true,
     });
@@ -520,7 +556,13 @@ describe('Time formatting', () => {
     vi.useFakeTimers();
     localStorage.clear();
     Object.defineProperty(window, 'location', {
-      value: { ...window.location, pathname: '/', search: '', hash: '', origin: 'http://localhost' },
+      value: {
+        ...window.location,
+        pathname: '/',
+        search: '',
+        hash: '',
+        origin: 'http://localhost',
+      },
       writable: true,
       configurable: true,
     });
@@ -583,7 +625,13 @@ describe('Focus transitions between clips', () => {
   beforeEach(() => {
     localStorage.clear();
     Object.defineProperty(window, 'location', {
-      value: { ...window.location, pathname: '/', search: '', hash: '', origin: 'http://localhost' },
+      value: {
+        ...window.location,
+        pathname: '/',
+        search: '',
+        hash: '',
+        origin: 'http://localhost',
+      },
       writable: true,
       configurable: true,
     });
@@ -626,7 +674,13 @@ describe('Expired label styling', () => {
     vi.useFakeTimers();
     localStorage.clear();
     Object.defineProperty(window, 'location', {
-      value: { ...window.location, pathname: '/', search: '', hash: '', origin: 'http://localhost' },
+      value: {
+        ...window.location,
+        pathname: '/',
+        search: '',
+        hash: '',
+        origin: 'http://localhost',
+      },
       writable: true,
       configurable: true,
     });
@@ -680,7 +734,13 @@ describe('Clip order', () => {
   beforeEach(() => {
     localStorage.clear();
     Object.defineProperty(window, 'location', {
-      value: { ...window.location, pathname: '/', search: '', hash: '', origin: 'http://localhost' },
+      value: {
+        ...window.location,
+        pathname: '/',
+        search: '',
+        hash: '',
+        origin: 'http://localhost',
+      },
       writable: true,
       configurable: true,
     });
@@ -689,7 +749,11 @@ describe('Clip order', () => {
   afterEach(cleanup);
 
   it('displays new clip at the top of the list after adding via local store', async () => {
-    const oldClip = makeClip({ id: 'old-clip', text: 'Old clip content', created_at: Date.now() - 1000_000 });
+    const oldClip = makeClip({
+      id: 'old-clip',
+      text: 'Old clip content',
+      created_at: Date.now() - 1000_000,
+    });
     const newClip = makeClip({ id: 'new-clip', text: 'New clip content' });
 
     // Persist old clip via localStorage API
@@ -782,7 +846,13 @@ describe('Timer-based expiry refresh', () => {
     vi.useFakeTimers();
     localStorage.clear();
     Object.defineProperty(window, 'location', {
-      value: { ...window.location, pathname: '/', search: '', hash: '', origin: 'http://localhost' },
+      value: {
+        ...window.location,
+        pathname: '/',
+        search: '',
+        hash: '',
+        origin: 'http://localhost',
+      },
       writable: true,
       configurable: true,
     });
@@ -873,9 +943,12 @@ describe('Timer-based expiry refresh', () => {
     // Advance past expiry
     vi.advanceTimersByTime(61_000);
 
-    await waitFor(() => {
-      expect(screen.getByText('(2 expired)')).toBeInTheDocument();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        expect(screen.getByText('(2 expired)')).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
   });
 
   it('shows "soon" class for clips within 5 minutes', async () => {

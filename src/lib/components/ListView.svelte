@@ -10,7 +10,9 @@
   let shareUrl = $state('');
   let sharingClip = $state<string | null>(null);
   let shareError = $state<string | null>(null);
-  let showExpired = $state(typeof localStorage !== 'undefined' && localStorage.getItem('show_expired_clips') === 'true');
+  let showExpired = $state(
+    typeof localStorage !== 'undefined' && localStorage.getItem('show_expired_clips') === 'true',
+  );
   let refresh = $state(0);
 
   function toggleShowExpired() {
@@ -25,10 +27,12 @@
   const storeClipId = $derived($clipState.clipId);
   const now = $derived(Date.now() + refresh);
   const expiredClips = $derived(clips.filter((c) => c.expires_at && c.expires_at <= now));
-  const visibleClips = $derived(clips.filter((c) => {
-    if (showExpired) return true;
-    return !c.expires_at || c.expires_at > now;
-  }));
+  const visibleClips = $derived(
+    clips.filter((c) => {
+      if (showExpired) return true;
+      return !c.expires_at || c.expires_at > now;
+    }),
+  );
 
   $effect(() => {
     const _m = mode;
@@ -108,7 +112,10 @@
     return `expires in ${seconds}s`;
   }
 
-  function formatExpiryDisplay(clip: (typeof clips)[0], now: number): { label: string; expired: boolean } {
+  function formatExpiryDisplay(
+    clip: (typeof clips)[0],
+    now: number,
+  ): { label: string; expired: boolean } {
     if (!clip.expires_at || clip.expires_at === 0) return { label: 'No expiry', expired: false };
     if (clip.expires_at > now)
       return { label: formatTimeUntilExpire(clip.expires_at, now), expired: false };
@@ -196,7 +203,7 @@
         allClips[clipIndex] = newClip;
         updateLocalClip(sharingClip, newClip);
         focusedClip = newClip.id;
-        console.log("setting focusedClip ", focusedClip);
+        console.log('setting focusedClip ', focusedClip);
         clipState.update((s) => ({ ...s, localClips: allClips }));
 
         shareUrl = `${window.location.origin}/?${newId}#${newPw}`;
@@ -224,7 +231,19 @@
 <div class="list-container">
   <div class="list-header">
     <h2 class="list-title">Your Clips</h2>
-    <div class="toggle-label" onclick={() => toggleShowExpired()} role="switch" tabindex="0" aria-checked={showExpired} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleShowExpired(); } }}>
+    <div
+      class="toggle-label"
+      onclick={() => toggleShowExpired()}
+      role="switch"
+      tabindex="0"
+      aria-checked={showExpired}
+      onkeydown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleShowExpired();
+        }
+      }}
+    >
       <span class="toggle-track"></span>
       <span class="label-text">{clips.length} clips</span>
       <span class="expired-label">({expiredClips.length} expired)</span>
@@ -271,7 +290,14 @@
               >
                 {#if sharingClip === clip.id}
                   <svg class="spinner-svg" viewBox="0 0 40 40">
-                    <circle class="spinner-track" cx="20" cy="20" r="16" fill="none" stroke-width="3" />
+                    <circle
+                      class="spinner-track"
+                      cx="20"
+                      cy="20"
+                      r="16"
+                      fill="none"
+                      stroke-width="3"
+                    />
                     <circle
                       class="spinner-head"
                       cx="20"
@@ -302,12 +328,11 @@
             </div>
             <div class="clip-expanded-footer">
               <span class="clip-time">Created {formatTimeAgo(clip.created_at)}</span>
-            <span
-                 class="clip-expiry"
-                 class:clip-expiry-soon={clip.expires_at - now < 300000 &&
-                   clip.expires_at > now}
-                 class:clip-expired={clip.expires_at && clip.expires_at <= now}
-               >
+              <span
+                class="clip-expiry"
+                class:clip-expiry-soon={clip.expires_at - now < 300000 && clip.expires_at > now}
+                class:clip-expired={clip.expires_at && clip.expires_at <= now}
+              >
                 {formatExpiryDisplay(clip, now).label}
               </span>
               {#if clip.burn_after_read}
@@ -317,14 +342,13 @@
           {:else}
             <div class="clip-collapsed">
               <span class="clip-preview">{truncate(clip.text, 40)}</span>
-            <span
-                  class="clip-expiry"
-                  class:clip-expiry-soon={clip.expires_at - now < 300000 &&
-                    clip.expires_at > now}
-                  class:clip-expired={clip.expires_at && clip.expires_at <= now}
-                >
-                  {formatExpiryDisplay(clip, now).label}
-                </span>
+              <span
+                class="clip-expiry"
+                class:clip-expiry-soon={clip.expires_at - now < 300000 && clip.expires_at > now}
+                class:clip-expired={clip.expires_at && clip.expires_at <= now}
+              >
+                {formatExpiryDisplay(clip, now).label}
+              </span>
             </div>
           {/if}
         </div>

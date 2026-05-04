@@ -31,15 +31,16 @@
     const now = Date.now();
     const kept = clips.filter((c) => !c.expires_at || c.expires_at > now);
     localStorage.setItem('copycat_clips', JSON.stringify(kept));
-    clipState.update((s) => ({ ...s, localClips: s.localClips.filter((c) => !c.expires_at || c.expires_at > now) }));
+    clipState.update((s) => ({
+      ...s,
+      localClips: s.localClips.filter((c) => !c.expires_at || c.expires_at > now),
+    }));
     showConfirm = false;
   }
 
   function dismissConfirm() {
     showConfirm = false;
   }
-
-  
 </script>
 
 <header class="header">
@@ -55,18 +56,14 @@
           aria-label="Menu"
           aria-expanded={open}
           aria-haspopup="menu"
-          onclick={() => open = !open}
+          onclick={() => (open = !open)}
         >
           <span></span>
           <span></span>
           <span></span>
         </button>
         {#if open}
-          <div
-            class="menu-dropdown"
-            role="menu"
-            tabindex="-1"
-          >
+          <div class="menu-dropdown" role="menu" tabindex="-1">
             <button class="menu-item" role="menuitem" onclick={handleNewClip}>
               <svg
                 width="16"
@@ -122,12 +119,16 @@
     role="presentation"
     tabindex="-1"
     onclick={dismissConfirm}
-    onkeydown={(e) => { if (e.key === 'Escape') dismissConfirm(); }}
+    onkeydown={(e) => {
+      if (e.key === 'Escape') dismissConfirm();
+    }}
   >
     <div
       class="modal"
       onclick={(e) => e.stopPropagation()}
-      onkeydown={(e) => { if (e.key === 'Escape') dismissConfirm(); }}
+      onkeydown={(e) => {
+        if (e.key === 'Escape') dismissConfirm();
+      }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
@@ -306,8 +307,12 @@
   }
 
   @keyframes backdrop-fade {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   .modal {

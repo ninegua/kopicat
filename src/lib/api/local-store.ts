@@ -46,9 +46,9 @@ export function updateLocalClip(id: string, updates: Partial<LocalClip>): void {
   const clips = readClips();
   const index = clips.findIndex((c) => c.id === id);
   if (index !== -1) {
-    console.log("updateLocalClip(old)", index, clips[index]);
+    console.log('updateLocalClip(old)', index, clips[index]);
     clips[index] = { ...clips[index], ...updates };
-    console.log("updateLocalClip(new)", index, clips[index]);
+    console.log('updateLocalClip(new)', index, clips[index]);
     writeClips(clips);
   }
 }
