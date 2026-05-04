@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/svelte';
 import { clipState } from '$lib/api/store';
 import type { LocalClip } from '$lib/api/store';
+import { addLocalClip, getLocalClips } from '$lib/api/local-store';
 
 import Page from '../routes/+page.svelte';
 
@@ -668,6 +669,73 @@ describe('Expired label styling', () => {
 
     const expiryElement = screen.getByText(/expires in 4m/);
     expect(expiryElement).toHaveClass('clip-expiry-soon');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Clip order
+// ---------------------------------------------------------------------------
+
+describe('Clip order', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    Object.defineProperty(window, 'location', {
+      value: { ...window.location, pathname: '/', search: '', hash: '', origin: 'http://localhost' },
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  afterEach(cleanup);
+
+  it('displays new clip at the top of the list after adding via local store', async () => {
+    const oldClip = makeClip({ id: 'old-clip', text: 'Old clip content', created_at: Date.now() - 1000_000 });
+    const newClip = makeClip({ id: 'new-clip', text: 'New clip content' });
+
+    // Persist old clip via localStorage API
+    addLocalClip(oldClip);
+
+    // Load from localStorage into store (getLocalClips reverses the order)
+    setListMode(getLocalClips());
+    render(Page);
+
+    expect(screen.getByText('Old clip content')).toBeInTheDocument();
+
+    // Add new clip via localStorage API (same path as handleCreate)
+    const allClips = addLocalClip(newClip);
+    clipState.update((s) => ({ ...s, localClips: allClips }));
+
+    // The new clip should be first in the DOM (at the top of the list)
+    await waitFor(() => {
+      const listContainer = document.querySelector('.clips-list');
+      const clipItems = listContainer!.querySelectorAll('.clip-item');
+      expect(clipItems.length).toBe(2);
+    });
+
+    const listContainer = document.querySelector('.clips-list');
+    const clipItems = listContainer!.querySelectorAll('.clip-item');
+    expect(clipItems[0].querySelector('.clip-preview')!.textContent).toContain('New clip content');
+    expect(clipItems[1].querySelector('.clip-preview')!.textContent).toContain('Old clip content');
+  });
+
+  it('displays clips in the order provided by local store', () => {
+    const clip1 = makeClip({ id: 'first', text: 'First clip' });
+    const clip2 = makeClip({ id: 'second', text: 'Second clip' });
+    const clip3 = makeClip({ id: 'third', text: 'Third clip' });
+
+    addLocalClip(clip1);
+    addLocalClip(clip2);
+    addLocalClip(clip3);
+
+    setListMode(getLocalClips());
+    render(Page);
+
+    const listContainer = document.querySelector('.clips-list');
+    const clipItems = listContainer!.querySelectorAll('.clip-item');
+    expect(clipItems.length).toBe(3);
+    expect(clipItems[0].querySelector('.clip-preview')!.textContent).toContain('Third clip');
+    expect(clipItems[1].querySelector('.clip-preview')!.textContent).toContain('Second clip');
+    expect(clipItems[2].querySelector('.clip-preview')!.textContent).toContain('First clip');
   });
 });
 

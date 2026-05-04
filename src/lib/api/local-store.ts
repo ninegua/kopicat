@@ -34,7 +34,7 @@ export function addLocalClip(clip: LocalClip): LocalClip[] {
     clips.push(clip);
   }
   writeClips(clips);
-  return clips;
+  return clips.reverse();
 }
 
 export function removeLocalClip(id: string): void {
