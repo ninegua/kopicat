@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, cleanup, tick } from '@testing-library/svelte';
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/svelte';
 import { clipState } from '$lib/api/store';
 import type { LocalClip } from '$lib/api/store';
 import { addLocalClip, getLocalClips } from '$lib/api/local-store';
