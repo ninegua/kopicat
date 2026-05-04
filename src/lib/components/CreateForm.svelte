@@ -52,7 +52,7 @@
     <textarea
       id="clip-text"
       bind:value={text}
-      placeholder="Paste your text here..."
+      placeholder="Enter your text here..."
       class="card-textarea"
     ></textarea>
     <span class="char-count">{charCount} characters</span>
