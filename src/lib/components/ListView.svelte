@@ -62,7 +62,7 @@
     return text.slice(0, maxLength) + '…';
   }
 
-  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   async function handleEnter(clipId: string) {
     pendingClips.push(clipId);
@@ -164,6 +164,7 @@
 </script>
 
 <div class="list-container">
+  <h2 class="list-title">Your Clips</h2>
   <div class="list-header">
     <div class="toggle-label" onclick={() => toggleShowExpired()} role="switch" tabindex="0" aria-checked={showExpired} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleShowExpired(); } }}>
       <span class="toggle-track"></span>
@@ -428,12 +429,6 @@
     color: var(--error);
   }
 
-  .clip-expanded {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-  }
-
   .share-btn {
     position: absolute;
     top: 0;
@@ -495,31 +490,6 @@
       transform: rotate(360deg);
       stroke-dashoffset: 0;
     }
-  }
-
-  .clip-expanded-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xs);
-  }
-
-  .clip-expanded-text {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    line-height: 1.5;
-    white-space: pre-wrap;
-    word-break: break-word;
-    max-height: 160px;
-    overflow-y: auto;
-    color: var(--text-primary);
-    background: var(--bg-input);
-    padding: var(--space-md);
-    border-radius: var(--radius-sm);
-  }
-
-  .clip-expanded-meta {
-    font-size: 0.7rem;
-    color: var(--text-muted);
   }
 
   .clip-expanded-footer {

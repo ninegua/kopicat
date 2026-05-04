@@ -164,17 +164,6 @@
     margin: var(--space-md) var(--space-md) 0;
   }
 
-  .result-content {
-    padding: var(--space-lg) var(--space-md);
-    border-bottom: 1px solid var(--border-color);
-    width: 100%;
-    height: 200px;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow-y: auto;
-  }
-
   .btn-primary,
   .btn-secondary {
     flex: 1;

@@ -58,7 +58,7 @@
     <textarea
       id="clip-text"
       bind:value={text}
-      placeholder="Enter your text here..."
+      placeholder="Paste your text here..."
       class="card-textarea"
       oninput={handleInput}
     ></textarea>

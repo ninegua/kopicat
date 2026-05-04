@@ -30,11 +30,9 @@
 
 <div
   class="card"
+  role="presentation"
   onclick={handleBoxClick}
   onkeydown={handleKeyDown}
-  tabindex="0"
-  role="button"
-  aria-label="Paste from clipboard"
 >
   <div class="idle-inner">
     <div class="card-header">
@@ -53,7 +51,7 @@
           <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
         </svg>
       </div>
-      <p class="card-title">Enter your text to share</p>
+      <p class="card-title">Paste your text to share</p>
     </div>
     {#if $clipState.error}
       <div class="idle-error">
@@ -76,7 +74,7 @@
     {/if}
     <div class="idle-actions">
       <div class="idle-keyboard">
-        <span>Or press <kbd>Ctrl+V</kbd> or <kbd>⌘+V</kbd></span>
+        <span>Or press <kbd>Ctrl+V</kbd> or <kbd>⌘+V</kbd> to copy from clipboard</span>
       </div>
       <button
         type="button"

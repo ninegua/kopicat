@@ -94,11 +94,6 @@
     gap: var(--space-xs);
   }
 
-  .btn-new-clip:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-
   .logo-img {
     width: 48px;
     height: 48px;
