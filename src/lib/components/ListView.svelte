@@ -10,14 +10,21 @@
   let shareUrl = $state('');
   let sharingClip = $state<string | null>(null);
   let shareError = $state<string | null>(null);
+  let showExpired = $state(typeof localStorage !== 'undefined' && localStorage.getItem('show_expired_clips') === 'true');
 
-  $effect(() => {
-    if ($clipState.mode === 'list' && $clipState.clipId) {
-      focusedClip = $clipState.clipId;
+  function toggleShowExpired() {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('show_expired_clips', String(!showExpired));
     }
-  });
+    showExpired = !showExpired;
+  }
 
   const clips = $derived($clipState.localClips);
+  const expiredClips = $derived(clips.filter((c) => c.expires_at && c.expires_at <= Date.now()));
+  const visibleClips = $derived(clips.filter((c) => {
+    if (showExpired) return true;
+    return !c.expires_at || c.expires_at > Date.now();
+  }));
 
   function formatTimeAgo(timestamp: number): string {
     const diff = Date.now() - timestamp;
@@ -157,13 +164,20 @@
 </script>
 
 <div class="list-container">
+  <div class="list-header">
+    <div class="toggle-label" onclick={() => toggleShowExpired()} role="switch" tabindex="0" aria-checked={showExpired} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleShowExpired(); } }}>
+      <span class="toggle-track"></span>
+      <span class="label-text">{clips.length} clips</span>
+      <span class="expired-label">({expiredClips.length} expired)</span>
+    </div>
+  </div>
   {#if clips.length === 0}
     <div class="empty-state">
       <p>No clips yet. Create one to get started.</p>
     </div>
   {:else}
     <div class="clips-list" class:clips-list-disabled={showShareCard}>
-      {#each clips as clip, i (clip.id)}
+      {#each visibleClips as clip, i (clip.id)}
         <div
           class="clip-item"
           class:clip-focused={focusedClip === clip.id}
@@ -272,6 +286,64 @@
     width: 100%;
     max-width: 480px;
     margin: 0 auto;
+  }
+
+  .list-header {
+    margin-bottom: var(--space-sm);
+  }
+
+  .toggle-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    cursor: pointer;
+    font-size: 0.8rem;
+    user-select: none;
+    padding: var(--space-xs) 0;
+  }
+
+  .label-text {
+    color: var(--text-primary);
+  }
+
+  .expired-label {
+    color: var(--text-muted);
+    transition: color 0.2s;
+  }
+
+  .toggle-label[aria-checked='true'] .expired-label {
+    color: var(--text-primary);
+  }
+
+  .toggle-track {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    flex-shrink: 0;
+    background: var(--border-color);
+    border-radius: 100px;
+    transition: background 0.2s;
+  }
+
+  .toggle-track::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: white;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  .toggle-label[aria-checked='true'] .toggle-track {
+    background: var(--accent);
+  }
+
+  .toggle-label[aria-checked='true'] .toggle-track::after {
+    transform: translateX(16px);
   }
 
   .empty-state {
