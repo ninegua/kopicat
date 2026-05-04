@@ -57,12 +57,13 @@
 
   async function handleEnter(clipId: string) {
     pendingClips.push(clipId);
-    let clip = null;
-    while ((clip = pendingClips.pop())) {
+    while (true) {
       await delay(100);
-      if (clip) {
-        focusedClip = clip;
+      let clip = pendingClips.pop();
+      if (!clip) {
+        break;
       }
+      focusedClip = clip;
     }
   }
 
@@ -81,15 +82,11 @@
     showShareCard = true;
   }
 
-  function handleCloseShare() {
+  async function handleCloseShare() {
     showShareCard = false;
     shareUrl = '';
-    if (pendingClip && pendingClip !== focusedClip) {
-      focusedClip = pendingClip;
-      pendingClip = null;
-    } else {
-      pendingClip = null;
-    }
+    await delay(50);
+    pendingClips = [];
   }
 
   function handleNewClip() {
@@ -348,7 +345,7 @@
     justify-content: center;
     width: 32px;
     height: 32px;
-    background: none;
+    background: rgba(256, 246, 224, 0.8);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     color: var(--accent);
