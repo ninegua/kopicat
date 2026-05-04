@@ -79,7 +79,17 @@
   }
 
   function handleReset() {
-    clipState.update((s) => ({ ...s, mode: 'idle', prefillText: null, localClips: getLocalClips(), clip: null, decryptedText: null, shareUrl: null, error: null, showShareModal: false }));
+    clipState.update((s) => ({
+      ...s,
+      mode: 'idle',
+      prefillText: null,
+      localClips: getLocalClips(),
+      clip: null,
+      decryptedText: null,
+      shareUrl: null,
+      error: null,
+      showShareModal: false,
+    }));
     history.replaceState(null, '', '/');
   }
 
@@ -214,30 +224,36 @@
     <DecryptForm onDecrypt={decryptClip} onSetPassword={setPassword} />
   {:else if currentMode === 'result'}
     <ResultView
-      onNewClip={() => clipState.update((s) => ({ ...s, mode: 'idle', prefillText: null, localClips: getLocalClips() }))}
+      onDismiss={() =>
+        clipState.update((s) => ({
+          ...s,
+          mode: 'idle',
+          prefillText: null,
+          localClips: getLocalClips(),
+        }))}
     />
   {:else if currentMode === 'list'}
     <ListView />
   {:else if currentMode === 'idle' && !$clipState.prefillText}
     <IdleView onPaste={handlePaste} />
     <ViewClipsLink />
-
   {:else if $clipState.showShareModal && $clipState.shareUrl}
     <ShareCard
       url={$clipState.shareUrl}
-      onNewClip={() =>
+      onDismiss={(e) => {
+        e.preventDefault();
         clipState.update((s) => ({
           ...s,
           showShareModal: false,
-          mode: 'idle',
+          mode: 'list',
           shareUrl: null,
           prefillText: null,
-        }))}
+        }));
+      }}
     />
   {:else}
     <CreateForm onCreate={handleCreate} />
     <ViewClipsLink />
-
   {/if}
 </main>
 

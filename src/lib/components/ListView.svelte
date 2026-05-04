@@ -3,12 +3,17 @@
   import ShareCard from './ShareCard.svelte';
 
   let focusedClip = $state<string | null>(null);
+  let pendingClips = [];
   let showShareCard = $state(false);
   let shareUrl = $state('');
 
-  const clips = $derived(
-    $clipState.localClips.sort((a, b) => b.created_at - a.created_at),
-  );
+  $effect(() => {
+    if ($clipState.mode === 'list' && $clipState.clipId) {
+      focusedClip = $clipState.clipId;
+    }
+  });
+
+  const clips = $derived($clipState.localClips.sort((a, b) => b.created_at - a.created_at));
 
   const newestClip = $derived(clips[0] ?? null);
 
@@ -38,7 +43,8 @@
 
   function formatExpiryDisplay(clip: (typeof clips)[0]): { label: string; expired: boolean } {
     if (!clip.expires_at || clip.expires_at === 0) return { label: 'No expiry', expired: false };
-    if (clip.expires_at > Date.now()) return { label: formatTimeUntilExpire(clip.expires_at), expired: false };
+    if (clip.expires_at > Date.now())
+      return { label: formatTimeUntilExpire(clip.expires_at), expired: false };
     return { label: 'Expired', expired: true };
   }
 
@@ -47,12 +53,27 @@
     return text.slice(0, maxLength) + '…';
   }
 
-  function handleFocus(clipId: string) {
-    focusedClip = clipId;
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  async function handleEnter(clipId: string) {
+    pendingClips.push(clipId);
+    let clip = null;
+    while ((clip = pendingClips.pop())) {
+      await delay(100);
+      if (clip) {
+        focusedClip = clip;
+      }
+    }
   }
 
-  function handleBlur() {
-    focusedClip = null;
+  async function handleLeave(clipId: string) {
+    if (clipId !== focusedClip) return;
+    if (showShareCard) return;
+    pendingClips = [];
+  }
+
+  function handleFocus(clipId: string) {
+    focusedClip = clipId;
   }
 
   function handleShare(clip: (typeof clips)[0]) {
@@ -63,6 +84,12 @@
   function handleCloseShare() {
     showShareCard = false;
     shareUrl = '';
+    if (pendingClip && pendingClip !== focusedClip) {
+      focusedClip = pendingClip;
+      pendingClip = null;
+    } else {
+      pendingClip = null;
+    }
   }
 
   function handleNewClip() {
@@ -100,13 +127,13 @@
       <p>No clips yet. Create one to get started.</p>
     </div>
   {:else}
-    <div class="clips-list">
+    <div class="clips-list" class:clips-list-disabled={showShareCard}>
       {#each clips as clip (clip.id)}
         <div
           class="clip-item"
           class:clip-focused={focusedClip === clip.id}
-          onmouseenter={handleFocus.bind(null, clip.id)}
-          onmouseleave={handleBlur}
+          onmouseenter={handleEnter.bind(null, clip.id)}
+          onmouseleave={handleLeave.bind(null, clip.id)}
           onclick={() => handleFocus(clip.id)}
           onkeydown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -119,46 +146,58 @@
           aria-pressed={focusedClip === clip.id}
         >
           {#if focusedClip === clip.id}
-            <div class="clip-expanded">
-              <div class="clip-expanded-header">
-                <span class="clip-id">{clip.id}</span>
-                <button class="share-btn" aria-label="Share this clip" onclick={(e) => { e.stopPropagation(); handleShare(clip); }}>
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                    <polyline points="16 6 12 2 8 6" />
-                    <line x1="12" y1="2" x2="12" y2="15" />
-                  </svg>
-                </button>
-              </div>
-              <div class="clip-expanded-content">
-                <pre class="clip-expanded-text">{clip.text}</pre>
-                <span class="clip-expanded-meta">{clip.text.length} characters</span>
-              </div>
-              <div class="clip-expanded-footer">
-                <span class="clip-time">Created {formatTimeAgo(clip.created_at)}</span>
-                <span class="clip-expiry" class:clip-expiry-soon={clip.expires_at - Date.now() < 300000 && clip.expires_at > Date.now()} class:clip-expired={clip.expires_at && clip.expires_at <= Date.now()}>
-                  {formatExpiryDisplay(clip).label}
-                </span>
-                {#if clip.burn_after_read}
-                  <span class="burn-badge">Burn after read</span>
-                {/if}
-              </div>
+            <div class="card-textarea-group">
+              <pre class="clipped-text">{clip.text}</pre>
+              <span class="char-count">{clip.text.length} characters</span>
+              <button
+                class="share-btn"
+                aria-label="Share this clip"
+                onclick={(e) => {
+                  e.stopPropagation();
+                  handleShare(clip);
+                }}
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                  <polyline points="16 6 12 2 8 6" />
+                  <line x1="12" y1="2" x2="12" y2="15" />
+                </svg>
+              </button>
+            </div>
+            <div class="clip-expanded-footer">
+              <span class="clip-time">Created {formatTimeAgo(clip.created_at)}</span>
+              <span
+                class="clip-expiry"
+                class:clip-expiry-soon={clip.expires_at - Date.now() < 300000 &&
+                  clip.expires_at > Date.now()}
+                class:clip-expired={clip.expires_at && clip.expires_at <= Date.now()}
+              >
+                {formatExpiryDisplay(clip).label}
+              </span>
+              {#if clip.burn_after_read}
+                <span class="burn-badge">Burn after read</span>
+              {/if}
             </div>
           {:else}
             <div class="clip-collapsed">
               <span class="clip-preview">{truncate(clip.text, 40)}</span>
               <div class="clip-meta">
                 <span class="clip-time">{formatTimeAgo(clip.created_at)}</span>
-                <span class="clip-expiry" class:clip-expiry-soon={clip.expires_at - Date.now() < 300000 && clip.expires_at > Date.now()} class:clip-expired={clip.expires_at && clip.expires_at <= Date.now()}>
+                <span
+                  class="clip-expiry"
+                  class:clip-expiry-soon={clip.expires_at - Date.now() < 300000 &&
+                    clip.expires_at > Date.now()}
+                  class:clip-expired={clip.expires_at && clip.expires_at <= Date.now()}
+                >
                   {formatExpiryDisplay(clip).label}
                 </span>
               </div>
@@ -171,7 +210,7 @@
 </div>
 
 {#if showShareCard}
-  <ShareCard url={shareUrl} onNewClip={handleCloseShare} />
+  <ShareCard url={shareUrl} onDismiss={handleCloseShare} />
 {/if}
 
 <style>
@@ -226,6 +265,11 @@
     gap: var(--space-sm);
   }
 
+  .clips-list-disabled {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
   .clip-item {
     background: transparent;
     border: 1px solid var(--border-color);
@@ -243,6 +287,7 @@
   }
 
   .clip-focused {
+    flex: 1;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-glow);
     background: var(--bg-card);
@@ -295,20 +340,10 @@
     gap: var(--space-sm);
   }
 
-  .clip-expanded-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .clip-id {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--text-muted);
-  }
-
   .share-btn {
-    display: inline-flex;
+    position: absolute;
+    top: 0;
+    right: 0;
     align-items: center;
     justify-content: center;
     width: 32px;
@@ -354,6 +389,7 @@
   .clip-expanded-footer {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: var(--space-sm);
     font-size: 0.75rem;
   }

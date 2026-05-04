@@ -149,6 +149,7 @@
   /* --- Card --- */
   :global(.card) {
     background: var(--bg-card);
+    padding: var(--space-md);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     overflow: hidden;
@@ -195,7 +196,6 @@
   }
 
   :global(.card-textarea-group) {
-    padding: var(--space-lg) var(--space-md);
     border-bottom: 1px solid var(--border-color);
     width: 100%;
     min-height: 180px;
@@ -232,7 +232,7 @@
 
   /* --- Buttons --- */
   :global(.btn-primary) {
-    padding: var(--space-md) var(--space-lg);
+    padding: var(--space-md);
     background: var(--accent-gradient);
     border: none;
     border-radius: var(--radius-md);
@@ -287,7 +287,7 @@
   :global(.btn-row) {
     display: flex;
     gap: var(--space-sm);
-    padding: var(--space-md);
+    padding: var(--space-md) 0;
   }
 
   /* --- Error banner --- */
@@ -309,8 +309,6 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    margin-bottom: var(--space-md);
-    padding: 0 var(--space-md);
   }
 
   :global(.form-row) {
@@ -321,6 +319,25 @@
 
   :global(.form-row > *) {
     flex: 1;
+  }
+
+  :global(.clipped-text) {
+    background: transparent;
+    padding: 0;
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-y: auto;
+  }
+
+  :global(.char-count) {
+    position: absolute;
+    bottom: var(--space-xs);
+    right: 0;
+    color: var(--text-muted);
+    font-size: 0.75rem;
   }
 
   :global(label) {

@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
   import * as QRCode from 'qrcode';
 
-  let { url, onNewClip }: { url: string; onNewClip: () => void } = $props();
+  let { url, onDismiss }: { url: string; onDismiss: () => void } = $props();
 
   onMount(() => {
     import('svelte').then(({ tick }) => {
@@ -27,7 +27,7 @@
 
     function handleKeydown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
-        onNewClip();
+        onDismiss();
       }
     }
 
@@ -37,7 +37,7 @@
 
   function handleBackdropClick(e: MouseEvent) {
     if ((e.target as HTMLElement).classList.contains('modal-backdrop')) {
-      onNewClip();
+      onDismiss();
     }
   }
 </script>
@@ -92,22 +92,7 @@
           Copy link
         </button>
 
-        <button class="btn-secondary" onclick={onNewClip}>
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          New clip
-        </button>
+        <button class="btn-secondary" onclick={onDismiss}> Done </button>
       </div>
     </div>
   </div>
@@ -147,7 +132,6 @@
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: var(--space-sm) var(--space-md);
-    margin: 0 var(--space-md) var(--space-md);
   }
 
   .share-url-text {
