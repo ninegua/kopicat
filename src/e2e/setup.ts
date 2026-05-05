@@ -25,6 +25,14 @@ Element.prototype.animate = function () {
   } as unknown as Animation;
 };
 
+// Mock ResizeObserver (not supported by jsdom)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(globalThis as any).ResizeObserver = class ResizeObserver {
+  observe(_target: unknown) {}
+  unobserve(_target: unknown) {}
+  disconnect() {}
+} as never;
+
 // Mock matchMedia (not supported by jsdom)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 window.matchMedia = vi.fn().mockImplementation((query: string) => ({
