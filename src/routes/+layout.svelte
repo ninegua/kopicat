@@ -204,6 +204,7 @@
     flex-direction: column;
     position: relative;
     overflow-y: auto;
+    padding-bottom: var(--space-md);
     margin-bottom: var(--space-sm);
   }
 
@@ -334,8 +335,8 @@
 
   :global(.char-count) {
     position: absolute;
-    bottom: var(--space-xs);
-    right: 0;
+    bottom: 0;
+    right: var(--space-sm);
     color: var(--text-muted);
     font-size: 0.75rem;
   }

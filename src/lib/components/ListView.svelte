@@ -171,65 +171,34 @@
           aria-pressed={focusedClip === clip.id}
         >
           {#if focusedClip === clip.id}
-            <div class="card-textarea-group">
-              <pre class="clipped-text">{clip.text}</pre>
-              <span class="char-count">{clip.text.length} characters</span>
-              {#if shareError}
-                <span class="share-error">{shareError}</span>
-              {/if}
-              <button
-                class="share-btn"
-                aria-label="Share this clip"
-                disabled={sharingClip !== null}
-                onclick={(e) => {
-                  e.stopPropagation();
-                  handleShare(clip, i);
-                }}
-              >
-                {#if sharingClip === clip.id}
-                  <svg class="spinner-svg" viewBox="0 0 40 40">
-                    <circle
-                      class="spinner-track"
-                      cx="20"
-                      cy="20"
-                      r="16"
-                      fill="none"
-                      stroke-width="3"
-                    />
-                    <circle
-                      class="spinner-head"
-                      cx="20"
-                      cy="20"
-                      r="16"
-                      fill="none"
-                      stroke-width="3"
-                      stroke-linecap="round"
-                    />
-                  </svg>
-                {:else}
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                    <polyline points="16 6 12 2 8 6" />
-                    <line x1="12" y1="2" x2="12" y2="15" />
-                  </svg>
+             <div class="card-textarea-group">
+                <pre class="clipped-text">{clip.text}</pre>
+                <span class="char-count">{clip.text.length} characters</span>
+                {#if shareError}
+                  <span class="share-error">{shareError}</span>
                 {/if}
-              </button>
-            </div>
-            <div class="clip-expanded-footer">
-              <span class="clip-time">Created {formatTimeAgo(clip.created_at)}</span>
-              {#if clip.burn_after_read}
-                <span class="burn-badge">Burn after read</span>
-              {/if}
-            </div>
+              </div>
+             <div class="clip-expanded-footer">
+               <span class="clip-time">Created {formatTimeAgo(clip.created_at)}</span>
+                <div style="display: flex; align-items: center; justify-content: flex-end; gap: var(--space-sm);">
+                   {#if clip.burn_after_read}
+                     <span class="burn-badge">Burn after read</span>
+                   {/if}
+                   <button
+                     class="copy-icon-btn"
+                     aria-label="Copy text to clipboard"
+                 onclick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(clip.text);
+                      }}
+                   >
+                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                       <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                     </svg>
+                   </button>
+                 </div>
+             </div>
           {:else}
             <div class="clip-collapsed">
               <span class="clip-preview">{truncate(clip.text, 40)}</span>
@@ -335,30 +304,26 @@
     flex-shrink: 0;
   }
 
-  .share-btn {
-    position: absolute;
-    top: 0;
-    right: 0;
+  .card-textarea-group {
+    position: relative;
+  }
+
+  .copy-icon-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    background: rgba(256, 246, 224, 0.8);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    color: var(--accent);
-    cursor: pointer;
     transition: all 0.15s;
   }
 
-  .share-btn:hover {
+  .copy-icon-btn:hover {
+    color: var(--accent);
     background: var(--accent-glow);
-    border-color: var(--accent);
-  }
-
-  .share-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
   }
 
   .share-error {
@@ -369,33 +334,6 @@
     border-radius: var(--radius-sm);
     width: 100%;
     text-align: center;
-  }
-
-  .share-btn .spinner-svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  .share-btn .spinner-track {
-    stroke: var(--border-color);
-  }
-
-  .share-btn .spinner-head {
-    stroke: var(--accent);
-    stroke-dasharray: 75;
-    stroke-dashoffset: 55;
-    animation: list-spinner 1.2s linear infinite;
-  }
-
-  @keyframes list-spinner {
-    0% {
-      transform: rotate(0deg);
-      stroke-dashoffset: 75;
-    }
-    100% {
-      transform: rotate(360deg);
-      stroke-dashoffset: 0;
-    }
   }
 
   .clip-expanded-footer {

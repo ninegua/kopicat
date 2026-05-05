@@ -253,59 +253,6 @@ describe('Focus and expand', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Share functionality
-// ---------------------------------------------------------------------------
-
-describe('Share functionality', () => {
-  beforeEach(() => {
-    localStorage.clear();
-    Object.defineProperty(window, 'location', {
-      value: {
-        ...window.location,
-        origin: 'http://localhost',
-      },
-      writable: true,
-      configurable: true,
-    });
-  });
-
-  afterEach(cleanup);
-
-  it('shows share button when a clip is focused', async () => {
-    const clip = makeClip({ text: 'Share me' });
-    setListMode([clip]);
-    render(Page);
-
-    const clipButton = getClipButton('share me');
-    await fireEvent.click(clipButton);
-
-    await waitFor(() => {
-      expect(screen.getByLabelText('Share this clip')).toBeInTheDocument();
-    });
-  });
-
-  it('shows share modal when share button is clicked for non-expired clip', async () => {
-    const clip = makeClip({ text: 'Share me', password: 'testpw123' });
-    setListMode([clip]);
-    render(Page);
-
-    const clipButton = getClipButton('share me');
-    await fireEvent.click(clipButton);
-
-    await waitFor(() => {
-      expect(screen.getByLabelText('Share this clip')).toBeInTheDocument();
-    });
-
-    await fireEvent.click(screen.getByLabelText('Share this clip'));
-
-    await waitFor(() => {
-      expect(screen.getByText('Share this clip')).toBeInTheDocument();
-      expect(screen.getByText(/http:\/\/localhost\/\?test-clip-/)).toBeInTheDocument();
-    });
-  });
-});
-
-// ---------------------------------------------------------------------------
 // Keyboard interaction
 // ---------------------------------------------------------------------------
 
