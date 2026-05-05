@@ -216,30 +216,28 @@
     </div>
   </div>
   <div class="form-row">
-    <div class="ttl-trigger-wrap">
-      <button
-        type="button"
-        bind:this={ttlButton}
-        class="ttl-select"
-        class:open={ttlOpen}
-        disabled={createMode === 'edit' && !shareMessage}
-        onclick={() => {
-          if (createMode === 'edit' && !shareMessage) return;
-          ttlOpen = !ttlOpen;
-        }}
-      >
-        <span>{formatTTL(selectedTTL)}</span>
-        <svg viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M1 1L6 6L11 1"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </button>
-    </div>
+    <button
+      type="button"
+      bind:this={ttlButton}
+      class="ttl-select"
+      class:open={ttlOpen}
+      disabled={createMode === 'edit' && !shareMessage}
+      onclick={() => {
+        if (createMode === 'edit' && !shareMessage) return;
+        ttlOpen = !ttlOpen;
+      }}
+    >
+      <span>{formatTTL(selectedTTL)}</span>
+      <svg viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M1 1L6 6L11 1"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
     <button class="btn-primary" onclick={handleCreate} disabled={$clipState.loading}>
       {#if $clipState.loading}
         <svg
@@ -344,16 +342,11 @@
     color: #e74c3c;
   }
 
-  .ttl-trigger-wrap {
-    min-width: 180px;
-  }
-
   .ttl-select {
-    width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-sm);
+    gap: var(--space-xs);
     padding: var(--space-md);
     background: var(--bg-input);
     border: 1px solid var(--border-color);
@@ -367,7 +360,6 @@
       box-shadow 0.15s;
     background-image: none;
     font-weight: 500;
-    padding-left: 16px;
   }
 
   .ttl-select svg {
@@ -375,7 +367,6 @@
     height: 8px;
     color: var(--text-muted);
     transition: transform 0.15s;
-    margin-right: 8px;
   }
 
   .ttl-select.open svg {

@@ -332,13 +332,10 @@
   }
 
   :global(.form-row) {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: var(--space-sm);
     align-items: center;
-  }
-
-  :global(.form-row > *) {
-    flex: 1;
   }
 
   :global(.clipped-text) {
