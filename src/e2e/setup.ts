@@ -36,6 +36,7 @@ afterEach(() => {
   resetClipStore();
   clipState.set({
     mode: 'create',
+    viewMode: 'list',
     clipId: null,
     password: '',
     decryptedText: null,

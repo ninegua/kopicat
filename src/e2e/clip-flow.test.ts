@@ -351,7 +351,7 @@ describe('Burn-after-read flow', () => {
       ).not.toBeInTheDocument();
     });
 
-   await fillText(container, testText);
+    await fillText(container, testText);
 
     // Enable burn-after-read and local copy
     const burnCheckbox = getBurnCheckbox();

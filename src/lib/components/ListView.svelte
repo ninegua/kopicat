@@ -172,43 +172,65 @@
           aria-pressed={focusedClip === clip.id}
         >
           {#if focusedClip === clip.id}
-             <div class="card-textarea-group">
-                <pre class="clipped-text">{clip.text}</pre>
-                <span class="char-count">{clip.text.length} characters</span>
-                {#if shareError}
-                  <span class="share-error">{shareError}</span>
+            <div class="card-textarea-group">
+              <pre class="clipped-text">{clip.text}</pre>
+              <span class="char-count">{clip.text.length} characters</span>
+              {#if shareError}
+                <span class="share-error">{shareError}</span>
+              {/if}
+            </div>
+            <div class="clip-expanded-footer">
+              <span class="clip-time">Saved {formatTimeAgo(clip.created_at)}</span>
+              <div
+                style="display: flex; align-items: center; justify-content: flex-end; gap: var(--space-sm);"
+              >
+                {#if clip.burn_after_read}
+                  <span class="burn-badge">Burn after read</span>
                 {/if}
-              </div>
-             <div class="clip-expanded-footer">
-               <span class="clip-time">Saved {formatTimeAgo(clip.created_at)}</span>
-                <div style="display: flex; align-items: center; justify-content: flex-end; gap: var(--space-sm);">
-                   {#if clip.burn_after_read}
-                     <span class="burn-badge">Burn after read</span>
-                   {/if}
-                   <button
-                      class="copy-icon-btn"
-                      class:copy-icon-btn-copied={copiedId === clip.id}
-                      aria-label="Copy text to clipboard"
+                <button
+                  class="copy-icon-btn"
+                  class:copy-icon-btn-copied={copiedId === clip.id}
+                  aria-label="Copy text to clipboard"
                   onclick={(e) => {
-                         e.stopPropagation();
-                         navigator.clipboard.writeText(clip.text);
-                         copiedId = clip.id;
-                         setTimeout(() => { copiedId = null; }, 1500);
-                       }}
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(clip.text);
+                    copiedId = clip.id;
+                    setTimeout(() => {
+                      copiedId = null;
+                    }, 1500);
+                  }}
+                >
+                  {#if copiedId === clip.id}
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
                     >
-                      {#if copiedId === clip.id}
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      {:else}
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                        </svg>
-                      {/if}
-                    </button>
-                 </div>
-             </div>
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  {:else}
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                  {/if}
+                </button>
+              </div>
+            </div>
           {:else}
             <div class="clip-collapsed">
               <span class="clip-preview">{truncate(clip.text, 40)}</span>
@@ -342,10 +364,18 @@
   }
 
   @keyframes copy-bounce {
-    0% { transform: scale(1); }
-    30% { transform: scale(1.3); }
-    60% { transform: scale(0.9); }
-    100% { transform: scale(1); }
+    0% {
+      transform: scale(1);
+    }
+    30% {
+      transform: scale(1.3);
+    }
+    60% {
+      transform: scale(0.9);
+    }
+    100% {
+      transform: scale(1);
+    }
   }
 
   .share-error {

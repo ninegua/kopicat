@@ -155,72 +155,74 @@
   {/if}
 
   <div class="form-group">
-      <div class="checkboxes">
-        <label class="burn-checkbox-label">
-          <input
-            type="checkbox"
-            checked={burnAfterRead}
-            onchange={() => (burnAfterRead = !burnAfterRead)}
+    <div class="checkboxes">
+      <label class="burn-checkbox-label">
+        <input
+          type="checkbox"
+          checked={burnAfterRead}
+          onchange={() => (burnAfterRead = !burnAfterRead)}
+        />
+        <span class:burn-active={burnAfterRead}>Burn after read</span>
+        <svg
+          class="fire-icon"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#e74c3c"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
           />
-          <span class:burn-active={burnAfterRead}>Burn after read</span>
-          <svg
-            class="fire-icon"
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#e74c3c"
-            stroke-width="2"
+        </svg>
+      </label>
+      <label class="local-checkbox-label">
+        <input type="checkbox" checked={saveLocal} onchange={() => (saveLocal = !saveLocal)} />
+        <span class="local-checkbox-text">Keep a local copy</span>
+      </label>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="ttl-trigger-wrap">
+      <button
+        type="button"
+        bind:this={ttlButton}
+        class="ttl-select"
+        class:open={ttlOpen}
+        onclick={() => {
+          ttlOpen = !ttlOpen;
+        }}
+      >
+        <span>{formatTTL(selectedTTL)}</span>
+        <svg viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M1 1L6 6L11 1"
+            stroke="currentColor"
+            stroke-width="1.5"
             stroke-linecap="round"
             stroke-linejoin="round"
-          >
-            <path
-              d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
-            />
-          </svg>
-        </label>
-        <label class="local-checkbox-label">
-          <input
-            type="checkbox"
-            checked={saveLocal}
-            onchange={() => (saveLocal = !saveLocal)}
           />
-          <span class="local-checkbox-text">Keep a local copy</span>
-        </label>
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="ttl-trigger-wrap">
-        <button
-          type="button"
-          bind:this={ttlButton}
-          class="ttl-select"
-          class:open={ttlOpen}
-          onclick={() => { ttlOpen = !ttlOpen; }}
-        >
-          <span>{formatTTL(selectedTTL)}</span>
-          <svg viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
-      <button class="btn-primary" onclick={handleCreate} disabled={$clipState.loading}>
-        {#if $clipState.loading}
-          <svg
-            class="spinner"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-          >
-            <circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="15" />
-          </svg>
-          Creating...
-        {:else}
-          {#if saveLocal}Save & Share{:else}Share{/if}
-        {/if}
+        </svg>
       </button>
     </div>
+    <button class="btn-primary" onclick={handleCreate} disabled={$clipState.loading}>
+      {#if $clipState.loading}
+        <svg
+          class="spinner"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
+          <circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="15" />
+        </svg>
+        Creating...
+      {:else if saveLocal}Save & Share{:else}Share{/if}
+    </button>
+  </div>
 </div>
 
 <div bind:this={ttlPortal} class="ttl-portal" hidden>
@@ -232,7 +234,10 @@
         aria-selected={option.value === selectedTTL}
         class="ttl-option"
         class:active={option.value === selectedTTL}
-        onclick={() => { selectedTTL = option.value; ttlOpen = false; }}
+        onclick={() => {
+          selectedTTL = option.value;
+          ttlOpen = false;
+        }}
       >
         {option.label}
       </button>
@@ -366,7 +371,9 @@
     font-size: 0.9rem;
     text-align: left;
     cursor: pointer;
-    transition: background 0.1s, color 0.1s;
+    transition:
+      background 0.1s,
+      color 0.1s;
   }
 
   .ttl-option:hover {

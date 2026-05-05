@@ -33,6 +33,7 @@ export const load = async ({ url }: { url: URL }) => {
 
   clipState.set({
     mode: isClip ? ('decrypt' as ClipMode) : 'idle',
+    viewMode: 'list',
     clipId: isClip ? clipId : null,
     password: isClip ? hash : '',
     decryptedText: null,

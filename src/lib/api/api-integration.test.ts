@@ -86,6 +86,7 @@ beforeEach(() => {
   // Reset the client store to initial state
   clipState.set({
     mode: 'create',
+    viewMode: 'list',
     clipId: null,
     password: '',
     decryptedText: null,
@@ -413,6 +414,7 @@ describe('Clip viewing flow', () => {
     // Step 3: Simulate navigating to the clip URL (reset state first)
     clipState.set({
       mode: 'create',
+      viewMode: 'list',
       clipId: null,
       password: '',
       decryptedText: null,
@@ -533,6 +535,7 @@ describe('UI component state flow', () => {
     };
     clipState.set({
       mode: 'decrypt',
+      viewMode: 'list',
       clipId: 'test',
       password: '',
       decryptedText: null,
@@ -560,6 +563,7 @@ describe('UI component state flow', () => {
     };
     clipState.set({
       mode: 'decrypt',
+      viewMode: 'list',
       clipId: 'test',
       password: 'somePassword',
       decryptedText: null,

@@ -3,6 +3,7 @@ import { fetchClip } from './client';
 import type { Clip } from './client';
 
 export type ClipMode = 'idle' | 'create' | 'decrypt' | 'result' | 'not-found' | 'list';
+export type ViewMode = 'list' | 'grid';
 
 export interface LocalClip {
   id: string;
@@ -16,6 +17,7 @@ export interface LocalClip {
 
 export interface ClipState {
   mode: ClipMode;
+  viewMode: ViewMode;
   clipId: string | null;
   password: string;
   decryptedText: string | null;
@@ -30,6 +32,7 @@ export interface ClipState {
 
 const initial: ClipState = {
   mode: 'idle',
+  viewMode: 'list',
   clipId: null,
   password: '',
   decryptedText: null,

@@ -25,6 +25,7 @@ function makeClip(overrides: Partial<LocalClip> = {}): LocalClip {
 function setListMode(clips: LocalClip[] = []) {
   clipState.set({
     mode: 'list',
+    viewMode: 'list',
     clipId: null,
     password: '',
     decryptedText: null,
