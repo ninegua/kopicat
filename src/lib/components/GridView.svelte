@@ -28,6 +28,16 @@
     }
   });
 
+  $effect(() => {
+    const editId = $clipState.editClipId;
+    if (editId && sharedClip === null && clips.length > 0) {
+      const exists = clips.some((c) => c.id === editId);
+      if (exists) {
+        sharedClip = editId;
+      }
+    }
+  });
+
   function formatTimeAgo(timestamp: number): string {
     const diff = Date.now() - timestamp;
     const seconds = Math.floor(diff / 1000);

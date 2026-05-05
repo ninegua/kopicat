@@ -233,6 +233,7 @@
 
   /* --- Buttons --- */
   :global(.btn-primary) {
+    display: flex;
     padding: var(--space-md);
     background: var(--accent-gradient);
     border: none;
@@ -264,6 +265,7 @@
   }
 
   :global(.btn-secondary) {
+    display: flex;
     padding: var(--space-md);
     background: var(--bg-input);
     border: 1px solid var(--border-color);

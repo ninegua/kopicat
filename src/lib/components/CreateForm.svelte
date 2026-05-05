@@ -2,6 +2,7 @@
   import { computePosition, flip, offset, shift } from '@floating-ui/dom';
   import { generatePassword } from '$lib/crypto';
   import { clipState } from '$lib/api/store';
+  import ViewClipsLink from '$lib/components/ViewClipsLink.svelte';
 
   let {
     onCreate,
@@ -256,6 +257,8 @@
     </button>
   </div>
 </div>
+
+<ViewClipsLink icon="back" />
 
 <div bind:this={ttlPortal} class="ttl-portal" hidden>
   <div class="ttl-options" role="listbox">

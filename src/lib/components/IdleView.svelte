@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { clipState } from '$lib/api/store';
+  import ViewClipsLink from '$lib/components/ViewClipsLink.svelte';
 
   let { onPaste }: { onPaste: (text: string) => void } = $props();
 
@@ -101,6 +102,8 @@
     </div>
   </div>
 </div>
+
+<ViewClipsLink />
 
 <style>
   .card {

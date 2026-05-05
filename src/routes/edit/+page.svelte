@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import { clipState } from '$lib/api/store';
-  import { fetchClip, createClip } from '$lib/api/client';
+  import { createClip } from '$lib/api/client';
   import { getLocalClips, addLocalClip, updateLocalClip } from '$lib/api/local-store';
   import { decrypt, encrypt } from '$lib/crypto';
   import { generateClipId } from '$lib/words';
@@ -53,16 +53,6 @@
 
     if (edit_clip_id) {
       // Edit mode - update existing clip
-      const existingClip = await fetchClip(edit_clip_id);
-      if (!existingClip) {
-        clipState.update((s) => ({
-          ...s,
-          error: 'Original clip not found. It may have expired.',
-          loading: false,
-        }));
-        return;
-      }
-
       const clipId = generateClipId();
       const expires_after = ttl === 0 ? undefined : ttl;
 
@@ -114,7 +104,7 @@
         showShareModal: share_message,
         prefillText: null,
         createMode: 'share',
-        editClipId: null,
+        editClipId: clipId,
         localClips: allClips,
         loading: false,
       }));
@@ -175,7 +165,7 @@
       showShareModal: share_message,
       prefillText: null,
       createMode: 'share',
-      editClipId: null,
+      editClipId: clipId,
       localClips: allClips,
       loading: false,
     }));
