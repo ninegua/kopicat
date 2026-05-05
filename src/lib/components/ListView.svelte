@@ -12,6 +12,7 @@
   let shareUrl = $state('');
   let sharingClip = $state<string | null>(null);
   let shareError = $state<string | null>(null);
+  let copiedId = $state<string | null>(null);
   const clips = $derived($clipState.localClips);
   const mode = $derived($clipState.mode);
   const storeClipId = $derived($clipState.clipId);
@@ -185,18 +186,27 @@
                      <span class="burn-badge">Burn after read</span>
                    {/if}
                    <button
-                     class="copy-icon-btn"
-                     aria-label="Copy text to clipboard"
-                 onclick={(e) => {
-                        e.stopPropagation();
-                        navigator.clipboard.writeText(clip.text);
-                      }}
-                   >
-                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                       <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                     </svg>
-                   </button>
+                      class="copy-icon-btn"
+                      class:copy-icon-btn-copied={copiedId === clip.id}
+                      aria-label="Copy text to clipboard"
+                  onclick={(e) => {
+                         e.stopPropagation();
+                         navigator.clipboard.writeText(clip.text);
+                         copiedId = clip.id;
+                         setTimeout(() => { copiedId = null; }, 1500);
+                       }}
+                    >
+                      {#if copiedId === clip.id}
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      {:else}
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                        </svg>
+                      {/if}
+                    </button>
                  </div>
              </div>
           {:else}
@@ -324,6 +334,18 @@
   .copy-icon-btn:hover {
     color: var(--accent);
     background: var(--accent-glow);
+  }
+
+  .copy-icon-btn-copied {
+    color: var(--accent);
+    animation: copy-bounce 0.4s ease;
+  }
+
+  @keyframes copy-bounce {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.3); }
+    60% { transform: scale(0.9); }
+    100% { transform: scale(1); }
   }
 
   .share-error {
