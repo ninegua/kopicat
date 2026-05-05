@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { computePosition, flip, offset, shift } from '@floating-ui/dom';
   import { generatePassword } from '$lib/crypto';
   import { clipState } from '$lib/api/store';
 
@@ -25,6 +26,17 @@
     { label: '7 days', value: 604800 },
   ];
 
+  function formatTTL(value: number): string {
+    const option = TTL_OPTIONS.find((o) => o.value === value);
+    if (!option) return 'Expire (custom)';
+    const minutes = Math.floor(option.value / 60);
+    const days = Math.floor(option.value / 86400);
+    if (days > 1) return `Expire (${days} days)`;
+    if (days == 1) return `Expire (${days} day)`;
+    if (minutes >= 60) return `Expire (${Math.floor(minutes / 60)} hour)`;
+    return `Expire (${minutes} min)`;
+  }
+
   let text = $state($clipState.prefillText ?? '');
 
   $effect(() => {
@@ -32,9 +44,63 @@
       text = $clipState.prefillText;
     }
   });
+
   let password = $state('');
   let selectedTTL = $state(900);
+  let ttlOpen = $state(false);
+  let ttlButton: HTMLButtonElement | undefined;
+  let ttlPortal: HTMLDivElement | undefined;
   let burnAfterRead = $state(false);
+
+  $effect(() => {
+    if (!ttlOpen || !ttlButton || !ttlPortal) return;
+    ttlPortal.hidden = false;
+
+    const update = () => {
+      const btn = ttlButton;
+      const portal = ttlPortal;
+      if (!btn || !portal) return;
+      computePosition(btn, portal, {
+        placement: 'bottom-start',
+        middleware: [offset(4), flip(), shift({ padding: 8 })],
+      }).then(({ x, y, placement }) => {
+        Object.assign(portal.style, {
+          left: `${x}px`,
+          top: `${y}px`,
+          width: `${btn.offsetWidth}px`,
+        });
+        portal.dataset.placement = placement;
+      });
+    };
+
+    update();
+
+    const ro = new ResizeObserver(update);
+    ro.observe(ttlButton);
+
+    const handleScroll = () => update();
+    window.addEventListener('scroll', handleScroll, true);
+
+    function handleOutside(e: MouseEvent) {
+      const target = e.target as Node;
+      if (!ttlButton!.contains(target) && !ttlPortal!.contains(target)) {
+        ttlOpen = false;
+      }
+    }
+    requestAnimationFrame(() => document.addEventListener('click', handleOutside));
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('scroll', handleScroll, true);
+      document.removeEventListener('click', handleOutside);
+    };
+  });
+
+  $effect(() => {
+    if (ttlPortal) {
+      ttlPortal.hidden = !ttlOpen;
+    }
+  });
 
   async function handleCreate() {
     if (!text.trim()) {
@@ -119,16 +185,25 @@
             checked={saveLocal}
             onchange={() => (saveLocal = !saveLocal)}
           />
-          Keep a local copy
+          <span class="local-checkbox-text">Keep a local copy</span>
         </label>
       </div>
     </div>
     <div class="form-row">
-      <select id="clip-ttl" bind:value={selectedTTL} class="select">
-        {#each TTL_OPTIONS as option}
-          <option value={option.value}>{option.label}</option>
-        {/each}
-      </select>
+      <div class="ttl-trigger-wrap">
+        <button
+          type="button"
+          bind:this={ttlButton}
+          class="ttl-select"
+          class:open={ttlOpen}
+          onclick={() => { ttlOpen = !ttlOpen; }}
+        >
+          <span>{formatTTL(selectedTTL)}</span>
+          <svg viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
       <button class="btn-primary" onclick={handleCreate} disabled={$clipState.loading}>
         {#if $clipState.loading}
           <svg
@@ -142,10 +217,27 @@
           </svg>
           Creating...
         {:else}
-          {#if saveLocal}Save and Share{:else}Share{/if}
+          {#if saveLocal}Save & Share{:else}Share{/if}
         {/if}
       </button>
     </div>
+</div>
+
+<div bind:this={ttlPortal} class="ttl-portal" hidden>
+  <div class="ttl-options" role="listbox">
+    {#each TTL_OPTIONS as option}
+      <button
+        type="button"
+        role="option"
+        aria-selected={option.value === selectedTTL}
+        class="ttl-option"
+        class:active={option.value === selectedTTL}
+        onclick={() => { selectedTTL = option.value; ttlOpen = false; }}
+      >
+        {option.label}
+      </button>
+    {/each}
+  </div>
 </div>
 
 <style>
@@ -155,10 +247,13 @@
     gap: var(--space-md);
     margin-top: var(--space-sm);
     width: 100%;
+    padding: 0 var(--space-xs);
   }
 
   .local-checkbox-label {
     flex: 1;
+    display: flex;
+    justify-content: flex-end;
     align-items: center;
     gap: var(--space-xs);
     color: var(--text-muted);
@@ -205,7 +300,16 @@
     color: #e74c3c;
   }
 
-  .select {
+  .ttl-trigger-wrap {
+    min-width: 180px;
+  }
+
+  .ttl-select {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
     padding: var(--space-md);
     background: var(--bg-input);
     border: 1px solid var(--border-color);
@@ -217,14 +321,62 @@
     transition:
       border-color 0.15s,
       box-shadow 0.15s;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%239090a8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
+    background-image: none;
+    font-weight: 500;
+    padding-left: 16px;
   }
 
-  .select:focus {
+  .ttl-select svg {
+    width: 12px;
+    height: 8px;
+    color: var(--text-muted);
+    transition: transform 0.15s;
+    margin-right: 8px;
+  }
+
+  .ttl-select.open svg {
+    transform: rotate(180deg);
+  }
+
+  .ttl-select.open {
     border-color: var(--border-focus);
     box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .ttl-portal {
+    position: fixed;
+    z-index: 1000;
+    padding: 6px;
+  }
+
+  .ttl-options {
+    background: var(--bg-input);
+    border: 1px solid var(--border-focus);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+  }
+
+  .ttl-option {
+    width: 100%;
+    padding: var(--space-md) var(--space-md) var(--space-md) 16px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+  }
+
+  .ttl-option:hover {
+    background: var(--border-color);
+    color: var(--text-primary);
+  }
+
+  .ttl-option.active {
+    color: var(--accent);
+    font-weight: 600;
+    background: rgba(102, 126, 234, 0.08);
   }
 </style>

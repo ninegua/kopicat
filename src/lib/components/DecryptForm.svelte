@@ -124,7 +124,4 @@
   .input {
     margin-bottom: var(--space-md);
   }
-
-  .btn-primary {
-  }
 </style>
