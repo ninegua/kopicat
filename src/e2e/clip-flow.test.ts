@@ -38,6 +38,10 @@ function getBurnCheckbox(): HTMLInputElement {
   return screen.getByLabelText(/burn after read/i) as HTMLInputElement;
 }
 
+function getLocalCopyCheckbox(): HTMLInputElement {
+  return screen.getByLabelText(/keep a local copy/i) as HTMLInputElement;
+}
+
 // ---------------------------------------------------------------------------
 // Clip creation flow
 // ---------------------------------------------------------------------------
@@ -82,6 +86,9 @@ describe('Clip creation flow', () => {
 
     const createBtn = getCreateButton();
     expect(createBtn).not.toBeDisabled();
+
+    // Enable local copy so the clip appears in the list view
+    await fireEvent.click(getLocalCopyCheckbox());
 
     await fireEvent.click(createBtn);
 
@@ -346,9 +353,10 @@ describe('Burn-after-read flow', () => {
 
    await fillText(container, testText);
 
-    // Enable burn-after-read by checking the checkbox
+    // Enable burn-after-read and local copy
     const burnCheckbox = getBurnCheckbox();
     await fireEvent.click(burnCheckbox);
+    await fireEvent.click(getLocalCopyCheckbox());
 
     const createBtn = getCreateButton();
     await fireEvent.click(createBtn);

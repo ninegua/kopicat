@@ -104,7 +104,7 @@
     });
   }
 
-  async function handleCreate(text: string, pw: string, ttl: number, burn_after_read: boolean) {
+  async function handleCreate(text: string, pw: string, ttl: number, burn_after_read: boolean, save_local: boolean) {
     if (!text.trim()) {
       setError('Please enter some text to share');
       return;
@@ -140,32 +140,46 @@
         return;
       }
 
-      const shareUrl = `${window.location.origin}/?${clipId}#${pw}`;
+     const shareUrl = `${window.location.origin}/?${clipId}#${pw}`;
       const now = Date.now();
       const ttlSeconds = ttl === 0 ? 900 : ttl;
-      const newClip = {
-        id: clipId,
-        text,
-        created_at: now,
-        expires_at: now + ttlSeconds * 1000,
-        burn_after_read,
-        blob: encryptedBlob,
-        password: pw,
-      };
 
-      const allClips = addLocalClip(newClip);
+      if (save_local) {
+        const newClip = {
+          id: clipId,
+          text,
+          created_at: now,
+          expires_at: now + ttlSeconds * 1000,
+          burn_after_read,
+          blob: encryptedBlob,
+          password: pw,
+        };
 
-      clipState.update((s) => ({
-        ...s,
-        mode: 'list',
-        clipId,
-        decryptedText: text,
-        shareUrl,
-        showShareModal: true,
-        prefillText: null,
-        localClips: allClips,
-        loading: false,
-      }));
+        const allClips = addLocalClip(newClip);
+
+        clipState.update((s) => ({
+          ...s,
+          mode: 'list',
+          clipId,
+          decryptedText: text,
+          shareUrl,
+          showShareModal: true,
+          prefillText: null,
+          localClips: allClips,
+          loading: false,
+        }));
+      } else {
+        clipState.update((s) => ({
+          ...s,
+          mode: 'list',
+          clipId,
+          decryptedText: text,
+          shareUrl,
+          showShareModal: true,
+          prefillText: null,
+          loading: false,
+        }));
+      }
     } catch (e: any) {
       clipState.update((s) => ({
         ...s,
