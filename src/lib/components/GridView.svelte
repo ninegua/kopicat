@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { goto } from '$app/navigation';
   import { clipState } from '$lib/api/store';
   import type { LocalClip } from '$lib/api/store';
   import { flip } from 'svelte/animate';
@@ -16,13 +17,10 @@
       ? $clipState.localClips.filter((c) => !deletedIds.has(c.id))
       : $clipState.localClips;
   });
-  const mode = $derived($clipState.mode);
-  const storeClipId = $derived($clipState.clipId);
 
   $effect(() => {
-    const _m = mode;
-    const _id = storeClipId;
-    if (_m === 'list' && _id && sharedClip === null) {
+    const _id = $clipState.clipId;
+    if (_id && sharedClip === null) {
       const exists = clips.some((c) => c.id === _id);
       if (exists) {
         sharedClip = _id;
@@ -75,22 +73,11 @@
   }
 
   function handleShare(clip: (typeof clips)[0]) {
-    clipState.update((s) => ({
-      ...s,
-      mode: 'create',
-      prefillText: clip.text,
-      createMode: 'share',
-    }));
+    goto(`/edit?text=${encodeURIComponent(clip.text)}`);
   }
 
   function handleEdit(clip: (typeof clips)[0]) {
-    clipState.update((s) => ({
-      ...s,
-      mode: 'create',
-      prefillText: clip.text,
-      createMode: 'edit',
-      editClipId: clip.id,
-    }));
+    goto(`/edit?edit=${clip.id}&text=${encodeURIComponent(clip.text)}`);
   }
 
   function handleDelete(clip: (typeof clips)[0]) {

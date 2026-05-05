@@ -11,11 +11,10 @@ export const handle: Handle = async ({ event, resolve }) => {
   }
 
   if (clipId && clipPattern.test(clipId)) {
-    const homeResponse = await event.fetch('/');
-    const homeHtml = await homeResponse.text();
-    return new Response(homeHtml, {
-      status: 404,
-      headers: { 'content-type': 'text/html' },
+    // Old URL format - redirect to /decrypt
+    return new Response('', {
+      status: 302,
+      headers: { 'location': `/decrypt?clip=${clipId}` },
     });
   }
 

@@ -14,6 +14,11 @@ vi.mock('$app/paths', () => ({
   base: '',
 }));
 
+// $app/navigation mock — needed by components using goto()
+vi.mock('$app/navigation', () => ({
+  goto: vi.fn(),
+}));
+
 // Mock element.animate (not supported by jsdom)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 Element.prototype.animate = function () {
@@ -56,7 +61,6 @@ afterEach(() => {
   server.resetHandlers();
   resetClipStore();
   clipState.set({
-    mode: 'create',
     clipId: null,
     password: '',
     decryptedText: null,

@@ -1,17 +1,12 @@
 <script lang="ts">
-  import { clipState } from '$lib/api/store';
-  import { getLocalClips } from '$lib/api/local-store';
+  import { goto } from '$app/navigation';
 
   let { onReset }: { onReset?: () => void } = $props();
 
   let open = $state(false);
 
   function handleNewClip() {
-    clipState.update((s) => ({
-      ...s,
-      mode: 'create',
-      localClips: s.localClips,
-    }));
+    goto('/edit');
     open = false;
   }
 </script>
@@ -22,41 +17,39 @@
       <img src="/kopicat-logo.png" alt="KopiCat" class="logo-img" />
       <span class="logo-text">KopiCat</span>
     </a>
-    {#if $clipState.mode === 'list'}
-      <div class="menu-wrapper">
-        <button
-          class="hamburger"
-          aria-label="Menu"
-          aria-expanded={open}
-          aria-haspopup="menu"
-          onclick={() => (open = !open)}
-        >
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-        {#if open}
-          <div class="menu-dropdown" role="menu" tabindex="-1">
-            <button class="menu-item" role="menuitem" onclick={handleNewClip}>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              New clip
-            </button>
-          </div>
-        {/if}
-      </div>
-    {/if}
+    <div class="menu-wrapper">
+      <button
+        class="hamburger"
+        aria-label="Menu"
+        aria-expanded={open}
+        aria-haspopup="menu"
+        onclick={() => (open = !open)}
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      {#if open}
+        <div class="menu-dropdown" role="menu" tabindex="-1">
+          <button class="menu-item" role="menuitem" onclick={handleNewClip}>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            New clip
+          </button>
+        </div>
+      {/if}
+    </div>
   </div>
 </header>
 

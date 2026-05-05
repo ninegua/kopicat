@@ -123,7 +123,7 @@
         </button>
 
         <button class="btn-secondary" onclick={() => {
-          if (saveLocal && $clipState.clipId && $clipState.clip?.blob && $clipState.decryptedText) {
+          if (saveLocal && $clipState.clipId && $clipState.clip?.blob && $clipState.decryptedText && onSave) {
             onSave($clipState.clipId, $clipState.decryptedText, $clipState.clip!.blob);
           } else {
             onDismiss();

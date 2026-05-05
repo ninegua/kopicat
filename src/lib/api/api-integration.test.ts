@@ -85,7 +85,6 @@ beforeEach(() => {
 
   // Reset the client store to initial state
   clipState.set({
-    mode: 'create',
     clipId: null,
     password: '',
     decryptedText: null,
@@ -172,7 +171,6 @@ async function simulateFetchClipById(id: string) {
   if (!clip) {
     clipState.set({
       ...get(clipState),
-      mode: 'not-found',
       loading: false,
     });
     return null;
@@ -181,7 +179,6 @@ async function simulateFetchClipById(id: string) {
   clipState.set({
     ...get(clipState),
     clip,
-    mode: 'decrypt',
     loading: false,
   });
 
@@ -205,7 +202,6 @@ async function simulateDecryptClip(clip: Clip | null, password: string) {
     clipState.set({
       ...get(clipState),
       decryptedText: text,
-      mode: 'result',
       shareUrl: `http://localhost/?${get(clipState).clipId}#${password}`,
       loading: false,
       error: null,
@@ -230,7 +226,6 @@ describe('Clip creation flow', () => {
 
     // Verify initial state
     const initialState = get(clipState);
-    expect(initialState.mode).toBe('create');
     expect(initialState.loading).toBe(false);
 
     // Simulate create
@@ -290,8 +285,6 @@ describe('Clip creation flow', () => {
     expect(result.success).toBe(false);
     expect(result.error).toContain('Network Error');
 
-    // Store should still be in create mode
-    expect(get(clipState).mode).toBe('create');
   });
 
   it('handles malformed backend response (non-JSON 500)', async () => {
@@ -330,7 +323,6 @@ describe('Clip viewing flow', () => {
     const clip = await simulateFetchClipById(clipId);
 
     expect(clip).not.toBeNull();
-    expect(get(clipState).mode).toBe('decrypt');
     expect(get(clipState).clip).not.toBeNull();
     expect(get(clipState).clip!.blob).toBe(encryptedBlob);
     expect(get(clipState).loading).toBe(false);
@@ -340,7 +332,6 @@ describe('Clip viewing flow', () => {
     const result = await simulateFetchClipById('non-existent-clip');
 
     expect(result).toBeNull();
-    expect(get(clipState).mode).toBe('not-found');
     expect(get(clipState).loading).toBe(false);
   });
 
@@ -366,7 +357,6 @@ describe('Clip viewing flow', () => {
     const clip = get(clipState).clip;
     await simulateDecryptClip(clip, password);
 
-    expect(get(clipState).mode).toBe('result');
     expect(get(clipState).decryptedText).toBe(text);
     expect(get(clipState).error).toBeNull();
     expect(get(clipState).loading).toBe(false);
@@ -395,7 +385,6 @@ describe('Clip viewing flow', () => {
     const clip = get(clipState).clip;
     await simulateDecryptClip(clip, wrongPassword);
 
-    expect(get(clipState).mode).toBe('decrypt'); // stays on decrypt mode
     expect(get(clipState).error).toContain('password may be incorrect');
     expect(get(clipState).decryptedText).toBeNull();
   });
@@ -414,7 +403,6 @@ describe('Clip viewing flow', () => {
 
     // Step 3: Simulate navigating to the clip URL (reset state first)
     clipState.set({
-      mode: 'create',
       clipId: null,
       password: '',
       decryptedText: null,
@@ -431,11 +419,9 @@ describe('Clip viewing flow', () => {
 
     const clip = await simulateFetchClipById(createResult.clipId!);
     expect(clip).not.toBeNull();
-    expect(get(clipState).mode).toBe('decrypt');
 
     // Step 4: Decrypt the clip
     await simulateDecryptClip(clip, password);
-    expect(get(clipState).mode).toBe('result');
     expect(get(clipState).decryptedText).toBe(text);
   });
 });
@@ -536,7 +522,6 @@ describe('UI component state flow', () => {
       burn_after_read: false,
     };
     clipState.set({
-      mode: 'decrypt',
       clipId: 'test',
       password: '',
       decryptedText: null,
@@ -565,7 +550,6 @@ describe('UI component state flow', () => {
       burn_after_read: false,
     };
     clipState.set({
-      mode: 'decrypt',
       clipId: 'test',
       password: 'somePassword',
       decryptedText: null,

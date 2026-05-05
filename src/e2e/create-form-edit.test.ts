@@ -38,7 +38,6 @@ function getTTLSelect(): HTMLButtonElement {
 describe('CreateForm edit mode - text prefill', () => {
   beforeEach(() => {
     clipState.set({
-      mode: 'create',
       clipId: null,
       password: '',
       decryptedText: null,
@@ -57,7 +56,6 @@ describe('CreateForm edit mode - text prefill', () => {
   afterEach(() => {
     cleanup();
     clipState.set({
-      mode: 'idle',
       clipId: null,
       password: '',
       decryptedText: null,
@@ -112,7 +110,6 @@ describe('CreateForm edit mode - button text', () => {
   beforeEach(() => {
     clipState.set({
       ...get(clipState),
-      mode: 'create',
       prefillText: 'some text',
       createMode: 'edit',
       editClipId: 'clip-1',
@@ -122,7 +119,6 @@ describe('CreateForm edit mode - button text', () => {
   afterEach(() => {
     cleanup();
     clipState.set({
-      mode: 'idle',
       clipId: null,
       password: '',
       decryptedText: null,
@@ -165,7 +161,6 @@ describe('CreateForm edit mode - share message checkbox', () => {
   beforeEach(() => {
     clipState.set({
       ...get(clipState),
-      mode: 'create',
       prefillText: 'some text',
       createMode: 'edit',
       editClipId: 'clip-1',
@@ -175,7 +170,6 @@ describe('CreateForm edit mode - share message checkbox', () => {
   afterEach(() => {
     cleanup();
     clipState.set({
-      mode: 'idle',
       clipId: null,
       password: '',
       decryptedText: null,
@@ -220,7 +214,6 @@ describe('CreateForm edit mode - burn-after-read', () => {
   beforeEach(() => {
     clipState.set({
       ...get(clipState),
-      mode: 'create',
       prefillText: 'some text',
       createMode: 'edit',
       editClipId: 'clip-1',
@@ -230,7 +223,6 @@ describe('CreateForm edit mode - burn-after-read', () => {
   afterEach(() => {
     cleanup();
     clipState.set({
-      mode: 'idle',
       clipId: null,
       password: '',
       decryptedText: null,
@@ -287,7 +279,6 @@ describe('CreateForm edit mode - TTL selector', () => {
   beforeEach(() => {
     clipState.set({
       ...get(clipState),
-      mode: 'create',
       prefillText: 'some text',
       createMode: 'edit',
       editClipId: 'clip-1',
@@ -297,7 +288,6 @@ describe('CreateForm edit mode - TTL selector', () => {
   afterEach(() => {
     cleanup();
     clipState.set({
-      mode: 'idle',
       clipId: null,
       password: '',
       decryptedText: null,
@@ -366,7 +356,6 @@ describe('CreateForm edit mode - save_local behavior', () => {
   beforeEach(() => {
     clipState.set({
       ...get(clipState),
-      mode: 'create',
       prefillText: 'some text',
       createMode: 'edit',
       editClipId: 'clip-1',
@@ -376,7 +365,6 @@ describe('CreateForm edit mode - save_local behavior', () => {
   afterEach(() => {
     cleanup();
     clipState.set({
-      mode: 'idle',
       clipId: null,
       password: '',
       decryptedText: null,
@@ -415,7 +403,6 @@ describe('CreateForm edit mode - edit_clip_id', () => {
   beforeEach(() => {
     clipState.set({
       ...get(clipState),
-      mode: 'create',
       prefillText: 'some text',
       createMode: 'edit',
       editClipId: 'edit-target-clip-id',
@@ -425,7 +412,6 @@ describe('CreateForm edit mode - edit_clip_id', () => {
   afterEach(() => {
     cleanup();
     clipState.set({
-      mode: 'idle',
       clipId: null,
       password: '',
       decryptedText: null,
@@ -483,7 +469,6 @@ describe('CreateForm edit mode - validation', () => {
   beforeEach(() => {
     clipState.set({
       ...get(clipState),
-      mode: 'create',
       prefillText: 'some text',
       createMode: 'edit',
       editClipId: 'clip-1',
@@ -493,7 +478,6 @@ describe('CreateForm edit mode - validation', () => {
   afterEach(() => {
     cleanup();
     clipState.set({
-      mode: 'idle',
       clipId: null,
       password: '',
       decryptedText: null,
@@ -557,7 +541,6 @@ describe('CreateForm edit mode - loading state', () => {
   beforeEach(() => {
     clipState.set({
       ...get(clipState),
-      mode: 'create',
       prefillText: 'some text',
       createMode: 'edit',
       editClipId: 'clip-1',
@@ -568,7 +551,6 @@ describe('CreateForm edit mode - loading state', () => {
   afterEach(() => {
     cleanup();
     clipState.set({
-      mode: 'idle',
       clipId: null,
       password: '',
       decryptedText: null,
@@ -588,7 +570,7 @@ describe('CreateForm edit mode - loading state', () => {
     render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
 
     await waitFor(() => {
-      const btn = screen.getByRole('button', { name: /creating/i });
+      const btn = screen.getByRole('button', { name: /creating/i }) as HTMLButtonElement;
       expect(btn.disabled).toBe(true);
     });
   });
@@ -602,7 +584,6 @@ describe('CreateForm edit mode vs share mode differences', () => {
   afterEach(() => {
     cleanup();
     clipState.set({
-      mode: 'idle',
       clipId: null,
       password: '',
       decryptedText: null,

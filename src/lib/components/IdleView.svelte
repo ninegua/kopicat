@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { goto } from '$app/navigation';
   import { clipState } from '$lib/api/store';
 
   let { onPaste }: { onPaste: (text: string) => void } = $props();
@@ -18,7 +19,7 @@
   }
 
   function handleBoxClick() {
-    clipState.update((s) => ({ ...s, mode: 'create', error: null, prefillText: null }));
+    goto('/edit');
   }
 
   function handleKeyDown(e: KeyboardEvent) {

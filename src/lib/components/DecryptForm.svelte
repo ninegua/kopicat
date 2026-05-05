@@ -30,7 +30,7 @@
     if (userTyped) return;
     const clip = $clipState.clip;
     const pw = $clipState.password;
-    if (clip && pw && !$clipState.loading && $clipState.mode === 'decrypt' && !$clipState.decryptedText) {
+    if (clip && pw && !$clipState.loading && !$clipState.decryptedText) {
       onDecrypt(clip, pw);
     }
   });

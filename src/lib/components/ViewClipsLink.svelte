@@ -1,11 +1,11 @@
 <script>
-  import { clipState } from '$lib/api/store';
+  import { goto } from '$app/navigation';
   import { getLocalClips } from '$lib/api/local-store';
 
-  $: show = $clipState.mode !== 'list' && getLocalClips().length > 0;
+  $: show = getLocalClips().length > 0;
 
   function handleViewClips() {
-    clipState.update((s) => ({ ...s, mode: 'list', localClips: getLocalClips() }));
+    goto('/list');
   }
 </script>
 

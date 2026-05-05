@@ -42,11 +42,13 @@
     return `Expire (${minutes} min)`;
   }
 
-  let text = $state($clipState.prefillText ?? '');
+  let text = $state('');
 
   $effect(() => {
-    if ($clipState.prefillText && text === '') {
-      text = $clipState.prefillText;
+    const p = $clipState.prefillText;
+    if (p) {
+      text = p;
+      clipState.update((s) => ({ ...s, prefillText: null }));
     }
   });
 
