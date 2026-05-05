@@ -13,7 +13,6 @@
   import DecryptForm from '$lib/components/DecryptForm.svelte';
   import ResultView from '$lib/components/ResultView.svelte';
   import ShareCard from '$lib/components/ShareCard.svelte';
-  import ListView from '$lib/components/ListView.svelte';
   import GridView from '$lib/components/GridView.svelte';
   import ClipNotFound from '$lib/components/ClipNotFound.svelte';
   import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
@@ -83,7 +82,6 @@
     clipState.update((s) => ({
       ...s,
       mode: 'idle',
-      viewMode: 'list',
       prefillText: null,
       localClips: getLocalClips(),
       clip: null,
@@ -93,13 +91,6 @@
       showShareModal: false,
     }));
     history.replaceState(null, '', '/');
-  }
-
-  function toggleView() {
-    clipState.update((s) => ({
-      ...s,
-      viewMode: s.viewMode === 'list' ? 'grid' : 'list',
-    }));
   }
 
   function handlePaste(text: string) {
@@ -175,7 +166,6 @@
         clipState.update((s) => ({
           ...s,
           mode: 'list',
-          viewMode: 'list',
           clipId,
           decryptedText: text,
           shareUrl,
@@ -188,7 +178,6 @@
         clipState.update((s) => ({
           ...s,
           mode: 'list',
-          viewMode: 'list',
           clipId,
           decryptedText: text,
           shareUrl,
@@ -258,7 +247,6 @@
         clipState.update((s) => ({
           ...s,
           mode: 'idle',
-          viewMode: 'list',
           prefillText: null,
           localClips: getLocalClips(),
         }))}
@@ -271,7 +259,6 @@
           ...s,
           showShareModal: false,
           mode: 'list',
-          viewMode: 'list',
           shareUrl: null,
           prefillText: null,
           localClips: getLocalClips(),
@@ -279,11 +266,7 @@
       }}
     />
   {:else if currentMode === 'list'}
-    {#if $clipState.viewMode === 'grid'}
-      <GridView />
-    {:else}
-      <ListView />
-    {/if}
+    <GridView />
   {:else if currentMode === 'idle' && !$clipState.prefillText}
     <IdleView onPaste={handlePaste} />
     <ViewClipsLink />

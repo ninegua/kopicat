@@ -127,7 +127,7 @@
     <textarea
       id="clip-text"
       bind:value={text}
-      placeholder="Paste your text here..."
+      placeholder="Enter your text here..."
       class="card-textarea"
       oninput={handleInput}
     ></textarea>

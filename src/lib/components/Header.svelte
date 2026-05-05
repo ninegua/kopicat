@@ -6,13 +6,6 @@
 
   let open = $state(false);
 
-  function handleToggleView() {
-    clipState.update((s) => ({
-      ...s,
-      viewMode: s.viewMode === 'list' ? 'grid' : 'list',
-    }));
-  }
-
   function handleNewClip() {
     clipState.update((s) => ({
       ...s,
@@ -57,48 +50,6 @@
       <span class="logo-text">KopiCat</span>
     </a>
     {#if $clipState.mode === 'list'}
-      <button
-        class="view-toggle"
-        aria-label="Toggle view"
-        title="Toggle list/grid view"
-        onclick={handleToggleView}
-      >
-        {#if $clipState.viewMode === 'grid'}
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <rect x="3" y="3" width="7" height="7" />
-            <rect x="14" y="3" width="7" height="7" />
-            <rect x="14" y="14" width="7" height="7" />
-            <rect x="3" y="14" width="7" height="7" />
-          </svg>
-        {:else}
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <line x1="8" y1="6" x2="21" y2="6" />
-            <line x1="8" y1="12" x2="21" y2="12" />
-            <line x1="8" y1="18" x2="21" y2="18" />
-            <line x1="3" y1="6" x2="3.01" y2="6" />
-            <line x1="3" y1="12" x2="3.01" y2="12" />
-            <line x1="3" y1="18" x2="3.01" y2="18" />
-          </svg>
-        {/if}
-      </button>
       <div class="menu-wrapper">
         <button
           class="hamburger"
@@ -267,26 +218,6 @@
     min-width: 40px;
     min-height: 40px;
     align-items: center;
-  }
-
-  .view-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: var(--space-xs);
-    min-width: 40px;
-    min-height: 40px;
-    color: var(--text-muted);
-    border-radius: var(--radius-sm);
-    transition: all 0.15s;
-  }
-
-  .view-toggle:hover {
-    color: var(--accent);
-    background: var(--accent-glow);
   }
 
   .hamburger span {

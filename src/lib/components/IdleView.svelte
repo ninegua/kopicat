@@ -46,7 +46,7 @@
           <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
         </svg>
       </div>
-      <p class="card-title">Paste your text to share</p>
+      <p class="card-title">Input your text to share</p>
     </div>
     {#if $clipState.error}
       <div class="idle-error">

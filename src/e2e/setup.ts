@@ -25,6 +25,19 @@ Element.prototype.animate = function () {
   } as unknown as Animation;
 };
 
+// Mock matchMedia (not supported by jsdom)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+  matches: false,
+  media: query,
+  onchange: null,
+  addListener: () => {},
+  removeListener: () => {},
+  addEventListener: () => {},
+  removeEventListener: () => {},
+  dispatchEvent: () => false,
+}));
+
 // Start MSW server once per test file
 const server = createMockServer();
 
@@ -36,7 +49,6 @@ afterEach(() => {
   resetClipStore();
   clipState.set({
     mode: 'create',
-    viewMode: 'list',
     clipId: null,
     password: '',
     decryptedText: null,
