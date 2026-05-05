@@ -34,11 +34,13 @@
   }
 
   function initFromUrl() {
-    const rawQuery = window.location.href.split('?')[1];
+    const rawQuery = window.location.search.slice(1);
     const clipIdPattern = /^[a-z]+-[a-z]+-[a-z]+$/i;
-
+    const hash = window.location.hash;
+    console.log(window.location.href.split('?')[1]);
+    console.log("rawQuery", rawQuery, "hash", hash);
     if (rawQuery && clipIdPattern.test(rawQuery)) {
-      void goto(`/decrypt?clip=${rawQuery}`, { replaceState: true });
+      void goto(`/decrypt?clip=${rawQuery}${hash}`, { replaceState: true });
       return;
     }
 
