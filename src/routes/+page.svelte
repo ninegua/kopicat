@@ -6,7 +6,6 @@
   import Header from '$lib/components/Header.svelte';
   import IdleView from '$lib/components/IdleView.svelte';
   import Footer from '$lib/components/Footer.svelte';
-  import ViewClipsLink from '$lib/components/ViewClipsLink.svelte';
 
   function handleReset() {
     clipState.update((s) => ({
@@ -112,7 +111,6 @@
 
 <main class="app-main">
   <IdleView onPaste={handlePaste} />
-  <ViewClipsLink />
 </main>
 
 <Footer />
