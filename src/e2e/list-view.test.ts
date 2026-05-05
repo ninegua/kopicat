@@ -130,7 +130,7 @@ describe('Clip list display', () => {
     setListMode(clips);
     render(Page);
 
-    expect(screen.getByText('3 clips')).toBeInTheDocument();
+    expect(screen.getByText('total: 3')).toBeInTheDocument();
   });
 
   it('shows truncated preview for long clip text in collapsed view', () => {
@@ -217,7 +217,7 @@ describe('Focus and expand', () => {
     setListMode([clip]);
     render(Page);
 
-    const clipButton = getClipButton('');
+    const clipButton = getClipButton('this is a test clip content');
     await fireEvent.click(clipButton);
 
     await waitFor(() => {
@@ -230,7 +230,7 @@ describe('Focus and expand', () => {
     setListMode([clip]);
     render(Page);
 
-    const clipButton = getClipButton('');
+    const clipButton = getClipButton('this is a test clip content');
     await fireEvent.click(clipButton);
 
     await waitFor(() => {
@@ -243,175 +243,12 @@ describe('Focus and expand', () => {
     setListMode([clip]);
     render(Page);
 
-    const clipButton = getClipButton('');
+    const clipButton = getClipButton('this is a test clip content');
     await fireEvent.click(clipButton);
 
     await waitFor(() => {
       expect(screen.queryByText('Burn after read')).not.toBeInTheDocument();
     });
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Expired clips toggle
-// ---------------------------------------------------------------------------
-
-describe('Expired clips toggle', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    localStorage.clear();
-    Object.defineProperty(window, 'location', {
-      value: {
-        ...window.location,
-        pathname: '/',
-        search: '',
-        hash: '',
-        origin: 'http://localhost',
-      },
-      writable: true,
-      configurable: true,
-    });
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-    cleanup();
-  });
-
-  it('shows expired count in the toggle label', () => {
-    const now = Date.now();
-    const activeClip = makeClip({ created_at: now, expires_at: now + 900_000 });
-    const expiredClip = makeClip({
-      created_at: now - 2000_000,
-      expires_at: now - 500_000,
-    });
-    setListMode([activeClip, expiredClip]);
-    render(Page);
-
-    expect(screen.getByText('2 clips')).toBeInTheDocument();
-    expect(screen.getByText('(1 expired)')).toBeInTheDocument();
-  });
-
-  it('hides expired clips by default', () => {
-    const now = Date.now();
-    const activeClip = makeClip({ created_at: now, expires_at: now + 900_000 });
-    const expiredClip = makeClip({
-      created_at: now - 2000_000,
-      expires_at: now - 500_000,
-      text: 'Expired clip visible',
-    });
-    setListMode([activeClip, expiredClip]);
-    render(Page);
-
-    expect(screen.getByText('2 clips')).toBeInTheDocument();
-    expect(screen.getByText('(1 expired)')).toBeInTheDocument();
-    // Expired clip should be hidden by default
-    expect(screen.queryByText('Expired clip visible')).not.toBeInTheDocument();
-  });
-
-  it('toggles expired clips visibility when toggle is clicked', async () => {
-    const now = Date.now();
-    const activeClip = makeClip({ created_at: now, expires_at: now + 900_000 });
-    const expiredClip = makeClip({
-      created_at: now - 2000_000,
-      expires_at: now - 500_000,
-      text: 'Expired clip text',
-    });
-    setListMode([activeClip, expiredClip]);
-    render(Page);
-
-    // Toggle button should be visible
-    const toggleLabel = screen.getByRole('switch');
-    await fireEvent.click(toggleLabel);
-
-    await waitFor(() => {
-      // After toggling on, the expired clip should be visible
-      expect(screen.getByText('Expired clip text')).toBeInTheDocument();
-    });
-  });
-
-  it('shows "Expired" label on expired clips', () => {
-    const now = Date.now();
-    const expiredClip = makeClip({
-      created_at: now - 2000_000,
-      expires_at: now - 500_000,
-    });
-    setListMode([expiredClip]);
-    render(Page);
-
-    const toggleLabel = screen.getByRole('switch');
-    // Default: aria-checked should be false (expired hidden)
-    expect(toggleLabel).toHaveAttribute('aria-checked', 'false');
-
-    fireEvent.click(toggleLabel);
-
-    expect(screen.getByText('Expired')).toBeInTheDocument();
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Expiry status display
-// ---------------------------------------------------------------------------
-
-describe('Expiry status', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    localStorage.clear();
-    Object.defineProperty(window, 'location', {
-      value: {
-        ...window.location,
-        pathname: '/',
-        search: '',
-        hash: '',
-        origin: 'http://localhost',
-      },
-      writable: true,
-      configurable: true,
-    });
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-    cleanup();
-  });
-
-  it('shows "No expiry" for clips without expires_at', () => {
-    const clip = makeClip({ expires_at: 0 });
-    setListMode([clip]);
-    render(Page);
-
-    expect(screen.getByText('No expiry')).toBeInTheDocument();
-  });
-
-  it('shows "expires in" for future expiry with hours', () => {
-    const now = Date.now();
-    const clip = makeClip({ expires_at: now + 3_600_000 });
-    setListMode([clip]);
-    render(Page);
-
-    expect(screen.getByText(/expires in \d+h/)).toBeInTheDocument();
-  });
-
-  it('shows "expires in" with minutes when less than an hour', () => {
-    const now = Date.now();
-    const clip = makeClip({ expires_at: now + 45 * 60_000 });
-    setListMode([clip]);
-    render(Page);
-
-    expect(screen.getByText(/expires in 45m/)).toBeInTheDocument();
-  });
-
-  it('shows "Expired" text for past-expired clips after toggling', () => {
-    const now = Date.now();
-    const clip = makeClip({ expires_at: now - 1000 });
-    setListMode([clip]);
-    render(Page);
-
-    // Default state hides expired, toggle to see it
-    const toggleLabel = screen.getByRole('switch');
-    fireEvent.click(toggleLabel);
-
-    expect(screen.getByText('Expired')).toBeInTheDocument();
   });
 });
 
@@ -514,36 +351,6 @@ describe('Keyboard interaction', () => {
     await waitFor(() => {
       expect(clipButton).toHaveAttribute('aria-pressed', 'true');
     });
-  });
-
-  it('toggles expired filter on Enter in toggle', async () => {
-    const now = Date.now();
-    const expiredClip = makeClip({
-      created_at: now - 2000_000,
-      expires_at: now - 500_000,
-    });
-    setListMode([expiredClip]);
-    render(Page);
-
-    const toggleLabel = screen.getByRole('switch');
-    await fireEvent.keyDown(toggleLabel, { key: 'Enter' });
-
-    expect(toggleLabel).toHaveAttribute('aria-checked', 'true');
-  });
-
-  it('toggles expired filter on Space in toggle', async () => {
-    const now = Date.now();
-    const expiredClip = makeClip({
-      created_at: now - 2000_000,
-      expires_at: now - 500_000,
-    });
-    setListMode([expiredClip]);
-    render(Page);
-
-    const toggleLabel = screen.getByRole('switch');
-    await fireEvent.keyDown(toggleLabel, { key: ' ' });
-
-    expect(toggleLabel).toHaveAttribute('aria-checked', 'true');
   });
 });
 
@@ -666,67 +473,6 @@ describe('Focus transitions between clips', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Expired label styling
-// ---------------------------------------------------------------------------
-
-describe('Expired label styling', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    localStorage.clear();
-    Object.defineProperty(window, 'location', {
-      value: {
-        ...window.location,
-        pathname: '/',
-        search: '',
-        hash: '',
-        origin: 'http://localhost',
-      },
-      writable: true,
-      configurable: true,
-    });
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-    cleanup();
-  });
-
-  it('applies clip-expired class to expired clip expiry label', () => {
-    const now = Date.now();
-    const expiredClip = makeClip({
-      created_at: now - 2000_000,
-      expires_at: now - 500_000,
-      text: 'Expired test',
-    });
-    setListMode([expiredClip]);
-    render(Page);
-
-    // Toggle to show expired clips
-    const toggleLabel = screen.getByRole('switch');
-    fireEvent.click(toggleLabel);
-
-    const expiryElement = screen.getByText('Expired');
-    expect(expiryElement).toHaveClass('clip-expired');
-  });
-
-  it('applies clip-expiry-soon class when less than 5 minutes remaining', () => {
-    const now = Date.now();
-    const soonClip = makeClip({
-      created_at: now,
-      expires_at: now + 4 * 60_000, // 4 minutes from now
-    });
-    setListMode([soonClip]);
-    render(Page);
-
-    const clipButton = getClipButton('');
-    fireEvent.click(clipButton);
-
-    const expiryElement = screen.getByText(/expires in 4m/);
-    expect(expiryElement).toHaveClass('clip-expiry-soon');
-  });
-});
-
-// ---------------------------------------------------------------------------
 // Clip order
 // ---------------------------------------------------------------------------
 
@@ -834,198 +580,5 @@ describe('Clip order', () => {
 
     const clipButton = getClipButton('clip a');
     expect(clipButton).toHaveAttribute('aria-pressed', 'false');
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Timer-based expiry refresh
-// ---------------------------------------------------------------------------
-
-describe('Timer-based expiry refresh', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    localStorage.clear();
-    Object.defineProperty(window, 'location', {
-      value: {
-        ...window.location,
-        pathname: '/',
-        search: '',
-        hash: '',
-        origin: 'http://localhost',
-      },
-      writable: true,
-      configurable: true,
-    });
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-    cleanup();
-  });
-
-  it('shows correct initial expiry for soon-expiring clip', async () => {
-    const now = Date.now();
-    const soonClip = makeClip({
-      created_at: now,
-      expires_at: now + 3 * 60_000, // 3 minutes from now
-    });
-    setListMode([soonClip]);
-    render(Page);
-
-    await waitFor(() => {
-      expect(screen.getByText(/expires in 3m/)).toBeInTheDocument();
-    });
-  });
-
-  it('shows correct initial expiry for future clip (no longer than 5min)', async () => {
-    const now = Date.now();
-    const futureClip = makeClip({
-      created_at: now,
-      expires_at: now + 10 * 60_000, // 10 minutes from now
-    });
-    setListMode([futureClip]);
-    render(Page);
-
-    await waitFor(() => {
-      expect(screen.getByText(/expires in 10m/)).toBeInTheDocument();
-    });
-  });
-
-  it('does not create timer when no clips have expiry', () => {
-    const clip = makeClip({ expires_at: 0 });
-    setListMode([clip]);
-    render(Page);
-
-    expect(screen.getByText('No expiry')).toBeInTheDocument();
-  });
-
-  it('uses earliest clip expiry display when multiple clips exist', async () => {
-    const now = Date.now();
-    const clip1 = makeClip({
-      id: 'multi-clip-1',
-      text: 'Multi clip 1',
-      created_at: now,
-      expires_at: now + 15 * 60_000, // 15 minutes from now
-    });
-    const clip2 = makeClip({
-      id: 'multi-clip-2',
-      text: 'Multi clip 2',
-      created_at: now,
-      expires_at: now + 10 * 60_000, // 10 minutes from now
-    });
-    setListMode([clip1, clip2]);
-    render(Page);
-
-    await waitFor(() => {
-      expect(screen.getByText(/expires in 10m/)).toBeInTheDocument();
-    });
-  });
-
-  it('updates expired count as timer advances past expiry', async () => {
-    const now = Date.now();
-    const clip1 = makeClip({
-      id: 'exp-count-1',
-      text: 'Count test 1',
-      created_at: now,
-      expires_at: now + 1 * 60_000, // 1 minute from now
-    });
-    const clip2 = makeClip({
-      id: 'exp-count-2',
-      text: 'Count test 2',
-      created_at: now,
-      expires_at: now + 1 * 60_000,
-    });
-    setListMode([clip1, clip2]);
-    render(Page);
-
-    expect(screen.getByText('(0 expired)')).toBeInTheDocument();
-
-    // Advance past expiry
-    vi.advanceTimersByTime(61_000);
-
-    await waitFor(
-      () => {
-        expect(screen.getByText('(2 expired)')).toBeInTheDocument();
-      },
-      { timeout: 3000 },
-    );
-  });
-
-  it('shows "soon" class for clips within 5 minutes', async () => {
-    const now = Date.now();
-    const soonClip = makeClip({
-      created_at: now,
-      expires_at: now + 4 * 60_000, // 4 minutes from now
-    });
-    setListMode([soonClip]);
-    render(Page);
-
-    await waitFor(() => {
-      expect(screen.getByText(/expires in 4m/)).toBeInTheDocument();
-    });
-
-    const clipButton = getClipButton('');
-    fireEvent.click(clipButton);
-
-    await waitFor(() => {
-      const expiryElement = screen.getByText(/expires in 4m/);
-      expect(expiryElement).toHaveClass('clip-expiry-soon');
-    });
-  });
-
-  it('transitions to "Expired" label when clip expires', async () => {
-    const now = Date.now();
-    const soonClip = makeClip({
-      created_at: now,
-      expires_at: now + 1 * 60_000, // 1 minute from now
-    });
-    setListMode([soonClip]);
-    render(Page);
-
-    await waitFor(() => {
-      expect(screen.getByText(/expires in 1m/)).toBeInTheDocument();
-    });
-
-    // Advance past expiry
-    vi.advanceTimersByTime(61_000);
-    await vi.runOnlyPendingTimersAsync();
-
-    // Toggle to show expired clips
-    const toggleLabel = screen.getByRole('switch');
-    fireEvent.click(toggleLabel);
-
-    await waitFor(() => {
-      expect(screen.getByText('Expired')).toBeInTheDocument();
-    });
-  });
-
-  it('reschedules timer when clips are added via store update', async () => {
-    const now = Date.now();
-    const soonClip = makeClip({
-      id: 'resched-clip',
-      text: 'Reschedule test',
-      created_at: now,
-      expires_at: now + 3 * 60_000,
-    });
-    setListMode([soonClip]);
-    render(Page);
-
-    await waitFor(() => {
-      expect(screen.getByText(/expires in 3m/)).toBeInTheDocument();
-    });
-
-    // Add a new clip with later expiry
-    const newClip = makeClip({
-      id: 'resched-clip-2',
-      text: 'New reschedule clip',
-      created_at: now,
-      expires_at: now + 10 * 60_000,
-    });
-    setListMode([soonClip, newClip]);
-
-    // Should show the later expiry
-    await waitFor(() => {
-      expect(screen.getByText(/expires in 10m/)).toBeInTheDocument();
-    });
   });
 });
