@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { clipState } from '$lib/api/store';
 import { get } from 'svelte/store';
 import { encrypt } from '$lib/crypto';
@@ -51,7 +52,7 @@ describe('Clip creation flow', () => {
     render(Page);
 
     expect(screen.getByRole('button', { name: 'Paste from clipboard' })).toBeInTheDocument();
-    expect(screen.getByText(/paste your text to share/i)).toBeInTheDocument();
+    expect(screen.getByText(/input your text to share/i)).toBeInTheDocument();
     expect(screen.getByText(/ctrl\+v/i)).toBeInTheDocument();
     expect(screen.getByText(/Paste from clipboard/i)).toBeInTheDocument();
   });
@@ -69,7 +70,7 @@ describe('Clip creation flow', () => {
       ).not.toBeInTheDocument();
     });
 
-    expect(screen.getByPlaceholderText(/paste your text/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/enter your text/i)).toBeInTheDocument();
   });
 
   it('creates a clip successfully and shows the list view', async () => {
@@ -98,21 +99,21 @@ describe('Clip creation flow', () => {
 
     await fireEvent.click(screen.getByRole('button', { name: /done/i }));
 
-    await waitFor(() => {
-      expect(screen.getByText('Your Clips')).toBeInTheDocument();
-    });
+  await waitFor(() => {
+       expect(screen.getByText('Saved Clips')).toBeInTheDocument();
+     });
 
-    await waitFor(() => {
-      expect(screen.getByText(testText)).toBeInTheDocument();
-    });
+     await waitFor(() => {
+       expect(screen.getByText(testText)).toBeInTheDocument();
+     });
 
-    const state = get(clipState);
-    const createdClipId = state.clipId;
-    expect(createdClipId).not.toBeNull();
+     const state = get(clipState);
+     const createdClipId = state.clipId;
+     expect(createdClipId).not.toBeNull();
 
-    const { fetchClip } = await import('$lib/api/client');
-    const fetchedClip = await fetchClip(createdClipId!);
-    expect(fetchedClip).not.toBeNull();
+     const { fetchClip } = await import('$lib/api/client');
+     const fetchedClip = await fetchClip(createdClipId!);
+     expect(fetchedClip).not.toBeNull();
   });
 
   it('shows validation error for empty text', async () => {
@@ -323,6 +324,165 @@ describe('Clip viewing flow', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Clip deletion flow
+// ---------------------------------------------------------------------------
+
+describe('Clip deletion flow', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    clipState.update((s) => ({ ...s, localClips: [] }));
+  });
+
+  it('shows a snackbar when a clip is deleted', async () => {
+    const testText = 'Delete me please';
+    const now = Date.now();
+    clipState.update((s) => ({
+      ...s,
+      mode: 'list',
+      localClips: [{ id: 'del-clip-1', text: testText, saved_at: now }],
+    }));
+
+    const { default: GridView } = await import('../lib/components/GridView.svelte');
+    const { container } = render(GridView);
+
+    const clipBox = screen.getByText(testText).closest('.clip-box');
+    expect(clipBox).not.toBeNull();
+
+    await fireEvent.click(clipBox!);
+
+    const deleteButton = screen.getByRole('button', { name: 'Delete clip' });
+    expect(deleteButton).toBeInTheDocument();
+
+    await fireEvent.click(deleteButton);
+    await tick();
+
+    await waitFor(() => {
+      const snackbar = container.querySelector('.snackbar');
+      expect(snackbar).not.toBeNull();
+    });
+  });
+
+  it('removes clip from grid after snackbar timer expires', async () => {
+    const testText = 'Temp clip';
+    const now = Date.now();
+    clipState.update((s) => ({
+      ...s,
+      mode: 'list',
+      localClips: [{ id: 'temp-clip-1', text: testText, saved_at: now }],
+    }));
+
+    const { default: GridView } = await import('../lib/components/GridView.svelte');
+    render(GridView);
+
+    const clipBox = screen.getByText(testText).closest('.clip-box');
+    expect(clipBox).not.toBeNull();
+
+    await fireEvent.click(clipBox!);
+
+    const deleteButton = screen.getByRole('button', { name: 'Delete clip' });
+    await fireEvent.click(deleteButton);
+    await tick();
+
+    await waitFor(() => {
+      const snackbar = document.querySelector('.snackbar');
+      expect(snackbar).not.toBeNull();
+    });
+
+    // Advance time to trigger the 5-second delete timer
+    vi.useFakeTimers();
+    vi.advanceTimersByTime(5000);
+    await tick();
+    vi.useRealTimers();
+
+    await waitFor(() => {
+      const clipInGrid = document.querySelector('.clips-grid .clip-box');
+      expect(clipInGrid).toBeNull();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/no clips yet/i)).toBeInTheDocument();
+    });
+  });
+
+  it('restores a deleted clip via snackbar', async () => {
+    const testText = 'Restore me';
+    const now = Date.now();
+    clipState.update((s) => ({
+      ...s,
+      mode: 'list',
+      localClips: [{ id: 'restore-clip-1', text: testText, saved_at: now }],
+    }));
+
+    const { default: GridView } = await import('../lib/components/GridView.svelte');
+    render(GridView);
+
+    const clipBox = screen.getByText(testText).closest('.clip-box');
+    expect(clipBox).not.toBeNull();
+
+    await fireEvent.click(clipBox!);
+
+    const deleteButton = screen.getByRole('button', { name: 'Delete clip' });
+    await fireEvent.click(deleteButton);
+    await tick();
+
+    await waitFor(() => {
+      const snackbar = document.querySelector('.snackbar');
+      expect(snackbar).not.toBeNull();
+    });
+
+    const snackbar = document.querySelector('.snackbar');
+    await fireEvent.click(snackbar!);
+    await tick();
+
+    await waitFor(() => {
+      const restored = document.querySelector('.clip-box');
+      expect(restored).not.toBeNull();
+    });
+  });
+
+  it('shows empty state when all clips are deleted', async () => {
+    const testText = 'Last clip';
+    const now = Date.now();
+    clipState.update((s) => ({
+      ...s,
+      mode: 'list',
+      localClips: [{ id: 'last-clip-1', text: testText, saved_at: now }],
+    }));
+
+    const { default: GridView } = await import('../lib/components/GridView.svelte');
+    render(GridView);
+
+    const clipBox = screen.getByText(testText).closest('.clip-box');
+    expect(clipBox).not.toBeNull();
+
+    await fireEvent.click(clipBox!);
+
+    const deleteButton = screen.getByRole('button', { name: 'Delete clip' });
+    await fireEvent.click(deleteButton);
+    await tick();
+
+    await waitFor(() => {
+      const snackbar = document.querySelector('.snackbar');
+      expect(snackbar).not.toBeNull();
+    });
+
+    vi.useFakeTimers();
+    vi.advanceTimersByTime(5000);
+    await tick();
+    vi.useRealTimers();
+
+    await waitFor(() => {
+      const clipInGrid = document.querySelector('.clips-grid .clip-box');
+      expect(clipInGrid).toBeNull();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/no clips yet/i)).toBeInTheDocument();
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Burn-after-read flow
 // ---------------------------------------------------------------------------
 
@@ -365,21 +525,21 @@ describe('Burn-after-read flow', () => {
       expect(screen.getByText('Share this clip')).toBeInTheDocument();
     });
 
-    await fireEvent.click(screen.getByRole('button', { name: /done/i }));
+const state = get(clipState);
+     const createdClipId = state.clipId;
+     const createdPassword = state.shareUrl?.split('#').pop() || '';
+     expect(createdClipId).not.toBeNull();
+     expect(createdPassword).not.toBe('');
 
-    await waitFor(() => {
-      expect(screen.getByText('Your Clips')).toBeInTheDocument();
-    });
+     await fireEvent.click(screen.getByRole('button', { name: /done/i }));
 
-    await waitFor(() => {
-      expect(screen.getByText('Burn this message')).toBeInTheDocument();
-    });
+     await waitFor(() => {
+       expect(screen.getByText('Saved Clips')).toBeInTheDocument();
+     });
 
-    const state = get(clipState);
-    const createdClipId = state.clipId;
-    const createdPassword = state.password;
-    expect(createdClipId).not.toBeNull();
-    expect(createdPassword).not.toBe('');
+     await waitFor(() => {
+       expect(screen.getByText('Burn this message')).toBeInTheDocument();
+     });
 
     // First access: should decrypt successfully
     cleanup();

@@ -3,10 +3,19 @@
   import type { LocalClip } from '$lib/api/store';
   import { flip } from 'svelte/animate';
   import { cubicOut } from 'svelte/easing';
+  import { removeLocalClip } from '$lib/api/local-store';
 
   let copiedId = $state<string | null>(null);
   let sharedClip = $state<string | null>(null);
-  const clips = $derived($clipState.localClips);
+  let pendingDeletes = $state<{ id: string; text: string; timer: ReturnType<typeof setTimeout> }[]>(
+    [],
+  );
+  const clips = $derived.by(() => {
+    const deletedIds = pendingDeletes.length > 0 ? new Set(pendingDeletes.map((d) => d.id)) : null;
+    return deletedIds
+      ? $clipState.localClips.filter((c) => !deletedIds.has(c.id))
+      : $clipState.localClips;
+  });
   const mode = $derived($clipState.mode);
   const storeClipId = $derived($clipState.clipId);
 
@@ -71,11 +80,40 @@
       prefillText: clip.text,
     }));
   }
+
+  function handleDelete(clip: (typeof clips)[0]) {
+    if (sharedClip === clip.id) {
+      sharedClip = null;
+    }
+    const existing = pendingDeletes.find((d) => d.id === clip.id);
+    if (existing) {
+      clearTimeout(existing.timer);
+      pendingDeletes = pendingDeletes.filter((d) => d.id !== clip.id);
+    }
+    const timer = setTimeout(() => {
+      removeLocalClip(clip.id);
+      clipState.update((s) => ({
+        ...s,
+        localClips: s.localClips.filter((c) => c.id !== clip.id),
+      }));
+      pendingDeletes = pendingDeletes.filter((d) => d.id !== clip.id);
+    }, 5000);
+    pendingDeletes = [...pendingDeletes, { id: clip.id, text: clip.text, timer }];
+  }
+
+  function handleRestoreById(id: string) {
+    const entry = pendingDeletes.find((d) => d.id === id);
+    if (entry) {
+      clearTimeout(entry.timer);
+      pendingDeletes = pendingDeletes.filter((d) => d.id !== id);
+      sharedClip = id;
+    }
+  }
 </script>
 
 <div class="grid-container">
   <div class="grid-header">
-    <h2 class="grid-title">Your Clips</h2>
+    <h2 class="grid-title">Saved Clips</h2>
     <span class="clip-count">total: {clips.length}</span>
   </div>
   {#if clips.length === 0}
@@ -106,6 +144,31 @@
               <div class="clip-box-footer">
                 <span class="clip-time">Saved {formatTimeAgo(clip.saved_at)}</span>
                 <div style="display: flex; align-items: center; gap: var(--space-xs);">
+                  <button
+                    class="copy-icon-btn copy-icon-btn--delete"
+                    aria-label="Delete clip"
+                    onclick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(clip);
+                    }}
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M3 6h18" />
+                      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                      <line x1="10" y1="11" x2="10" y2="17" />
+                      <line x1="14" y1="11" x2="14" y2="17" />
+                    </svg>
+                  </button>
                   <button
                     class="copy-icon-btn"
                     class:copy-icon-btn-copied={copiedId === clip.id}
@@ -185,6 +248,34 @@
     </div>
   {/if}
 </div>
+
+{#if pendingDeletes.length > 0}
+  <div class="snackbar-root">
+    {#each [...pendingDeletes].reverse() as pendingDelete}
+      <button type="button" class="snackbar" onclick={() => handleRestoreById(pendingDelete.id)}>
+        <svg
+          class="snackbar-icon"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="1 4 1 10 7 10" />
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+        </svg>
+        <span class="snackbar-message">
+          <span>'<span class="snackbar-id">{truncate(pendingDelete.text, 20)}</span>' deleted.</span
+          >
+          <span>Click to restore.</span></span
+        >
+      </button>
+    {/each}
+  </div>
+{/if}
 
 <style>
   .grid-container {
@@ -335,5 +426,76 @@
   .copy-icon-btn-copied {
     color: var(--accent);
     animation: copy-bounce 0.4s ease;
+  }
+
+  .copy-icon-btn--delete:hover {
+    color: var(--error);
+    background: var(--error-bg);
+  }
+
+  .snackbar-root {
+    position: fixed;
+    bottom: var(--space-md);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    z-index: 100;
+    width: 300px;
+    font-size: 0.8rem;
+  }
+
+  .snackbar {
+    display: flex;
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: background 0.15s;
+    animation: snackbar-in 0.3s ease;
+    justify-content: center;
+  }
+
+  .snackbar-message {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .snackbar:hover {
+    background: var(--accent-glow);
+  }
+
+  .snackbar-icon {
+    flex-shrink: 0;
+    color: var(--accent);
+  }
+
+  .snackbar-id {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-muted);
+  }
+
+  .snackbar-action {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  @keyframes snackbar-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 </style>
