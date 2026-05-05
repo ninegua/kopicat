@@ -301,7 +301,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: var(--space-xl);
-    padding-bottom: var(--space-2xl);
+    padding-top: var(--space-md);
+    padding-bottom: var(--space-xl);
   }
 </style>

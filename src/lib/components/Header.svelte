@@ -223,7 +223,7 @@
   .header-inner {
     max-width: 700px;
     margin: 0 auto;
-    padding: var(--space-md) var(--space-md) 0 var(--space-md);
+    padding: var(--space-md);
     display: flex;
     justify-content: space-between;
     align-items: center;
