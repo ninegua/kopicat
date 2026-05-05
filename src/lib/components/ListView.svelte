@@ -180,7 +180,7 @@
                 {/if}
               </div>
              <div class="clip-expanded-footer">
-               <span class="clip-time">Created {formatTimeAgo(clip.created_at)}</span>
+               <span class="clip-time">Saved {formatTimeAgo(clip.created_at)}</span>
                 <div style="display: flex; align-items: center; justify-content: flex-end; gap: var(--space-sm);">
                    {#if clip.burn_after_read}
                      <span class="burn-badge">Burn after read</span>

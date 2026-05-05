@@ -157,7 +157,7 @@ describe('Clip list display', () => {
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(screen.getByText('Created just now')).toBeInTheDocument();
+      expect(screen.getByText('Saved just now')).toBeInTheDocument();
     });
   });
 });
@@ -211,7 +211,7 @@ describe('Focus and expand', () => {
     });
   });
 
-  it('shows "Created" timestamp with formatted time for focused clip', async () => {
+  it('shows "Saved" timestamp with formatted time for focused clip', async () => {
     const now = Date.now();
     const clip = makeClip({ created_at: now });
     setListMode([clip]);
@@ -221,7 +221,7 @@ describe('Focus and expand', () => {
     await fireEvent.click(clipButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/Created\s+just now/i)).toBeInTheDocument();
+      expect(screen.getByText(/Saved\s+just now/i)).toBeInTheDocument();
     });
   });
 
@@ -333,7 +333,7 @@ describe('Time formatting', () => {
     const button = getClipButton('this is a test clip content');
     fireEvent.click(button);
     await waitFor(() => {
-      expect(screen.getByText('Created just now')).toBeInTheDocument();
+      expect(screen.getByText('Saved just now')).toBeInTheDocument();
     });
   });
 
@@ -344,7 +344,7 @@ describe('Time formatting', () => {
     const button = getClipButton('this is a test clip content');
     fireEvent.click(button);
     await waitFor(() => {
-      expect(screen.getByText('Created 5m ago')).toBeInTheDocument();
+      expect(screen.getByText('Saved 5m ago')).toBeInTheDocument();
     });
   });
 
@@ -355,7 +355,7 @@ describe('Time formatting', () => {
     const button = getClipButton('this is a test clip content');
     fireEvent.click(button);
     await waitFor(() => {
-      expect(screen.getByText('Created 3h ago')).toBeInTheDocument();
+      expect(screen.getByText('Saved 3h ago')).toBeInTheDocument();
     });
   });
 
@@ -366,7 +366,7 @@ describe('Time formatting', () => {
     const button = getClipButton('this is a test clip content');
     fireEvent.click(button);
     await waitFor(() => {
-      expect(screen.getByText('Created 2d ago')).toBeInTheDocument();
+      expect(screen.getByText('Saved 2d ago')).toBeInTheDocument();
     });
   });
 });
