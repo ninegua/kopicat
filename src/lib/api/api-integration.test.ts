@@ -95,6 +95,8 @@ beforeEach(() => {
     shareUrl: null,
     showShareModal: false,
     prefillText: null,
+    createMode: 'share',
+    editClipId: null,
     localClips: [],
   });
 
@@ -422,6 +424,8 @@ describe('Clip viewing flow', () => {
       shareUrl: null,
       showShareModal: false,
       prefillText: null,
+      createMode: 'share',
+      editClipId: null,
       localClips: [],
     });
 
@@ -542,6 +546,8 @@ describe('UI component state flow', () => {
       shareUrl: null,
       showShareModal: false,
       prefillText: null,
+      createMode: 'share',
+      editClipId: null,
       localClips: [],
     });
 
@@ -569,6 +575,8 @@ describe('UI component state flow', () => {
       shareUrl: null,
       showShareModal: false,
       prefillText: null,
+      createMode: 'share',
+      editClipId: null,
       localClips: [],
     });
 

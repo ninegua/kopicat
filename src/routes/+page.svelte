@@ -83,6 +83,8 @@
       ...s,
       mode: 'idle',
       prefillText: null,
+      createMode: 'share',
+      editClipId: null,
       localClips: getLocalClips(),
       clip: null,
       decryptedText: null,
@@ -94,7 +96,7 @@
   }
 
   function handlePaste(text: string) {
-    clipState.update((s) => ({ ...s, mode: 'create', error: null, prefillText: null }));
+    clipState.update((s) => ({ ...s, mode: 'create', error: null, prefillText: null, createMode: 'share', editClipId: null }));
     queueMicrotask(() => {
       const textarea = document.querySelector('textarea');
       if (textarea) {
@@ -117,6 +119,25 @@
     }
 
     clipState.update((s) => ({ ...s, loading: true, error: null }));
+
+    if ($clipState.createMode === 'edit' && !save_local && $clipState.editClipId) {
+      const updatedClip = {
+        id: $clipState.editClipId,
+        text,
+        saved_at: Date.now(),
+      };
+      const allClips = addLocalClip(updatedClip);
+      clipState.update((s) => ({
+        ...s,
+        mode: 'list',
+        prefillText: null,
+        createMode: 'share',
+        editClipId: null,
+        localClips: allClips,
+        loading: false,
+      }));
+      return;
+    }
 
     try {
       const encryptedBlob = await encrypt(text, pw);
@@ -168,6 +189,7 @@
           shareUrl,
           showShareModal: true,
           prefillText: null,
+          createMode: 'share',
           localClips: allClips,
           loading: false,
         }));
@@ -180,6 +202,7 @@
           shareUrl,
           showShareModal: true,
           prefillText: null,
+          createMode: 'share',
           loading: false,
         }));
       }
@@ -258,6 +281,8 @@
           mode: 'list',
           shareUrl: null,
           prefillText: null,
+          createMode: 'share',
+          editClipId: null,
           localClips: getLocalClips(),
         }));
       }}
@@ -268,7 +293,7 @@
     <IdleView onPaste={handlePaste} />
     <ViewClipsLink />
   {:else}
-    <CreateForm onCreate={handleCreate} />
+    <CreateForm onCreate={handleCreate} createMode={$clipState.createMode} />
     <ViewClipsLink />
   {/if}
 </main>

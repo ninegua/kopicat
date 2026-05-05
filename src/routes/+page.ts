@@ -42,6 +42,8 @@ export const load = async ({ url }: { url: URL }) => {
     shareUrl: null,
     showShareModal: false,
     prefillText,
+    createMode: 'share',
+    editClipId: null,
     localClips: [],
   });
 

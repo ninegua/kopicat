@@ -5,6 +5,7 @@
 
   let {
     onCreate,
+    createMode,
   }: {
     onCreate: (
       text: string,
@@ -13,9 +14,11 @@
       burn_after_read: boolean,
       save_local: boolean,
     ) => Promise<void>;
+    createMode: 'share' | 'edit';
   } = $props();
 
   let saveLocal = $state(false);
+  let shareMessage = $state(false);
 
   const TTL_OPTIONS = [
     { label: '1 minute', value: 60 },
@@ -160,7 +163,11 @@
         <input
           type="checkbox"
           checked={burnAfterRead}
-          onchange={() => (burnAfterRead = !burnAfterRead)}
+          disabled={createMode === 'edit' && !shareMessage}
+          onchange={() => {
+            if (createMode === 'edit' && !shareMessage) return;
+            burnAfterRead = !burnAfterRead;
+          }}
         />
         <span class:burn-active={burnAfterRead}>Burn after read</span>
         <svg
@@ -179,10 +186,17 @@
           />
         </svg>
       </label>
-      <label class="local-checkbox-label">
-        <input type="checkbox" checked={saveLocal} onchange={() => (saveLocal = !saveLocal)} />
-        <span class="local-checkbox-text">Keep a local copy</span>
-      </label>
+      {#if createMode === 'share'}
+        <label class="local-checkbox-label">
+          <input type="checkbox" checked={saveLocal} onchange={() => (saveLocal = !saveLocal)} />
+          <span class="local-checkbox-text">Keep a local copy</span>
+        </label>
+      {:else}
+        <label class="local-checkbox-label">
+          <input type="checkbox" checked={shareMessage} onchange={() => (shareMessage = !shareMessage)} />
+          <span class="local-checkbox-text">Share this message</span>
+        </label>
+      {/if}
     </div>
   </div>
   <div class="form-row">
@@ -192,7 +206,9 @@
         bind:this={ttlButton}
         class="ttl-select"
         class:open={ttlOpen}
+        disabled={createMode === 'edit' && !shareMessage}
         onclick={() => {
+          if (createMode === 'edit' && !shareMessage) return;
           ttlOpen = !ttlOpen;
         }}
       >
@@ -220,7 +236,11 @@
           <circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="15" />
         </svg>
         Creating...
-      {:else if saveLocal}Save & Share{:else}Share{/if}
+      {:else if createMode === 'share'}
+        {#if saveLocal}Save & Share{:else}Share{/if}
+      {:else}
+        {#if shareMessage}Save & Share{:else}Save{/if}
+      {/if}
     </button>
   </div>
 </div>
@@ -301,6 +321,11 @@
     cursor: pointer;
   }
 
+  .burn-checkbox-label input[type='checkbox']:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
   .fire-icon {
     color: #e74c3c;
   }
@@ -346,6 +371,12 @@
   .ttl-select.open {
     border-color: var(--border-focus);
     box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .ttl-select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--bg-input);
   }
 
   .ttl-portal {

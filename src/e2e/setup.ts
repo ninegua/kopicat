@@ -58,6 +58,8 @@ afterEach(() => {
     shareUrl: null,
     showShareModal: false,
     prefillText: null,
+    createMode: 'share',
+    editClipId: null,
     localClips: [],
   });
 });

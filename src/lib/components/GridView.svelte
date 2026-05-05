@@ -78,6 +78,17 @@
       ...s,
       mode: 'create',
       prefillText: clip.text,
+      createMode: 'share',
+    }));
+  }
+
+  function handleEdit(clip: (typeof clips)[0]) {
+    clipState.update((s) => ({
+      ...s,
+      mode: 'create',
+      prefillText: clip.text,
+      createMode: 'edit',
+      editClipId: clip.id,
     }));
   }
 
@@ -213,10 +224,10 @@
                   </button>
                   <button
                     class="copy-icon-btn"
-                    aria-label="Share clip"
+                    aria-label="Edit clip"
                     onclick={(e) => {
                       e.stopPropagation();
-                      handleShare(clip);
+                      handleEdit(clip);
                     }}
                   >
                     <svg
@@ -229,9 +240,8 @@
                       stroke-linecap="round"
                       stroke-linejoin="round"
                     >
-                      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                      <polyline points="16 6 12 2 8 6" />
-                      <line x1="12" y1="2" x2="12" y2="15" />
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                     </svg>
                   </button>
                 </div>
