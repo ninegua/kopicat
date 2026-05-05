@@ -55,13 +55,11 @@
 
   function rearrange(clips: LocalClip[]) {
     const isMobile = window.matchMedia('(max-width: 480px)');
-    if (isMobile.matches) {
-      return clips;
-    }
+    const cols = isMobile.matches ? 2 : 3;
     let result: (typeof clips)[0][] = [];
     for (var i = 0; i < clips.length; i++) {
       let clip = clips[i];
-      if (clip.id == sharedClip && i % 3 == 2) {
+      if (clip.id == sharedClip && (i + 1) % cols == 0) {
         let prev = result.pop();
         if (prev) {
           result.push(clip);
