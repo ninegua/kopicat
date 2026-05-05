@@ -49,7 +49,8 @@
   }
 
   function handleClick(clipId: string) {
-    sharedClip = sharedClip === clipId ? null : clipId;
+    if (sharedClip === clipId) return;
+    sharedClip = clipId;
   }
 
   function rearrange(clips: LocalClip[]) {

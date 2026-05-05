@@ -319,7 +319,10 @@ describe('Clip viewing flow', () => {
     const pwInput = screen.getByLabelText('Password') as HTMLInputElement;
     expect(pwInput).toHaveValue(password);
 
-    expect(getDecryptButton()).not.toBeDisabled();
+    await waitFor(() => {
+      expect(screen.getByText('Decrypted successfully')).toBeInTheDocument();
+    });
+    expect(screen.getByText(text)).toBeInTheDocument();
   });
 });
 

@@ -10,12 +10,14 @@
   } = $props();
 
   let password = $state($clipState.password);
+  let userTyped = $state(false);
 
   $effect(() => {
     password = $clipState.password;
   });
 
   function handleInput() {
+    userTyped = true;
     onSetPassword(password);
   }
 
@@ -23,6 +25,15 @@
     if (!password || !$clipState.clip) return;
     onDecrypt($clipState.clip, password);
   }
+
+  $effect(() => {
+    if (userTyped) return;
+    const clip = $clipState.clip;
+    const pw = $clipState.password;
+    if (clip && pw && !$clipState.loading && $clipState.mode === 'decrypt' && !$clipState.decryptedText) {
+      onDecrypt(clip, pw);
+    }
+  });
 </script>
 
 <div class="card">
