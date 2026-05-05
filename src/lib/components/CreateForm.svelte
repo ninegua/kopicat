@@ -13,6 +13,8 @@
       ttl: number,
       burn_after_read: boolean,
       save_local: boolean,
+      share_message: boolean,
+      edit_clip_id: string | null,
     ) => Promise<void>;
     createMode: 'share' | 'edit';
   } = $props();
@@ -113,7 +115,15 @@
 
     clipState.update((s) => ({ ...s, error: null }));
     const pw = password || generatePassword(11);
-    await onCreate(text, pw, selectedTTL, burnAfterRead, saveLocal);
+    await onCreate(
+      text,
+      pw,
+      selectedTTL,
+      burnAfterRead,
+      createMode == "edit" || saveLocal,
+      createMode === 'share' || shareMessage,
+      $clipState.editClipId,
+    );
   }
 
   const charCount = $derived(text.length);
@@ -193,7 +203,11 @@
         </label>
       {:else}
         <label class="local-checkbox-label">
-          <input type="checkbox" checked={shareMessage} onchange={() => (shareMessage = !shareMessage)} />
+          <input
+            type="checkbox"
+            checked={shareMessage}
+            onchange={() => (shareMessage = !shareMessage)}
+          />
           <span class="local-checkbox-text">Share this message</span>
         </label>
       {/if}
@@ -238,9 +252,7 @@
         Creating...
       {:else if createMode === 'share'}
         {#if saveLocal}Save & Share{:else}Share{/if}
-      {:else}
-        {#if shareMessage}Save & Share{:else}Save{/if}
-      {/if}
+      {:else if shareMessage}Save & Share{:else}Save{/if}
     </button>
   </div>
 </div>

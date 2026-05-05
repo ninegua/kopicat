@@ -99,21 +99,21 @@ describe('Clip creation flow', () => {
 
     await fireEvent.click(screen.getByRole('button', { name: /done/i }));
 
-  await waitFor(() => {
-       expect(screen.getByText('Saved Clips')).toBeInTheDocument();
-     });
+    await waitFor(() => {
+      expect(screen.getByText('Saved Clips')).toBeInTheDocument();
+    });
 
-     await waitFor(() => {
-       expect(screen.getByText(testText)).toBeInTheDocument();
-     });
+    await waitFor(() => {
+      expect(screen.getByText(testText)).toBeInTheDocument();
+    });
 
-     const state = get(clipState);
-     const createdClipId = state.clipId;
-     expect(createdClipId).not.toBeNull();
+    const state = get(clipState);
+    const createdClipId = state.clipId;
+    expect(createdClipId).not.toBeNull();
 
-     const { fetchClip } = await import('$lib/api/client');
-     const fetchedClip = await fetchClip(createdClipId!);
-     expect(fetchedClip).not.toBeNull();
+    const { fetchClip } = await import('$lib/api/client');
+    const fetchedClip = await fetchClip(createdClipId!);
+    expect(fetchedClip).not.toBeNull();
   });
 
   it('shows validation error for empty text', async () => {
@@ -525,21 +525,21 @@ describe('Burn-after-read flow', () => {
       expect(screen.getByText('Share this clip')).toBeInTheDocument();
     });
 
-const state = get(clipState);
-     const createdClipId = state.clipId;
-     const createdPassword = state.shareUrl?.split('#').pop() || '';
-     expect(createdClipId).not.toBeNull();
-     expect(createdPassword).not.toBe('');
+    const state = get(clipState);
+    const createdClipId = state.clipId;
+    const createdPassword = state.shareUrl?.split('#').pop() || '';
+    expect(createdClipId).not.toBeNull();
+    expect(createdPassword).not.toBe('');
 
-     await fireEvent.click(screen.getByRole('button', { name: /done/i }));
+    await fireEvent.click(screen.getByRole('button', { name: /done/i }));
 
-     await waitFor(() => {
-       expect(screen.getByText('Saved Clips')).toBeInTheDocument();
-     });
+    await waitFor(() => {
+      expect(screen.getByText('Saved Clips')).toBeInTheDocument();
+    });
 
-     await waitFor(() => {
-       expect(screen.getByText('Burn this message')).toBeInTheDocument();
-     });
+    await waitFor(() => {
+      expect(screen.getByText('Burn this message')).toBeInTheDocument();
+    });
 
     // First access: should decrypt successfully
     cleanup();

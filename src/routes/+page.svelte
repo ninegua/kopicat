@@ -3,7 +3,7 @@
   import { clipState } from '$lib/api/store';
   import type { ClipState, ClipMode } from '$lib/api/store';
   import { fetchClip, createClip } from '$lib/api/client';
-  import { getLocalClips, addLocalClip } from '$lib/api/local-store';
+  import { getLocalClips, addLocalClip, updateLocalClip } from '$lib/api/local-store';
   import { decrypt, encrypt } from '$lib/crypto';
   import { generateClipId } from '$lib/words';
   import Header from '$lib/components/Header.svelte';
@@ -96,7 +96,14 @@
   }
 
   function handlePaste(text: string) {
-    clipState.update((s) => ({ ...s, mode: 'create', error: null, prefillText: null, createMode: 'share', editClipId: null }));
+    clipState.update((s) => ({
+      ...s,
+      mode: 'create',
+      error: null,
+      prefillText: null,
+      createMode: 'share',
+      editClipId: null,
+    }));
     queueMicrotask(() => {
       const textarea = document.querySelector('textarea');
       if (textarea) {
@@ -112,6 +119,8 @@
     ttl: number,
     burn_after_read: boolean,
     save_local: boolean,
+    share_message: boolean,
+    edit_clip_id: string | null,
   ) {
     if (!text.trim()) {
       setError('Please enter some text to share');
@@ -119,31 +128,11 @@
     }
 
     clipState.update((s) => ({ ...s, loading: true, error: null }));
+    const encryptedBlob = await encrypt(text, pw);
+    const clipId = generateClipId();
+    const expires_after = ttl === 0 ? undefined : ttl;
 
-    if ($clipState.createMode === 'edit' && !save_local && $clipState.editClipId) {
-      const updatedClip = {
-        id: $clipState.editClipId,
-        text,
-        saved_at: Date.now(),
-      };
-      const allClips = addLocalClip(updatedClip);
-      clipState.update((s) => ({
-        ...s,
-        mode: 'list',
-        prefillText: null,
-        createMode: 'share',
-        editClipId: null,
-        localClips: allClips,
-        loading: false,
-      }));
-      return;
-    }
-
-    try {
-      const encryptedBlob = await encrypt(text, pw);
-      const clipId = generateClipId();
-      const expires_after = ttl === 0 ? undefined : ttl;
-
+    if (share_message) {
       const result = await createClip({
         id: clipId,
         blob: encryptedBlob,
@@ -166,53 +155,38 @@
         clipState.update((s) => ({ ...s, error: msg || 'Failed to create clip', loading: false }));
         return;
       }
-
-      const shareUrl = `${window.location.origin}/?${clipId}#${pw}`;
-      const now = Date.now();
-      const ttlSeconds = ttl === 0 ? 900 : ttl;
-
-      if (save_local) {
-        const newClip = {
-          id: clipId,
-          text,
-          saved_at: now,
-          blob: encryptedBlob,
-        };
-
-        const allClips = addLocalClip(newClip);
-
-        clipState.update((s) => ({
-          ...s,
-          mode: 'list',
-          clipId,
-          decryptedText: text,
-          shareUrl,
-          showShareModal: true,
-          prefillText: null,
-          createMode: 'share',
-          localClips: allClips,
-          loading: false,
-        }));
-      } else {
-        clipState.update((s) => ({
-          ...s,
-          mode: 'list',
-          clipId,
-          decryptedText: text,
-          shareUrl,
-          showShareModal: true,
-          prefillText: null,
-          createMode: 'share',
-          loading: false,
-        }));
-      }
-    } catch (e: any) {
-      clipState.update((s) => ({
-        ...s,
-        error: e.message || 'Failed to create clip',
-        loading: false,
-      }));
     }
+
+    const shareUrl = `${window.location.origin}/?${clipId}#${pw}`;
+    const now = Date.now();
+    const newClip = {
+      id: clipId,
+      text,
+      saved_at: now,
+      blob: encryptedBlob,
+    };
+    let allClips;
+    if (save_local) {
+      if (edit_clip_id) {
+        updateLocalClip(edit_clip_id, { id: clipId, text, saved_at: now, blob: encryptedBlob });
+        allClips = getLocalClips();
+      } else {
+        allClips = addLocalClip(newClip);
+      }
+    }
+    clipState.update((s) => ({
+      ...s,
+      mode: 'list',
+      clipId,
+      decryptedText: text,
+      shareUrl: share_message ? shareUrl : s.shareUrl,
+      showShareModal: share_message,
+      prefillText: null,
+      createMode: 'share',
+      editClipId: null,
+      localClips: allClips,
+      loading: false,
+    }));
   }
 
   onMount(async () => {

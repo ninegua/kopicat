@@ -493,11 +493,6 @@
     color: var(--text-muted);
   }
 
-  .snackbar-action {
-    font-weight: 600;
-    white-space: nowrap;
-  }
-
   @keyframes snackbar-in {
     from {
       opacity: 0;
