@@ -1,5 +1,6 @@
 <script lang="ts">
   import { clipState } from '$lib/api/store';
+  import type { LocalClip } from '$lib/api/store';
   import { flip } from 'svelte/animate';
   import { cubicOut } from 'svelte/easing';
   import ShareCard from './ShareCard.svelte';
@@ -52,18 +53,22 @@
     shareError = null;
   }
 
-  function rearrange(clips) {
-    const isMobile = window.matchMedia('(max-width: 400px)');
+  function rearrange(clips: LocalClip[]) {
+    const isMobile = window.matchMedia('(max-width: 480px)');
     if (isMobile.matches) {
       return clips;
     }
-    let result = [];
+    let result: (typeof clips)[0][] = [];
     for (var i = 0; i < clips.length; i++) {
       let clip = clips[i];
       if (clip.id == sharedClip && i % 3 == 2) {
         let prev = result.pop();
-        result.push(clip);
-        result.push(prev);
+        if (prev) {
+          result.push(clip);
+          result.push(prev);
+        } else {
+          result.push(clip);
+        }
       } else {
         result.push(clip);
       }
@@ -257,7 +262,7 @@
 <style>
   .grid-container {
     width: 100%;
-    max-width: 700px;
+    max-width: 600px;
     margin: 0 auto;
   }
 
@@ -288,9 +293,16 @@
 
   .clips-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 180px));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-auto-rows: 120px;
     gap: var(--space-sm);
+    width: 100%;
+  }
+
+  @media (max-width: 480px) {
+    .clips-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
   .clips-grid-disabled {
