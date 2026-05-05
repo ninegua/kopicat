@@ -14,33 +14,6 @@
     }));
     open = false;
   }
-
-  let showConfirm = $state(false);
-  let expiredCount = $state(0);
-
-  function handleClearExpired() {
-    const clips = getLocalClips();
-    const now = Date.now();
-    expiredCount = clips.filter((c) => c.expires_at && c.expires_at <= now).length;
-    showConfirm = true;
-    open = false;
-  }
-
-  function confirmClear() {
-    const clips = getLocalClips();
-    const now = Date.now();
-    const kept = clips.filter((c) => !c.expires_at || c.expires_at > now);
-    localStorage.setItem('copycat_clips', JSON.stringify(kept));
-    clipState.update((s) => ({
-      ...s,
-      localClips: s.localClips.filter((c) => !c.expires_at || c.expires_at > now),
-    }));
-    showConfirm = false;
-  }
-
-  function dismissConfirm() {
-    showConfirm = false;
-  }
 </script>
 
 <header class="header">
@@ -80,73 +53,12 @@
               </svg>
               New clip
             </button>
-            <button
-              class="menu-item"
-              class:menu-item-danger={expiredCount > 0}
-              role="menuitem"
-              onclick={handleClearExpired}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M3 6h18" />
-                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-              </svg>
-              {#if expiredCount > 0}
-                Clear expired ({expiredCount})
-              {:else}
-                Clear expired
-              {/if}
-            </button>
           </div>
         {/if}
       </div>
     {/if}
   </div>
 </header>
-
-{#if showConfirm}
-  <div
-    class="modal-backdrop"
-    role="presentation"
-    tabindex="-1"
-    onclick={dismissConfirm}
-    onkeydown={(e) => {
-      if (e.key === 'Escape') dismissConfirm();
-    }}
-  >
-    <div
-      class="modal"
-      onclick={(e) => e.stopPropagation()}
-      onkeydown={(e) => {
-        if (e.key === 'Escape') dismissConfirm();
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-      tabindex="-1"
-    >
-      <h3 id="modal-title" class="modal-title">Clear expired clips</h3>
-      <p class="modal-body">
-        Are you sure you want to delete
-        <strong>{expiredCount} expired clip{expiredCount !== 1 ? 's' : ''}</strong>
-        from your local storage? This action cannot be undone.
-      </p>
-      <div class="modal-actions">
-        <button class="btn-secondary" onclick={dismissConfirm}>Cancel</button>
-        <button class="btn-primary" onclick={confirmClear}>Delete all</button>
-      </div>
-    </div>
-  </div>
-{/if}
 
 <style>
   @font-face {
@@ -285,106 +197,5 @@
 
   .menu-item:hover {
     background: rgba(0, 0, 0, 0.04);
-  }
-
-  .menu-item-danger {
-    color: var(--error);
-  }
-
-  .menu-item-danger:hover {
-    background: var(--error-bg);
-  }
-
-  .modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 200;
-    animation: backdrop-fade 0.15s ease-out;
-  }
-
-  @keyframes backdrop-fade {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  .modal {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: var(--space-xl);
-    max-width: 400px;
-    width: calc(100% - var(--space-lg));
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
-    animation: modal-fade 0.15s ease-out;
-  }
-
-  @keyframes modal-fade {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  .modal-title {
-    margin: 0 0 var(--space-md);
-    font-size: 1.1rem;
-    color: var(--text-primary);
-  }
-
-  .modal-body {
-    margin: 0 0 var(--space-lg);
-    color: var(--text-primary);
-    line-height: 1.5;
-    font-size: 0.9rem;
-  }
-
-  .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--space-sm);
-  }
-
-  .btn-primary {
-    background: var(--accent);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    padding: var(--space-xs) var(--space-md);
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-weight: 600;
-  }
-
-  .btn-primary:hover {
-    border-color: var(--accent);
-  }
-
-  .btn-secondary {
-    background: transparent;
-    color: var(--text-muted);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    padding: var(--space-xs) var(--space-md);
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .btn-secondary:hover {
-    border-color: var(--text-muted);
-    color: var(--text-primary);
   }
 </style>

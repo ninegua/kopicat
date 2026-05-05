@@ -7,11 +7,8 @@ export type ClipMode = 'idle' | 'create' | 'decrypt' | 'result' | 'not-found' | 
 export interface LocalClip {
   id: string;
   text: string;
-  created_at: number;
-  expires_at: number;
-  burn_after_read: boolean;
+  saved_at: number;
   blob?: string;
-  password?: string;
 }
 
 export interface ClipState {

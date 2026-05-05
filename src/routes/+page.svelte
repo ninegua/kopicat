@@ -154,11 +154,8 @@
         const newClip = {
           id: clipId,
           text,
-          created_at: now,
-          expires_at: now + ttlSeconds * 1000,
-          burn_after_read,
+          saved_at: now,
           blob: encryptedBlob,
-          password: pw,
         };
 
         const allClips = addLocalClip(newClip);

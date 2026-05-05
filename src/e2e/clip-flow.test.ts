@@ -377,7 +377,7 @@ describe('Burn-after-read flow', () => {
 
     const state = get(clipState);
     const createdClipId = state.clipId;
-    const createdPassword = state.localClips.find((c) => c.id === createdClipId)?.password || '';
+    const createdPassword = state.password;
     expect(createdClipId).not.toBeNull();
     expect(createdPassword).not.toBe('');
 

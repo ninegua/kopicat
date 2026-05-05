@@ -3,16 +3,7 @@
   import type { LocalClip } from '$lib/api/store';
   import { flip } from 'svelte/animate';
   import { cubicOut } from 'svelte/easing';
-  import ShareCard from './ShareCard.svelte';
-  import { generatePassword, encrypt } from '$lib/crypto';
-  import { generateClipId } from '$lib/words';
-  import { createClip } from '$lib/api/client';
-  import { updateLocalClip } from '$lib/api/local-store';
 
-  let showShareCard = $state(false);
-  let shareUrl = $state('');
-  let sharingClip = $state<string | null>(null);
-  let shareError = $state<string | null>(null);
   let copiedId = $state<string | null>(null);
   let sharedClip = $state<string | null>(null);
   const clips = $derived($clipState.localClips);
@@ -50,7 +41,6 @@
 
   function handleClick(clipId: string) {
     sharedClip = sharedClip === clipId ? null : clipId;
-    shareError = null;
   }
 
   function rearrange(clips: LocalClip[]) {
@@ -74,63 +64,12 @@
     return result;
   }
 
-  async function handleShare(clip: (typeof clips)[0]) {
-    shareError = null;
-
-    const isExpired = clip.expires_at && clip.expires_at <= Date.now();
-
-    if (isExpired && !clip.password) {
-      shareError = 'Cannot share: missing decryption key for this expired clip.';
-      return;
-    }
-
-    if (isExpired) {
-      sharingClip = clip.id;
-      try {
-        const newId = generateClipId();
-        const newPw = generatePassword();
-        const encryptedBlob = await encrypt(clip.text, newPw);
-        const result = await createClip({
-          id: newId,
-          blob: encryptedBlob,
-          burn_after_read: clip.burn_after_read,
-        });
-
-        if ('error' in result) {
-          shareError = result.error || 'Failed to create clip on server.';
-          return;
-        }
-
-        const now = Date.now();
-        const newClip = {
-          id: newId,
-          text: clip.text,
-          created_at: now,
-          expires_at: now + 900 * 1000,
-          burn_after_read: clip.burn_after_read,
-          blob: encryptedBlob,
-          password: newPw,
-        };
-
-        updateLocalClip(sharingClip, newClip);
-        sharedClip = newClip.id;
-
-        shareUrl = `${window.location.origin}/?${newId}#${newPw}`;
-        showShareCard = true;
-      } catch (e: any) {
-        shareError = e.message || 'Failed to re-create clip.';
-      } finally {
-        sharingClip = null;
-      }
-    } else {
-      shareUrl = `${window.location.origin}/?${clip.id}#${clip.password}`;
-      showShareCard = true;
-    }
-  }
-
-  function handleCloseShare() {
-    showShareCard = false;
-    shareUrl = '';
+  function handleShare(clip: (typeof clips)[0]) {
+    clipState.update((s) => ({
+      ...s,
+      mode: 'create',
+      prefillText: clip.text,
+    }));
   }
 </script>
 
@@ -144,7 +83,7 @@
       <p>No clips yet. Create one to get started.</p>
     </div>
   {:else}
-    <div class="clips-grid" class:clips-grid-disabled={showShareCard}>
+    <div class="clips-grid">
       {#each rearrange(clips) as clip (clip.id)}
         <div
           class="clip-box"
@@ -164,15 +103,9 @@
           {#if sharedClip === clip.id}
             <div class="clip-box-content">
               <pre class="clipped-text">{clip.text}</pre>
-              {#if shareError}
-                <span class="share-error">{shareError}</span>
-              {/if}
               <div class="clip-box-footer">
-                <span class="clip-time">Saved {formatTimeAgo(clip.created_at)}</span>
+                <span class="clip-time">Saved {formatTimeAgo(clip.saved_at)}</span>
                 <div style="display: flex; align-items: center; gap: var(--space-xs);">
-                  {#if clip.burn_after_read}
-                    <span class="burn-badge">Burn after read</span>
-                  {/if}
                   <button
                     class="copy-icon-btn"
                     class:copy-icon-btn-copied={copiedId === clip.id}
@@ -244,7 +177,7 @@
           {:else}
             <div class="clip-box-collapsed">
               <span class="clip-preview">{truncate(clip.text, 50)}</span>
-              <span class="clip-time">{formatTimeAgo(clip.created_at)}</span>
+              <span class="clip-time">{formatTimeAgo(clip.saved_at)}</span>
             </div>
           {/if}
         </div>
@@ -252,10 +185,6 @@
     </div>
   {/if}
 </div>
-
-{#if showShareCard}
-  <ShareCard url={shareUrl} onDismiss={handleCloseShare} />
-{/if}
 
 <style>
   .grid-container {
@@ -301,11 +230,6 @@
     .clips-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-  }
-
-  .clips-grid-disabled {
-    pointer-events: none;
-    opacity: 0.6;
   }
 
   .clip-box {
@@ -390,19 +314,6 @@
     flex-shrink: 0;
   }
 
-  .burn-badge {
-    padding: var(--space-xs) var(--space-sm);
-    background: var(--error-bg);
-    border: 1px solid rgba(196, 69, 54, 0.2);
-    border-radius: 100px;
-    color: var(--error);
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    flex-shrink: 0;
-  }
-
   .copy-icon-btn {
     background: none;
     border: none;
@@ -424,16 +335,5 @@
   .copy-icon-btn-copied {
     color: var(--accent);
     animation: copy-bounce 0.4s ease;
-  }
-
-  .share-error {
-    color: var(--error);
-    font-size: 0.7rem;
-    padding: var(--space-xs) var(--space-sm);
-    background: var(--error-bg);
-    border-radius: var(--radius-sm);
-    width: 100%;
-    text-align: center;
-    margin-top: var(--space-xs);
   }
 </style>
