@@ -19,7 +19,7 @@ async function fillText(container: HTMLElement, text: string) {
 }
 
 function getCreateButton(): HTMLButtonElement {
-  return screen.getByRole('button', { name: /create clip/i }) as HTMLButtonElement;
+  return screen.getByRole('button', { name: /share/i }) as HTMLButtonElement;
 }
 
 function getDecryptButton(): HTMLButtonElement {
@@ -86,8 +86,10 @@ describe('Clip creation flow', () => {
     await fireEvent.click(createBtn);
 
     await waitFor(() => {
-      expect(createBtn).toBeDisabled();
+      expect(screen.getByText('Share this clip')).toBeInTheDocument();
     });
+
+    await fireEvent.click(screen.getByRole('button', { name: /done/i }));
 
     await waitFor(() => {
       expect(screen.getByText('Your Clips')).toBeInTheDocument();
@@ -342,13 +344,7 @@ describe('Burn-after-read flow', () => {
       ).not.toBeInTheDocument();
     });
 
-    // Wait for the page to settle (any onMount fetches complete)
-    await waitFor(() => {
-      const btn = screen.getByRole('button', { name: /create clip/i });
-      expect(btn).not.toBeDisabled();
-    });
-
-    await fillText(container, testText);
+   await fillText(container, testText);
 
     // Enable burn-after-read by checking the checkbox
     const burnCheckbox = getBurnCheckbox();
@@ -358,8 +354,10 @@ describe('Burn-after-read flow', () => {
     await fireEvent.click(createBtn);
 
     await waitFor(() => {
-      expect(createBtn).toBeDisabled();
+      expect(screen.getByText('Share this clip')).toBeInTheDocument();
     });
+
+    await fireEvent.click(screen.getByRole('button', { name: /done/i }));
 
     await waitFor(() => {
       expect(screen.getByText('Your Clips')).toBeInTheDocument();

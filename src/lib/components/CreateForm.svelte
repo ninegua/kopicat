@@ -131,7 +131,7 @@
           </svg>
           Creating...
         {:else}
-          Create clip
+          Share
         {/if}
       </button>
     </div>

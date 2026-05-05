@@ -161,7 +161,7 @@
         clipId,
         decryptedText: text,
         shareUrl,
-        showShareModal: false,
+        showShareModal: true,
         prefillText: null,
         localClips: allClips,
         loading: false,
@@ -231,11 +231,6 @@
           localClips: getLocalClips(),
         }))}
     />
-  {:else if currentMode === 'list'}
-    <ListView />
-  {:else if currentMode === 'idle' && !$clipState.prefillText}
-    <IdleView onPaste={handlePaste} />
-    <ViewClipsLink />
   {:else if $clipState.showShareModal && $clipState.shareUrl}
     <ShareCard
       url={$clipState.shareUrl}
@@ -246,9 +241,15 @@
           mode: 'list',
           shareUrl: null,
           prefillText: null,
+          localClips: getLocalClips(),
         }));
       }}
     />
+  {:else if currentMode === 'list'}
+    <ListView />
+  {:else if currentMode === 'idle' && !$clipState.prefillText}
+    <IdleView onPaste={handlePaste} />
+    <ViewClipsLink />
   {:else}
     <CreateForm onCreate={handleCreate} />
     <ViewClipsLink />
