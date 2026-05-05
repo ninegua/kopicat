@@ -1,5 +1,7 @@
 <script lang="ts">
   import { clipState } from '$lib/api/store';
+  import { flip } from 'svelte/animate';
+  import { cubicOut } from 'svelte/easing';
   import ShareCard from './ShareCard.svelte';
   import { generatePassword, encrypt } from '$lib/crypto';
   import { generateClipId } from '$lib/words';
@@ -154,6 +156,7 @@
           role="button"
           tabindex="0"
           aria-pressed={sharedClip === clip.id}
+          animate:flip={{ duration: 300, easing: cubicOut }}
         >
           {#if sharedClip === clip.id}
             <div class="clip-box-content">
@@ -304,7 +307,8 @@
     transition:
       border-color 0.15s,
       box-shadow 0.15s,
-      background 0.15s;
+      background 0.15s,
+      transform 0.3s;
     display: flex;
     flex-direction: column;
   }
