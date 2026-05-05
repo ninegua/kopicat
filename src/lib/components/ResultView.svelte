@@ -71,7 +71,7 @@
 
     {#if $clipState.decryptedText}
       <div class="form-row">
-        <button class="btn-primary" onclick={copyText} disabled={copyFeedback === 'text'}>
+        <button class="btn-primary" class:btn-primary--copied={copyFeedback === 'text'} onclick={copyText} disabled={copyFeedback === 'text'}>
           {#if copyFeedback === 'text'}
             <svg
               width="16"

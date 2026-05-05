@@ -35,6 +35,8 @@
     onDestroy(() => document.removeEventListener('keydown', handleKeydown));
   });
 
+  let copied = $state(false);
+
   function handleBackdropClick(e: MouseEvent) {
     if ((e.target as HTMLElement).classList.contains('modal-backdrop')) {
       onDismiss();
@@ -72,8 +74,11 @@
       <div class="btn-row">
         <button
           class="btn-primary"
+          class:btn-primary--copied={copied}
           onclick={() => {
             navigator.clipboard.writeText(url);
+            copied = true;
+            setTimeout(() => (copied = false), 400);
           }}
         >
           <svg
