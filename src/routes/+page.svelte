@@ -244,6 +244,18 @@
           prefillText: null,
           localClips: getLocalClips(),
         }))}
+      onSave={(clipId, text, blob) => {
+        const now = Date.now();
+        const newClip = { id: clipId, text, saved_at: now, blob };
+        const allClips = addLocalClip(newClip);
+        clipState.update((s) => ({
+          ...s,
+          mode: 'list',
+          clipId,
+          localClips: allClips,
+          showShareModal: false,
+        }));
+      }}
     />
   {:else if $clipState.showShareModal && $clipState.shareUrl}
     <ShareCard

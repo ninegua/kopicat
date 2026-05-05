@@ -1,9 +1,10 @@
 <script lang="ts">
   import { clipState } from '$lib/api/store';
 
-  let { onDismiss }: { onDismiss: () => void } = $props();
+  let { onDismiss, onSave }: { onDismiss: () => void; onSave?: (clipId: string, text: string, blob: string) => void } = $props();
 
   let copyFeedback = $state<'text' | null>(null);
+  let saveLocal = $state(false);
 
   async function copyText() {
     const text = $clipState.decryptedText;
@@ -44,9 +45,21 @@
         <span>Decrypted successfully</span>
       </div>
 
-      {#if $clipState.clip?.burn_after_read}
-        <div class="burn-badge">Burned</div>
-      {/if}
+      <div style="display: flex; align-items: center; gap: var(--space-sm);">
+        {#if $clipState.clip?.burn_after_read}
+          <div class="burn-badge">Burned</div>
+        {/if}
+
+        {#if !$clipState.clip?.burn_after_read && $clipState.clip?.blob && onSave}
+          <label class="result-checkbox-label">
+            <input
+              type="checkbox"
+              bind:checked={saveLocal}
+            />
+            <span>Save a local copy</span>
+          </label>
+        {/if}
+      </div>
     </div>
 
     {#if $clipState.error}
@@ -109,7 +122,13 @@
           {/if}
         </button>
 
-        <button class="btn-secondary" onclick={onDismiss}>
+        <button class="btn-secondary" onclick={() => {
+          if (saveLocal && $clipState.clipId && $clipState.clip?.blob && $clipState.decryptedText) {
+            onSave($clipState.clipId, $clipState.decryptedText, $clipState.clip!.blob);
+          } else {
+            onDismiss();
+          }
+        }}>
           <svg
             width="16"
             height="16"
@@ -122,7 +141,7 @@
           >
             <polyline points="20 6 9 17 4 12" />
           </svg>
-          Done
+          {#if saveLocal}Save{:else}Done{/if}
         </button>
       </div>
     {/if}
@@ -167,5 +186,27 @@
 
   .error-banner {
     margin: var(--space-md) var(--space-md) 0;
+  }
+
+  .result-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .result-checkbox-label:hover {
+    color: var(--text-secondary);
+  }
+
+  .result-checkbox-label input[type='checkbox'] {
+    accent-color: var(--accent);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
   }
 </style>

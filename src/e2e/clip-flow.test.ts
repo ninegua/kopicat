@@ -5,6 +5,7 @@ import { clipState } from '$lib/api/store';
 import { get } from 'svelte/store';
 import { encrypt } from '$lib/crypto';
 import { generateClipId } from '$lib/words';
+import { getLocalClips, addLocalClip } from '$lib/api/local-store';
 import type { ClipInput } from '$lib/api/client';
 
 import Page from '../routes/+page.svelte';
@@ -597,5 +598,267 @@ describe('Burn-after-read flow', () => {
     await waitFor(() => {
       expect(screen.getByText(/not found/i)).toBeInTheDocument();
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// ResultView save local copy
+// ---------------------------------------------------------------------------
+
+describe('ResultView save local copy', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    clipState.update((s) => ({ ...s, localClips: [] }));
+  });
+
+  it('saves a local copy when checkbox is checked', async () => {
+    const testText = 'Save me locally';
+    const password = 'testPassword123';
+    const clipId = generateClipId();
+    const blob = await encrypt(testText, password);
+
+    const { default: ResultView } = await import('../lib/components/ResultView.svelte');
+
+    clipState.update((s) => ({
+      ...s,
+      mode: 'result',
+      clipId,
+      clip: {
+        blob,
+        created_at: Date.now(),
+        expires_at: 0,
+        burn_after_read: false,
+      },
+      decryptedText: testText,
+      error: null,
+      loading: false,
+      shareUrl: null,
+      showShareModal: false,
+      prefillText: null,
+      createMode: 'share',
+      editClipId: null,
+      localClips: [],
+      password: '',
+    }));
+
+    const savedData = { id: null as string | null, text: null as string | null, blob: null as string | null };
+    const onSave = (savedClipId: string, savedText: string, savedBlob: string) => {
+      savedData.id = savedClipId;
+      savedData.text = savedText;
+      savedData.blob = savedBlob;
+    };
+
+    render(ResultView, {
+      props: {
+        onDismiss: () => {},
+        onSave,
+      },
+    });
+
+    // Wait for the component to render
+    await waitFor(() => {
+      expect(screen.getByText('Decrypted successfully')).toBeInTheDocument();
+    });
+
+    // Find and check the "Save a local copy" checkbox
+    const checkbox = screen.getByLabelText(/save a local copy/i) as HTMLInputElement;
+    expect(checkbox).not.toBeChecked();
+
+    await fireEvent.click(checkbox);
+    expect(checkbox).toBeChecked();
+
+    // Button text should change from "Done" to "Save"
+    const saveButton = screen.getByRole('button', { name: /save/i }) as HTMLButtonElement;
+    expect(saveButton).toBeInTheDocument();
+
+    await fireEvent.click(saveButton);
+
+    // Verify onSave was called with correct data
+    expect(savedData.id).toBe(clipId);
+    expect(savedData.text).toBe(testText);
+    expect(savedData.blob).toBe(blob);
+  });
+
+  it('does not save when checkbox is unchecked', async () => {
+    const testText = 'Do not save me';
+    const password = 'testPassword456';
+    const clipId = generateClipId();
+    const blob = await encrypt(testText, password);
+
+    const { default: ResultView } = await import('../lib/components/ResultView.svelte');
+
+    clipState.update((s) => ({
+      ...s,
+      mode: 'result',
+      clipId,
+      clip: {
+        blob,
+        created_at: Date.now(),
+        expires_at: 0,
+        burn_after_read: false,
+      },
+      decryptedText: testText,
+      error: null,
+      loading: false,
+      shareUrl: null,
+      showShareModal: false,
+      prefillText: null,
+      createMode: 'share',
+      editClipId: null,
+      localClips: [],
+      password: '',
+    }));
+
+    const onSave = vi.fn();
+
+    render(ResultView, {
+      props: {
+        onDismiss: () => {},
+        onSave,
+      },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Decrypted successfully')).toBeInTheDocument();
+    });
+
+    const checkbox = screen.getByLabelText(/save a local copy/i) as HTMLInputElement;
+    expect(checkbox).not.toBeChecked();
+
+    const doneButton = screen.getByRole('button', { name: /done/i }) as HTMLButtonElement;
+    expect(doneButton).toBeInTheDocument();
+
+    await fireEvent.click(doneButton);
+
+    // onSave should not have been called
+    expect(onSave).not.toHaveBeenCalled();
+
+    // localStorage should be empty
+    const savedClips = getLocalClips();
+    expect(savedClips.length).toBe(0);
+  });
+
+  it('persists clip to localStorage when saving', async () => {
+    const testText = 'Persist me';
+    const password = 'testPasswordPersist';
+    const clipId = generateClipId();
+    const blob = await encrypt(testText, password);
+
+    const { default: ResultView } = await import('../lib/components/ResultView.svelte');
+
+    clipState.update((s) => ({
+      ...s,
+      mode: 'result',
+      clipId,
+      clip: {
+        blob,
+        created_at: Date.now(),
+        expires_at: 0,
+        burn_after_read: false,
+      },
+      decryptedText: testText,
+      error: null,
+      loading: false,
+      shareUrl: null,
+      showShareModal: false,
+      prefillText: null,
+      createMode: 'share',
+      editClipId: null,
+      localClips: [],
+      password: '',
+    }));
+
+    const onSave = (savedClipId: string, savedText: string, savedBlob: string) => {
+      const now = Date.now();
+      const newClip = { id: savedClipId, text: savedText, saved_at: now, blob: savedBlob };
+      addLocalClip(newClip);
+      clipState.update((s) => ({
+        ...s,
+        mode: 'list',
+        clipId: savedClipId,
+        localClips: getLocalClips(),
+      }));
+    };
+
+    render(ResultView, {
+      props: {
+        onDismiss: () => {},
+        onSave,
+      },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Decrypted successfully')).toBeInTheDocument();
+    });
+
+    const checkbox = screen.getByLabelText(/save a local copy/i) as HTMLInputElement;
+    expect(checkbox).not.toBeChecked();
+
+    await fireEvent.click(checkbox);
+    expect(checkbox).toBeChecked();
+
+    const saveButton = screen.getByRole('button', { name: /save/i }) as HTMLButtonElement;
+    expect(saveButton).toBeInTheDocument();
+
+    await fireEvent.click(saveButton);
+
+    // Verify localStorage has the clip
+    const savedClips = getLocalClips();
+    expect(savedClips.length).toBe(1);
+    expect(savedClips[0].id).toBe(clipId);
+    expect(savedClips[0].text).toBe(testText);
+    expect(savedClips[0].blob).toBe(blob);
+  });
+
+  it('does not show save option for burn-after-read clips', async () => {
+    const testText = 'Burn me';
+    const password = 'testPassword789';
+    const clipId = generateClipId();
+    const blob = await encrypt(testText, password);
+
+    const { default: ResultView } = await import('../lib/components/ResultView.svelte');
+
+    clipState.update((s) => ({
+      ...s,
+      mode: 'result',
+      clipId,
+      clip: {
+        blob,
+        created_at: Date.now(),
+        expires_at: 0,
+        burn_after_read: true,
+      },
+      decryptedText: testText,
+      error: null,
+      loading: false,
+      shareUrl: null,
+      showShareModal: false,
+      prefillText: null,
+      createMode: 'share',
+      editClipId: null,
+      localClips: [],
+      password: '',
+    }));
+
+    const onSave = vi.fn();
+
+    render(ResultView, {
+      props: {
+        onDismiss: () => {},
+        onSave,
+      },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Decrypted successfully')).toBeInTheDocument();
+    });
+
+    // Should not have save checkbox or save button
+    expect(screen.queryByLabelText(/save a local copy/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /save/i })).not.toBeInTheDocument();
+
+    // Only "Done" button should be visible
+    const doneButton = screen.getByRole('button', { name: /done/i }) as HTMLButtonElement;
+    expect(doneButton).toBeInTheDocument();
   });
 });
