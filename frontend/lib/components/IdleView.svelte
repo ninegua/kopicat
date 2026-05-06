@@ -118,7 +118,7 @@
     </div>
   </div>
   <button type="button" class="idle-link" onclick={handleReceiveClick}
-    >Or are you looking to <span class="idle-link-text">receive a copy</span>?</button
+    >Or do you want to <span class="idle-link-text">receive a copy</span>?</button
   >
 </div>
 
@@ -194,7 +194,7 @@
 
   .idle-link {
     color: var(--text-muted);
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     text-decoration: none;
     cursor: pointer;
     border: 0;

@@ -230,7 +230,6 @@
               <div class="clip-box-content">
                 {#if isModified(clip)}
                   <div class="clip-box-header">
-                    <span class="clip-time">Last modified {formatTimeAgo(clip.saved_at)}</span>
                     <div style="display: flex; align-items: center; gap: var(--space-xs);">
                       <span class="clip-save">Save?</span>
                       <button
@@ -433,9 +432,9 @@
           <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
         </svg>
         <span class="snackbar-message">
-          <span>'<span class="snackbar-id">{truncate(pendingDelete.text, 20)}</span>' deleted.</span
+          <span>Deleted '<span class="snackbar-id">{truncate(pendingDelete.text, 20)}</span>'.</span
           >
-          <span>Changing mind? Click to restore.</span></span
+          <span>Not yet? Click to restore.</span></span
         >
       </button>
     {/each}
