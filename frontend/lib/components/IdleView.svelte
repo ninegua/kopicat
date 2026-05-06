@@ -9,7 +9,7 @@
     e.stopPropagation();
     const id = generateClipId();
     const pw = generatePassword(8);
-    const url = `${location.origin}/receive?${id}#${pw}`;
+    const url = `${location.origin}/send?${id}#${pw}`;
     clipState.update((s) => ({
       ...s,
       showModal: 'receive',

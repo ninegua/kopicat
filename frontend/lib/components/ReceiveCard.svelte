@@ -58,11 +58,12 @@
           stroke-linecap="round"
           stroke-linejoin="round"
         >
-          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-          <polyline points="16 6 12 2 8 6" />
-          <line x1="12" y1="2" x2="12" y2="15" />
+          <path d="M12 3v12" />
+          <polyline points="8 11 12 15 16 11" />
+          <path d="M4 21h16" />
+          <path d="M3 16h18" />
         </svg>
-        <h3>Scan to receive</h3>
+        <h3>Scan to send</h3>
       </div>
 
       <canvas class="qr-canvas" id="qr-canvas"></canvas>
@@ -97,7 +98,7 @@
           Copy link
         </button>
 
-        <button class="btn-secondary" onclick={onDismiss}> Done </button>
+        <button class="btn-secondary" onclick={onDismiss}> Dismiss </button>
       </div>
     </div>
   </div>
