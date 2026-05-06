@@ -24,6 +24,7 @@ export interface ClipState {
   createMode: CreateMode;
   editClipId: string | null;
   localClips: LocalClip[];
+  isLocal: boolean;
 }
 
 const initial: ClipState = {
@@ -39,6 +40,7 @@ const initial: ClipState = {
   createMode: 'share',
   editClipId: null,
   localClips: [],
+  isLocal: false,
 };
 
 export const clipState = writable<ClipState>(initial);

@@ -124,7 +124,7 @@
   }
 
   function handleEdit(clip: (typeof clips)[0]) {
-    goto(`/edit?edit=${clip.id}&text=${encodeURIComponent(clip.text)}`);
+    goto(`/view?local=${clip.id}`);
   }
 
   function handleDelete(clip: (typeof clips)[0]) {
@@ -229,7 +229,7 @@
                   <div style="display: flex; align-items: center; gap: var(--space-xs);">
                     <span class="clip-save">Save?</span>
                     <button
-                      class="copy-icon-btn copy-icon-btn--save"
+                      class="footer-icon-btn footer-icon-btn--save"
                       aria-label="Save changes"
                       onclick={() => handleSave(clip)}
                     >
@@ -247,7 +247,7 @@
                       </svg>
                     </button>
                     <button
-                      class="copy-icon-btn copy-icon-btn--cancel"
+                      class="footer-icon-btn footer-icon-btn--cancel"
                       aria-label="Cancel and revert"
                       onclick={() => handleCancel(clip)}
                     >
@@ -272,7 +272,7 @@
                   <span class="clip-time">Last modified {formatTimeAgo(clip.saved_at)}</span>
                   <div style="display: flex; align-items: center; gap: var(--space-md);">
                     <button
-                      class="copy-icon-btn copy-icon-btn--delete"
+                      class="footer-icon-btn footer-icon-btn--delete"
                       aria-label="Delete clip"
                       onclick={(e) => {
                         e.stopPropagation();
@@ -297,8 +297,8 @@
                       </svg>
                     </button>
                     <button
-                      class="copy-icon-btn"
-                      class:copy-icon-btn-copied={copiedId === clip.id}
+                      class="footer-icon-btn"
+                      class:footer-icon-btn-copied={copiedId === clip.id}
                       aria-label="Copy text to clipboard"
                       onclick={(e) => {
                         e.stopPropagation();
@@ -339,8 +339,8 @@
                       {/if}
                     </button>
                     <button
-                      class="copy-icon-btn"
-                      aria-label="Edit clip"
+                      class="footer-icon-btn"
+                      aria-label="View clip"
                       onclick={(e) => {
                         e.stopPropagation();
                         handleEdit(clip);
@@ -356,8 +356,8 @@
                         stroke-linecap="round"
                         stroke-linejoin="round"
                       >
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="M21 21l-4.35-4.35" />
                       </svg>
                     </button>
                   </div>
@@ -561,7 +561,7 @@
     flex-shrink: 0;
   }
 
-  .copy-icon-btn {
+  .footer-icon-btn {
     background: none;
     border: none;
     color: var(--text-muted);
@@ -574,34 +574,34 @@
     transition: all 0.15s;
   }
 
-  .copy-icon-btn:hover {
+  .footer-icon-btn:hover {
     color: var(--accent);
     background: var(--accent-glow);
   }
 
-  .copy-icon-btn-copied {
+  .footer-icon-btn-copied {
     color: var(--accent);
     animation: copy-bounce 0.4s ease;
   }
 
-  .copy-icon-btn--delete:hover {
+  .footer-icon-btn--delete:hover {
     color: var(--error);
     background: var(--error-bg);
   }
 
-  .copy-icon-btn--save {
+  .footer-icon-btn--save {
     color: #6fc18a;
   }
 
-  .copy-icon-btn--save:hover {
+  .footer-icon-btn--save:hover {
     background: rgba(111, 193, 138, 0.15);
   }
 
-  .copy-icon-btn--cancel {
+  .footer-icon-btn--cancel {
     color: #d4756b;
   }
 
-  .copy-icon-btn--cancel:hover {
+  .footer-icon-btn--cancel:hover {
     background: rgba(212, 117, 107, 0.15);
   }
 

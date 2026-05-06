@@ -73,6 +73,7 @@ afterEach(() => {
     createMode: 'share',
     editClipId: null,
     localClips: [],
+    isLocal: false,
   });
 });
 

@@ -50,6 +50,7 @@ describe('CreateForm edit mode - text prefill', () => {
       createMode: 'edit',
       editClipId: 'existing-clip-id',
       localClips: [],
+      isLocal: false,
     });
   });
 
@@ -68,6 +69,7 @@ describe('CreateForm edit mode - text prefill', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
   });
 
@@ -131,6 +133,7 @@ describe('CreateForm edit mode - button text', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
   });
 
@@ -182,6 +185,7 @@ describe('CreateForm edit mode - share message checkbox', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
   });
 
@@ -235,6 +239,7 @@ describe('CreateForm edit mode - burn-after-read', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
   });
 
@@ -297,6 +302,7 @@ describe('CreateForm edit mode - TTL selector', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
   });
 
@@ -377,6 +383,7 @@ describe('CreateForm edit mode - save_local behavior', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
   });
 
@@ -424,6 +431,7 @@ describe('CreateForm edit mode - edit_clip_id', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
   });
 
@@ -490,6 +498,7 @@ describe('CreateForm edit mode - validation', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
   });
 
@@ -563,6 +572,7 @@ describe('CreateForm edit mode - loading state', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
   });
 
@@ -596,6 +606,7 @@ describe('CreateForm edit mode vs share mode differences', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
   });
 

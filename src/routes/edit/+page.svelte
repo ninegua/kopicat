@@ -29,6 +29,7 @@
       createMode: editClipId ? 'edit' : 'share',
       editClipId,
       localClips: [],
+      isLocal: false,
     });
   }
 

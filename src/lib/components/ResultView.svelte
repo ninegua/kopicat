@@ -4,8 +4,12 @@
   let {
     onDismiss,
     onSave,
-  }: { onDismiss: () => void; onSave?: (clipId: string, text: string, blob: string) => void } =
-    $props();
+    isLocal = false,
+  }: {
+    onDismiss: () => void;
+    onSave?: (clipId: string, text: string, blob: string) => void;
+    isLocal?: boolean;
+  } = $props();
 
   let copyFeedback = $state<'text' | null>(null);
   let saveLocal = $state(false);
@@ -33,28 +37,26 @@
 
   <div class="form-group">
     <div class="card-status-header">
-      <div class="card-status">
-        <svg
-          class="status-icon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-          <polyline points="22 4 12 14.01 9 11.01" />
-        </svg>
-        <span>Decrypted successfully</span>
-      </div>
+      {#if !isLocal}
+        <div class="card-status">
+          <svg
+            class="status-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+          <span>Decrypted successfully</span>
+        </div>
+      {/if}
 
       <div style="display: flex; align-items: center; gap: var(--space-sm);">
-        {#if $clipState.clip?.burn_after_read}
-          <div class="burn-badge">Burned</div>
-        {/if}
-
-        {#if !$clipState.clip?.burn_after_read && $clipState.clip?.blob && onSave}
+        {#if !$clipState.clip?.burn_after_read && $clipState.clip?.blob && onSave && !isLocal}
           <label class="result-checkbox-label">
             <input type="checkbox" bind:checked={saveLocal} />
             <span>Save a local copy</span>
@@ -83,7 +85,7 @@
       </div>
     {/if}
 
-    {#if $clipState.decryptedText}
+    {#if $clipState.decryptedText && !isLocal}
       <div class="form-row">
         <button
           class="btn-primary"

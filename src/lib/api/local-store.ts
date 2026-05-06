@@ -50,3 +50,7 @@ export function updateLocalClip(id: string, updates: Partial<LocalClip>): void {
     writeClips(clips);
   }
 }
+
+export function getLocalClip(id: string): LocalClip | undefined {
+  return readClips().find((c) => c.id === id);
+}

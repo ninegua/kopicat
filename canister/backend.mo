@@ -10,7 +10,7 @@ import Option "mo:core/Option";
 import JSON "mo:json/JSON";
 import ServeHttpRequest "./http";
 
-shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_to_live: Nat }) {
+shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_to_live: Nat; max_blob_bytes: Nat }) {
 
   include ServeHttpRequest(creator);
 
@@ -30,6 +30,9 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
 
   // Default max time to live is 7 days or a week.
   let MAX_SECONDS_TO_LIVE: Nat = 3600 * 24 * 7;
+
+  // Default max bytes for blob is 1MB.
+  let MAX_BLOB_BYTES : Nat = 1024 * 1024;
 
   type Input = {
     id : Text;
@@ -58,8 +61,17 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
 
   func create_clip(input : Input) : (Result.Result<Text, Text>) {
     let { id; blob; expires_after; burn_after_read } = input;
+
     if (Map.containsKey(clips, Text.compare, id)) {
       return #err("Clip already exists");
+    };
+
+    let max_bytes = switch (init_arg) {
+      case (null) MAX_BLOB_BYTES;
+      case (?{ max_blob_bytes }) max_blob_bytes;
+    };
+    if (Text.size(blob) > max_bytes) {
+      return #err("Blob cannot exceed " # Nat.toText(max_bytes) # " bytes.");
     };
 
     let max_ttl = switch (init_arg) {

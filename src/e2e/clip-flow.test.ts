@@ -65,6 +65,7 @@ describe('Clip creation flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
 
     render(IdleView, { props: { onPaste: vi.fn() } });
@@ -91,6 +92,7 @@ describe('Clip creation flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
 
     render(CreateForm, { props: { onCreate: vi.fn(), createMode: 'share' as const } });
@@ -123,6 +125,7 @@ describe('Clip creation flow', () => {
         createMode: 'share',
         editClipId: null,
         localClips: getLocalClips(),
+        isLocal: false,
       });
     });
 
@@ -139,6 +142,7 @@ describe('Clip creation flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
 
     const { container } = render(CreateForm, { props: { onCreate, createMode: 'share' as const } });
@@ -179,6 +183,7 @@ describe('Clip creation flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
 
     render(CreateForm, { props: { onCreate: vi.fn(), createMode: 'share' as const } });
@@ -217,6 +222,7 @@ describe('Clip viewing flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
 
     render(DecryptForm, {
@@ -274,6 +280,7 @@ describe('Clip viewing flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
 
     const { container } = render(DecryptForm, {
@@ -341,6 +348,7 @@ describe('Clip viewing flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
 
     const { container } = render(DecryptForm, {
@@ -408,6 +416,7 @@ describe('Clip viewing flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
 
     render(DecryptForm, {
@@ -619,6 +628,7 @@ describe('Burn-after-read flow', () => {
         createMode: 'share',
         editClipId: null,
         localClips: getLocalClips(),
+        isLocal: false,
       });
     });
 
@@ -635,6 +645,7 @@ describe('Burn-after-read flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
 
     const { container } = render(CreateForm, { props: { onCreate, createMode: 'share' as const } });
@@ -684,6 +695,7 @@ describe('Burn-after-read flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
 
     render(DecryptForm, { props: { onDecrypt, onSetPassword: vi.fn() } });
@@ -716,6 +728,7 @@ describe('Burn-after-read flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
     });
 
     render(DecryptForm, { props: { onDecrypt: vi.fn(), onSetPassword: vi.fn() } });
@@ -764,6 +777,7 @@ describe('ResultView save local copy', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
       password: '',
     }));
 
@@ -835,6 +849,7 @@ describe('ResultView save local copy', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
       password: '',
     }));
 
@@ -893,6 +908,7 @@ describe('ResultView save local copy', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
       password: '',
     }));
 
@@ -904,6 +920,7 @@ describe('ResultView save local copy', () => {
         ...s,
         clipId: savedClipId,
         localClips: getLocalClips(),
+        isLocal: false,
       }));
     };
 
@@ -963,6 +980,7 @@ describe('ResultView save local copy', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
+      isLocal: false,
       password: '',
     }));
 

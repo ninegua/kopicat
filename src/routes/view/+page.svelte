@@ -3,9 +3,9 @@
   import { onMount } from 'svelte';
   import { clipState } from '$lib/api/store';
   import type { ClipState as ClipStateType } from '$lib/api/store';
-  import { fetchClip } from '$lib/api/client';
-  import { decrypt, encrypt } from '$lib/crypto';
-  import { getLocalClips, addLocalClip } from '$lib/api/local-store';
+import { fetchClip } from '$lib/api/client';
+import { decrypt, encrypt } from '$lib/crypto';
+import { getLocalClips, addLocalClip, getLocalClip } from '$lib/api/local-store';
   import Header from '$lib/components/Header.svelte';
   import DecryptForm from '$lib/components/DecryptForm.svelte';
   import ResultView from '$lib/components/ResultView.svelte';
@@ -18,7 +18,47 @@
   function initFromUrl() {
     const url = new URL(window.location.href);
     const clipId = url.searchParams.get('clip');
+    const localId = url.searchParams.get('local');
     const password = url.hash.slice(1);
+
+    if (localId) {
+      const clip = getLocalClip(localId);
+      if (clip) {
+        clipState.set({
+          clipId: localId,
+          password: '',
+          decryptedText: clip.text,
+          clip: null,
+          error: null,
+          loading: false,
+          shareUrl: null,
+          showShareModal: false,
+          prefillText: null,
+          createMode: 'share',
+          editClipId: null,
+          localClips: $clipState.localClips,
+          isLocal: true,
+        });
+        return;
+      } else {
+        clipState.set({
+          clipId: localId,
+          password: '',
+          decryptedText: null,
+          clip: null,
+          error: null,
+          loading: false,
+          shareUrl: null,
+          showShareModal: false,
+          prefillText: null,
+          createMode: 'share',
+          editClipId: null,
+          localClips: $clipState.localClips,
+          isLocal: true,
+        });
+        return;
+      }
+    }
 
     let prefillText: string | null = null;
     const shareParam = url.searchParams.get('share');
@@ -57,6 +97,7 @@
         createMode: 'share',
         editClipId: null,
         localClips: [],
+        isLocal: false,
       });
 
       void (async () => {
@@ -157,7 +198,7 @@
     {#if $clipState.showShareModal && $clipState.shareUrl}
       <ShareCard url={$clipState.shareUrl} onDismiss={handleShareDismiss} />
     {/if}
-    <ResultView onDismiss={handleDismiss} onSave={handleSave} />
+    <ResultView onDismiss={handleDismiss} onSave={handleSave} isLocal={$clipState.isLocal} />
     <ViewClipsLink />
   {:else if $clipState.clipId && !$clipState.clip && !$clipState.loading}
     <ClipNotFound />
