@@ -209,18 +209,8 @@
         >
           {#if sharedClip === clip.id}
             <div class="clip-box-content">
-              <textarea
-                class="clipped-text"
-                class:clipped-text-modified={isModified(clip)}
-                bind:value={editingText}
-                oninput={(e) => {
-                  clipEdits[clip.id] = (e.target as HTMLTextAreaElement).value;
-                  clipModified[clip.id] = true;
-                }}
-                onkeydown={(e) => e.stopPropagation()}
-              ></textarea>
               {#if isModified(clip)}
-                <div class="clip-box-footer">
+                <div class="clip-box-header">
                   <span class="clip-time">Last modified {formatTimeAgo(clip.saved_at)}</span>
                   <div style="display: flex; align-items: center; gap: var(--space-xs);">
                     <span class="clip-save">Save?</span>
@@ -264,7 +254,7 @@
                   </div>
                 </div>
               {:else}
-                <div class="clip-box-footer">
+                <div class="clip-box-header">
                   <span class="clip-time">Last modified {formatTimeAgo(clip.saved_at)}</span>
                   <div style="display: flex; align-items: center; gap: var(--space-md);">
                     <button
@@ -290,28 +280,6 @@
                         <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
                         <line x1="10" y1="11" x2="10" y2="17" />
                         <line x1="14" y1="11" x2="14" y2="17" />
-                      </svg>
-                    </button>
-                    <button
-                      class="footer-icon-btn"
-                      aria-label="View clip"
-                      onclick={(e) => {
-                        e.stopPropagation();
-                        handleView(clip);
-                      }}
-                    >
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <circle cx="11" cy="11" r="8" />
-                        <path d="M21 21l-4.35-4.35" />
                       </svg>
                     </button>
                     <button
@@ -356,14 +324,48 @@
                         </svg>
                       {/if}
                     </button>
+                    <button
+                      class="footer-icon-btn"
+                      aria-label="View clip"
+                      onclick={(e) => {
+                        e.stopPropagation();
+                        handleView(clip);
+                      }}
+                    >
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M15 3h6v6" />
+                        <path d="M9 21H3v-6" />
+                        <path d="M21 3l-7 7" />
+                        <path d="M3 21l7-7" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               {/if}
+              <textarea
+                class="clipped-text"
+                class:clipped-text-modified={isModified(clip)}
+                bind:value={editingText}
+                oninput={(e) => {
+                  clipEdits[clip.id] = (e.target as HTMLTextAreaElement).value;
+                  clipModified[clip.id] = true;
+                }}
+                onkeydown={(e) => e.stopPropagation()}
+              ></textarea>
             </div>
           {:else}
             <div class="clip-box-collapsed">
-              <div class="clip-preview">{@html truncate(clipEdits[clip.id] ?? clip.text, 3)}</div>
               <span class="clip-time">{formatTimeAgo(clip.saved_at)}</span>
+              <div class="clip-preview">{@html truncate(clipEdits[clip.id] ?? clip.text, 3)}</div>
             </div>
           {/if}
         </div>
@@ -500,6 +502,7 @@
     line-height: 1.4;
     flex: 1;
     display: flex;
+    margin-top: var(--space-sm);
     flex-direction: column;
   }
 
@@ -546,14 +549,14 @@
     background: var(--accent-glow);
   }
 
-  .clip-box-footer {
+  .clip-box-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-xs);
-    padding-top: var(--space-xs);
-    margin-top: var(--space-xs);
-    border-top: 1px solid var(--border-color);
+    padding-bottom: var(--space-xs);
+    margin-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-color);
     flex-shrink: 0;
   }
 

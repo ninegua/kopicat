@@ -341,7 +341,7 @@
 
   :global(.clipped-text) {
     background: transparent;
-    padding: 0;
+    padding-bottom: var(--space-md);
     color: var(--text-primary);
     font-size: 0.8rem;
     line-height: 1.5;

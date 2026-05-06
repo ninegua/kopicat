@@ -229,7 +229,7 @@
   </div>
 </div>
 
-<ViewClipsLink icon="back" />
+<ViewClipsLink />
 
 <div bind:this={ttlPortal} class="ttl-portal" hidden>
   <div class="ttl-options" role="listbox">
