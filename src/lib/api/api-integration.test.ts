@@ -284,7 +284,6 @@ describe('Clip creation flow', () => {
 
     expect(result.success).toBe(false);
     expect(result.error).toContain('Network Error');
-
   });
 
   it('handles malformed backend response (non-JSON 500)', async () => {

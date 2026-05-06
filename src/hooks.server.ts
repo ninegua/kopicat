@@ -14,7 +14,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     // Old URL format - redirect to /view
     return new Response('', {
       status: 302,
-      headers: { 'location': `/view?clip=${clipId}` },
+      headers: { location: `/view?clip=${clipId}` },
     });
   }
 

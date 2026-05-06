@@ -76,7 +76,11 @@
           } else {
             msg = 'Network Error. Please check your connection and try again.';
           }
-          clipState.update((s) => ({ ...s, error: msg || 'Failed to create clip', loading: false }));
+          clipState.update((s) => ({
+            ...s,
+            error: msg || 'Failed to create clip',
+            loading: false,
+          }));
           return;
         }
       }

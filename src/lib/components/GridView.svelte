@@ -51,9 +51,28 @@
     return 'just now';
   }
 
-  function truncate(text: string, maxLength: number): string {
-    if (text.length <= maxLength) return text;
-    return text.slice(0, maxLength) + '…';
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function truncate(text: string, numLines: number): string {
+    const lines = text.split(/\r\n|[\n\u000B\f\r\u0085\u2028\u2029]/);
+    let result = '';
+    let n = 0;
+    for (var i = 0; i < lines.length; i++) {
+      if (n >= numLines) {
+        result += '<div>…</div>';
+        break;
+      }
+      const line = lines[i].trim();
+      if (line.length > 0) {
+        result += `<div style='overflow: hidden; text-overflow: ellipsis; white-space: nowrap;'>${escapeHtml(line)}</div>`;
+        n += 1;
+      }
+    }
+    return result;
   }
 
   function handleClick(clipId: string) {
@@ -247,7 +266,7 @@
             </div>
           {:else}
             <div class="clip-box-collapsed">
-              <span class="clip-preview">{truncate(clip.text, 50)}</span>
+              <div class="clip-preview">{@html truncate(clip.text, 3)}</div>
               <span class="clip-time">{formatTimeAgo(clip.saved_at)}</span>
             </div>
           {/if}
@@ -363,15 +382,12 @@
   }
 
   .clip-preview {
-    display: -webkit-box; /* Required: The old flexbox model */
-    -webkit-box-orient: vertical; /* Required: Sets the axis */
-    -webkit-line-clamp: 3; /* The number of lines you want to show */
-    line-clamp: 3; /* Standard property */
-    overflow: hidden; /* Hides the text beyond the clamp */
     font-size: 0.8rem;
     color: var(--text-primary);
     line-height: 1.4;
     flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 
   .clip-time {

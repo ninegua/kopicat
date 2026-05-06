@@ -267,8 +267,6 @@ describe('CreateForm edit mode - burn-after-read', () => {
     await fireEvent.click(burnCheckbox);
     expect(burnCheckbox.checked).toBe(true);
   });
-
-  
 });
 
 // ---------------------------------------------------------------------------
@@ -326,7 +324,7 @@ describe('CreateForm edit mode - TTL selector', () => {
     expect(ttlButton.disabled).toBe(false);
   });
 
-   it('allows changing TTL after enabling share message', async () => {
+  it('allows changing TTL after enabling share message', async () => {
     render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
 
     const ttlButton = getTTLSelect();
@@ -450,13 +448,13 @@ describe('CreateForm edit mode - edit_clip_id', () => {
 
     await waitFor(() => {
       const args = onCreate.mock.calls[0];
-      expect(args[0]).toBe('edit content');          // text
-      expect(typeof args[1]).toBe('string');          // password
-      expect(typeof args[2]).toBe('number');          // ttl
-      expect(typeof args[3]).toBe('boolean');         // burn_after_read
-      expect(args[4]).toBe(true);                     // save_local
-      expect(args[5]).toBe(false);                    // share_message
-      expect(args[6]).toBe('edit-target-clip-id');    // edit_clip_id
+      expect(args[0]).toBe('edit content'); // text
+      expect(typeof args[1]).toBe('string'); // password
+      expect(typeof args[2]).toBe('number'); // ttl
+      expect(typeof args[3]).toBe('boolean'); // burn_after_read
+      expect(args[4]).toBe(true); // save_local
+      expect(args[5]).toBe(false); // share_message
+      expect(args[6]).toBe('edit-target-clip-id'); // edit_clip_id
     });
   });
 });

@@ -767,7 +767,11 @@ describe('ResultView save local copy', () => {
       password: '',
     }));
 
-    const savedData = { id: null as string | null, text: null as string | null, blob: null as string | null };
+    const savedData = {
+      id: null as string | null,
+      text: null as string | null,
+      blob: null as string | null,
+    };
     const onSave = (savedClipId: string, savedText: string, savedBlob: string) => {
       savedData.id = savedClipId;
       savedData.text = savedText;

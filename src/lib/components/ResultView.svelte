@@ -1,7 +1,11 @@
 <script lang="ts">
   import { clipState } from '$lib/api/store';
 
-  let { onDismiss, onSave }: { onDismiss: () => void; onSave?: (clipId: string, text: string, blob: string) => void } = $props();
+  let {
+    onDismiss,
+    onSave,
+  }: { onDismiss: () => void; onSave?: (clipId: string, text: string, blob: string) => void } =
+    $props();
 
   let copyFeedback = $state<'text' | null>(null);
   let saveLocal = $state(false);
@@ -52,10 +56,7 @@
 
         {#if !$clipState.clip?.burn_after_read && $clipState.clip?.blob && onSave}
           <label class="result-checkbox-label">
-            <input
-              type="checkbox"
-              bind:checked={saveLocal}
-            />
+            <input type="checkbox" bind:checked={saveLocal} />
             <span>Save a local copy</span>
           </label>
         {/if}
@@ -122,13 +123,22 @@
           {/if}
         </button>
 
-        <button class="btn-secondary" onclick={() => {
-          if (saveLocal && $clipState.clipId && $clipState.clip?.blob && $clipState.decryptedText && onSave) {
-            onSave($clipState.clipId, $clipState.decryptedText, $clipState.clip!.blob);
-          } else {
-            onDismiss();
-          }
-        }}>
+        <button
+          class="btn-secondary"
+          onclick={() => {
+            if (
+              saveLocal &&
+              $clipState.clipId &&
+              $clipState.clip?.blob &&
+              $clipState.decryptedText &&
+              onSave
+            ) {
+              onSave($clipState.clipId, $clipState.decryptedText, $clipState.clip!.blob);
+            } else {
+              onDismiss();
+            }
+          }}
+        >
           <svg
             width="16"
             height="16"
