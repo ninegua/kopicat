@@ -8,6 +8,7 @@
 
   let copiedId = $state<string | null>(null);
   let sharedClip = $state<string | null>(null);
+  let maximizedClip = $state<string | null>(null);
   let pendingDeletes = $state<{ id: string; text: string; timer: ReturnType<typeof setTimeout> }[]>(
     [],
   );
@@ -78,7 +79,7 @@
   function truncate(text: string, count: number): string {
     let result = text.substring(0, count);
     if (result.length < text.length) {
-       result += "…";
+      result += '…';
     }
     return result;
   }
@@ -127,13 +128,20 @@
     return result;
   }
 
-  function handleView(clip: LocalClip) {
-    goto(`/view?local=${clip.id}`);
+  function handleToggleMaximize(clip: LocalClip) {
+    if (maximizedClip === clip.id) {
+      maximizedClip = null;
+    } else {
+      maximizedClip = clip.id;
+    }
   }
 
   function handleDelete(clip: LocalClip) {
     if (sharedClip === clip.id) {
       sharedClip = null;
+    }
+    if (maximizedClip === clip.id) {
+      maximizedClip = null;
     }
     const existing = pendingDeletes.find((d) => d.id === clip.id);
     if (existing) {
@@ -182,141 +190,55 @@
   }
 </script>
 
-<div class="grid-container">
-  <div class="grid-header">
-    <h2 class="grid-title">Saved Clips</h2>
-    <span class="clip-count">
-      total: {clips.length}
-      {#if unsavedCount > 0}
-        (<span class="unsaved-count">{unsavedCount} unsaved</span>)
-      {/if}
-    </span>
-  </div>
-  {#if clips.length === 0}
-    <div class="empty-state">
-      <p>No clips yet. Create one to get started.</p>
-    </div>
-  {:else}
-    <div class="clips-grid">
-      {#each rearrange(clips) as clip (clip.id)}
-        <div
-          class="clip-box"
-          class:clip-box-focused={sharedClip === clip.id}
-          class:clip-box-modified={clipModified[clip.id] === true}
-          onclick={() => handleClick(clip.id)}
-          onkeydown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              handleClick(clip.id);
-            }
-          }}
-          role="button"
-          tabindex="0"
-          aria-pressed={sharedClip === clip.id}
-          animate:flip={{ duration: 300, easing: cubicOut }}
-        >
-          {#if sharedClip === clip.id}
-            <div class="clip-box-content">
-              {#if isModified(clip)}
-                <div class="clip-box-header">
-                  <span class="clip-time">Last modified {formatTimeAgo(clip.saved_at)}</span>
-                  <div style="display: flex; align-items: center; gap: var(--space-xs);">
-                    <span class="clip-save">Save?</span>
-                    <button
-                      class="footer-icon-btn footer-icon-btn--save"
-                      aria-label="Save changes"
-                      onclick={() => handleSave(clip)}
-                    >
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+<div class="grid-wrapper" class:grid-maximized={maximizedClip !== null}>
+  <div class="grid-container" class:grid-maximized={maximizedClip !== null}>
+    {#if maximizedClip === null}
+      <div class="grid-header">
+        <h2 class="grid-title">Saved Clips</h2>
+        <span class="clip-count">
+          total: {clips.length}
+          {#if unsavedCount > 0}
+            (<span class="unsaved-count">{unsavedCount} unsaved</span>)
+          {/if}
+        </span>
+      </div>
+    {/if}
+    {#if clips.length === 0}
+      <div class="empty-state">
+        <p>No clips yet. Create one to get started.</p>
+      </div>
+    {:else}
+      <div class="clips-grid" class:grid-maximized={maximizedClip !== null}>
+        {#each maximizedClip ? clips.filter((c) => c.id === maximizedClip) : rearrange(clips) as clip (clip.id)}
+          <div
+            class="clip-box"
+            class:clip-box-focused={sharedClip === clip.id}
+            class:clip-box-modified={clipModified[clip.id] === true}
+            class:clip-box-maximized={maximizedClip === clip.id}
+            onclick={() => handleClick(clip.id)}
+            onkeydown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleClick(clip.id);
+              }
+            }}
+            role="button"
+            tabindex="0"
+            aria-pressed={sharedClip === clip.id}
+            animate:flip={{ duration: 300, easing: cubicOut }}
+          >
+            {#if sharedClip === clip.id}
+              <div class="clip-box-content">
+                {#if isModified(clip)}
+                  <div class="clip-box-header">
+                    <span class="clip-time">Last modified {formatTimeAgo(clip.saved_at)}</span>
+                    <div style="display: flex; align-items: center; gap: var(--space-xs);">
+                      <span class="clip-save">Save?</span>
+                      <button
+                        class="footer-icon-btn footer-icon-btn--save"
+                        aria-label="Save changes"
+                        onclick={() => handleSave(clip)}
                       >
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    </button>
-                    <button
-                      class="footer-icon-btn footer-icon-btn--cancel"
-                      aria-label="Cancel and revert"
-                      onclick={() => handleCancel(clip)}
-                    >
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                        <line x1="6" y1="6" x2="18" y2="18" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              {:else}
-                <div class="clip-box-header">
-                  <span class="clip-time">Last modified {formatTimeAgo(clip.saved_at)}</span>
-                  <div style="display: flex; align-items: center; gap: var(--space-md);">
-                    <button
-                      class="footer-icon-btn footer-icon-btn--delete"
-                      aria-label="Delete clip"
-                      onclick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(clip);
-                      }}
-                    >
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <path d="M3 6h18" />
-                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                        <line x1="10" y1="11" x2="10" y2="17" />
-                        <line x1="14" y1="11" x2="14" y2="17" />
-                      </svg>
-                    </button>
-                    <button
-                      class="footer-icon-btn"
-                      class:footer-icon-btn-copied={copiedId === clip.id}
-                      aria-label="Copy text to clipboard"
-                      onclick={(e) => {
-                        e.stopPropagation();
-                        navigator.clipboard.writeText(clip.text);
-                        copiedId = clip.id;
-                        setTimeout(() => {
-                          copiedId = null;
-                        }, 1500);
-                      }}
-                    >
-                      {#if copiedId === clip.id}
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      {:else}
                         <svg
                           width="20"
                           height="20"
@@ -327,59 +249,170 @@
                           stroke-linecap="round"
                           stroke-linejoin="round"
                         >
-                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                          <polyline points="20 6 9 17 4 12" />
                         </svg>
-                      {/if}
-                    </button>
-                    <button
-                      class="footer-icon-btn"
-                      aria-label="View clip"
-                      onclick={(e) => {
-                        e.stopPropagation();
-                        handleView(clip);
-                      }}
-                    >
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                      </button>
+                      <button
+                        class="footer-icon-btn footer-icon-btn--cancel"
+                        aria-label="Cancel and revert"
+                        onclick={() => handleCancel(clip)}
                       >
-                        <path d="M15 3h6v6" />
-                        <path d="M9 21H3v-6" />
-                        <path d="M21 3l-7 7" />
-                        <path d="M3 21l7-7" />
-                      </svg>
-                    </button>
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
+                {:else}
+                  <div class="clip-box-header">
+                    <span class="clip-time">Last modified {formatTimeAgo(clip.saved_at)}</span>
+                    <div style="display: flex; align-items: center; gap: var(--space-md);">
+                      <button
+                        class="footer-icon-btn footer-icon-btn--delete"
+                        aria-label="Delete clip"
+                        onclick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(clip);
+                        }}
+                      >
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M3 6h18" />
+                          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                          <line x1="10" y1="11" x2="10" y2="17" />
+                          <line x1="14" y1="11" x2="14" y2="17" />
+                        </svg>
+                      </button>
+                      <button
+                        class="footer-icon-btn"
+                        class:footer-icon-btn-copied={copiedId === clip.id}
+                        aria-label="Copy text to clipboard"
+                        onclick={(e) => {
+                          e.stopPropagation();
+                          navigator.clipboard.writeText(clip.text);
+                          copiedId = clip.id;
+                          setTimeout(() => {
+                            copiedId = null;
+                          }, 1500);
+                        }}
+                      >
+                        {#if copiedId === clip.id}
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        {:else}
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                          </svg>
+                        {/if}
+                      </button>
+                      <button
+                        class="footer-icon-btn"
+                        aria-label={maximizedClip === clip.id ? 'Minimize' : 'Maximize'}
+                        onclick={(e) => {
+                          e.stopPropagation();
+                          handleToggleMaximize(clip);
+                        }}
+                      >
+                        {#if maximizedClip === clip.id}
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <path d="M4 14h6v6" />
+                            <path d="M20 10h-6V4" />
+                            <path d="M14 10l7-7" />
+                            <path d="M3 21l7-7" />
+                          </svg>
+                        {:else}
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <path d="M15 3h6v6" />
+                            <path d="M9 21H3v-6" />
+                            <path d="M21 3l-7 7" />
+                            <path d="M3 21l7-7" />
+                          </svg>
+                        {/if}
+                      </button>
+                    </div>
+                  </div>
+                {/if}
+                <textarea
+                  class="clipped-text"
+                  class:clipped-text-modified={isModified(clip)}
+                  bind:value={editingText}
+                  oninput={(e) => {
+                    clipEdits[clip.id] = (e.target as HTMLTextAreaElement).value;
+                    clipModified[clip.id] = true;
+                  }}
+                  onkeydown={(e) => e.stopPropagation()}
+                ></textarea>
+              </div>
+            {:else}
+              <div class="clip-box-collapsed">
+                <span class="clip-time">{formatTimeAgo(clip.saved_at)}</span>
+                <div class="clip-preview">
+                  {@html truncateLines(clipEdits[clip.id] ?? clip.text, 3)}
                 </div>
-              {/if}
-              <textarea
-                class="clipped-text"
-                class:clipped-text-modified={isModified(clip)}
-                bind:value={editingText}
-                oninput={(e) => {
-                  clipEdits[clip.id] = (e.target as HTMLTextAreaElement).value;
-                  clipModified[clip.id] = true;
-                }}
-                onkeydown={(e) => e.stopPropagation()}
-              ></textarea>
-            </div>
-          {:else}
-            <div class="clip-box-collapsed">
-              <span class="clip-time">{formatTimeAgo(clip.saved_at)}</span>
-              <div class="clip-preview">{@html truncateLines(clipEdits[clip.id] ?? clip.text, 3)}</div>
-            </div>
-          {/if}
-        </div>
-      {/each}
-    </div>
-  {/if}
+              </div>
+            {/if}
+          </div>
+        {/each}
+      </div>
+    {/if}
+  </div>
 </div>
 
 {#if pendingDeletes.length > 0}
@@ -411,10 +444,42 @@
 {/if}
 
 <style>
+  .grid-wrapper {
+    width: 100%;
+  }
+
+  .grid-wrapper.grid-maximized {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-primary);
+  }
+
   .grid-container {
     width: 100%;
     max-width: 600px;
     margin: 0 auto;
+    transition: max-width 0.3s;
+  }
+
+  .grid-container.grid-maximized {
+    max-width: 100%;
+    margin: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .grid-wrapper.grid-maximized .grid-header {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+    margin-bottom: 0;
   }
 
   .grid-header {
@@ -454,6 +519,14 @@
     width: 100%;
   }
 
+  .grid-container.grid-maximized .clips-grid {
+    grid-template-columns: 1fr;
+    grid-auto-rows: 1fr;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+  }
+
   @media (max-width: 480px) {
     .clips-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -478,6 +551,15 @@
   .clip-box-focused {
     grid-column: span 2;
     grid-row: span 2;
+  }
+
+  .clip-box-maximized {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    min-height: 0;
+    flex: 1;
+    height: 100%;
+    min-height: 0;
   }
 
   .clip-box-collapsed {
