@@ -25,10 +25,6 @@ function getLocalCopyCheckbox(): HTMLInputElement {
   return screen.getByLabelText(/keep a local copy/i) as HTMLInputElement;
 }
 
-function getShareCheckbox(): HTMLInputElement {
-  return screen.getByLabelText(/share this message/i) as HTMLInputElement;
-}
-
 function getTTLSelect(): HTMLButtonElement {
   return screen.getByRole('button', { name: /expire/i }) as HTMLButtonElement;
 }
@@ -161,26 +157,26 @@ describe('CreateForm share mode - button text', () => {
     const { container } = render(CreateForm, { onCreate: vi.fn() });
 
     const checkbox = getLocalCopyCheckbox();
-    expect(checkbox.checked).toBe(true);
-
-    await fireEvent.click(checkbox);
     expect(checkbox.checked).toBe(false);
 
     await fireEvent.click(checkbox);
     expect(checkbox.checked).toBe(true);
+
+    await fireEvent.click(checkbox);
+    expect(checkbox.checked).toBe(false);
   });
 
   it('toggles the share message checkbox', async () => {
     const { container } = render(CreateForm, { onCreate: vi.fn() });
 
-    const checkbox = getShareCheckbox();
-    expect(checkbox.checked).toBe(true);
-
-    await fireEvent.click(checkbox);
+    const checkbox = getBurnCheckbox();
     expect(checkbox.checked).toBe(false);
 
     await fireEvent.click(checkbox);
     expect(checkbox.checked).toBe(true);
+
+    await fireEvent.click(checkbox);
+    expect(checkbox.checked).toBe(false);
   });
 });
 
@@ -302,23 +298,6 @@ describe('CreateForm share mode - TTL selector', () => {
       expect(getTTLSelect()).toHaveTextContent('15 min');
     });
   });
-
-  it('hides TTL selector when share message is disabled', async () => {
-    const { container } = render(CreateForm, { onCreate: vi.fn() });
-
-    await getShareCheckbox().click();
-    expect(screen.queryByRole('button', { name: /expire/i })).not.toBeInTheDocument();
-  });
-
-  it('shows TTL selector when share message is toggled back on', async () => {
-    const { container } = render(CreateForm, { onCreate: vi.fn() });
-
-    await getShareCheckbox().click();
-    expect(screen.queryByRole('button', { name: /expire/i })).not.toBeInTheDocument();
-
-    await getShareCheckbox().click();
-    expect(getTTLSelect()).toBeInTheDocument();
-  });
 });
 
 // ---------------------------------------------------------------------------
@@ -378,8 +357,7 @@ describe('CreateForm share mode - edit_clip_id', () => {
       expect(typeof args[2]).toBe('number');
       expect(typeof args[3]).toBe('boolean');
       expect(typeof args[4]).toBe('boolean');
-      expect(typeof args[5]).toBe('boolean');
-      expect(args[6]).toBe('clip-1');
+      expect(args[5]).toBe('clip-1');
     });
   });
 });
@@ -557,7 +535,7 @@ describe('CreateForm share mode - local copy checkbox', () => {
 
     await fillText(container, 'test');
 
-    // Uncheck local copy
+    // Toggle on (starts unchecked)
     await fireEvent.click(getLocalCopyCheckbox());
 
     await fireEvent.click(getCreateButton());
@@ -565,7 +543,7 @@ describe('CreateForm share mode - local copy checkbox', () => {
     await waitFor(() => {
       expect(onCreate).toHaveBeenCalled();
       const args = onCreate.mock.calls[0] as any[];
-      expect(args[4]).toBe(false); // save_local
+      expect(args[4]).toBe(true); // save_local
     });
   });
 });

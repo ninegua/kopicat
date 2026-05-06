@@ -119,11 +119,7 @@
     return result;
   }
 
-  function handleShare(clip: (typeof clips)[0]) {
-    goto(`/edit?clip=${encodeURIComponent(clip.id)}`);
-  }
-
-  function handleEdit(clip: (typeof clips)[0]) {
+  function handleView(clip: (typeof clips)[0]) {
     goto(`/view?local=${clip.id}`);
   }
 
@@ -301,7 +297,7 @@
                       aria-label="View clip"
                       onclick={(e) => {
                         e.stopPropagation();
-                        handleEdit(clip);
+                        handleView(clip);
                       }}
                     >
                       <svg
