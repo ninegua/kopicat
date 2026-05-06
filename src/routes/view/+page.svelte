@@ -3,9 +3,9 @@
   import { onMount } from 'svelte';
   import { clipState } from '$lib/api/store';
   import type { ClipState as ClipStateType } from '$lib/api/store';
-import { fetchClip } from '$lib/api/client';
-import { decrypt, encrypt } from '$lib/crypto';
-import { getLocalClips, addLocalClip, getLocalClip } from '$lib/api/local-store';
+  import { fetchClip } from '$lib/api/client';
+  import { decrypt, encrypt } from '$lib/crypto';
+  import { getLocalClips, addLocalClip, getLocalClip } from '$lib/api/local-store';
   import Header from '$lib/components/Header.svelte';
   import DecryptForm from '$lib/components/DecryptForm.svelte';
   import ResultView from '$lib/components/ResultView.svelte';
@@ -35,7 +35,7 @@ import { getLocalClips, addLocalClip, getLocalClip } from '$lib/api/local-store'
           showShareModal: false,
           prefillText: null,
           createMode: 'share',
-          editClipId: null,
+          editClipId: localId,
           localClips: $clipState.localClips,
           isLocal: true,
         });
@@ -159,14 +159,7 @@ import { getLocalClips, addLocalClip, getLocalClip } from '$lib/api/local-store'
   function handleSave(clipId: string, text: string, blob: string) {
     const now = Date.now();
     const newClip = { id: clipId, text, saved_at: now, blob };
-    const allClips = addLocalClip(newClip);
-    clipState.update((s) => ({
-      ...s,
-      clipId,
-      localClips: allClips,
-      showShareModal: false,
-    }));
-    goto('/list');
+    addLocalClip(newClip);
   }
 
   function handleShareDismiss() {

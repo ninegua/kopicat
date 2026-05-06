@@ -2,7 +2,7 @@ import { writable } from 'svelte/store';
 import { fetchClip } from './client';
 import type { Clip } from './client';
 
-export type CreateMode = 'share' | 'edit';
+export type CreateMode = 'share';
 
 export interface LocalClip {
   id: string;

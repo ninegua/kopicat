@@ -6,7 +6,6 @@
 
   let {
     onCreate,
-    createMode,
   }: {
     onCreate: (
       text: string,
@@ -14,14 +13,11 @@
       ttl: number,
       burn_after_read: boolean,
       save_local: boolean,
-      share_message: boolean,
       edit_clip_id: string | null,
     ) => Promise<void>;
-    createMode: 'share' | 'edit';
   } = $props();
 
   let saveLocal = $state(false);
-  let shareMessage = $state(false);
 
   const TTL_OPTIONS = [
     { label: '1 minute', value: 60 },
@@ -118,15 +114,7 @@
 
     clipState.update((s) => ({ ...s, error: null }));
     const pw = password || generatePassword(11);
-    await onCreate(
-      text,
-      pw,
-      selectedTTL,
-      burnAfterRead,
-      createMode == 'edit' || saveLocal,
-      createMode === 'share' || shareMessage,
-      $clipState.editClipId,
-    );
+    await onCreate(text, pw, selectedTTL, burnAfterRead, saveLocal, $clipState.editClipId);
   }
 
   const charCount = $derived(text.length);
@@ -172,46 +160,33 @@
 
   <div class="form-group">
     <div class="checkboxes">
-      {#if createMode === 'share'}
-        <label class="local-checkbox-label">
-          <input type="checkbox" checked={saveLocal} onchange={() => (saveLocal = !saveLocal)} />
-          <span class="local-checkbox-text">Keep a local copy</span>
-        </label>
-      {:else}
-        <label class="local-checkbox-label">
-          <input
-            type="checkbox"
-            checked={shareMessage}
-            onchange={() => (shareMessage = !shareMessage)}
+      <label class="local-checkbox-label">
+        <input type="checkbox" checked={saveLocal} onchange={() => (saveLocal = !saveLocal)} />
+        <span class="local-checkbox-text">Keep a local copy</span>
+      </label>
+      <label class="burn-checkbox-label">
+        <input
+          type="checkbox"
+          checked={burnAfterRead}
+          onchange={() => (burnAfterRead = !burnAfterRead)}
+        />
+        <span class:burn-active={burnAfterRead}>Burn after read</span>
+        <svg
+          class="fire-icon"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#e74c3c"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
           />
-          <span class="local-checkbox-text">Share this message</span>
-        </label>
-      {/if}
-      {#if createMode === 'share' || shareMessage}
-        <label class="burn-checkbox-label">
-          <input
-            type="checkbox"
-            checked={burnAfterRead}
-            onchange={() => (burnAfterRead = !burnAfterRead)}
-          />
-          <span class:burn-active={burnAfterRead}>Burn after read</span>
-          <svg
-            class="fire-icon"
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#e74c3c"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
-            />
-          </svg>
-        </label>
-      {/if}
+        </svg>
+      </label>
     </div>
   </div>
   <div class="form-row">
@@ -227,32 +202,30 @@
           <circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="15" />
         </svg>
         Creating...
-      {:else if createMode === 'share'}
-        {#if saveLocal}Save & Share{:else}Share{/if}
-      {:else if shareMessage}Save & Share{:else}Save{/if}
+      {:else}
+        Share
+      {/if}
     </button>
-    {#if createMode === 'share' || shareMessage}
-      <button
-        type="button"
-        bind:this={ttlButton}
-        class="ttl-select"
-        class:open={ttlOpen}
-        onclick={() => {
-          ttlOpen = !ttlOpen;
-        }}
-      >
-        <span>{formatTTL(selectedTTL)}</span>
-        <svg viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M1 1L6 6L11 1"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </button>
-    {/if}
+    <button
+      type="button"
+      bind:this={ttlButton}
+      class="ttl-select"
+      class:open={ttlOpen}
+      onclick={() => {
+        ttlOpen = !ttlOpen;
+      }}
+    >
+      <span>{formatTTL(selectedTTL)}</span>
+      <svg viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M1 1L6 6L11 1"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
   </div>
 </div>
 

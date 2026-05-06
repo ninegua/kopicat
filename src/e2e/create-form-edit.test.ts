@@ -1,8 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/svelte';
-import { tick } from 'svelte';
 import { clipState } from '$lib/api/store';
-import { get } from 'svelte/store';
 import CreateForm from '$lib/components/CreateForm.svelte';
 
 // ---------------------------------------------------------------------------
@@ -16,14 +14,18 @@ async function fillText(container: HTMLElement, text: string) {
 }
 
 function getCreateButton(): HTMLButtonElement {
-  return screen.getByRole('button', { name: /save|share/i }) as HTMLButtonElement;
+  return screen.getByRole('button', { name: /share/i }) as HTMLButtonElement;
 }
 
 function getBurnCheckbox(): HTMLInputElement {
   return screen.getByLabelText(/burn after read/i) as HTMLInputElement;
 }
 
-function getShareMessageCheckbox(): HTMLInputElement {
+function getLocalCopyCheckbox(): HTMLInputElement {
+  return screen.getByLabelText(/keep a local copy/i) as HTMLInputElement;
+}
+
+function getShareCheckbox(): HTMLInputElement {
   return screen.getByLabelText(/share this message/i) as HTMLInputElement;
 }
 
@@ -32,10 +34,10 @@ function getTTLSelect(): HTMLButtonElement {
 }
 
 // ---------------------------------------------------------------------------
-// Edit mode - text prefill
+// CreateForm share mode - text prefill
 // ---------------------------------------------------------------------------
 
-describe('CreateForm edit mode - text prefill', () => {
+describe('CreateForm share mode - text prefill', () => {
   beforeEach(() => {
     clipState.set({
       clipId: null,
@@ -46,9 +48,9 @@ describe('CreateForm edit mode - text prefill', () => {
       loading: false,
       shareUrl: null,
       showShareModal: false,
-      prefillText: 'Edit this existing clip',
-      createMode: 'edit',
-      editClipId: 'existing-clip-id',
+      prefillText: 'Shared clip content',
+      createMode: 'share' as const,
+      editClipId: null,
       localClips: [],
       isLocal: false,
     });
@@ -66,26 +68,26 @@ describe('CreateForm edit mode - text prefill', () => {
       shareUrl: null,
       showShareModal: false,
       prefillText: null,
-      createMode: 'share',
+      createMode: 'share' as const,
       editClipId: null,
       localClips: [],
       isLocal: false,
     });
   });
 
-  it('pre-fills the textarea with the existing clip text', async () => {
+  it('pre-fills the textarea with the shared text', async () => {
     const onCreate = vi.fn();
-    const { container } = render(CreateForm, { onCreate, createMode: 'edit' });
+    const { container } = render(CreateForm, { onCreate });
 
     await waitFor(() => {
       const textarea = container.querySelector<HTMLTextAreaElement>('textarea');
-      expect(textarea?.value).toBe('Edit this existing clip');
+      expect(textarea?.value).toBe('Shared clip content');
     });
   });
 
   it('allows user to edit the pre-filled text', async () => {
     const onCreate = vi.fn();
-    const { container } = render(CreateForm, { onCreate, createMode: 'edit' });
+    const { container } = render(CreateForm, { onCreate });
 
     await fillText(container, 'Modified text content');
 
@@ -96,25 +98,35 @@ describe('CreateForm edit mode - text prefill', () => {
   });
 
   it('shows character count based on pre-filled text', async () => {
-    render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
+    const { container } = render(CreateForm, { onCreate: vi.fn() });
 
     await waitFor(() => {
-      expect(screen.getByText(/23 characters/)).toBeInTheDocument();
+      const charCount = container.querySelector('.char-count');
+      expect(charCount?.textContent).toContain('19 characters');
     });
   });
 });
 
 // ---------------------------------------------------------------------------
-// Edit mode - button text
+// CreateForm share mode - button text
 // ---------------------------------------------------------------------------
 
-describe('CreateForm edit mode - button text', () => {
+describe('CreateForm share mode - button text', () => {
   beforeEach(() => {
     clipState.set({
-      ...get(clipState),
-      prefillText: 'some text',
-      createMode: 'edit',
-      editClipId: 'clip-1',
+      clipId: null,
+      password: '',
+      decryptedText: null,
+      clip: null,
+      error: null,
+      loading: false,
+      shareUrl: null,
+      showShareModal: false,
+      prefillText: null,
+      createMode: 'share' as const,
+      editClipId: null,
+      localClips: [],
+      isLocal: false,
     });
   });
 
@@ -130,97 +142,68 @@ describe('CreateForm edit mode - button text', () => {
       shareUrl: null,
       showShareModal: false,
       prefillText: null,
-      createMode: 'share',
+      createMode: 'share' as const,
       editClipId: null,
       localClips: [],
       isLocal: false,
     });
   });
 
-  it('shows "Save" button text when share message is disabled', async () => {
-    const { container } = render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
+  it('shows "Share" button text when share is enabled', async () => {
+    const { container } = render(CreateForm, { onCreate: vi.fn() });
 
-    await fillText(container, 'test');
-
-    expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
-  });
-
-  it('shows "Save & Share" button text when share message is enabled', async () => {
-    const { container } = render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
-
-    await fillText(container, 'test');
-
-    await fireEvent.click(getShareMessageCheckbox());
-
-    expect(screen.getByRole('button', { name: 'Save & Share' })).toBeInTheDocument();
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Edit mode - share message checkbox vs keep local copy
-// ---------------------------------------------------------------------------
-
-describe('CreateForm edit mode - share message checkbox', () => {
-  beforeEach(() => {
-    clipState.set({
-      ...get(clipState),
-      prefillText: 'some text',
-      createMode: 'edit',
-      editClipId: 'clip-1',
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
     });
   });
 
-  afterEach(() => {
-    cleanup();
-    clipState.set({
-      clipId: null,
-      password: '',
-      decryptedText: null,
-      clip: null,
-      error: null,
-      loading: false,
-      shareUrl: null,
-      showShareModal: false,
-      prefillText: null,
-      createMode: 'share',
-      editClipId: null,
-      localClips: [],
-      isLocal: false,
-    });
-  });
+  it('toggles the local copy checkbox', async () => {
+    const { container } = render(CreateForm, { onCreate: vi.fn() });
 
-  it('shows "Share this message" checkbox instead of "Keep a local copy"', () => {
-    render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
-
-    expect(screen.getByLabelText(/share this message/i)).toBeInTheDocument();
-    expect(screen.queryByLabelText(/keep a local copy/i)).not.toBeInTheDocument();
-  });
-
-  it('toggles the share message checkbox', async () => {
-    render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
-
-    const checkbox = getShareMessageCheckbox();
-    expect(checkbox.checked).toBe(false);
-
-    await fireEvent.click(checkbox);
+    const checkbox = getLocalCopyCheckbox();
     expect(checkbox.checked).toBe(true);
 
     await fireEvent.click(checkbox);
     expect(checkbox.checked).toBe(false);
+
+    await fireEvent.click(checkbox);
+    expect(checkbox.checked).toBe(true);
+  });
+
+  it('toggles the share message checkbox', async () => {
+    const { container } = render(CreateForm, { onCreate: vi.fn() });
+
+    const checkbox = getShareCheckbox();
+    expect(checkbox.checked).toBe(true);
+
+    await fireEvent.click(checkbox);
+    expect(checkbox.checked).toBe(false);
+
+    await fireEvent.click(checkbox);
+    expect(checkbox.checked).toBe(true);
   });
 });
 
 // ---------------------------------------------------------------------------
-// Edit mode - burn-after-read disabled by default
+// CreateForm share mode - burn after read
 // ---------------------------------------------------------------------------
 
-describe('CreateForm edit mode - burn-after-read', () => {
+describe('CreateForm share mode - burn after read', () => {
   beforeEach(() => {
     clipState.set({
-      ...get(clipState),
-      prefillText: 'some text',
-      createMode: 'edit',
-      editClipId: 'clip-1',
+      clipId: null,
+      password: '',
+      decryptedText: null,
+      clip: null,
+      error: null,
+      loading: false,
+      shareUrl: null,
+      showShareModal: false,
+      prefillText: null,
+      createMode: 'share' as const,
+      editClipId: null,
+      localClips: [],
+      isLocal: false,
     });
   });
 
@@ -236,135 +219,52 @@ describe('CreateForm edit mode - burn-after-read', () => {
       shareUrl: null,
       showShareModal: false,
       prefillText: null,
-      createMode: 'share',
+      createMode: 'share' as const,
       editClipId: null,
       localClips: [],
       isLocal: false,
     });
   });
 
-  it('hides burn-after-read checkbox when share message is not enabled', () => {
-    render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
-
-    expect(screen.queryByLabelText(/burn after read/i)).not.toBeInTheDocument();
-  });
-
-  it('shows burn-after-read checkbox when share message is toggled on', async () => {
-    render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
-
-    expect(screen.queryByLabelText(/burn after read/i)).not.toBeInTheDocument();
-
-    await fireEvent.click(getShareMessageCheckbox());
-    const burnCheckbox = getBurnCheckbox();
-    expect(burnCheckbox.disabled).toBe(false);
-  });
-
-  it('allows enabling burn-after-read after enabling share message', async () => {
-    render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
-
-    expect(screen.queryByLabelText(/burn after read/i)).not.toBeInTheDocument();
-
-    await fireEvent.click(getShareMessageCheckbox());
-    const burnCheckbox = getBurnCheckbox();
-    expect(burnCheckbox.disabled).toBe(false);
-
-    await fireEvent.click(burnCheckbox);
-    expect(burnCheckbox.checked).toBe(true);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Edit mode - TTL selector disabled by default
-// ---------------------------------------------------------------------------
-
-describe('CreateForm edit mode - TTL selector', () => {
-  beforeEach(() => {
-    clipState.set({
-      ...get(clipState),
-      prefillText: 'some text',
-      createMode: 'edit',
-      editClipId: 'clip-1',
-    });
-  });
-
-  afterEach(() => {
-    cleanup();
-    clipState.set({
-      clipId: null,
-      password: '',
-      decryptedText: null,
-      clip: null,
-      error: null,
-      loading: false,
-      shareUrl: null,
-      showShareModal: false,
-      prefillText: null,
-      createMode: 'share',
-      editClipId: null,
-      localClips: [],
-      isLocal: false,
-    });
-  });
-
-  it('hides TTL selector when share message is not enabled', () => {
-    render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
-
-    expect(screen.queryByRole('button', { name: /expire/i })).not.toBeInTheDocument();
-  });
-
-  it('shows default 15 minute TTL in edit mode when share message is enabled', async () => {
-    render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
-
-    await fireEvent.click(getShareMessageCheckbox());
-
-    expect(screen.getByRole('button', { name: /expire \(15 min\)/i })).toBeInTheDocument();
-  });
-
-  it('shows TTL selector when share message is toggled on', async () => {
-    render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
-
-    expect(screen.queryByRole('button', { name: /expire/i })).not.toBeInTheDocument();
-
-    await fireEvent.click(getShareMessageCheckbox());
-    const ttlButton = getTTLSelect();
-    expect(ttlButton.disabled).toBe(false);
-  });
-
-  it('allows changing TTL after enabling share message', async () => {
-    render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
-
-    expect(screen.queryByRole('button', { name: /expire/i })).not.toBeInTheDocument();
-
-    await fireEvent.click(getShareMessageCheckbox());
-    const ttlButton = getTTLSelect();
-    expect(ttlButton.disabled).toBe(false);
-
-    await fireEvent.click(ttlButton);
+  it('shows burn-after-read checkbox by default', async () => {
+    const { container } = render(CreateForm, { onCreate: vi.fn() });
 
     await waitFor(() => {
-      const option = document.querySelector('.ttl-option');
-      expect(option).not.toBeNull();
+      expect(screen.getByLabelText(/burn after read/i)).toBeInTheDocument();
     });
+  });
 
-    await fireEvent.click(screen.getByRole('option', { name: /1 hour/i }));
+  it('allows enabling burn-after-read', async () => {
+    const { container } = render(CreateForm, { onCreate: vi.fn() });
 
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: /expire \(1 hour\)/i })).toBeInTheDocument();
-    });
+    const checkbox = getBurnCheckbox();
+    expect(checkbox.checked).toBe(false);
+
+    await fireEvent.click(checkbox);
+    expect(checkbox.checked).toBe(true);
   });
 });
 
 // ---------------------------------------------------------------------------
-// Edit mode - save_local always true
+// CreateForm share mode - TTL selector
 // ---------------------------------------------------------------------------
 
-describe('CreateForm edit mode - save_local behavior', () => {
+describe('CreateForm share mode - TTL selector', () => {
   beforeEach(() => {
     clipState.set({
-      ...get(clipState),
-      prefillText: 'some text',
-      createMode: 'edit',
-      editClipId: 'clip-1',
+      clipId: null,
+      password: '',
+      decryptedText: null,
+      clip: null,
+      error: null,
+      loading: false,
+      shareUrl: null,
+      showShareModal: false,
+      prefillText: null,
+      createMode: 'share' as const,
+      editClipId: null,
+      localClips: [],
+      isLocal: false,
     });
   });
 
@@ -380,44 +280,116 @@ describe('CreateForm edit mode - save_local behavior', () => {
       shareUrl: null,
       showShareModal: false,
       prefillText: null,
-      createMode: 'share',
+      createMode: 'share' as const,
       editClipId: null,
       localClips: [],
       isLocal: false,
     });
   });
 
-  it('passes save_local=true to onCreate even without explicit local copy checkbox', async () => {
+  it('shows TTL selector when share message is enabled', async () => {
+    const { container } = render(CreateForm, { onCreate: vi.fn() });
+
+    await waitFor(() => {
+      expect(getTTLSelect()).toBeInTheDocument();
+    });
+  });
+
+  it('shows default 15 minute TTL when share message is enabled', async () => {
+    const { container } = render(CreateForm, { onCreate: vi.fn() });
+
+    await waitFor(() => {
+      expect(getTTLSelect()).toHaveTextContent('15 min');
+    });
+  });
+
+  it('hides TTL selector when share message is disabled', async () => {
+    const { container } = render(CreateForm, { onCreate: vi.fn() });
+
+    await getShareCheckbox().click();
+    expect(screen.queryByRole('button', { name: /expire/i })).not.toBeInTheDocument();
+  });
+
+  it('shows TTL selector when share message is toggled back on', async () => {
+    const { container } = render(CreateForm, { onCreate: vi.fn() });
+
+    await getShareCheckbox().click();
+    expect(screen.queryByRole('button', { name: /expire/i })).not.toBeInTheDocument();
+
+    await getShareCheckbox().click();
+    expect(getTTLSelect()).toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// CreateForm share mode - edit_clip_id
+// ---------------------------------------------------------------------------
+
+describe('CreateForm share mode - edit_clip_id', () => {
+  beforeEach(() => {
+    clipState.set({
+      clipId: null,
+      password: '',
+      decryptedText: null,
+      clip: null,
+      error: null,
+      loading: false,
+      shareUrl: null,
+      showShareModal: false,
+      prefillText: 'some text',
+      createMode: 'share' as const,
+      editClipId: 'clip-1',
+      localClips: [],
+      isLocal: false,
+    });
+  });
+
+  afterEach(() => {
+    cleanup();
+    clipState.set({
+      clipId: null,
+      password: '',
+      decryptedText: null,
+      clip: null,
+      error: null,
+      loading: false,
+      shareUrl: null,
+      showShareModal: false,
+      prefillText: null,
+      createMode: 'share' as const,
+      editClipId: null,
+      localClips: [],
+      isLocal: false,
+    });
+  });
+
+  it('passes edit_clip_id as seventh argument', async () => {
     const onCreate = vi.fn();
-    const { container } = render(CreateForm, { onCreate, createMode: 'edit' });
+    const { container } = render(CreateForm, { onCreate });
 
-    await fillText(container, 'edit content');
+    await fillText(container, 'test');
     await fireEvent.click(getCreateButton());
 
     await waitFor(() => {
       expect(onCreate).toHaveBeenCalled();
-      const [saved_local] = [...onCreate.mock.calls[0]].slice(4, 5);
-      expect(saved_local).toBe(true);
+      const args = onCreate.mock.calls[0] as any[];
+      expect(args[0]).toBe('test');
+      expect(typeof args[1]).toBe('string');
+      expect(typeof args[2]).toBe('number');
+      expect(typeof args[3]).toBe('boolean');
+      expect(typeof args[4]).toBe('boolean');
+      expect(typeof args[5]).toBe('boolean');
+      expect(args[6]).toBe('clip-1');
     });
   });
 });
 
 // ---------------------------------------------------------------------------
-// Edit mode - edit_clip_id passed to onCreate
+// CreateForm share mode - button disabled
 // ---------------------------------------------------------------------------
 
-describe('CreateForm edit mode - edit_clip_id', () => {
+describe('CreateForm share mode - button disabled', () => {
   beforeEach(() => {
-    clipState.set({
-      ...get(clipState),
-      prefillText: 'some text',
-      createMode: 'edit',
-      editClipId: 'edit-target-clip-id',
-    });
-  });
-
-  afterEach(() => {
-    cleanup();
     clipState.set({
       clipId: null,
       password: '',
@@ -428,61 +400,13 @@ describe('CreateForm edit mode - edit_clip_id', () => {
       shareUrl: null,
       showShareModal: false,
       prefillText: null,
-      createMode: 'share',
+      createMode: 'share' as const,
       editClipId: null,
       localClips: [],
       isLocal: false,
     });
   });
 
-  it('passes edit_clip_id to onCreate callback', async () => {
-    const onCreate = vi.fn();
-    const { container } = render(CreateForm, { onCreate, createMode: 'edit' });
-
-    await fillText(container, 'edit content');
-    await fireEvent.click(getCreateButton());
-
-    await waitFor(() => {
-      expect(onCreate).toHaveBeenCalled();
-      const args = onCreate.mock.calls[0];
-      expect(args[6]).toBe('edit-target-clip-id');
-    });
-  });
-
-  it('passes edit_clip_id as seventh argument (after share_message)', async () => {
-    const onCreate = vi.fn();
-    const { container } = render(CreateForm, { onCreate, createMode: 'edit' });
-
-    await fillText(container, 'edit content');
-    await fireEvent.click(getCreateButton());
-
-    await waitFor(() => {
-      const args = onCreate.mock.calls[0];
-      expect(args[0]).toBe('edit content'); // text
-      expect(typeof args[1]).toBe('string'); // password
-      expect(typeof args[2]).toBe('number'); // ttl
-      expect(typeof args[3]).toBe('boolean'); // burn_after_read
-      expect(args[4]).toBe(true); // save_local
-      expect(args[5]).toBe(false); // share_message
-      expect(args[6]).toBe('edit-target-clip-id'); // edit_clip_id
-    });
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Edit mode - validation error
-// ---------------------------------------------------------------------------
-
-describe('CreateForm edit mode - validation', () => {
-  beforeEach(() => {
-    clipState.set({
-      ...get(clipState),
-      prefillText: 'some text',
-      createMode: 'edit',
-      editClipId: 'clip-1',
-    });
-  });
-
   afterEach(() => {
     cleanup();
     clipState.set({
@@ -495,81 +419,7 @@ describe('CreateForm edit mode - validation', () => {
       shareUrl: null,
       showShareModal: false,
       prefillText: null,
-      createMode: 'share',
-      editClipId: null,
-      localClips: [],
-      isLocal: false,
-    });
-  });
-
-  it('shows validation error for empty text', async () => {
-    // Override prefillText to empty so we can test empty submit
-    clipState.set({
-      ...get(clipState),
-      prefillText: '',
-    });
-
-    render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
-
-    await tick();
-    await fireEvent.click(getCreateButton());
-
-    await waitFor(() => {
-      expect(screen.getByText(/please enter some text/i)).toBeInTheDocument();
-    });
-  });
-
-  it('clears validation error when user starts typing', async () => {
-    clipState.set({
-      ...get(clipState),
-      prefillText: '',
-    });
-
-    const { container } = render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
-
-    await tick();
-    await fireEvent.click(getCreateButton());
-
-    await waitFor(() => {
-      expect(screen.getByText(/please enter some text/i)).toBeInTheDocument();
-    });
-
-    await fillText(container, 'new content');
-
-    await waitFor(() => {
-      expect(screen.queryByText(/please enter some text/i)).not.toBeInTheDocument();
-    });
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Edit mode - loading state
-// ---------------------------------------------------------------------------
-
-describe('CreateForm edit mode - loading state', () => {
-  beforeEach(() => {
-    clipState.set({
-      ...get(clipState),
-      prefillText: 'some text',
-      createMode: 'edit',
-      editClipId: 'clip-1',
-      loading: true,
-    });
-  });
-
-  afterEach(() => {
-    cleanup();
-    clipState.set({
-      clipId: null,
-      password: '',
-      decryptedText: null,
-      clip: null,
-      error: null,
-      loading: false,
-      shareUrl: null,
-      showShareModal: false,
-      prefillText: null,
-      createMode: 'share',
+      createMode: 'share' as const,
       editClipId: null,
       localClips: [],
       isLocal: false,
@@ -577,20 +427,37 @@ describe('CreateForm edit mode - loading state', () => {
   });
 
   it('disables the create button when loading', async () => {
-    render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
+    clipState.update((s) => ({ ...s, loading: true }));
+    const { container } = render(CreateForm, { onCreate: vi.fn() });
 
-    await waitFor(() => {
-      const btn = screen.getByRole('button', { name: /creating/i }) as HTMLButtonElement;
-      expect(btn.disabled).toBe(true);
-    });
+    const button = screen.getByRole('button', { name: /creating/i });
+    expect(button).toBeDisabled();
   });
 });
 
 // ---------------------------------------------------------------------------
-// Edit mode vs share mode comparison
+// CreateForm share mode - error handling
 // ---------------------------------------------------------------------------
 
-describe('CreateForm edit mode vs share mode differences', () => {
+describe('CreateForm share mode - error handling', () => {
+  beforeEach(() => {
+    clipState.set({
+      clipId: null,
+      password: '',
+      decryptedText: null,
+      clip: null,
+      error: null,
+      loading: false,
+      shareUrl: null,
+      showShareModal: false,
+      prefillText: null,
+      createMode: 'share' as const,
+      editClipId: null,
+      localClips: [],
+      isLocal: false,
+    });
+  });
+
   afterEach(() => {
     cleanup();
     clipState.set({
@@ -603,63 +470,102 @@ describe('CreateForm edit mode vs share mode differences', () => {
       shareUrl: null,
       showShareModal: false,
       prefillText: null,
-      createMode: 'share',
+      createMode: 'share' as const,
       editClipId: null,
       localClips: [],
       isLocal: false,
     });
   });
 
-  it('share mode shows "Share" button, edit mode shows "Save"', async () => {
-    clipState.set({
-      ...get(clipState),
-      prefillText: 'hello',
-      createMode: 'share',
-    });
+  it('shows error message when text is empty', async () => {
+    const { container } = render(CreateForm, { onCreate: vi.fn() });
 
-    render(CreateForm, { onCreate: vi.fn(), createMode: 'share' });
-    expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
+    await fireEvent.click(getCreateButton());
+
+    await waitFor(() => {
+      expect(screen.getByText('Please enter some text to share')).toBeInTheDocument();
+    });
   });
 
-  it('share mode shows "Keep a local copy", edit mode shows "Share this message"', async () => {
-    clipState.set({
-      ...get(clipState),
-      prefillText: 'hello',
+  it('clears error message on input', async () => {
+    clipState.update((s) => ({ ...s, error: 'Some error' }));
+    const { container } = render(CreateForm, { onCreate: vi.fn() });
+
+    expect(screen.getByText('Some error')).toBeInTheDocument();
+
+    await fillText(container, 'test');
+
+    await waitFor(() => {
+      expect(screen.queryByText('Some error')).not.toBeInTheDocument();
     });
+  });
+});
 
-    // Share mode
-    render(CreateForm, { onCreate: vi.fn(), createMode: 'share' });
-    expect(screen.getByLabelText(/keep a local copy/i)).toBeInTheDocument();
-    expect(screen.queryByLabelText(/share this message/i)).not.toBeInTheDocument();
+// ---------------------------------------------------------------------------
+// CreateForm share mode - local copy checkbox
+// ---------------------------------------------------------------------------
 
+describe('CreateForm share mode - local copy checkbox', () => {
+  beforeEach(() => {
+    clipState.set({
+      clipId: null,
+      password: '',
+      decryptedText: null,
+      clip: null,
+      error: null,
+      loading: false,
+      shareUrl: null,
+      showShareModal: false,
+      prefillText: null,
+      createMode: 'share' as const,
+      editClipId: null,
+      localClips: [],
+      isLocal: false,
+    });
+  });
+
+  afterEach(() => {
     cleanup();
-
-    // Edit mode
     clipState.set({
-      ...get(clipState),
-      prefillText: 'hello',
-      createMode: 'edit',
-      editClipId: 'clip-1',
+      clipId: null,
+      password: '',
+      decryptedText: null,
+      clip: null,
+      error: null,
+      loading: false,
+      shareUrl: null,
+      showShareModal: false,
+      prefillText: null,
+      createMode: 'share' as const,
+      editClipId: null,
+      localClips: [],
+      isLocal: false,
     });
-
-    render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
-    expect(screen.getByLabelText(/share this message/i)).toBeInTheDocument();
-    expect(screen.queryByLabelText(/keep a local copy/i)).not.toBeInTheDocument();
   });
 
-  it('share mode has enabled burn and TTL by default', async () => {
-    clipState.set({
-      ...get(clipState),
-      prefillText: 'hello',
-      createMode: 'share',
+  it('shows "Keep a local copy" checkbox', async () => {
+    const { container } = render(CreateForm, { onCreate: vi.fn() });
+
+    await waitFor(() => {
+      expect(getLocalCopyCheckbox()).toBeInTheDocument();
     });
+  });
 
-    render(CreateForm, { onCreate: vi.fn(), createMode: 'share' });
+  it('passes save_local as fifth argument', async () => {
+    const onCreate = vi.fn();
+    const { container } = render(CreateForm, { onCreate });
 
-    const burnCheckbox = getBurnCheckbox();
-    expect(burnCheckbox.disabled).toBe(false);
+    await fillText(container, 'test');
 
-    const ttlButton = getTTLSelect();
-    expect(ttlButton.disabled).toBe(false);
+    // Uncheck local copy
+    await fireEvent.click(getLocalCopyCheckbox());
+
+    await fireEvent.click(getCreateButton());
+
+    await waitFor(() => {
+      expect(onCreate).toHaveBeenCalled();
+      const args = onCreate.mock.calls[0] as any[];
+      expect(args[4]).toBe(false); // save_local
+    });
   });
 });

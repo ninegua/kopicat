@@ -95,7 +95,7 @@ describe('Clip creation flow', () => {
       isLocal: false,
     });
 
-    render(CreateForm, { props: { onCreate: vi.fn(), createMode: 'share' as const } });
+    render(CreateForm, { props: { onCreate: vi.fn() } });
 
     await waitFor(() => {
       expect(screen.getByPlaceholderText(/enter your text/i)).toBeInTheDocument();
@@ -145,7 +145,7 @@ describe('Clip creation flow', () => {
       isLocal: false,
     });
 
-    const { container } = render(CreateForm, { props: { onCreate, createMode: 'share' as const } });
+    const { container } = render(CreateForm, { props: { onCreate } });
     await fillText(container, testText);
 
     const createBtn = getCreateButton();
@@ -186,7 +186,7 @@ describe('Clip creation flow', () => {
       isLocal: false,
     });
 
-    render(CreateForm, { props: { onCreate: vi.fn(), createMode: 'share' as const } });
+    render(CreateForm, { props: { onCreate: vi.fn() } });
 
     const createBtn = getCreateButton();
     await fireEvent.click(createBtn);
@@ -648,7 +648,7 @@ describe('Burn-after-read flow', () => {
       isLocal: false,
     });
 
-    const { container } = render(CreateForm, { props: { onCreate, createMode: 'share' as const } });
+    const { container } = render(CreateForm, { props: { onCreate } });
     await fillText(container, testText);
 
     // Enable burn-after-read and local copy
@@ -751,7 +751,7 @@ describe('ResultView save local copy', () => {
     clipState.update((s) => ({ ...s, localClips: [] }));
   });
 
-  it('saves a local copy when checkbox is checked', async () => {
+  it('saves a local copy when save icon is clicked', async () => {
     const testText = 'Save me locally';
     const password = 'testPassword123';
     const clipId = generateClipId();
@@ -804,18 +804,11 @@ describe('ResultView save local copy', () => {
       expect(screen.getByText('Decrypted successfully')).toBeInTheDocument();
     });
 
-    // Find and check the "Save a local copy" checkbox
-    const checkbox = screen.getByLabelText(/save a local copy/i) as HTMLInputElement;
-    expect(checkbox).not.toBeChecked();
+    // Click the save icon button
+    const saveIcon = screen.getByRole('button', { name: /save clip/i });
+    expect(saveIcon).toBeInTheDocument();
 
-    await fireEvent.click(checkbox);
-    expect(checkbox).toBeChecked();
-
-    // Button text should change from "Done" to "Save"
-    const saveButton = screen.getByRole('button', { name: /save/i }) as HTMLButtonElement;
-    expect(saveButton).toBeInTheDocument();
-
-    await fireEvent.click(saveButton);
+    await fireEvent.click(saveIcon);
 
     // Verify onSave was called with correct data
     expect(savedData.id).toBe(clipId);
@@ -823,7 +816,7 @@ describe('ResultView save local copy', () => {
     expect(savedData.blob).toBe(blob);
   });
 
-  it('does not save when checkbox is unchecked', async () => {
+  it('does not save when copy icon is clicked', async () => {
     const testText = 'Do not save me';
     const password = 'testPassword456';
     const clipId = generateClipId();
@@ -866,13 +859,10 @@ describe('ResultView save local copy', () => {
       expect(screen.getByText('Decrypted successfully')).toBeInTheDocument();
     });
 
-    const checkbox = screen.getByLabelText(/save a local copy/i) as HTMLInputElement;
-    expect(checkbox).not.toBeChecked();
+    const copyIcon = screen.getByRole('button', { name: /copy to clipboard/i });
+    expect(copyIcon).toBeInTheDocument();
 
-    const doneButton = screen.getByRole('button', { name: /done/i }) as HTMLButtonElement;
-    expect(doneButton).toBeInTheDocument();
-
-    await fireEvent.click(doneButton);
+    await fireEvent.click(copyIcon);
 
     // onSave should not have been called
     expect(onSave).not.toHaveBeenCalled();
@@ -935,16 +925,10 @@ describe('ResultView save local copy', () => {
       expect(screen.getByText('Decrypted successfully')).toBeInTheDocument();
     });
 
-    const checkbox = screen.getByLabelText(/save a local copy/i) as HTMLInputElement;
-    expect(checkbox).not.toBeChecked();
+    const saveIcon = screen.getByRole('button', { name: /save clip/i });
+    expect(saveIcon).toBeInTheDocument();
 
-    await fireEvent.click(checkbox);
-    expect(checkbox).toBeChecked();
-
-    const saveButton = screen.getByRole('button', { name: /save/i }) as HTMLButtonElement;
-    expect(saveButton).toBeInTheDocument();
-
-    await fireEvent.click(saveButton);
+    await fireEvent.click(saveIcon);
 
     // Verify localStorage has the clip
     const savedClips = getLocalClips();
@@ -954,7 +938,7 @@ describe('ResultView save local copy', () => {
     expect(savedClips[0].blob).toBe(blob);
   });
 
-  it('does not show save option for burn-after-read clips', async () => {
+  it('shows burned badge for burn-after-read clips', async () => {
     const testText = 'Burn me';
     const password = 'testPassword789';
     const clipId = generateClipId();
@@ -997,12 +981,14 @@ describe('ResultView save local copy', () => {
       expect(screen.getByText('Decrypted successfully')).toBeInTheDocument();
     });
 
-    // Should not have save checkbox or save button
-    expect(screen.queryByLabelText(/save a local copy/i)).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /save/i })).not.toBeInTheDocument();
+    // Should show burn badge
+    expect(screen.getByText('Burned')).toBeInTheDocument();
 
-    // Only "Done" button should be visible
-    const doneButton = screen.getByRole('button', { name: /done/i }) as HTMLButtonElement;
-    expect(doneButton).toBeInTheDocument();
+    // Should not have save icon
+    expect(screen.queryByRole('button', { name: /save clip/i })).not.toBeInTheDocument();
+
+    // Copy icon should still be visible
+    const copyIcon = screen.getByRole('button', { name: /copy to clipboard/i });
+    expect(copyIcon).toBeInTheDocument();
   });
 });

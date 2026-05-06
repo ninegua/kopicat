@@ -120,7 +120,7 @@
   }
 
   function handleShare(clip: (typeof clips)[0]) {
-    goto(`/edit?text=${encodeURIComponent(clip.text)}`);
+    goto(`/edit?clip=${encodeURIComponent(clip.id)}`);
   }
 
   function handleEdit(clip: (typeof clips)[0]) {
@@ -298,6 +298,28 @@
                     </button>
                     <button
                       class="footer-icon-btn"
+                      aria-label="View clip"
+                      onclick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(clip);
+                      }}
+                    >
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="M21 21l-4.35-4.35" />
+                      </svg>
+                    </button>
+                    <button
+                      class="footer-icon-btn"
                       class:footer-icon-btn-copied={copiedId === clip.id}
                       aria-label="Copy text to clipboard"
                       onclick={(e) => {
@@ -337,28 +359,6 @@
                           <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                         </svg>
                       {/if}
-                    </button>
-                    <button
-                      class="footer-icon-btn"
-                      aria-label="View clip"
-                      onclick={(e) => {
-                        e.stopPropagation();
-                        handleEdit(clip);
-                      }}
-                    >
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <circle cx="11" cy="11" r="8" />
-                        <path d="M21 21l-4.35-4.35" />
-                      </svg>
                     </button>
                   </div>
                 </div>
