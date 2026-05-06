@@ -152,7 +152,7 @@
               <pre class="clipped-text">{clip.text}</pre>
               <div class="clip-box-footer">
                 <span class="clip-time">Saved {formatTimeAgo(clip.saved_at)}</span>
-                <div style="display: flex; align-items: center; gap: var(--space-xs);">
+                <div style="display: flex; align-items: center; gap: var(--space-md);">
                   <button
                     class="copy-icon-btn copy-icon-btn--delete"
                     aria-label="Delete clip"
@@ -162,8 +162,8 @@
                     }}
                   >
                     <svg
-                      width="16"
-                      height="16"
+                      width="20"
+                      height="20"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -193,8 +193,8 @@
                   >
                     {#if copiedId === clip.id}
                       <svg
-                        width="16"
-                        height="16"
+                        width="20"
+                        height="20"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -206,8 +206,8 @@
                       </svg>
                     {:else}
                       <svg
-                        width="16"
-                        height="16"
+                        width="20"
+                        height="20"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -229,8 +229,8 @@
                     }}
                   >
                     <svg
-                      width="16"
-                      height="16"
+                      width="20"
+                      height="20"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"

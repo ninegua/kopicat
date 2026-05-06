@@ -51,13 +51,13 @@
         {/if}
 
         {#if !$clipState.clip?.burn_after_read && $clipState.clip?.blob && onSave}
-          <label class="result-checkbox-label">
+          <div class="result-checkbox-label">
             <input
               type="checkbox"
               bind:checked={saveLocal}
             />
             <span>Save a local copy</span>
-          </label>
+          </div>
         {/if}
       </div>
     </div>
@@ -155,6 +155,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    font-size: 0.85rem;
   }
 
   .card-status {
@@ -162,7 +163,6 @@
     align-items: center;
     gap: var(--space-sm);
     color: var(--success);
-    font-size: 0.85rem;
     font-weight: 500;
   }
 
@@ -178,7 +178,6 @@
     border: 1px solid rgba(196, 69, 54, 0.2);
     border-radius: 100px;
     color: var(--error);
-    font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -193,7 +192,6 @@
     align-items: center;
     gap: var(--space-xs);
     color: var(--text-muted);
-    font-size: 0.8rem;
     font-weight: 500;
     cursor: pointer;
     user-select: none;

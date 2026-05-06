@@ -5,6 +5,7 @@
   import Header from '$lib/components/Header.svelte';
   import ResultView from '$lib/components/ResultView.svelte';
   import ShareCard from '$lib/components/ShareCard.svelte';
+  import ViewClipsLink from '$lib/components/ViewClipsLink.svelte';
   import Footer from '$lib/components/Footer.svelte';
 
   function handleDismiss() {
@@ -52,6 +53,7 @@
     <ShareCard url={$clipState.shareUrl} onDismiss={handleShareDismiss} />
   {/if}
   <ResultView onDismiss={handleDismiss} onSave={handleSave} />
+  <ViewClipsLink />
 </main>
 
 <Footer />
