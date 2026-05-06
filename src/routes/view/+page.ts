@@ -19,7 +19,6 @@ export const load = async () => {
         ...s,
         clipId: localId,
         decryptedText: clip.text,
-        isLocal: true,
       }));
     }
   }

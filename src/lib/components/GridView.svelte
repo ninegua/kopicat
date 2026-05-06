@@ -404,7 +404,7 @@
               <div class="clip-box-collapsed">
                 <span class="clip-time">{formatTimeAgo(clip.saved_at)}</span>
                 <div class="clip-preview">
-                  {@html truncateLines(clipEdits[clip.id] ?? clip.text, 3)}
+                  {@html truncateLines(clipEdits[clip.id] ?? clip.text, 4)}
                 </div>
               </div>
             {/if}
@@ -587,7 +587,8 @@
   }
 
   .clip-preview {
-    font-size: 0.8rem;
+    font-family: monospace;
+    font-size: 0.7rem;
     color: var(--text-primary);
     line-height: 1.4;
     flex: 1;
@@ -631,7 +632,6 @@
     resize: none;
     border: none;
     outline: none;
-    font-family: inherit;
     width: 100%;
   }
 
@@ -730,7 +730,7 @@
   }
 
   .snackbar:hover {
-    background: var(--accent-glow);
+    background: var(--bg-secondary);
   }
 
   .snackbar-icon {

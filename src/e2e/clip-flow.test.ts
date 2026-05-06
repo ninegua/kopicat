@@ -65,7 +65,6 @@ describe('Clip creation flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
-      isLocal: false,
     });
 
     render(IdleView, { props: { onPaste: vi.fn() } });
@@ -92,7 +91,6 @@ describe('Clip creation flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
-      isLocal: false,
     });
 
     render(CreateForm, { props: { onCreate: vi.fn() } });
@@ -125,7 +123,6 @@ describe('Clip creation flow', () => {
         createMode: 'share',
         editClipId: null,
         localClips: getLocalClips(),
-        isLocal: false,
       });
     });
 
@@ -142,7 +139,6 @@ describe('Clip creation flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
-      isLocal: false,
     });
 
     const { container } = render(CreateForm, { props: { onCreate } });
@@ -183,7 +179,6 @@ describe('Clip creation flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
-      isLocal: false,
     });
 
     render(CreateForm, { props: { onCreate: vi.fn() } });
@@ -222,7 +217,6 @@ describe('Clip viewing flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
-      isLocal: false,
     });
 
     render(DecryptForm, {
@@ -280,7 +274,6 @@ describe('Clip viewing flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
-      isLocal: false,
     });
 
     const { container } = render(DecryptForm, {
@@ -348,7 +341,6 @@ describe('Clip viewing flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
-      isLocal: false,
     });
 
     const { container } = render(DecryptForm, {
@@ -416,7 +408,6 @@ describe('Clip viewing flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
-      isLocal: false,
     });
 
     render(DecryptForm, {
@@ -628,7 +619,6 @@ describe('Burn-after-read flow', () => {
         createMode: 'share',
         editClipId: null,
         localClips: getLocalClips(),
-        isLocal: false,
       });
     });
 
@@ -645,7 +635,6 @@ describe('Burn-after-read flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
-      isLocal: false,
     });
 
     const { container } = render(CreateForm, { props: { onCreate } });
@@ -695,7 +684,6 @@ describe('Burn-after-read flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
-      isLocal: false,
     });
 
     render(DecryptForm, { props: { onDecrypt, onSetPassword: vi.fn() } });
@@ -728,7 +716,6 @@ describe('Burn-after-read flow', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
-      isLocal: false,
     });
 
     render(DecryptForm, { props: { onDecrypt: vi.fn(), onSetPassword: vi.fn() } });
@@ -777,7 +764,6 @@ describe('ResultView save local copy', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
-      isLocal: false,
       password: '',
     }));
 
@@ -799,13 +785,8 @@ describe('ResultView save local copy', () => {
       },
     });
 
-    // Wait for the component to render
-    await waitFor(() => {
-      expect(screen.getByText('Decrypted successfully')).toBeInTheDocument();
-    });
-
     // Click the save icon button
-    const saveIcon = screen.getByRole('button', { name: /save clip/i });
+    const saveIcon = screen.getByRole('button', { name: /download clip/i });
     expect(saveIcon).toBeInTheDocument();
 
     await fireEvent.click(saveIcon);
@@ -842,7 +823,6 @@ describe('ResultView save local copy', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
-      isLocal: false,
       password: '',
     }));
 
@@ -853,10 +833,6 @@ describe('ResultView save local copy', () => {
         onDismiss: () => {},
         onSave,
       },
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('Decrypted successfully')).toBeInTheDocument();
     });
 
     const copyIcon = screen.getByRole('button', { name: /copy to clipboard/i });
@@ -898,7 +874,6 @@ describe('ResultView save local copy', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
-      isLocal: false,
       password: '',
     }));
 
@@ -910,7 +885,6 @@ describe('ResultView save local copy', () => {
         ...s,
         clipId: savedClipId,
         localClips: getLocalClips(),
-        isLocal: false,
       }));
     };
 
@@ -921,11 +895,7 @@ describe('ResultView save local copy', () => {
       },
     });
 
-    await waitFor(() => {
-      expect(screen.getByText('Decrypted successfully')).toBeInTheDocument();
-    });
-
-    const saveIcon = screen.getByRole('button', { name: /save clip/i });
+    const saveIcon = screen.getByRole('button', { name: /download clip/i });
     expect(saveIcon).toBeInTheDocument();
 
     await fireEvent.click(saveIcon);
@@ -964,7 +934,6 @@ describe('ResultView save local copy', () => {
       createMode: 'share',
       editClipId: null,
       localClips: [],
-      isLocal: false,
       password: '',
     }));
 
@@ -977,15 +946,11 @@ describe('ResultView save local copy', () => {
       },
     });
 
-    await waitFor(() => {
-      expect(screen.getByText('Decrypted successfully')).toBeInTheDocument();
-    });
-
     // Should show burn badge
     expect(screen.getByText('Burned')).toBeInTheDocument();
 
     // Should not have save icon
-    expect(screen.queryByRole('button', { name: /save clip/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /download clip/i })).not.toBeInTheDocument();
 
     // Copy icon should still be visible
     const copyIcon = screen.getByRole('button', { name: /copy to clipboard/i });

@@ -80,7 +80,6 @@
       createMode: 'share',
       editClipId: null,
       localClips: getLocalClips(),
-      isLocal: false,
     });
   }
 

@@ -37,7 +37,6 @@
           createMode: 'share',
           editClipId: localId,
           localClips: $clipState.localClips,
-          isLocal: true,
         });
         return;
       } else {
@@ -54,7 +53,6 @@
           createMode: 'share',
           editClipId: null,
           localClips: $clipState.localClips,
-          isLocal: true,
         });
         return;
       }
@@ -97,7 +95,6 @@
         createMode: 'share',
         editClipId: null,
         localClips: [],
-        isLocal: false,
       });
 
       void (async () => {
@@ -191,7 +188,7 @@
     {#if $clipState.showShareModal && $clipState.shareUrl}
       <ShareCard url={$clipState.shareUrl} onDismiss={handleShareDismiss} />
     {/if}
-    <ResultView onDismiss={handleDismiss} onSave={handleSave} isLocal={$clipState.isLocal} />
+    <ResultView onDismiss={handleDismiss} onSave={handleSave} />
     <ViewClipsLink />
   {:else if $clipState.clipId && !$clipState.clip && !$clipState.loading}
     <ClipNotFound />

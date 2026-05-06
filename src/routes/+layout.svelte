@@ -215,11 +215,11 @@
     border: none;
     border-radius: 0;
     color: var(--text-primary);
+    font-family: monospace;
     font-size: 0.8rem;
     line-height: 1.5;
     resize: none;
     outline: none;
-    font-family: monospace;
   }
 
   :global(.card-textarea:focus) {
@@ -340,10 +340,11 @@
   }
 
   :global(.clipped-text) {
+    font-family: monospace;
+    font-size: 0.8rem;
     background: transparent;
     padding-bottom: var(--space-md);
     color: var(--text-primary);
-    font-size: 0.8rem;
     line-height: 1.5;
     white-space: pre-wrap;
     word-break: break-word;

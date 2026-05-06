@@ -35,7 +35,6 @@
       createMode: 'share',
       editClipId: editClipId,
       localClips: getLocalClips(),
-      isLocal: false,
     });
   }
 
