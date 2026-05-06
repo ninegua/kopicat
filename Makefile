@@ -1,7 +1,7 @@
 NAME=copycat
 VERSION?=$(shell git rev-parse --abbrev-ref HEAD)
-BACKEND_MAIN_SRC=canister/backend.mo
-BACKEND_SRC=$(wildcard canister/*.mo)
+BACKEND_MAIN_SRC=backend/main.mo
+BACKEND_SRC=$(wildcard backend/*.mo)
 MOC_VERSION=$(shell grep compiler vessel.dhall|cut -d\" -f2)
 MOC=.vessel/.bin/$(MOC_VERSION)/moc
 

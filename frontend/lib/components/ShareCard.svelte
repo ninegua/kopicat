@@ -17,7 +17,7 @@
               margin: 1,
               color: { dark: '#150D08', light: '#F7EFD2' },
             },
-            (err: Error | null) => {
+            (err: Error | null | undefined) => {
               if (err) console.error('QR generation failed:', err);
             },
           );

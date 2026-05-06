@@ -786,7 +786,7 @@ describe('ResultView save local copy', () => {
     });
 
     // Click the save icon button
-    const saveIcon = screen.getByRole('button', { name: /download clip/i });
+    const saveIcon = screen.getByRole('button', { name: /add to collection/i });
     expect(saveIcon).toBeInTheDocument();
 
     await fireEvent.click(saveIcon);
@@ -895,7 +895,7 @@ describe('ResultView save local copy', () => {
       },
     });
 
-    const saveIcon = screen.getByRole('button', { name: /download clip/i });
+    const saveIcon = screen.getByRole('button', { name: /add to collection/i });
     expect(saveIcon).toBeInTheDocument();
 
     await fireEvent.click(saveIcon);

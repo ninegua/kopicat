@@ -12,6 +12,14 @@ const config = {
 			base: '',
 		},
 		files: {
+			appTemplate: 'frontend/app.html',
+			routes: 'frontend/routes',
+			lib: 'frontend/lib',
+			hooks: {
+				client: 'frontend/hooks.client',
+				server: 'frontend/hooks.server'
+			},
+			params: 'frontend/params',
 			serviceWorker: "non-existent",
 		},
 	},

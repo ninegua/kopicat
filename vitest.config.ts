@@ -75,8 +75,8 @@ export default defineConfig({
 	],
 	resolve: {
 		alias: {
-			'$app': path.resolve(__dirname, 'src/app'),
-			'$lib': path.resolve(__dirname, 'src/lib'),
+			'$app': path.resolve(__dirname, 'frontend/app'),
+			'$lib': path.resolve(__dirname, 'frontend/lib'),
 		},
 	},
 	test: {
@@ -87,7 +87,7 @@ export default defineConfig({
 				url: 'http://localhost',
 			},
 		},
-		include: ['src/**/*.test.ts'],
-		setupFiles: ['./src/e2e/setup.ts'],
+		include: ['frontend/**/*.test.ts'],
+		setupFiles: ['./frontend/tests/setup.ts'],
 	},
 });

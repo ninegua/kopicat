@@ -7,7 +7,7 @@ export default defineConfig({
 		sveltekit(),
 		VitePWA({
 			strategies: 'injectManifest',
-			srcDir: 'src',
+			srcDir: 'frontend',
 			filename: 'service-worker.ts',
 			injectRegister: false,
 			injectManifest: {
