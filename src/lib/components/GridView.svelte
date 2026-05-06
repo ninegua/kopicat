@@ -75,7 +75,15 @@
     return div.innerHTML;
   }
 
-  function truncate(text: string, numLines: number): string {
+  function truncate(text: string, count: number): string {
+    let result = text.substring(0, count);
+    if (result.length < text.length) {
+       result += "…";
+    }
+    return result;
+  }
+
+  function truncateLines(text: string, numLines: number): string {
     const lines = text.split(/\r\n|[\n\u000B\f\r\u0085\u2028\u2029]/);
     let result = '';
     let n = 0;
@@ -101,7 +109,7 @@
   function rearrange(clips: LocalClip[]) {
     const isMobile = window.matchMedia('(max-width: 480px)');
     const cols = isMobile.matches ? 2 : 3;
-    let result: (typeof clips)[0][] = [];
+    let result: LocalClip[] = [];
     for (var i = 0; i < clips.length; i++) {
       let clip = clips[i];
       if (clip.id == sharedClip && (i + 1) % cols == 0) {
@@ -119,11 +127,11 @@
     return result;
   }
 
-  function handleView(clip: (typeof clips)[0]) {
+  function handleView(clip: LocalClip) {
     goto(`/view?local=${clip.id}`);
   }
 
-  function handleDelete(clip: (typeof clips)[0]) {
+  function handleDelete(clip: LocalClip) {
     if (sharedClip === clip.id) {
       sharedClip = null;
     }
@@ -365,7 +373,7 @@
           {:else}
             <div class="clip-box-collapsed">
               <span class="clip-time">{formatTimeAgo(clip.saved_at)}</span>
-              <div class="clip-preview">{@html truncate(clipEdits[clip.id] ?? clip.text, 3)}</div>
+              <div class="clip-preview">{@html truncateLines(clipEdits[clip.id] ?? clip.text, 3)}</div>
             </div>
           {/if}
         </div>
