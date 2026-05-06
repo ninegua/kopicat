@@ -172,15 +172,27 @@
 
   <div class="form-group">
     <div class="checkboxes">
+      {#if createMode === 'share'}
+        <label class="local-checkbox-label">
+          <input type="checkbox" checked={saveLocal} onchange={() => (saveLocal = !saveLocal)} />
+          <span class="local-checkbox-text">Keep a local copy</span>
+        </label>
+      {:else}
+        <label class="local-checkbox-label">
+          <input
+            type="checkbox"
+            checked={shareMessage}
+            onchange={() => (shareMessage = !shareMessage)}
+          />
+          <span class="local-checkbox-text">Share this message</span>
+        </label>
+      {/if}
+      {#if createMode === 'share' || shareMessage}
       <label class="burn-checkbox-label">
         <input
           type="checkbox"
           checked={burnAfterRead}
-          disabled={createMode === 'edit' && !shareMessage}
-          onchange={() => {
-            if (createMode === 'edit' && !shareMessage) return;
-            burnAfterRead = !burnAfterRead;
-          }}
+          onchange={() => (burnAfterRead = !burnAfterRead)}
         />
         <span class:burn-active={burnAfterRead}>Burn after read</span>
         <svg
@@ -199,46 +211,10 @@
           />
         </svg>
       </label>
-      {#if createMode === 'share'}
-        <label class="local-checkbox-label">
-          <input type="checkbox" checked={saveLocal} onchange={() => (saveLocal = !saveLocal)} />
-          <span class="local-checkbox-text">Keep a local copy</span>
-        </label>
-      {:else}
-        <label class="local-checkbox-label">
-          <input
-            type="checkbox"
-            checked={shareMessage}
-            onchange={() => (shareMessage = !shareMessage)}
-          />
-          <span class="local-checkbox-text">Share this message</span>
-        </label>
       {/if}
     </div>
   </div>
   <div class="form-row">
-    <button
-      type="button"
-      bind:this={ttlButton}
-      class="ttl-select"
-      class:open={ttlOpen}
-      disabled={createMode === 'edit' && !shareMessage}
-      onclick={() => {
-        if (createMode === 'edit' && !shareMessage) return;
-        ttlOpen = !ttlOpen;
-      }}
-    >
-      <span>{formatTTL(selectedTTL)}</span>
-      <svg viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M1 1L6 6L11 1"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
-    </button>
     <button class="btn-primary" onclick={handleCreate} disabled={$clipState.loading}>
       {#if $clipState.loading}
         <svg
@@ -255,6 +231,28 @@
         {#if saveLocal}Save & Share{:else}Share{/if}
       {:else if shareMessage}Save & Share{:else}Save{/if}
     </button>
+    {#if createMode === 'share' || shareMessage}
+    <button
+      type="button"
+      bind:this={ttlButton}
+      class="ttl-select"
+      class:open={ttlOpen}
+      onclick={() => {
+        ttlOpen = !ttlOpen;
+      }}
+    >
+      <span>{formatTTL(selectedTTL)}</span>
+      <svg viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M1 1L6 6L11 1"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
+      {/if}
   </div>
 </div>
 
@@ -293,7 +291,7 @@
   .local-checkbox-label {
     flex: 1;
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     align-items: center;
     gap: var(--space-xs);
     color: var(--text-muted);
@@ -316,7 +314,9 @@
 
   .burn-checkbox-label {
     flex: 1;
+    display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: var(--space-xs);
     color: var(--text-muted);
     font-size: 0.8rem;

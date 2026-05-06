@@ -278,7 +278,7 @@
         <span class="snackbar-message">
           <span>'<span class="snackbar-id">{truncate(pendingDelete.text, 20)}</span>' deleted.</span
           >
-          <span>Click to restore.</span></span
+          <span>Changing mind? Click to restore.</span></span
         >
       </button>
     {/each}
@@ -472,6 +472,7 @@
   .snackbar-message {
     display: flex;
     flex-direction: column;
+    gap: var(--space-xs);
     width: 100%;
   }
 
