@@ -28,9 +28,9 @@
   }
 
   function shareClip() {
-    const text = $clipState.decryptedText;
-    if (text) {
-      goto(`/edit?text=${encodeURIComponent(text)}`);
+    const clipId = $clipState.clipId;
+    if (clipId) {
+      goto(`/edit?clip=${encodeURIComponent(clipId)}`);
     }
   }
 
