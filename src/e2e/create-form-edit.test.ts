@@ -238,30 +238,29 @@ describe('CreateForm edit mode - burn-after-read', () => {
     });
   });
 
-  it('disables burn-after-read checkbox when share message is not enabled', () => {
+  it('hides burn-after-read checkbox when share message is not enabled', () => {
     render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
 
-    const burnCheckbox = getBurnCheckbox();
-    expect(burnCheckbox.disabled).toBe(true);
-    expect(burnCheckbox.checked).toBe(false);
+    expect(screen.queryByLabelText(/burn after read/i)).not.toBeInTheDocument();
   });
 
-  it('enables burn-after-read checkbox when share message is toggled on', async () => {
+  it('shows burn-after-read checkbox when share message is toggled on', async () => {
     render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
 
-    const burnCheckbox = getBurnCheckbox();
-    expect(burnCheckbox.disabled).toBe(true);
+    expect(screen.queryByLabelText(/burn after read/i)).not.toBeInTheDocument();
 
     await fireEvent.click(getShareMessageCheckbox());
+    const burnCheckbox = getBurnCheckbox();
     expect(burnCheckbox.disabled).toBe(false);
   });
 
   it('allows enabling burn-after-read after enabling share message', async () => {
     render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
 
-    const burnCheckbox = getBurnCheckbox();
+    expect(screen.queryByLabelText(/burn after read/i)).not.toBeInTheDocument();
 
     await fireEvent.click(getShareMessageCheckbox());
+    const burnCheckbox = getBurnCheckbox();
     expect(burnCheckbox.disabled).toBe(false);
 
     await fireEvent.click(burnCheckbox);
@@ -301,34 +300,37 @@ describe('CreateForm edit mode - TTL selector', () => {
     });
   });
 
-  it('disables TTL selector when share message is not enabled', () => {
+  it('hides TTL selector when share message is not enabled', () => {
     render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
 
-    const ttlButton = getTTLSelect();
-    expect(ttlButton.disabled).toBe(true);
+    expect(screen.queryByRole('button', { name: /expire/i })).not.toBeInTheDocument();
   });
 
-  it('shows default 15 minute TTL in edit mode', () => {
+  it('shows default 15 minute TTL in edit mode when share message is enabled', async () => {
     render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
+
+    await fireEvent.click(getShareMessageCheckbox());
 
     expect(screen.getByRole('button', { name: /expire \(15 min\)/i })).toBeInTheDocument();
   });
 
-  it('enables TTL selector when share message is toggled on', async () => {
+  it('shows TTL selector when share message is toggled on', async () => {
     render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
 
-    const ttlButton = getTTLSelect();
-    expect(ttlButton.disabled).toBe(true);
+    expect(screen.queryByRole('button', { name: /expire/i })).not.toBeInTheDocument();
 
     await fireEvent.click(getShareMessageCheckbox());
+    const ttlButton = getTTLSelect();
     expect(ttlButton.disabled).toBe(false);
   });
 
   it('allows changing TTL after enabling share message', async () => {
     render(CreateForm, { onCreate: vi.fn(), createMode: 'edit' });
 
-    const ttlButton = getTTLSelect();
+    expect(screen.queryByRole('button', { name: /expire/i })).not.toBeInTheDocument();
+
     await fireEvent.click(getShareMessageCheckbox());
+    const ttlButton = getTTLSelect();
     expect(ttlButton.disabled).toBe(false);
 
     await fireEvent.click(ttlButton);

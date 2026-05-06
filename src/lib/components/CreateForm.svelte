@@ -56,7 +56,7 @@
   let password = $state('');
   let selectedTTL = $state(900);
   let ttlOpen = $state(false);
-  let ttlButton: HTMLButtonElement | undefined;
+  let ttlButton: HTMLButtonElement | undefined = $state();
   let ttlPortal: HTMLDivElement | undefined;
   let burnAfterRead = $state(false);
 
