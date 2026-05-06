@@ -100,7 +100,7 @@
 </script>
 
 <svelte:head>
-  <title>KopiCat - Share secret clips end-to-end encrypted</title>
+  <title>KopiCat - Copy. Clip. Clip.</title>
   <meta
     name="description"
     content="Share encrypted text via simple links. Your data is encrypted client-side before being stored on the Internet Computer."

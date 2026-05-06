@@ -64,7 +64,7 @@
           <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
         </svg>
       </div>
-      <p class="card-title">Input your text to share</p>
+      <p class="card-title">Sending a copy?</p>
     </div>
     {#if $clipState.error}
       <div class="idle-error">
@@ -113,12 +113,12 @@
           <path d="M12 12v6" />
           <path d="m9 13 3 -3 3 3" />
         </svg>
-        Paste from clipboard
+        Copy from clipboard
       </button>
     </div>
   </div>
   <button type="button" class="idle-link" onclick={handleReceiveClick}
-    >Or are you trying to <span class="idle-link-text">receive a text</span>?</button
+    >Or are you looking to <span class="idle-link-text">receive a copy</span>?</button
   >
 </div>
 

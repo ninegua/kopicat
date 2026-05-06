@@ -194,7 +194,6 @@
   <div class="grid-container" class:grid-maximized={maximizedClip !== null}>
     {#if maximizedClip === null}
       <div class="grid-header">
-        <h2 class="grid-title">Saved Clips</h2>
         <span class="clip-count">
           total: {clips.length}
           {#if unsavedCount > 0}
@@ -488,10 +487,6 @@
     justify-content: space-between;
     padding: 0 var(--space-sm);
     margin-bottom: var(--space-sm);
-  }
-
-  .grid-title {
-    margin: 0;
   }
 
   .clip-count {
