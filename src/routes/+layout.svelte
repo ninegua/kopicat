@@ -198,8 +198,7 @@
   :global(.card-textarea-group) {
     border-bottom: 1px solid var(--border-color);
     width: 100%;
-    min-height: 180px;
-    height: 195px;
+    flex: 1;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -210,7 +209,7 @@
 
   :global(.card-textarea) {
     width: 100%;
-    height: 100%;
+    min-height: 178px;
     padding: 0;
     background: transparent;
     border: none;
@@ -349,6 +348,7 @@
     white-space: pre-wrap;
     word-break: break-word;
     overflow-y: auto;
+    min-height: 178px;
   }
 
   :global(.char-count) {

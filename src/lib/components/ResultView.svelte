@@ -28,13 +28,6 @@
 </script>
 
 <div class="card">
-  {#if $clipState.decryptedText}
-    <div class="card-textarea-group">
-      <pre class="clipped-text">{$clipState.decryptedText}</pre>
-      <span class="char-count">{$clipState.decryptedText.length} characters</span>
-    </div>
-  {/if}
-
   <div class="form-group">
     <div class="card-status-header">
       {#if !isLocal}
@@ -158,19 +151,31 @@
       </div>
     {/if}
   </div>
+  {#if $clipState.decryptedText}
+    <div class="card-textarea-group">
+      <pre class="clipped-text">{$clipState.decryptedText}</pre>
+      <span class="char-count">{$clipState.decryptedText.length} characters</span>
+    </div>
+  {/if}
 </div>
 
 <style>
+  .card-textarea-group {
+    border-bottom: none;
+    border-top: 1px solid var(--border-color);
+  }
+
   .card-status-header {
     margin: var(--space-sm) 0;
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 0.85rem;
+    font-size: 0.80rem;
   }
 
   .card-status {
+    margin-bottom: var(--space-sm);
     display: flex;
     align-items: center;
     gap: var(--space-sm);
