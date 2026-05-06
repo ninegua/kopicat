@@ -42,7 +42,7 @@
     --accent: #c59645;
     --accent-hover: #b58520;
     --accent-active: #9a7018;
-    --accent-glow: rgba(197, 150, 69, 0.15);
+    --accent-glow: rgba(255, 193, 7, 0.12);
     --accent-gradient: linear-gradient(135deg, #c59645, #a38660);
 
     --border-color: #cbb796;

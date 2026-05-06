@@ -29,9 +29,9 @@ export function addLocalClip(clip: LocalClip): LocalClip[] {
   const clips = readClips();
   const exists = clips.findIndex((c) => c.id === clip.id);
   if (exists !== -1) {
-    clips[exists] = clip;
+    clips[exists] = { ...clips[exists], ...clip, saved_at: Date.now() };
   } else {
-    clips.push(clip);
+    clips.push({ ...clip, saved_at: Date.now() });
   }
   writeClips(clips);
   return clips.reverse();
@@ -46,7 +46,7 @@ export function updateLocalClip(id: string, updates: Partial<LocalClip>): void {
   const clips = readClips();
   const index = clips.findIndex((c) => c.id === id);
   if (index !== -1) {
-    clips[index] = { ...clips[index], ...updates };
+    clips[index] = { ...clips[index], ...updates, saved_at: Date.now() };
     writeClips(clips);
   }
 }
