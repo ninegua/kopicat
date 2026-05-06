@@ -2,6 +2,22 @@
   import { goto } from '$app/navigation';
   import { clipState } from '$lib/api/store';
   import ViewClipsLink from '$lib/components/ViewClipsLink.svelte';
+  import { generateClipId } from '$lib/words';
+  import { generatePassword } from '$lib/crypto';
+
+  function handleReceiveClick(e: MouseEvent) {
+    e.stopPropagation();
+    const id = generateClipId();
+    const pw = generatePassword(8);
+    const url = `${location.origin}/receive?${id}#${pw}`;
+    clipState.update((s) => ({
+      ...s,
+      showModal: 'receive',
+      shareUrl: url,
+      createMode: 'receive',
+    }));
+    goto('/list');
+  }
 
   let { onPaste }: { onPaste: (text: string) => void } = $props();
 
@@ -71,7 +87,7 @@
     {/if}
     <div class="idle-actions">
       <div class="idle-keyboard">
-        <span>Or press <kbd>Ctrl+V</kbd> or <kbd>⌘+V</kbd></span>
+        <span>Press <kbd>Ctrl+V</kbd> or <kbd>⌘+V</kbd> to</span>
       </div>
       <button
         type="button"
@@ -101,6 +117,9 @@
       </button>
     </div>
   </div>
+  <button type="button" class="idle-link" onclick={handleReceiveClick}
+    >Or are you trying to <span class="idle-link-text">receive a text</span>?</button
+  >
 </div>
 
 <ViewClipsLink />
@@ -171,6 +190,20 @@
   .idle-keyboard {
     color: var(--text-muted);
     font-size: 0.85rem;
+  }
+
+  .idle-link {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    text-decoration: none;
+    cursor: pointer;
+    border: 0;
+    background: none;
+  }
+
+  .idle-link-text {
+    text-decoration: underline;
+    color: #1e40af;
   }
 
   kbd {

@@ -3,7 +3,7 @@
 
 <footer class="footer">
   <div class="footer-inner">
-    <p class="footer-text">End-to-end encrypted. Only those with the shareable link can decrypt.</p>
+    <p class="footer-text">Copying from and back, end-to-end encrypted.</p>
     <p class="footer-meta">Built on the Internet Computer</p>
   </div>
 </footer>

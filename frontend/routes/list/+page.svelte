@@ -4,12 +4,13 @@
   import Header from '$lib/components/Header.svelte';
   import GridView from '$lib/components/GridView.svelte';
   import ShareCard from '$lib/components/ShareCard.svelte';
+  import ReceiveCard from '$lib/components/ReceiveCard.svelte';
   import Footer from '$lib/components/Footer.svelte';
 
-  function handleShareDismiss() {
+  function handleDismiss() {
     clipState.update((s) => ({
       ...s,
-      showShareModal: false,
+      showModal: null,
       shareUrl: null,
       prefillText: null,
       createMode: 'share',
@@ -26,8 +27,11 @@
 <Header onReset={() => goto('/')} showMenu />
 
 <main class="app-main">
-  {#if $clipState.showShareModal && $clipState.shareUrl}
-    <ShareCard url={$clipState.shareUrl} onDismiss={handleShareDismiss} />
+  {#if $clipState.showModal === 'share' && $clipState.shareUrl}
+    <ShareCard url={$clipState.shareUrl} onDismiss={handleDismiss} />
+  {/if}
+  {#if $clipState.showModal === 'receive' && $clipState.shareUrl}
+    <ReceiveCard url={$clipState.shareUrl} onDismiss={handleDismiss} />
   {/if}
   <GridView />
 </main>

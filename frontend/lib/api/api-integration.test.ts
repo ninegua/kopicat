@@ -92,7 +92,7 @@ beforeEach(() => {
     error: null,
     loading: false,
     shareUrl: null,
-    showShareModal: false,
+    showModal: null,
     prefillText: null,
     createMode: 'share',
     editClipId: null,
@@ -146,7 +146,7 @@ async function simulateCreateClip(
     clipId,
     decryptedText: text,
     shareUrl,
-    showShareModal: true,
+    showModal: 'share',
     loading: false,
     error: null,
   });
@@ -238,7 +238,7 @@ describe('Clip creation flow', () => {
 
     // Verify store state
     const finalState = get(clipState);
-    expect(finalState.showShareModal).toBe(true);
+    expect(finalState.showModal).toBe('share');
     expect(finalState.decryptedText).toBe(text);
     expect(finalState.loading).toBe(false);
     expect(finalState.error).toBeNull();
@@ -397,7 +397,7 @@ describe('Clip viewing flow', () => {
     expect(createResult.success).toBe(true);
 
     // Step 2: Store state should have showShareModal true
-    expect(get(clipState).showShareModal).toBe(true);
+    expect(get(clipState).showModal).toBe('share');
     expect(get(clipState).decryptedText).toBe(text);
 
     // Step 3: Simulate navigating to the clip URL (reset state first)
@@ -409,7 +409,7 @@ describe('Clip viewing flow', () => {
       error: null,
       loading: false,
       shareUrl: null,
-      showShareModal: false,
+      showModal: null,
       prefillText: null,
       createMode: 'share',
       editClipId: null,
@@ -528,7 +528,7 @@ describe('UI component state flow', () => {
       error: null,
       loading: false,
       shareUrl: null,
-      showShareModal: false,
+      showModal: null,
       prefillText: null,
       createMode: 'share',
       editClipId: null,
@@ -556,7 +556,7 @@ describe('UI component state flow', () => {
       error: null,
       loading: false,
       shareUrl: null,
-      showShareModal: false,
+      showModal: null,
       prefillText: null,
       createMode: 'share',
       editClipId: null,

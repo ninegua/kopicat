@@ -75,7 +75,7 @@
       error: null,
       loading: false,
       shareUrl: null,
-      showShareModal: false,
+      showModal: null,
       prefillText,
       createMode: 'share',
       editClipId: null,

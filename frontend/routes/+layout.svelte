@@ -209,7 +209,7 @@
 
   :global(.card-textarea) {
     width: 100%;
-    min-height: 178px;
+    min-height: 192px;
     padding: 0;
     background: transparent;
     border: none;
@@ -349,7 +349,7 @@
     white-space: pre-wrap;
     word-break: break-word;
     overflow-y: auto;
-    min-height: 178px;
+    min-height: 192px;
   }
 
   :global(.char-count) {

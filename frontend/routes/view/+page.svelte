@@ -32,7 +32,7 @@
           error: null,
           loading: false,
           shareUrl: null,
-          showShareModal: false,
+          showModal: null,
           prefillText: null,
           createMode: 'share',
           editClipId: localId,
@@ -48,7 +48,7 @@
           error: null,
           loading: false,
           shareUrl: null,
-          showShareModal: false,
+          showModal: null,
           prefillText: null,
           createMode: 'share',
           editClipId: null,
@@ -90,7 +90,7 @@
         error: null,
         loading: true,
         shareUrl: null,
-        showShareModal: false,
+        showModal: null,
         prefillText,
         createMode: 'share',
         editClipId: null,
@@ -185,7 +185,7 @@
   {:else if $clipState.clip && !$clipState.decryptedText}
     <DecryptForm onDecrypt={decryptClip} onSetPassword={setPassword} />
   {:else if $clipState.decryptedText}
-    {#if $clipState.showShareModal && $clipState.shareUrl}
+    {#if $clipState.showModal === 'share' && $clipState.shareUrl}
       <ShareCard url={$clipState.shareUrl} onDismiss={handleShareDismiss} />
     {/if}
     <ResultView onDismiss={handleDismiss} onSave={handleSave} />
