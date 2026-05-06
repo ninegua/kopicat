@@ -51,13 +51,13 @@
         {/if}
 
         {#if !$clipState.clip?.burn_after_read && $clipState.clip?.blob && onSave}
-          <div class="result-checkbox-label">
+          <label class="result-checkbox-label">
             <input
               type="checkbox"
               bind:checked={saveLocal}
             />
             <span>Save a local copy</span>
-          </div>
+          </label>
         {/if}
       </div>
     </div>

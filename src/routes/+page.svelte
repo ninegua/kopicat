@@ -39,7 +39,7 @@
     const hash = window.location.hash;
 
     if (rawQuery && clipIdPattern.test(rawQuery)) {
-      void goto(`/decrypt?clip=${rawQuery}${hash}`, { replaceState: true });
+      void goto(`/view?clip=${rawQuery}${hash}`, { replaceState: true });
       return;
     }
 
