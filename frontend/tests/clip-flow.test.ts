@@ -419,7 +419,10 @@ describe('Clip deletion flow', () => {
   it('shows a snackbar when a clip is deleted', async () => {
     const testText = 'Delete me please';
     const now = Date.now();
-    localStorage.setItem('copycat_clips', JSON.stringify([{ id: 'del-clip-1', text: testText, saved_at: now }]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: 'del-clip-1', text: testText, saved_at: now }]),
+    );
 
     const { default: GridView } = await import('../lib/components/GridView.svelte');
     const { container } = render(GridView);
@@ -444,7 +447,10 @@ describe('Clip deletion flow', () => {
   it('removes clip from grid after snackbar timer expires', async () => {
     const testText = 'Temp clip';
     const now = Date.now();
-    localStorage.setItem('copycat_clips', JSON.stringify([{ id: 'temp-clip-1', text: testText, saved_at: now }]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: 'temp-clip-1', text: testText, saved_at: now }]),
+    );
 
     const { default: GridView } = await import('../lib/components/GridView.svelte');
     render(GridView);
@@ -482,7 +488,10 @@ describe('Clip deletion flow', () => {
   it('restores a deleted clip via snackbar', async () => {
     const testText = 'Restore me';
     const now = Date.now();
-    localStorage.setItem('copycat_clips', JSON.stringify([{ id: 'restore-clip-1', text: testText, saved_at: now }]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: 'restore-clip-1', text: testText, saved_at: now }]),
+    );
 
     const { default: GridView } = await import('../lib/components/GridView.svelte');
     render(GridView);
@@ -514,7 +523,10 @@ describe('Clip deletion flow', () => {
   it('shows empty state when all clips are deleted', async () => {
     const testText = 'Last clip';
     const now = Date.now();
-    localStorage.setItem('copycat_clips', JSON.stringify([{ id: 'last-clip-1', text: testText, saved_at: now }]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: 'last-clip-1', text: testText, saved_at: now }]),
+    );
 
     const { default: GridView } = await import('../lib/components/GridView.svelte');
     render(GridView);

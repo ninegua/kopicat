@@ -44,12 +44,14 @@ export function removeLocalClip(id: string): void {
   writeClips(clips);
 }
 
-export function updateLocalClip(id: string, updates: Partial<LocalClip>): void {
+export function updateLocalClip(id: string, updates: Partial<LocalClip>): LocalClip | null {
   const clips = readClips();
   const index = clips.findIndex((c) => c.id === id);
   if (index !== -1) {
-    clips[index] = { ...clips[index], ...updates, saved_at: Date.now() };
+    let clip = { ...clips[index], ...updates, saved_at: Date.now() };
+    clips[index] = clip;
     writeClips(clips);
+    return clip;
   }
 }
 

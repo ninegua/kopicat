@@ -22,33 +22,48 @@
   let editingText = $state<string>('');
   let clipEdits: Record<string, string> = $state({});
   let clipModified: Record<string, boolean> = $state({});
-let localClips = $state<LocalClip[]>(getLocalClips());
+  let clips = $state<LocalClip[]>(getLocalClips());
 
   $effect(() => {
     function onStorage(e: StorageEvent) {
       if (e.key === 'copycat_clips') {
-        localClips = getLocalClips();
+        clips = getLocalClips();
       }
     }
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
   });
 
-  const clips = $derived.by(() => {
-    const deletedIds = pendingDeletes.length > 0 ? new Set(pendingDeletes.map((d) => d.id)) : null;
-    return deletedIds
-      ? localClips.filter((c) => !deletedIds.has(c.id))
-      : localClips;
-  });
+  function getClips(): LocalClip[] {
+    if (pendingDeletes.length > 0) {
+      const deletedIds = new Set(pendingDeletes.map((d) => d.id));
+      return clips.filter((c) => !deletedIds.has(c.id));
+    } else {
+      return clips;
+    }
+  }
+
+  function getClipsLength(): LocalClip[] {
+    const deleted = pendingDeletes.length;
+    return clips.length - deleted;
+  }
+
+  function updateClip(id: string, updates: Partial<LocalClip>) {
+    let updated = updateLocalClip(id, updates);
+    if (updated) {
+      clips = clips.map((c) => (c.id === id ? updated : c));
+    }
+  }
+
   let sharedClip = $state<string | null>($clipState.clipId);
 
   const unsavedCount = $derived.by(() => {
-    return clips.filter((c) => clipModified[c.id]).length;
+    return getClips().filter((c) => clipModified[c.id]).length;
   });
 
   // Sets editingText when sharedClip changes.
   $effect(() => {
-    const clip = clips.find((c) => c.id === sharedClip);
+    const clip = getClips().find((c) => c.id === sharedClip);
     if (clip) {
       if (clipEdits[clip.id] !== undefined) {
         editingText = clipEdits[clip.id];
@@ -60,7 +75,7 @@ let localClips = $state<LocalClip[]>(getLocalClips());
 
   // Fill QR code canvas with clip.text if sharedClip is receiving (whenever sharedClip changes).
   $effect(() => {
-    const clip = clips.find((c) => c.id === sharedClip);
+    const clip = getClips().find((c) => c.id === sharedClip);
     if (clip?.receiving && clip.text) {
       const canvas = document.getElementById(`qr-${clip.id}`) as HTMLCanvasElement | null;
       if (canvas) {
@@ -106,20 +121,16 @@ let localClips = $state<LocalClip[]>(getLocalClips());
 
       const now = Date.now();
       const newClip: LocalClip = { id, text: decryptedText, saved_at: now, receiving: false };
-      updateLocalClip(clip.id, newClip);
-      localClips = localClips.map((c) => (c.id === id ? newClip : c));
+      updateClip(clip.id, newClip);
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : 'Decryption failed';
-      updateLocalClip(clip.id, { text: errorMessage });
-      localClips = localClips.map((c) =>
-        c.id === id ? { ...c, text: errorMessage, saved_at: Date.now() } : c,
-      );
+      updateClip(clip.id, { text: errorMessage, saved_at: Date.now() });
     }
   }
 
   // Sets up timer to poll receiving clips.
   $effect(() => {
-    const receivingClips = clips.filter((c) => c.receiving);
+    const receivingClips = getClips().filter((c) => c.receiving);
 
     if (pollingTimer) {
       clearTimeout(pollingTimer);
@@ -142,7 +153,7 @@ let localClips = $state<LocalClip[]>(getLocalClips());
       });
 
       pollingTimer = setInterval(() => {
-        const freshReceiving = clips.filter((c) => c.receiving);
+        const freshReceiving = getClips().filter((c) => c.receiving);
         freshReceiving.forEach((clip) => {
           if (pendingIds.size < receivingClips.length) {
             runPoll(clip);
@@ -263,7 +274,7 @@ let localClips = $state<LocalClip[]>(getLocalClips());
     }
     const timer = setTimeout(() => {
       removeLocalClip(clip.id);
-      localClips = localClips.filter((c) => c.id !== clip.id);
+      clips = clips.filter((c) => c.id !== clip.id);
       pendingDeletes = pendingDeletes.filter((d) => d.id !== clip.id);
     }, 5000);
     pendingDeletes = [...pendingDeletes, { id: clip.id, text: clip.text, timer }];
@@ -280,9 +291,8 @@ let localClips = $state<LocalClip[]>(getLocalClips());
 
   function handleSave(clip: LocalClip) {
     const text = editingText;
-    updateLocalClip(clip.id, { text });
     const now = Date.now();
-    localClips = localClips.map((c) => (c.id === clip.id ? { ...c, text, saved_at: now } : c));
+    updateClip(clip.id, { text, saved_at: now });
     delete clipEdits[clip.id];
     delete clipModified[clip.id];
   }
@@ -302,20 +312,20 @@ let localClips = $state<LocalClip[]>(getLocalClips());
     {#if maximizedClip === null}
       <div class="grid-header">
         <span class="clip-count">
-          total: {clips.length}
+          total: {getClipsLength()}
           {#if unsavedCount > 0}
             (<span class="unsaved-count">{unsavedCount} unsaved</span>)
           {/if}
         </span>
       </div>
     {/if}
-    {#if clips.length === 0}
+    {#if getClipsLength() === 0}
       <div class="empty-state">
         <p>No clips yet. Create one to get started.</p>
       </div>
     {:else}
       <div class="clips-grid" class:grid-maximized={maximizedClip !== null}>
-        {#each maximizedClip ? clips.filter((c) => c.id === maximizedClip) : rearrange(clips) as clip (clip.id)}
+        {#each maximizedClip ? getClips().filter((c) => c.id === maximizedClip) : rearrange(getClips()) as clip (clip.id)}
           <div
             class="clip-box"
             class:clip-box-focused={sharedClip === clip.id}
