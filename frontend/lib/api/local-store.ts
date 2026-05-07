@@ -58,13 +58,13 @@ export function getLocalClip(id: string): LocalClip | undefined {
 }
 
 export function newReceivingClip(origin: string): { id: string; url: string } {
+  const clips = readClips();
   while (true) {
     const id = generateClipId();
     const pw = generatePassword(8);
     const url = `${origin}/send?${id}#${pw}`;
-    const clips = readClips();
     if (clips.findIndex((c) => c.id === id) === -1) {
-      clips.push({ id, text: url, saved_at: null as unknown as number, receiving: true });
+      clips.push({ id, text: url, saved_at: Date.now(), receiving: true });
       writeClips(clips);
       return { id, url };
     }

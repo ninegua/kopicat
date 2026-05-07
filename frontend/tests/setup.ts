@@ -4,9 +4,9 @@ import { clipState } from '$lib/api/store';
 import { createMockServer, resetClipStore } from './msw-handlers';
 
 vi.mock('qrcode', () => ({
-  toCanvas: vi.fn(
-    (_canvas: unknown, _data: string, _opts: unknown, cb: (err: Error | null) => void) => cb(null),
-  ),
+  toCanvas: vi.fn((_canvas: unknown, _data: string, _opts: unknown, cb?: (err: Error | null) => void) => {
+    if (cb) cb(null);
+  }),
 }));
 
 // $app/paths mock — needed by Header.svelte
@@ -19,7 +19,7 @@ vi.mock('$app/navigation', () => ({
   goto: vi.fn(),
 }));
 
-// Mock element.animate (not supported by jsdom)
+// Mock element.animate (not supported by jsdom/happy-dom)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 Element.prototype.animate = function () {
   return {
@@ -28,6 +28,12 @@ Element.prototype.animate = function () {
     addEventListener: () => {},
     removeEventListener: () => {},
   } as unknown as Animation;
+};
+
+// Mock element.getAnimations (not supported by jsdom/happy-dom)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+Element.prototype.getAnimations = function () {
+  return [];
 };
 
 // Mock ResizeObserver (not supported by jsdom)

@@ -170,8 +170,7 @@
     }
   });
 
-  function formatTimeAgo(timestamp: number | null | undefined): string {
-    if (!timestamp) return 'unknown';
+  function formatTimeAgo(timestamp: number): string {
     const diff = Date.now() - timestamp;
     const seconds = Math.floor(diff / 1000);
     const minutes = Math.floor(seconds / 60);
@@ -520,14 +519,15 @@
                         <span class="qr-button">{clip.text}</span>
                       {:else}
                         <span class="error-banner qr-header">{clip.text}</span>
-                        <span
-                          class="btn-primary qr-button"
-                          onclick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(clip);
-                            handleSendAgain();
-                          }}>Try send again with a fresh code?</span
-                        >
+                        <button
+                           type="button"
+                           class="btn-primary qr-button"
+                           onclick={(e) => {
+                             e.stopPropagation();
+                             handleDelete(clip);
+                             handleSendAgain();
+                           }}>Try send again with a fresh code?</button
+                         >
                       {/if}
                     </div>
                   </div>

@@ -3,7 +3,7 @@ import { setupServer } from 'msw/node';
 import type { Clip, ClipInput } from '$lib/api/client';
 
 // In-memory "backend" store shared across all requests
-const clipStore = new Map<string, Clip>();
+export const clipStore = new Map<string, Clip>();
 
 // ---------------------------------------------------------------------------
 // MSW handlers
