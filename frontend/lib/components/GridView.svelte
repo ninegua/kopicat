@@ -34,24 +34,8 @@
     return clips.filter((c) => clipModified[c.id]).length;
   });
 
-  /*
-  // Sets sharedClip to clipState.clipId if sharedClip is not already set.
+  // Sets editingText when sharedClip changes.
   $effect(() => {
-    const _id = $clipState.clipId;
-    if (_id && sharedClip === null) {
-      const exists = clips.some((c) => c.id === _id);
-      if (exists) {
-        sharedClip = _id;
-      }
-    }
-  });
-*/
-
-  let previousSyncClipId: string | null = null;
-
-  $effect.pre(() => {
-    if (sharedClip === previousSyncClipId) return;
-    previousSyncClipId = sharedClip;
     const clip = clips.find((c) => c.id === sharedClip);
     if (clip) {
       if (clipEdits[clip.id] !== undefined) {
@@ -62,6 +46,7 @@
     }
   });
 
+  // Fill QR code canvas with clip.text if sharedClip is receiving (whenever sharedClip changes).
   $effect(() => {
     const clip = clips.find((c) => c.id === sharedClip);
     if (clip?.receiving && clip.text) {
@@ -126,6 +111,7 @@
     }
   }
 
+  // Sets up timer to poll receiving clips.
   $effect(() => {
     const receivingClips = clips.filter((c) => c.receiving);
 
