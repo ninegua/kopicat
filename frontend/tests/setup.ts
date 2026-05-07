@@ -76,7 +76,7 @@ afterEach(() => {
     error: null,
     loading: false,
     shareUrl: null,
-    showShareModal: false,
+    showModal: false,
     prefillText: null,
     createMode: 'share',
     editClipId: null,

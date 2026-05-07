@@ -18,7 +18,7 @@
       decryptedText: null,
       shareUrl: null,
       error: null,
-      showShareModal: false,
+      showModal: null,
     }));
   }
 

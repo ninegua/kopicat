@@ -119,7 +119,7 @@
         clipId,
         decryptedText: text,
         shareUrl: shareUrl,
-        showShareModal: true,
+        showModal: 'share',
         prefillText: null,
         createMode: 'share',
         editClipId: clipId,

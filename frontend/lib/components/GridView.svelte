@@ -15,7 +15,6 @@
   import { decrypt } from '$lib/crypto';
 
   let copiedId = $state<string | null>(null);
-  let sharedClip = $state<string | null>(null);
   let maximizedClip = $state<string | null>(null);
   let pendingDeletes = $state<{ id: string; text: string; timer: ReturnType<typeof setTimeout> }[]>(
     [],
@@ -29,11 +28,14 @@
       ? $clipState.localClips.filter((c) => !deletedIds.has(c.id))
       : $clipState.localClips;
   });
+  let sharedClip = $state<string | null>($clipState.clipId);
 
   const unsavedCount = $derived.by(() => {
     return clips.filter((c) => clipModified[c.id]).length;
   });
 
+  /*
+  // Sets sharedClip to clipState.clipId if sharedClip is not already set.
   $effect(() => {
     const _id = $clipState.clipId;
     if (_id && sharedClip === null) {
@@ -43,6 +45,7 @@
       }
     }
   });
+*/
 
   $effect(() => {
     const editId = $clipState.editClipId;
@@ -88,7 +91,7 @@
 
   let pollingTimer: ReturnType<typeof setTimeout> | null = null;
 
-  function matchBaseUrl(url: string): string {
+  function matchBaseUrl(url: string): string | null {
     let urlMatch = url.match(/^https?:\/\/[^#]+/);
     return urlMatch ? urlMatch[0] : null;
   }

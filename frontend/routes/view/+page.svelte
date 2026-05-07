@@ -162,7 +162,7 @@
   function handleShareDismiss() {
     clipState.update((s) => ({
       ...s,
-      showShareModal: false,
+      showModal: null,
       shareUrl: null,
       prefillText: null,
     }));
