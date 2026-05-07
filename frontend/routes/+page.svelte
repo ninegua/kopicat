@@ -63,7 +63,6 @@
     clipState.set({
       clipId: null,
       decryptedText: null,
-      loading: false,
       prefillText,
     });
   }

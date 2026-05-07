@@ -12,6 +12,7 @@
   import Footer from '$lib/components/Footer.svelte';
 
   let error = $state<string | null>(null);
+  let loading = $state(false);
 
   function initFromUrl() {
     error = null;
@@ -29,7 +30,6 @@
     clipState.set({
       clipId: null,
       decryptedText: null,
-      loading: false,
       prefillText: prefillText || null,
     });
   }
@@ -50,7 +50,7 @@
     }
 
     error = null;
-    clipState.update((s) => ({ ...s, loading: true }));
+    loading = true;
     const encryptedBlob = await encrypt(text, pw);
 
     const clipId = generateClipId();
@@ -75,7 +75,7 @@
       } else {
         msg = 'Network Error. Please check your connection and try again.';
       }
-      clipState.update((s) => ({ ...s, loading: false }));
+      loading = false;
       error = msg || 'Failed to create clip';
       return;
     }
@@ -97,8 +97,8 @@
       clipId,
       decryptedText: text,
       prefillText: null,
-      loading: false,
     }));
+    loading = false;
 
     goto('/list');
   }
@@ -112,7 +112,7 @@
 <Header />
 
 <main class="app-main">
-  <CreateForm onCreate={handleCreate} {error} onClearError={() => (error = null)} />
+  <CreateForm onCreate={handleCreate} {error} onClearError={() => (error = null)} {loading} />
 </main>
 
 <Footer />

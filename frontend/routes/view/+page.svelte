@@ -17,6 +17,7 @@
   let pagePassword = $state('');
   let shareUrl = $state<string | null>(null);
   let error = $state<string | null>(null);
+  let loading = $state(false);
 
   function initFromUrl() {
     const url = new URL(window.location.href);
@@ -51,34 +52,31 @@
       clipState.set({
         clipId,
         decryptedText: null,
-        loading: true,
         prefillText,
       });
+      loading = true;
 
       void (async () => {
         try {
           const clip = await fetchClip(clipId);
 
           if (!clip) {
-            clipState.update((s) => ({ ...s, loading: false }));
+            loading = false;
             return;
           }
 
           fetchedClip = clip;
-          clipState.update((s) => ({ ...s, loading: false }));
+          loading = false;
         } catch (e: any) {
           error = e.message || 'Failed to fetch clip';
-          clipState.update((s) => ({
-            ...s,
-            loading: false,
-          }));
+          loading = false;
         }
       })();
     }
   }
 
   async function decryptClip(password: string) {
-    clipState.update((s) => ({ ...s, loading: true }));
+    loading = true;
 
     try {
       const text = await decrypt(fetchedClip!.blob, password);
@@ -87,15 +85,12 @@
       clipState.update((s) => ({
         ...s,
         decryptedText: text,
-        loading: false,
       }));
       error = null;
     } catch {
       error = 'Failed to decrypt. The password may be incorrect.';
-      clipState.update((s) => ({
-        ...s,
-        loading: false,
-      }));
+    } finally {
+      loading = false;
     }
   }
 
@@ -126,10 +121,16 @@
 <Header />
 
 <main class="app-main">
-  {#if $clipState.loading && !fetchedClip}
+  {#if loading && !fetchedClip}
     <LoadingSpinner message="Fetching clip..." />
   {:else if fetchedClip && !$clipState.decryptedText}
-    <DecryptForm clip={fetchedClip} password={pagePassword} onDecrypt={decryptClip} {error} />
+    <DecryptForm
+      clip={fetchedClip}
+      password={pagePassword}
+      onDecrypt={decryptClip}
+      {error}
+      {loading}
+    />
   {:else if $clipState.decryptedText}
     <ResultView
       clip={fetchedClip}
@@ -140,7 +141,7 @@
       onClearError={() => (error = null)}
     />
     <ViewClipsLink />
-  {:else if $clipState.clipId && !fetchedClip && !$clipState.loading}
+  {:else if $clipState.clipId && !fetchedClip && !loading}
     <ClipNotFound />
   {/if}
 </main>

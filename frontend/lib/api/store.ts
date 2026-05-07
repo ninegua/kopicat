@@ -19,7 +19,6 @@ export interface LocalClip {
 export interface ClipState {
   clipId: string | null;
   decryptedText: string | null;
-  loading: boolean;
   prefillText: string | null;
 }
 
@@ -33,7 +32,6 @@ export const modalState = writable<ModalState>(modalInitial);
 const initial: ClipState = {
   clipId: null,
   decryptedText: null,
-  loading: false,
   prefillText: null,
 };
 

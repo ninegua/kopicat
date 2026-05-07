@@ -87,7 +87,6 @@ beforeEach(() => {
   clipState.set({
     clipId: null,
     decryptedText: null,
-    loading: false,
     prefillText: null,
   });
 
@@ -137,7 +136,6 @@ async function simulateCreateClip(
     ...get(clipState),
     clipId,
     decryptedText: text,
-    loading: false,
   });
   modalState.set({ showModal: 'share', shareUrl });
 
@@ -152,23 +150,13 @@ async function simulateFetchClipById(id: string) {
   clipState.set({
     ...get(clipState),
     clipId: id,
-    loading: true,
   });
 
   const clip = await fetchClip(id);
 
   if (!clip) {
-    clipState.set({
-      ...get(clipState),
-      loading: false,
-    });
     return null;
   }
-
-  clipState.set({
-    ...get(clipState),
-    loading: false,
-  });
 
   return clip;
 }
@@ -181,10 +169,8 @@ let testClip: Clip | null = null;
 
 async function simulateDecryptClip(clip: Clip | null, password: string) {
   testClip = clip;
-  clipState.set({ ...get(clipState), loading: true });
 
   if (!clip) {
-    clipState.set({ ...get(clipState), loading: false });
     return;
   }
 
@@ -193,13 +179,9 @@ async function simulateDecryptClip(clip: Clip | null, password: string) {
     clipState.set({
       ...get(clipState),
       decryptedText: text,
-      loading: false,
     });
   } catch {
-    clipState.set({
-      ...get(clipState),
-      loading: false,
-    });
+    // decryption failed - decryptedText remains null
   }
 }
 
@@ -214,7 +196,7 @@ describe('Clip creation flow', () => {
 
     // Verify initial state
     const initialState = get(clipState);
-    expect(initialState.loading).toBe(false);
+    expect(initialState.clipId).toBeNull();
 
     // Simulate create
     const result = await simulateCreateClip(text, password, 900);
@@ -228,7 +210,6 @@ describe('Clip creation flow', () => {
     const finalState = get(clipState);
     expect(get(modalState).showModal).toBe('share');
     expect(finalState.decryptedText).toBe(text);
-    expect(finalState.loading).toBe(false);
     expect(finalState.clipId).toBe(result.clipId);
 
     // Verify the clip was stored on the mock backend
@@ -310,14 +291,14 @@ describe('Clip viewing flow', () => {
 
     expect(clip).not.toBeNull();
     expect(clip!.blob).toBe(encryptedBlob);
-    expect(get(clipState).loading).toBe(false);
+    expect(get(clipState).clipId).toBe(clipId);
   });
 
   it('shows "not found" for a non-existent clip', async () => {
     const result = await simulateFetchClipById('non-existent-clip');
 
     expect(result).toBeNull();
-    expect(get(clipState).loading).toBe(false);
+    expect(get(clipState).clipId).toBe('non-existent-clip');
   });
 
   it('decrypts a clip with the correct password', async () => {
@@ -342,7 +323,6 @@ describe('Clip viewing flow', () => {
     await simulateDecryptClip(clip, password);
 
     expect(get(clipState).decryptedText).toBe(text);
-    expect(get(clipState).loading).toBe(false);
   });
 
   it('shows error when decryption fails with wrong password', async () => {
@@ -386,7 +366,6 @@ describe('Clip viewing flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      loading: false,
       prefillText: null,
     });
 
@@ -478,26 +457,26 @@ describe('UI component state flow', () => {
     clipState.set({
       clipId: 'test',
       decryptedText: null,
-      loading: false,
       prefillText: null,
     });
 
-    // The DecryptForm.svelte button has: disabled={$clipState.loading || !password}
+    // The DecryptForm.svelte button has: disabled={loading || !password}
     // where password is a local state initialized from the password prop
+    // and loading is a page-local prop
     const state = get(clipState);
-    expect(state.loading).toBe(false);
+    expect(state.clipId).toBe('test');
   });
 
   it('decrypt form: enables button when password is provided', () => {
     clipState.set({
       clipId: 'test',
       decryptedText: null,
-      loading: false,
       prefillText: null,
     });
 
     // Password is passed as a prop to DecryptForm, not stored in clipState
+    // loading is also a page-local prop, not in clipState
     const state = get(clipState);
-    expect(state.loading).toBe(false);
+    expect(state.clipId).toBe('test');
   });
 });

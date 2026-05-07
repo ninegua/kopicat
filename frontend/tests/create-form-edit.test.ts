@@ -39,7 +39,6 @@ describe('CreateForm share mode - text prefill', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      loading: false,
       prefillText: 'Shared clip content',
       localClips: [],
     });
@@ -51,7 +50,6 @@ describe('CreateForm share mode - text prefill', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      loading: false,
       prefillText: null,
       localClips: [],
     });
@@ -59,7 +57,7 @@ describe('CreateForm share mode - text prefill', () => {
 
   it('pre-fills the textarea with the shared text', async () => {
     const onCreate = vi.fn();
-    const { container } = render(CreateForm, { onCreate });
+    const { container } = render(CreateForm, { onCreate, loading: false });
 
     await waitFor(() => {
       const textarea = container.querySelector<HTMLTextAreaElement>('textarea');
@@ -69,7 +67,7 @@ describe('CreateForm share mode - text prefill', () => {
 
   it('allows user to edit the pre-filled text', async () => {
     const onCreate = vi.fn();
-    const { container } = render(CreateForm, { onCreate });
+    const { container } = render(CreateForm, { onCreate, loading: false });
 
     await fillText(container, 'Modified text content');
 
@@ -80,7 +78,7 @@ describe('CreateForm share mode - text prefill', () => {
   });
 
   it('shows character count based on pre-filled text', async () => {
-    const { container } = render(CreateForm, { onCreate: vi.fn() });
+    const { container } = render(CreateForm, { onCreate: vi.fn(), loading: false });
 
     await waitFor(() => {
       const charCount = container.querySelector('.char-count');
@@ -99,7 +97,6 @@ describe('CreateForm share mode - button text', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      loading: false,
       prefillText: null,
       localClips: [],
     });
@@ -111,14 +108,13 @@ describe('CreateForm share mode - button text', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      loading: false,
       prefillText: null,
       localClips: [],
     });
   });
 
   it('shows "Share" button text when share is enabled', async () => {
-    const { container } = render(CreateForm, { onCreate: vi.fn() });
+    const { container } = render(CreateForm, { onCreate: vi.fn(), loading: false });
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
@@ -126,7 +122,7 @@ describe('CreateForm share mode - button text', () => {
   });
 
   it('toggles the local copy checkbox', async () => {
-    const { container } = render(CreateForm, { onCreate: vi.fn() });
+    const { container } = render(CreateForm, { onCreate: vi.fn(), loading: false });
 
     const checkbox = getLocalCopyCheckbox();
     expect(checkbox.checked).toBe(false);
@@ -139,7 +135,7 @@ describe('CreateForm share mode - button text', () => {
   });
 
   it('toggles the share message checkbox', async () => {
-    const { container } = render(CreateForm, { onCreate: vi.fn() });
+    const { container } = render(CreateForm, { onCreate: vi.fn(), loading: false });
 
     const checkbox = getBurnCheckbox();
     expect(checkbox.checked).toBe(false);
@@ -162,7 +158,6 @@ describe('CreateForm share mode - burn after read', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      loading: false,
       prefillText: null,
       localClips: [],
     });
@@ -174,14 +169,13 @@ describe('CreateForm share mode - burn after read', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      loading: false,
       prefillText: null,
       localClips: [],
     });
   });
 
   it('shows burn-after-read checkbox by default', async () => {
-    const { container } = render(CreateForm, { onCreate: vi.fn() });
+    const { container } = render(CreateForm, { onCreate: vi.fn(), loading: false });
 
     await waitFor(() => {
       expect(screen.getByLabelText(/burn after read/i)).toBeInTheDocument();
@@ -189,7 +183,7 @@ describe('CreateForm share mode - burn after read', () => {
   });
 
   it('allows enabling burn-after-read', async () => {
-    const { container } = render(CreateForm, { onCreate: vi.fn() });
+    const { container } = render(CreateForm, { onCreate: vi.fn(), loading: false });
 
     const checkbox = getBurnCheckbox();
     expect(checkbox.checked).toBe(false);
@@ -209,7 +203,6 @@ describe('CreateForm share mode - TTL selector', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      loading: false,
       prefillText: null,
       localClips: [],
     });
@@ -221,14 +214,13 @@ describe('CreateForm share mode - TTL selector', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      loading: false,
       prefillText: null,
       localClips: [],
     });
   });
 
   it('shows TTL selector when share message is enabled', async () => {
-    const { container } = render(CreateForm, { onCreate: vi.fn() });
+    const { container } = render(CreateForm, { onCreate: vi.fn(), loading: false });
 
     await waitFor(() => {
       expect(getTTLSelect()).toBeInTheDocument();
@@ -236,7 +228,7 @@ describe('CreateForm share mode - TTL selector', () => {
   });
 
   it('shows default 15 minute TTL when share message is enabled', async () => {
-    const { container } = render(CreateForm, { onCreate: vi.fn() });
+    const { container } = render(CreateForm, { onCreate: vi.fn(), loading: false });
 
     await waitFor(() => {
       expect(getTTLSelect()).toHaveTextContent('15 min');
@@ -254,7 +246,6 @@ describe('CreateForm share mode - button disabled', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      loading: false,
       prefillText: null,
       localClips: [],
     });
@@ -266,15 +257,13 @@ describe('CreateForm share mode - button disabled', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      loading: false,
       prefillText: null,
       localClips: [],
     });
   });
 
   it('disables the create button when loading', async () => {
-    clipState.update((s) => ({ ...s, loading: true }));
-    const { container } = render(CreateForm, { onCreate: vi.fn() });
+    const { container } = render(CreateForm, { onCreate: vi.fn(), loading: true });
 
     const button = screen.getByRole('button', { name: /creating/i });
     expect(button).toBeDisabled();
@@ -291,7 +280,6 @@ describe('CreateForm share mode - error handling', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      loading: false,
       prefillText: null,
       localClips: [],
     });
@@ -303,7 +291,6 @@ describe('CreateForm share mode - error handling', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      loading: false,
       prefillText: null,
       localClips: [],
     });
@@ -332,7 +319,6 @@ describe('CreateForm share mode - local copy checkbox', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      loading: false,
       prefillText: null,
       localClips: [],
     });
@@ -344,14 +330,13 @@ describe('CreateForm share mode - local copy checkbox', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      loading: false,
       prefillText: null,
       localClips: [],
     });
   });
 
   it('shows "Keep a local copy" checkbox', async () => {
-    const { container } = render(CreateForm, { onCreate: vi.fn() });
+    const { container } = render(CreateForm, { onCreate: vi.fn(), loading: false });
 
     await waitFor(() => {
       expect(getLocalCopyCheckbox()).toBeInTheDocument();
@@ -360,7 +345,7 @@ describe('CreateForm share mode - local copy checkbox', () => {
 
   it('passes save_local as fifth argument', async () => {
     const onCreate = vi.fn();
-    const { container } = render(CreateForm, { onCreate });
+    const { container } = render(CreateForm, { onCreate, loading: false });
 
     await fillText(container, 'test');
 

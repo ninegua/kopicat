@@ -6,11 +6,13 @@
     password: initialPassword,
     onDecrypt,
     error: formError,
+    loading,
   }: {
     clip: any;
     password: string;
     onDecrypt: (pw: string) => Promise<void>;
     error: string | null;
+    loading: boolean;
   } = $props();
 
   // svelte-ignore state_referenced_locally
@@ -29,7 +31,7 @@
 
   $effect(() => {
     if (userTyped) return;
-    if (password && !$clipState.loading && !$clipState.decryptedText) {
+    if (password && !loading && !$clipState.decryptedText) {
       onDecrypt(password);
     }
   });
@@ -86,8 +88,8 @@
       }}
     />
 
-    <button class="btn-primary" onclick={handleDecrypt} disabled={$clipState.loading || !password}>
-      {#if $clipState.loading}
+    <button class="btn-primary" onclick={handleDecrypt} disabled={loading || !password}>
+      {#if loading}
         <svg
           class="spinner"
           viewBox="0 0 24 24"

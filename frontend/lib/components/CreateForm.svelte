@@ -8,6 +8,7 @@
     onCreate,
     error: formError,
     onClearError,
+    loading,
   }: {
     onCreate: (
       text: string,
@@ -18,6 +19,7 @@
     ) => Promise<void>;
     error: string | null;
     onClearError: () => void;
+    loading: boolean;
   } = $props();
 
   let saveLocal = $state(false);
@@ -186,8 +188,8 @@
     </div>
   </div>
   <div class="form-row">
-    <button class="btn-primary" onclick={handleCreate} disabled={$clipState.loading}>
-      {#if $clipState.loading}
+    <button class="btn-primary" onclick={handleCreate} disabled={loading}>
+      {#if loading}
         <svg
           class="spinner"
           viewBox="0 0 24 24"

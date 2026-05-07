@@ -55,7 +55,6 @@ describe('Clip creation flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      loading: false,
       prefillText: null,
     });
 
@@ -73,7 +72,6 @@ describe('Clip creation flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      loading: false,
       prefillText: 'Test paste content',
     });
 
@@ -97,7 +95,6 @@ describe('Clip creation flow', () => {
       clipState.set({
         clipId,
         decryptedText: testText,
-        loading: false,
         prefillText: null,
       });
 
@@ -107,7 +104,6 @@ describe('Clip creation flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      loading: false,
       prefillText: testText,
     });
 
@@ -141,7 +137,6 @@ describe('Clip creation flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      loading: false,
       prefillText: '',
     });
 
@@ -173,7 +168,6 @@ describe('Clip viewing flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
-      loading: false,
       prefillText: null,
     });
 
@@ -217,14 +211,12 @@ describe('Clip viewing flow', () => {
       clipState.set({
         ...get(clipState),
         decryptedText: result,
-        loading: false,
       });
     });
 
     clipState.set({
       clipId,
       decryptedText: null,
-      loading: false,
       prefillText: null,
     });
 
@@ -266,26 +258,20 @@ describe('Clip viewing flow', () => {
 
     const onDecrypt = vi.fn(async (pw: string) => {
       const clip = { blob, created_at: Date.now(), expires_at: 0, burn_after_read: false };
-      clipState.update((s) => ({ ...s, loading: true }));
       try {
         const result = await decrypt(clip.blob, pw);
         clipState.set({
           ...get(clipState),
           decryptedText: result,
-          loading: false,
         });
       } catch {
-        clipState.update((s) => ({
-          ...s,
-          loading: false,
-        }));
+        // decryption failed - decryptedText remains null
       }
     });
 
     clipState.set({
       clipId,
       decryptedText: null,
-      loading: false,
       prefillText: null,
     });
 
@@ -322,14 +308,12 @@ describe('Clip viewing flow', () => {
       clipState.set({
         ...get(clipState),
         decryptedText: result,
-        loading: false,
       });
     });
 
     clipState.set({
       clipId,
       decryptedText: null,
-      loading: false,
       prefillText: null,
     });
 
@@ -536,7 +520,6 @@ describe('Burn-after-read flow', () => {
       clipState.set({
         clipId,
         decryptedText: testText,
-        loading: false,
         prefillText: null,
       });
     });
@@ -544,12 +527,11 @@ describe('Burn-after-read flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      loading: false,
       prefillText: testText,
     });
 
     const { container } = render(CreateForm, {
-      props: { onCreate, error: null, onClearError: vi.fn() },
+      props: { onCreate, error: null, onClearError: vi.fn(), loading: false },
     });
     await fillText(container, testText);
 
@@ -585,14 +567,12 @@ describe('Burn-after-read flow', () => {
       clipState.set({
         ...get(clipState),
         decryptedText: result,
-        loading: false,
       });
     });
 
     clipState.set({
       clipId,
       decryptedText: null,
-      loading: false,
       prefillText: null,
     });
 
@@ -622,11 +602,12 @@ describe('Burn-after-read flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
-      loading: false,
       prefillText: null,
     });
 
-    render(DecryptForm, { props: { onDecrypt: vi.fn(), password: '', clip: null, error: null } });
+    render(DecryptForm, {
+      props: { onDecrypt: vi.fn(), password: '', clip: null, error: null, loading: false },
+    });
 
     await waitFor(() => {
       // In the real app, the parent page would show ClipNotFound when clip is null
@@ -662,7 +643,6 @@ describe('ResultView save local copy', () => {
         burn_after_read: false,
       },
       decryptedText: testText,
-      loading: false,
       prefillText: null,
     }));
 
@@ -713,7 +693,6 @@ describe('ResultView save local copy', () => {
         burn_after_read: false,
       },
       decryptedText: testText,
-      loading: false,
       prefillText: null,
     }));
 
@@ -757,7 +736,6 @@ describe('ResultView save local copy', () => {
         burn_after_read: false,
       },
       decryptedText: testText,
-      loading: false,
       prefillText: null,
     }));
 
@@ -802,7 +780,6 @@ describe('ResultView save local copy', () => {
       ...s,
       clipId,
       decryptedText: testText,
-      loading: false,
       prefillText: null,
     }));
 
