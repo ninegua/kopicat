@@ -6,7 +6,7 @@ function readClips(): LocalClip[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    return JSON.parse(raw) as LocalClip[];
+    return (JSON.parse(raw) as LocalClip[]).map((c) => ({ ...c, receiving: c.receiving ?? false }));
   } catch {
     return [];
   }

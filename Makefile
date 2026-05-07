@@ -36,4 +36,4 @@ clean:
 distclean: clean
 	rm -rf .vessel/
 
-.PHONY: build backend clean distclean
+.PHONY: build backend frontend clean distclean

@@ -9,8 +9,9 @@ export type ModalType = 'share' | 'receive' | null;
 export interface LocalClip {
   id: string;
   text: string;
-  saved_at: number;
+  saved_at?: number;
   blob?: string;
+  receiving?: boolean;
 }
 
 export interface ClipState {

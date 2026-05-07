@@ -8,3 +8,5 @@ dist/
 **/*.swp
 node_modules/
 skills-lock.json
+static/kopicat-*.png
+assets/
