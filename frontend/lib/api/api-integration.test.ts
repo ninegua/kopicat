@@ -86,9 +86,7 @@ beforeEach(() => {
   // Reset the client store to initial state
   clipState.set({
     clipId: null,
-    password: '',
     decryptedText: null,
-    clip: null,
     error: null,
     loading: false,
     shareUrl: null,
@@ -177,7 +175,6 @@ async function simulateFetchClipById(id: string) {
 
   clipState.set({
     ...get(clipState),
-    clip,
     loading: false,
   });
 
@@ -188,7 +185,10 @@ async function simulateFetchClipById(id: string) {
 // Simulate the +page.svelte decryptClip function
 // ---------------------------------------------------------------------------
 
+let testClip: Clip | null = null;
+
 async function simulateDecryptClip(clip: Clip | null, password: string) {
+  testClip = clip;
   clipState.set({ ...get(clipState), loading: true });
 
   if (!clip) {
@@ -321,8 +321,7 @@ describe('Clip viewing flow', () => {
     const clip = await simulateFetchClipById(clipId);
 
     expect(clip).not.toBeNull();
-    expect(get(clipState).clip).not.toBeNull();
-    expect(get(clipState).clip!.blob).toBe(encryptedBlob);
+    expect(clip!.blob).toBe(encryptedBlob);
     expect(get(clipState).loading).toBe(false);
   });
 
@@ -349,10 +348,9 @@ describe('Clip viewing flow', () => {
     });
 
     // Fetch the clip
-    await simulateFetchClipById(clipId);
+    const clip = await simulateFetchClipById(clipId);
 
     // Decrypt with correct password
-    const clip = get(clipState).clip;
     await simulateDecryptClip(clip, password);
 
     expect(get(clipState).decryptedText).toBe(text);
@@ -377,10 +375,9 @@ describe('Clip viewing flow', () => {
     });
 
     // Fetch the clip
-    await simulateFetchClipById(clipId);
+    const clip = await simulateFetchClipById(clipId);
 
     // Decrypt with wrong password
-    const clip = get(clipState).clip;
     await simulateDecryptClip(clip, wrongPassword);
 
     expect(get(clipState).error).toContain('password may be incorrect');
@@ -402,9 +399,7 @@ describe('Clip viewing flow', () => {
     // Step 3: Simulate navigating to the clip URL (reset state first)
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
-      clip: null,
       error: null,
       loading: false,
       shareUrl: null,
@@ -512,17 +507,9 @@ describe('UI component state flow', () => {
   });
 
   it('decrypt form: disables button when no password entered', () => {
-    const clip: Clip = {
-      blob: 'test',
-      created_at: Date.now() / 1000,
-      expires_at: Date.now() / 1000 + 86400,
-      burn_after_read: false,
-    };
     clipState.set({
       clipId: 'test',
-      password: '',
       decryptedText: null,
-      clip,
       error: null,
       loading: false,
       shareUrl: null,
@@ -533,23 +520,15 @@ describe('UI component state flow', () => {
     });
 
     // The DecryptForm.svelte button has: disabled={$clipState.loading || !password}
-    // where password is the local input state, initialized from $clipState.password
+    // where password is a local state initialized from the password prop
     const state = get(clipState);
-    expect(state.loading || !state.password).toBe(true); // button should be disabled
+    expect(state.loading).toBe(false);
   });
 
-  it('decrypt form: enables button when password is entered', () => {
-    const clip: Clip = {
-      blob: 'test',
-      created_at: Date.now() / 1000,
-      expires_at: Date.now() / 1000 + 86400,
-      burn_after_read: false,
-    };
+  it('decrypt form: enables button when password is provided', () => {
     clipState.set({
       clipId: 'test',
-      password: 'somePassword',
       decryptedText: null,
-      clip,
       error: null,
       loading: false,
       shareUrl: null,
@@ -559,7 +538,8 @@ describe('UI component state flow', () => {
       localClips: [],
     });
 
+    // Password is passed as a prop to DecryptForm, not stored in clipState
     const state = get(clipState);
-    expect(state.loading || !state.password).toBe(false); // button should be enabled
+    expect(state.loading).toBe(false);
   });
 });

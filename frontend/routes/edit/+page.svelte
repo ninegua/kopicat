@@ -24,9 +24,7 @@
 
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
-      clip: null,
       error: null,
       loading: false,
       shareUrl: null,

@@ -37,7 +37,6 @@ describe('CreateForm share mode - text prefill', () => {
   beforeEach(() => {
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
       clip: null,
       error: null,
@@ -54,7 +53,6 @@ describe('CreateForm share mode - text prefill', () => {
     cleanup();
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
       clip: null,
       error: null,
@@ -107,7 +105,6 @@ describe('CreateForm share mode - button text', () => {
   beforeEach(() => {
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
       clip: null,
       error: null,
@@ -124,7 +121,6 @@ describe('CreateForm share mode - button text', () => {
     cleanup();
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
       clip: null,
       error: null,
@@ -180,7 +176,6 @@ describe('CreateForm share mode - burn after read', () => {
   beforeEach(() => {
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
       clip: null,
       error: null,
@@ -197,7 +192,6 @@ describe('CreateForm share mode - burn after read', () => {
     cleanup();
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
       clip: null,
       error: null,
@@ -237,7 +231,6 @@ describe('CreateForm share mode - TTL selector', () => {
   beforeEach(() => {
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
       clip: null,
       error: null,
@@ -254,7 +247,6 @@ describe('CreateForm share mode - TTL selector', () => {
     cleanup();
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
       clip: null,
       error: null,
@@ -292,7 +284,6 @@ describe('CreateForm share mode - button disabled', () => {
   beforeEach(() => {
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
       clip: null,
       error: null,
@@ -309,7 +300,6 @@ describe('CreateForm share mode - button disabled', () => {
     cleanup();
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
       clip: null,
       error: null,
@@ -339,7 +329,6 @@ describe('CreateForm share mode - error handling', () => {
   beforeEach(() => {
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
       clip: null,
       error: null,
@@ -356,7 +345,6 @@ describe('CreateForm share mode - error handling', () => {
     cleanup();
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
       clip: null,
       error: null,
@@ -401,7 +389,6 @@ describe('CreateForm share mode - local copy checkbox', () => {
   beforeEach(() => {
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
       clip: null,
       error: null,
@@ -418,7 +405,6 @@ describe('CreateForm share mode - local copy checkbox', () => {
     cleanup();
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
       clip: null,
       error: null,

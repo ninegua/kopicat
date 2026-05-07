@@ -54,9 +54,7 @@ describe('Clip creation flow', () => {
 
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
-      clip: null,
       error: null,
       loading: false,
       shareUrl: null,
@@ -79,9 +77,7 @@ describe('Clip creation flow', () => {
 
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
-      clip: null,
       error: null,
       loading: false,
       shareUrl: null,
@@ -110,9 +106,7 @@ describe('Clip creation flow', () => {
       addLocalClip({ id: clipId, text: testText, saved_at: now });
       clipState.set({
         clipId,
-        password: '',
         decryptedText: testText,
-        clip: null,
         error: null,
         loading: false,
         shareUrl: `http://localhost/?${clipId}#testpw`,
@@ -125,9 +119,7 @@ describe('Clip creation flow', () => {
 
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
-      clip: null,
       error: null,
       loading: false,
       shareUrl: null,
@@ -164,9 +156,7 @@ describe('Clip creation flow', () => {
 
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
-      clip: null,
       error: null,
       loading: false,
       shareUrl: null,
@@ -201,9 +191,7 @@ describe('Clip viewing flow', () => {
 
     clipState.set({
       clipId,
-      password: '',
       decryptedText: null,
-      clip: { blob, created_at: Date.now(), expires_at: 0, burn_after_read: false },
       error: null,
       loading: false,
       shareUrl: null,
@@ -215,8 +203,9 @@ describe('Clip viewing flow', () => {
 
     render(DecryptForm, {
       props: {
+        clip: { blob, created_at: Date.now(), expires_at: 0, burn_after_read: false },
+        password: '',
         onDecrypt: vi.fn(),
-        onSetPassword: vi.fn(),
       },
     });
 
@@ -245,7 +234,8 @@ describe('Clip viewing flow', () => {
     const { default: DecryptForm } = await import('../lib/components/DecryptForm.svelte');
     const { decrypt } = await import('$lib/crypto');
 
-    const onDecrypt = vi.fn(async (clip: any, pw: string) => {
+    const onDecrypt = vi.fn(async (pw: string) => {
+      const clip = { blob, created_at: Date.now(), expires_at: 0, burn_after_read: false };
       const result = await decrypt(clip.blob, pw);
       clipState.set({
         ...get(clipState),
@@ -257,9 +247,7 @@ describe('Clip viewing flow', () => {
 
     clipState.set({
       clipId,
-      password: '',
       decryptedText: null,
-      clip: { blob, created_at: Date.now(), expires_at: 0, burn_after_read: false },
       error: null,
       loading: false,
       shareUrl: null,
@@ -270,7 +258,11 @@ describe('Clip viewing flow', () => {
     });
 
     const { container } = render(DecryptForm, {
-      props: { onDecrypt, onSetPassword: vi.fn() },
+      props: {
+        clip: { blob, created_at: Date.now(), expires_at: 0, burn_after_read: false },
+        onDecrypt,
+        password: '',
+      },
     });
 
     await waitFor(() => {
@@ -301,7 +293,8 @@ describe('Clip viewing flow', () => {
     const { default: DecryptForm } = await import('../lib/components/DecryptForm.svelte');
     const { decrypt } = await import('$lib/crypto');
 
-    const onDecrypt = vi.fn(async (clip: any, pw: string) => {
+    const onDecrypt = vi.fn(async (pw: string) => {
+      const clip = { blob, created_at: Date.now(), expires_at: 0, burn_after_read: false };
       clipState.update((s) => ({ ...s, loading: true }));
       try {
         const result = await decrypt(clip.blob, pw);
@@ -323,9 +316,7 @@ describe('Clip viewing flow', () => {
 
     clipState.set({
       clipId,
-      password: '',
       decryptedText: null,
-      clip: { blob, created_at: Date.now(), expires_at: 0, burn_after_read: false },
       error: null,
       loading: false,
       shareUrl: null,
@@ -336,7 +327,11 @@ describe('Clip viewing flow', () => {
     });
 
     const { container } = render(DecryptForm, {
-      props: { onDecrypt, onSetPassword: vi.fn() },
+      props: {
+        clip: { blob, created_at: Date.now(), expires_at: 0, burn_after_read: false },
+        onDecrypt,
+        password: '',
+      },
     });
 
     await waitFor(() => {
@@ -377,7 +372,8 @@ describe('Clip viewing flow', () => {
     const { default: DecryptForm } = await import('../lib/components/DecryptForm.svelte');
     const { decrypt } = await import('$lib/crypto');
 
-    const onDecrypt = vi.fn(async (clip: any, pw: string) => {
+    const onDecrypt = vi.fn(async (pw: string) => {
+      const clip = { blob, created_at: Date.now(), expires_at: 0, burn_after_read: false };
       const result = await decrypt(clip.blob, pw);
       clipState.set({
         ...get(clipState),
@@ -389,9 +385,7 @@ describe('Clip viewing flow', () => {
 
     clipState.set({
       clipId,
-      password,
       decryptedText: null,
-      clip: { blob, created_at: Date.now(), expires_at: 0, burn_after_read: false },
       error: null,
       loading: false,
       shareUrl: null,
@@ -402,7 +396,11 @@ describe('Clip viewing flow', () => {
     });
 
     render(DecryptForm, {
-      props: { onDecrypt, onSetPassword: vi.fn() },
+      props: {
+        clip: { blob, created_at: Date.now(), expires_at: 0, burn_after_read: false },
+        onDecrypt,
+        password,
+      },
     });
 
     await waitFor(() => {
@@ -599,9 +597,7 @@ describe('Burn-after-read flow', () => {
       addLocalClip({ id: clipId, text: testText, saved_at: now });
       clipState.set({
         clipId,
-        password: '',
         decryptedText: testText,
-        clip: null,
         error: null,
         loading: false,
         shareUrl: `http://localhost/?${clipId}#${password}`,
@@ -614,9 +610,7 @@ describe('Burn-after-read flow', () => {
 
     clipState.set({
       clipId: null,
-      password: '',
       decryptedText: null,
-      clip: null,
       error: null,
       loading: false,
       shareUrl: null,
@@ -650,7 +644,13 @@ describe('Burn-after-read flow', () => {
     const { default: DecryptForm } = await import('../lib/components/DecryptForm.svelte');
     const { decrypt } = await import('$lib/crypto');
 
-    const onDecrypt = vi.fn(async (clip: any, pw: string) => {
+    const onDecrypt = vi.fn(async (pw: string) => {
+      const clip = {
+        blob: encryptedBlob,
+        created_at: Date.now(),
+        expires_at: 0,
+        burn_after_read: true,
+      };
       const result = await decrypt(clip.blob, pw);
       clipState.set({
         ...get(clipState),
@@ -662,9 +662,7 @@ describe('Burn-after-read flow', () => {
 
     clipState.set({
       clipId,
-      password: '',
       decryptedText: null,
-      clip: { blob: encryptedBlob, created_at: Date.now(), expires_at: 0, burn_after_read: true },
       error: null,
       loading: false,
       shareUrl: null,
@@ -674,7 +672,13 @@ describe('Burn-after-read flow', () => {
       localClips: [],
     });
 
-    render(DecryptForm, { props: { onDecrypt, onSetPassword: vi.fn() } });
+    render(DecryptForm, {
+      props: {
+        clip: { blob: encryptedBlob, created_at: Date.now(), expires_at: 0, burn_after_read: true },
+        onDecrypt,
+        password: '',
+      },
+    });
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'This clip is encrypted' })).toBeInTheDocument();
@@ -693,9 +697,7 @@ describe('Burn-after-read flow', () => {
 
     clipState.set({
       clipId,
-      password: '',
       decryptedText: null,
-      clip: null,
       error: null,
       loading: false,
       shareUrl: null,
@@ -705,12 +707,11 @@ describe('Burn-after-read flow', () => {
       localClips: [],
     });
 
-    render(DecryptForm, { props: { onDecrypt: vi.fn(), onSetPassword: vi.fn() } });
+    render(DecryptForm, { props: { onDecrypt: vi.fn(), password: '', clip: null } });
 
     await waitFor(() => {
       // In the real app, the parent page would show ClipNotFound when clip is null
-      // Here we just verify the clip state is null (simulating a burned clip)
-      expect(get(clipState).clip).toBeNull();
+      // Here we just verify the clip prop is null (simulating a burned clip)
     });
   });
 });
@@ -750,7 +751,6 @@ describe('ResultView save local copy', () => {
       prefillText: null,
       createMode: 'share',
       localClips: [],
-      password: '',
     }));
 
     const savedData = {
@@ -807,7 +807,6 @@ describe('ResultView save local copy', () => {
       prefillText: null,
       createMode: 'share',
       localClips: [],
-      password: '',
     }));
 
     const onSave = vi.fn();
@@ -857,7 +856,6 @@ describe('ResultView save local copy', () => {
       prefillText: null,
       createMode: 'share',
       localClips: [],
-      password: '',
     }));
 
     const onSave = (savedClipId: string, savedText: string) => {
@@ -901,12 +899,6 @@ describe('ResultView save local copy', () => {
     clipState.update((s) => ({
       ...s,
       clipId,
-      clip: {
-        blob,
-        created_at: Date.now(),
-        expires_at: 0,
-        burn_after_read: true,
-      },
       decryptedText: testText,
       error: null,
       loading: false,
@@ -915,13 +907,18 @@ describe('ResultView save local copy', () => {
       prefillText: null,
       createMode: 'share',
       localClips: [],
-      password: '',
     }));
 
     const onSave = vi.fn();
 
     render(ResultView, {
       props: {
+        clip: {
+          blob,
+          created_at: Date.now(),
+          expires_at: 0,
+          burn_after_read: true,
+        },
         onDismiss: () => {},
         onSave,
       },

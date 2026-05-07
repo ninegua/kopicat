@@ -3,9 +3,11 @@
   import { goto } from '$app/navigation';
 
   let {
+    clip,
     onDismiss,
     onSave,
   }: {
+    clip: any;
     onDismiss: () => void;
     onSave?: (clipId: string, text: string) => void;
   } = $props();
@@ -38,7 +40,7 @@
 <div class="card">
   <div class="card-status-header">
     <div style="display: flex; align-items: center; gap: var(--space-sm);">
-      {#if $clipState.clip?.burn_after_read}
+      {#if clip?.burn_after_read}
         <span class="burn-badge">Burned</span>
       {:else if onSave}
         <button

@@ -2,36 +2,33 @@
   import { clipState } from '$lib/api/store';
 
   let {
+    clip,
+    password: initialPassword,
     onDecrypt,
-    onSetPassword,
   }: {
-    onDecrypt: (clip: any, password: string) => Promise<void>;
-    onSetPassword: (pw: string) => void;
+    clip: any;
+    password: string;
+    onDecrypt: (pw: string) => Promise<void>;
   } = $props();
 
-  let password = $state($clipState.password);
+  // svelte-ignore state_referenced_locally
+  // This is meant to capture the initial value.
+  let password = $state(initialPassword);
   let userTyped = $state(false);
-
-  $effect(() => {
-    password = $clipState.password;
-  });
 
   function handleInput() {
     userTyped = true;
-    onSetPassword(password);
   }
 
   function handleDecrypt() {
-    if (!password || !$clipState.clip) return;
-    onDecrypt($clipState.clip, password);
+    if (!password) return;
+    onDecrypt(password);
   }
 
   $effect(() => {
     if (userTyped) return;
-    const clip = $clipState.clip;
-    const pw = $clipState.password;
-    if (clip && pw && !$clipState.loading && !$clipState.decryptedText) {
-      onDecrypt(clip, pw);
+    if (password && !$clipState.loading && !$clipState.decryptedText) {
+      onDecrypt(password);
     }
   });
 </script>

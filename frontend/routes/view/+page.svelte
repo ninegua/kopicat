@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import { clipState } from '$lib/api/store';
-  import type { ClipState as ClipStateType } from '$lib/api/store';
+  import type { Clip } from '$lib/api/client';
   import { fetchClip } from '$lib/api/client';
   import { decrypt, encrypt } from '$lib/crypto';
   import { getLocalClips, addLocalClip, getLocalClip } from '$lib/api/local-store';
@@ -15,10 +15,12 @@
   import ViewClipsLink from '$lib/components/ViewClipsLink.svelte';
   import Footer from '$lib/components/Footer.svelte';
 
+  let pagePassword = '';
+
   function initFromUrl() {
     const url = new URL(window.location.href);
     const clipId = url.searchParams.get('clip');
-    const password = url.hash.slice(1);
+    pagePassword = url.hash.slice(1);
 
     let prefillText: string | null = null;
     const shareParam = url.searchParams.get('share');
@@ -46,9 +48,7 @@
     if (clipId) {
       clipState.set({
         clipId,
-        password: password || '',
         decryptedText: null,
-        clip: null,
         error: null,
         loading: true,
         shareUrl: null,
@@ -67,7 +67,8 @@
             return;
           }
 
-          clipState.update((s) => ({ ...s, clip, loading: false }));
+          fetchedClip = clip;
+          clipState.update((s) => ({ ...s, loading: false }));
         } catch (e: any) {
           clipState.update((s) => ({
             ...s,
@@ -79,11 +80,11 @@
     }
   }
 
-  async function decryptClip(clip: ClipStateType['clip'], password: string) {
+  async function decryptClip(password: string) {
     clipState.update((s) => ({ ...s, loading: true }));
 
     try {
-      const text = await decrypt(clip!.blob, password);
+      const text = await decrypt(fetchedClip!.blob, password);
 
       clipState.update((s) => ({
         ...s,
@@ -99,10 +100,6 @@
         loading: false,
       }));
     }
-  }
-
-  function setPassword(pw: string) {
-    clipState.update((s) => ({ ...s, password: pw }));
   }
 
   function handleDismiss() {
@@ -130,6 +127,8 @@
     goto('/list');
   }
 
+  let fetchedClip: Clip | null = null;
+
   onMount(initFromUrl);
 </script>
 
@@ -141,17 +140,17 @@
 <Header />
 
 <main class="app-main">
-  {#if $clipState.loading && !$clipState.clip}
+  {#if $clipState.loading && !fetchedClip}
     <LoadingSpinner message="Fetching clip..." />
-  {:else if $clipState.clip && !$clipState.decryptedText}
-    <DecryptForm onDecrypt={decryptClip} onSetPassword={setPassword} />
+  {:else if fetchedClip && !$clipState.decryptedText}
+    <DecryptForm clip={fetchedClip} password={pagePassword} onDecrypt={decryptClip} />
   {:else if $clipState.decryptedText}
     {#if $clipState.showModal === 'share' && $clipState.shareUrl}
       <ShareCard url={$clipState.shareUrl} onDismiss={handleShareDismiss} />
     {/if}
-    <ResultView onDismiss={handleDismiss} onSave={handleSave} />
+    <ResultView clip={fetchedClip} onDismiss={handleDismiss} onSave={handleSave} />
     <ViewClipsLink />
-  {:else if $clipState.clipId && !$clipState.clip && !$clipState.loading}
+  {:else if $clipState.clipId && !fetchedClip && !$clipState.loading}
     <ClipNotFound />
   {/if}
 </main>

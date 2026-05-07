@@ -1,6 +1,4 @@
 import { writable } from 'svelte/store';
-import { fetchClip } from './client';
-import type { Clip } from './client';
 
 export type CreateMode = 'share' | 'receive';
 
@@ -15,9 +13,7 @@ export interface LocalClip {
 
 export interface ClipState {
   clipId: string | null;
-  password: string;
   decryptedText: string | null;
-  clip: Clip | null;
   error: string | null;
   loading: boolean;
   shareUrl: string | null;
@@ -29,9 +25,7 @@ export interface ClipState {
 
 const initial: ClipState = {
   clipId: null,
-  password: '',
   decryptedText: null,
-  clip: null,
   error: null,
   loading: false,
   shareUrl: null,
