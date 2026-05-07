@@ -54,7 +54,11 @@
     }
   });
 
+  let previousSyncClipId: string | null = null;
+
   $effect.pre(() => {
+    if (sharedClip === previousSyncClipId) return;
+    previousSyncClipId = sharedClip;
     const clip = clips.find((c) => c.id === sharedClip);
     if (clip) {
       if (clipEdits[clip.id] !== undefined) {
