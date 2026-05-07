@@ -49,8 +49,7 @@ export async function fetchClip(id: string): Promise<Clip | null> {
   const response = await fetch(`${API_BASE}/clip/${id}`);
 
   if (!response.ok) {
-    if (response.status === 404) return null;
-    throw new Error(`Failed to fetch clip: ${response.status}`);
+    return null;
   }
 
   return (await response.json()) as Clip;

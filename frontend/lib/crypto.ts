@@ -71,7 +71,7 @@ export async function decrypt(blobB64: string, password: string): Promise<string
   const blob = fromBase64(blobB64);
 
   if (blob.length < SALT_BYTES + IV_BYTES) {
-    throw new Error('Decryption failed. Wrong password?');
+    throw new Error('Decryption failed.');
   }
 
   const salt = blob.slice(0, SALT_BYTES);

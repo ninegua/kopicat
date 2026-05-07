@@ -61,9 +61,15 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
 
   func create_clip(input : Input) : (Result.Result<Text, Text>) {
     let { id; blob; expires_after; burn_after_read } = input;
+    let now = now_secs();
 
-    if (Map.containsKey(clips, Text.compare, id)) {
-      return #err("Clip already exists");
+    switch (Map.get(clips, Text.compare, id)) {
+      case (?clip) {
+        if (now <= clip.expires_at) {
+          return #err("Clip already exists");
+        }
+      };
+      case (null) {}
     };
 
     let max_bytes = switch (init_arg) {
@@ -78,7 +84,6 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
       case (null) MAX_SECONDS_TO_LIVE;
       case (?{ max_seconds_to_live }) max_seconds_to_live;
     };
-    let now = now_secs();
     let expires_at = now + Option.get(expires_after, max_ttl);
     if (expires_at > now + max_ttl) {
       return #err("Expiration must be within " # Nat.toText(max_ttl) # " seconds.");

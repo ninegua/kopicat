@@ -5,7 +5,12 @@
   import * as QRCode from 'qrcode';
   import { flip } from 'svelte/animate';
   import { cubicOut } from 'svelte/easing';
-  import { removeLocalClip, updateLocalClip } from '$lib/api/local-store';
+  import {
+    getLocalClips,
+    newReceivingClip,
+    removeLocalClip,
+    updateLocalClip,
+  } from '$lib/api/local-store';
   import { fetchClip } from '$lib/api/client';
   import { decrypt } from '$lib/crypto';
 
@@ -74,23 +79,23 @@
   });
 
   function receivingStatus(clip: LocalClip): string {
-    return isURL(clip.text) ? "Not yet received..." : "Failed to receive";
+    return matchBaseUrl(clip.text) ? 'Not yet received...' : 'Failed to receive';
   }
 
   let pollingTimer: ReturnType<typeof setTimeout> | null = null;
 
-  function isURL(url: string): boolean {
-    const urlMatch = url.match(/^https?:\/\/[^#]+/);
-    return !!urlMatch;
+  function matchBaseUrl(url: string): string {
+    let urlMatch = url.match(/^https?:\/\/[^#]+/);
+    return urlMatch ? urlMatch[0] : null;
   }
 
   async function pollReceivingClip(clip: LocalClip) {
     const id = clip.id;
     const url = clip.text;
 
-    if (!isURL(url)) return;
+    const baseUrl = matchBaseUrl(url);
+    if (!baseUrl) return;
 
-    const baseUrl = urlMatch[0];
     const hashPart = url.slice(url.indexOf('#') + 1);
     const password = hashPart || '';
 
@@ -102,25 +107,19 @@
     if (!remoteClip) {
       return;
     }
-
-    if (!password) {
-      return;
-    }
-
     try {
       const decryptedText = await decrypt(remoteClip.blob, password);
 
       const now = Date.now();
+      const newClip: LocalClip = { id, text: decryptedText, saved_at: now, receiving: false };
+      updateLocalClip(clip.id, newClip);
       clipState.update((s) => ({
         ...s,
-        localClips: s.localClips.map((c) =>
-          c.id === id
-            ? { id, text: decryptedText, saved_at: now, receiving: false } as LocalClip
-            : c,
-        ),
+        localClips: s.localClips.map((c) => (c.id === id ? newClip : c)),
       }));
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : 'Decryption failed';
+      updateLocalClip(clip.id, { text: errorMessage });
       clipState.update((s) => ({
         ...s,
         localClips: s.localClips.map((c) =>
@@ -215,6 +214,18 @@
       }
     }
     return result;
+  }
+
+  function handleSendAgain() {
+    const { url } = newReceivingClip(location.origin);
+    clipState.update((s) => ({
+      ...s,
+      showModal: 'receive',
+      shareUrl: url,
+      createMode: 'receive',
+      localClips: getLocalClips(),
+    }));
+    goto('/list');
   }
 
   function handleClick(clipId: string) {
@@ -500,14 +511,24 @@
                     </div>
                   </div>
                   <div class="qr-view">
-                    {#if isURL(clip.text)}
-                    <canvas id="qr-{clip.id}" class="qr-canvas"></canvas>
+                    {#if matchBaseUrl(clip.text)}
+                      <canvas id="qr-{clip.id}" class="qr-canvas"></canvas>
                     {/if}
                     <div style="display: flex; flex-direction: column; align-items: center;">
-                    {#if isURL(clip.text)}
-                    <span style="flex: 1; text-align: center; font-weight: 600; padding-bottom: var(--space-md);">Scan to send</span>
-                    {/if}
-                    <span class="qr-url">{clip.text}</span>
+                      {#if matchBaseUrl(clip.text)}
+                        <span class="qr-header">Scan to send</span>
+                        <span class="qr-button">{clip.text}</span>
+                      {:else}
+                        <span class="error-banner qr-header">{clip.text}</span>
+                        <span
+                          class="btn-primary qr-button"
+                          onclick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(clip);
+                            handleSendAgain();
+                          }}>Try send again with a fresh code?</span
+                        >
+                      {/if}
                     </div>
                   </div>
                 {:else}
@@ -868,7 +889,15 @@
     background: var(--bg-card-hover);
   }
 
-  .qr-url {
+  .qr-header {
+    flex: 1;
+    text-align: center;
+    padding-bottom: var(--space-md);
+    background: none;
+    border: 0;
+  }
+
+  .qr-button {
     flex: 1;
     font-family: var(--font-mono);
     font-size: 0.7rem;
