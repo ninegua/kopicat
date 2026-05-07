@@ -5,10 +5,12 @@
     clip,
     password: initialPassword,
     onDecrypt,
+    error: formError,
   }: {
     clip: any;
     password: string;
     onDecrypt: (pw: string) => Promise<void>;
+    error: string | null;
   } = $props();
 
   // svelte-ignore state_referenced_locally
@@ -50,7 +52,7 @@
     <h2 class="card-title">This clip is encrypted</h2>
   </div>
 
-  {#if $clipState.error}
+  {#if formError}
     <div class="error-banner">
       <svg
         width="16"
@@ -66,7 +68,7 @@
         <line x1="15" y1="9" x2="9" y2="15" />
         <line x1="9" y1="9" x2="15" y2="15" />
       </svg>
-      <span>{$clipState.error}</span>
+      <span>{formError}</span>
     </div>
   {/if}
 

@@ -87,7 +87,6 @@ beforeEach(() => {
   clipState.set({
     clipId: null,
     decryptedText: null,
-    error: null,
     loading: false,
     prefillText: null,
   });
@@ -139,7 +138,6 @@ async function simulateCreateClip(
     clipId,
     decryptedText: text,
     loading: false,
-    error: null,
   });
   modalState.set({ showModal: 'share', shareUrl });
 
@@ -155,7 +153,6 @@ async function simulateFetchClipById(id: string) {
     ...get(clipState),
     clipId: id,
     loading: true,
-    error: null,
   });
 
   const clip = await fetchClip(id);
@@ -197,12 +194,10 @@ async function simulateDecryptClip(clip: Clip | null, password: string) {
       ...get(clipState),
       decryptedText: text,
       loading: false,
-      error: null,
     });
   } catch {
     clipState.set({
       ...get(clipState),
-      error: 'Failed to decrypt. The password may be incorrect.',
       loading: false,
     });
   }
@@ -234,7 +229,6 @@ describe('Clip creation flow', () => {
     expect(get(modalState).showModal).toBe('share');
     expect(finalState.decryptedText).toBe(text);
     expect(finalState.loading).toBe(false);
-    expect(finalState.error).toBeNull();
     expect(finalState.clipId).toBe(result.clipId);
 
     // Verify the clip was stored on the mock backend
@@ -348,7 +342,6 @@ describe('Clip viewing flow', () => {
     await simulateDecryptClip(clip, password);
 
     expect(get(clipState).decryptedText).toBe(text);
-    expect(get(clipState).error).toBeNull();
     expect(get(clipState).loading).toBe(false);
   });
 
@@ -374,7 +367,6 @@ describe('Clip viewing flow', () => {
     // Decrypt with wrong password
     await simulateDecryptClip(clip, wrongPassword);
 
-    expect(get(clipState).error).toContain('password may be incorrect');
     expect(get(clipState).decryptedText).toBeNull();
   });
 
@@ -394,7 +386,6 @@ describe('Clip viewing flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      error: null,
       loading: false,
       prefillText: null,
     });
@@ -467,21 +458,8 @@ describe('API client', () => {
 // ---------------------------------------------------------------------------
 
 describe('UI component state flow', () => {
-  it('create form: empty text shows validation error', async () => {
-    // Simulate clicking create with empty text (as CreateForm.svelte does)
-    const text = '   ';
-    if (!text.trim()) {
-      clipState.set({
-        ...get(clipState),
-        error: 'Please enter some text to share',
-      });
-    }
-
-    expect(get(clipState).error).toBe('Please enter some text to share');
-    expect(get(clipState).loading).toBe(false);
-    // createClip should NOT be called
-    expect(clipStore.size).toBe(0);
-  });
+  // Removed: error is now page-local, component uses onClearError callback
+  // The validation error is now set by the page, not the component
 
   it('create form: generates password if empty and calls createClip', async () => {
     const text = 'Some text';
@@ -500,7 +478,6 @@ describe('UI component state flow', () => {
     clipState.set({
       clipId: 'test',
       decryptedText: null,
-      error: null,
       loading: false,
       prefillText: null,
     });
@@ -515,7 +492,6 @@ describe('UI component state flow', () => {
     clipState.set({
       clipId: 'test',
       decryptedText: null,
-      error: null,
       loading: false,
       prefillText: null,
     });

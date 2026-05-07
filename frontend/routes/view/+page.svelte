@@ -16,6 +16,7 @@
 
   let pagePassword = $state('');
   let shareUrl = $state<string | null>(null);
+  let error = $state<string | null>(null);
 
   function initFromUrl() {
     const url = new URL(window.location.href);
@@ -46,10 +47,10 @@
     }
 
     if (clipId) {
+      error = null;
       clipState.set({
         clipId,
         decryptedText: null,
-        error: null,
         loading: true,
         prefillText,
       });
@@ -66,9 +67,9 @@
           fetchedClip = clip;
           clipState.update((s) => ({ ...s, loading: false }));
         } catch (e: any) {
+          error = e.message || 'Failed to fetch clip';
           clipState.update((s) => ({
             ...s,
-            error: e.message || 'Failed to fetch clip',
             loading: false,
           }));
         }
@@ -85,14 +86,14 @@
 
       clipState.update((s) => ({
         ...s,
-        error: null,
         decryptedText: text,
         loading: false,
       }));
+      error = null;
     } catch {
+      error = 'Failed to decrypt. The password may be incorrect.';
       clipState.update((s) => ({
         ...s,
-        error: 'Failed to decrypt. The password may be incorrect.',
         loading: false,
       }));
     }
@@ -128,9 +129,16 @@
   {#if $clipState.loading && !fetchedClip}
     <LoadingSpinner message="Fetching clip..." />
   {:else if fetchedClip && !$clipState.decryptedText}
-    <DecryptForm clip={fetchedClip} password={pagePassword} onDecrypt={decryptClip} />
+    <DecryptForm clip={fetchedClip} password={pagePassword} onDecrypt={decryptClip} {error} />
   {:else if $clipState.decryptedText}
-    <ResultView clip={fetchedClip} onDismiss={handleDismiss} onSave={handleSave} />
+    <ResultView
+      clip={fetchedClip}
+      onDismiss={handleDismiss}
+      onSave={handleSave}
+      {error}
+      onError={(msg) => (error = msg)}
+      onClearError={() => (error = null)}
+    />
     <ViewClipsLink />
   {:else if $clipState.clipId && !fetchedClip && !$clipState.loading}
     <ClipNotFound />

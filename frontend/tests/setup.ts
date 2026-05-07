@@ -71,7 +71,6 @@ afterEach(() => {
   clipState.set({
     clipId: null,
     decryptedText: null,
-    error: null,
     loading: false,
     prefillText: null,
   });

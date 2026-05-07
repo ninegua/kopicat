@@ -41,18 +41,18 @@ describe('newReceivingClip', () => {
   });
 
   it('creates a clip with receiving flag set to true', () => {
-    const { id, url } = newReceivingClip('http://localhost');
+    const { id, text } = newReceivingClip('http://localhost');
     const clip = getLocalClip(id);
 
     expect(clip).toBeDefined();
     expect(clip!.receiving).toBe(true);
-    expect(clip!.text).toBe(url);
+    expect(clip!.text).toBe(text);
   });
 
   it('generates a URL with the correct format', () => {
-    const { url } = newReceivingClip('http://localhost');
+    const { text } = newReceivingClip('http://localhost');
 
-    expect(url).toMatch(/^https?:\/\/[^#]+\/send\?[^#]+#.+$/);
+    expect(text).toMatch(/^https?:\/\/[^#]+\/send\?[^#]+#.+$/);
   });
 
   it('generates unique clip IDs on each call', () => {
@@ -71,16 +71,16 @@ describe('newReceivingClip', () => {
   });
 
   it('generates a unique password per clip', () => {
-    const { id, url } = newReceivingClip('http://localhost');
-    const password = url.slice(url.indexOf('#') + 1);
+    const { id, text } = newReceivingClip('http://localhost');
+    const password = text.slice(text.indexOf('#') + 1);
     expect(password.length).toBeGreaterThan(0);
 
     // Each call should produce a different password
     const passwords = new Set<string>();
     localStorage.clear();
     for (let i = 0; i < 10; i++) {
-      const { url: u } = newReceivingClip('http://localhost');
-      passwords.add(u.slice(u.indexOf('#') + 1));
+      const { text: t } = newReceivingClip('http://localhost');
+      passwords.add(t.slice(t.indexOf('#') + 1));
     }
     expect(passwords.size).toBe(10);
   });

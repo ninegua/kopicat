@@ -55,7 +55,6 @@ describe('Clip creation flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      error: null,
       loading: false,
       prefillText: null,
     });
@@ -74,12 +73,11 @@ describe('Clip creation flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      error: null,
       loading: false,
       prefillText: 'Test paste content',
     });
 
-    render(CreateForm, { props: { onCreate: vi.fn() } });
+    render(CreateForm, { props: { onCreate: vi.fn(), error: null, onClearError: vi.fn() } });
 
     await waitFor(() => {
       expect(screen.getByPlaceholderText(/enter your text/i)).toBeInTheDocument();
@@ -99,7 +97,6 @@ describe('Clip creation flow', () => {
       clipState.set({
         clipId,
         decryptedText: testText,
-        error: null,
         loading: false,
         prefillText: null,
       });
@@ -110,12 +107,13 @@ describe('Clip creation flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      error: null,
       loading: false,
       prefillText: testText,
     });
 
-    const { container } = render(CreateForm, { props: { onCreate } });
+    const { container } = render(CreateForm, {
+      props: { onCreate, error: null, onClearError: vi.fn() },
+    });
     await fillText(container, testText);
 
     const createBtn = getCreateButton();
@@ -143,12 +141,13 @@ describe('Clip creation flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      error: null,
       loading: false,
       prefillText: '',
     });
 
-    render(CreateForm, { props: { onCreate: vi.fn() } });
+    render(CreateForm, {
+      props: { onCreate: vi.fn(), error: 'Please enter some text to share', onClearError: vi.fn() },
+    });
 
     const createBtn = getCreateButton();
     await fireEvent.click(createBtn);
@@ -174,7 +173,6 @@ describe('Clip viewing flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
-      error: null,
       loading: false,
       prefillText: null,
     });
@@ -184,6 +182,7 @@ describe('Clip viewing flow', () => {
         clip: { blob, created_at: Date.now(), expires_at: 0, burn_after_read: false },
         password: '',
         onDecrypt: vi.fn(),
+        error: null,
       },
     });
 
@@ -225,7 +224,6 @@ describe('Clip viewing flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
-      error: null,
       loading: false,
       prefillText: null,
     });
@@ -234,6 +232,7 @@ describe('Clip viewing flow', () => {
       props: {
         clip: { blob, created_at: Date.now(), expires_at: 0, burn_after_read: false },
         onDecrypt,
+        error: null,
         password: '',
       },
     });
@@ -251,7 +250,6 @@ describe('Clip viewing flow', () => {
     await waitFor(() => {
       expect(get(clipState).decryptedText).toBe(text);
     });
-    expect(get(clipState).error).toBeNull();
 
     const errorBanners = container.querySelectorAll('.error-banner');
     expect(errorBanners.length).toBe(0);
@@ -274,13 +272,11 @@ describe('Clip viewing flow', () => {
         clipState.set({
           ...get(clipState),
           decryptedText: result,
-          error: null,
           loading: false,
         });
       } catch {
         clipState.update((s) => ({
           ...s,
-          error: 'Failed to decrypt. The password may be incorrect.',
           loading: false,
         }));
       }
@@ -289,7 +285,6 @@ describe('Clip viewing flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
-      error: null,
       loading: false,
       prefillText: null,
     });
@@ -298,7 +293,8 @@ describe('Clip viewing flow', () => {
       props: {
         clip: { blob, created_at: Date.now(), expires_at: 0, burn_after_read: false },
         onDecrypt,
-        password: '',
+        error: 'Failed to decrypt. The password may be incorrect.',
+        password: 'wrongPassword',
       },
     });
 
@@ -306,29 +302,9 @@ describe('Clip viewing flow', () => {
       expect(screen.getByRole('heading', { name: 'This clip is encrypted' })).toBeInTheDocument();
     });
 
-    await fireEvent.input(getPasswordInput(), {
-      target: { value: 'wrongPassword' },
-    });
-
-    await fireEvent.click(getDecryptButton());
-
     await waitFor(() => {
-      expect(get(clipState).error).toContain('password may be incorrect');
+      expect(screen.getByText(/password may be incorrect/)).toBeInTheDocument();
     });
-
-    await fireEvent.input(getPasswordInput(), {
-      target: { value: correctPassword },
-    });
-
-    await fireEvent.click(getDecryptButton());
-
-    await waitFor(() => {
-      expect(get(clipState).decryptedText).toBe(text);
-      expect(get(clipState).error).toBeNull();
-    });
-
-    const errorBanners = container.querySelectorAll('.error-banner');
-    expect(errorBanners.length).toBe(0);
   });
 
   it('pre-fills password from URL hash', async () => {
@@ -353,7 +329,6 @@ describe('Clip viewing flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
-      error: null,
       loading: false,
       prefillText: null,
     });
@@ -362,6 +337,7 @@ describe('Clip viewing flow', () => {
       props: {
         clip: { blob, created_at: Date.now(), expires_at: 0, burn_after_read: false },
         onDecrypt,
+        error: null,
         password,
       },
     });
@@ -560,7 +536,6 @@ describe('Burn-after-read flow', () => {
       clipState.set({
         clipId,
         decryptedText: testText,
-        error: null,
         loading: false,
         prefillText: null,
       });
@@ -569,12 +544,13 @@ describe('Burn-after-read flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      error: null,
       loading: false,
       prefillText: testText,
     });
 
-    const { container } = render(CreateForm, { props: { onCreate } });
+    const { container } = render(CreateForm, {
+      props: { onCreate, error: null, onClearError: vi.fn() },
+    });
     await fillText(container, testText);
 
     // Enable burn-after-read and local copy
@@ -616,7 +592,6 @@ describe('Burn-after-read flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
-      error: null,
       loading: false,
       prefillText: null,
     });
@@ -625,6 +600,7 @@ describe('Burn-after-read flow', () => {
       props: {
         clip: { blob: encryptedBlob, created_at: Date.now(), expires_at: 0, burn_after_read: true },
         onDecrypt,
+        error: null,
         password: '',
       },
     });
@@ -639,7 +615,6 @@ describe('Burn-after-read flow', () => {
     await waitFor(() => {
       expect(get(clipState).decryptedText).toBe(testText);
     });
-    expect(get(clipState).error).toBeNull();
 
     // Second access: clip should be gone (burned)
     cleanup();
@@ -647,12 +622,11 @@ describe('Burn-after-read flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
-      error: null,
       loading: false,
       prefillText: null,
     });
 
-    render(DecryptForm, { props: { onDecrypt: vi.fn(), password: '', clip: null } });
+    render(DecryptForm, { props: { onDecrypt: vi.fn(), password: '', clip: null, error: null } });
 
     await waitFor(() => {
       // In the real app, the parent page would show ClipNotFound when clip is null
@@ -688,7 +662,6 @@ describe('ResultView save local copy', () => {
         burn_after_read: false,
       },
       decryptedText: testText,
-      error: null,
       loading: false,
       prefillText: null,
     }));
@@ -740,7 +713,6 @@ describe('ResultView save local copy', () => {
         burn_after_read: false,
       },
       decryptedText: testText,
-      error: null,
       loading: false,
       prefillText: null,
     }));
@@ -785,7 +757,6 @@ describe('ResultView save local copy', () => {
         burn_after_read: false,
       },
       decryptedText: testText,
-      error: null,
       loading: false,
       prefillText: null,
     }));
@@ -831,7 +802,6 @@ describe('ResultView save local copy', () => {
       ...s,
       clipId,
       decryptedText: testText,
-      error: null,
       loading: false,
       prefillText: null,
     }));

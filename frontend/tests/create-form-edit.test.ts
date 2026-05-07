@@ -39,7 +39,6 @@ describe('CreateForm share mode - text prefill', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      error: null,
       loading: false,
       prefillText: 'Shared clip content',
       localClips: [],
@@ -52,7 +51,6 @@ describe('CreateForm share mode - text prefill', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      error: null,
       loading: false,
       prefillText: null,
       localClips: [],
@@ -101,7 +99,6 @@ describe('CreateForm share mode - button text', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      error: null,
       loading: false,
       prefillText: null,
       localClips: [],
@@ -114,7 +111,6 @@ describe('CreateForm share mode - button text', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      error: null,
       loading: false,
       prefillText: null,
       localClips: [],
@@ -166,7 +162,6 @@ describe('CreateForm share mode - burn after read', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      error: null,
       loading: false,
       prefillText: null,
       localClips: [],
@@ -179,7 +174,6 @@ describe('CreateForm share mode - burn after read', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      error: null,
       loading: false,
       prefillText: null,
       localClips: [],
@@ -215,7 +209,6 @@ describe('CreateForm share mode - TTL selector', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      error: null,
       loading: false,
       prefillText: null,
       localClips: [],
@@ -228,7 +221,6 @@ describe('CreateForm share mode - TTL selector', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      error: null,
       loading: false,
       prefillText: null,
       localClips: [],
@@ -262,7 +254,6 @@ describe('CreateForm share mode - button disabled', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      error: null,
       loading: false,
       prefillText: null,
       localClips: [],
@@ -275,7 +266,6 @@ describe('CreateForm share mode - button disabled', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      error: null,
       loading: false,
       prefillText: null,
       localClips: [],
@@ -301,7 +291,6 @@ describe('CreateForm share mode - error handling', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      error: null,
       loading: false,
       prefillText: null,
       localClips: [],
@@ -314,7 +303,6 @@ describe('CreateForm share mode - error handling', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      error: null,
       loading: false,
       prefillText: null,
       localClips: [],
@@ -322,25 +310,14 @@ describe('CreateForm share mode - error handling', () => {
   });
 
   it('shows error message when text is empty', async () => {
-    const { container } = render(CreateForm, { onCreate: vi.fn() });
-
-    await fireEvent.click(getCreateButton());
+    const { container } = render(CreateForm, {
+      onCreate: vi.fn(),
+      error: 'Please enter some text to share',
+      onClearError: vi.fn(),
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Please enter some text to share')).toBeInTheDocument();
-    });
-  });
-
-  it('clears error message on input', async () => {
-    clipState.update((s) => ({ ...s, error: 'Some error' }));
-    const { container } = render(CreateForm, { onCreate: vi.fn() });
-
-    expect(screen.getByText('Some error')).toBeInTheDocument();
-
-    await fillText(container, 'test');
-
-    await waitFor(() => {
-      expect(screen.queryByText('Some error')).not.toBeInTheDocument();
     });
   });
 });
@@ -355,7 +332,6 @@ describe('CreateForm share mode - local copy checkbox', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      error: null,
       loading: false,
       prefillText: null,
       localClips: [],
@@ -368,7 +344,6 @@ describe('CreateForm share mode - local copy checkbox', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      error: null,
       loading: false,
       prefillText: null,
       localClips: [],

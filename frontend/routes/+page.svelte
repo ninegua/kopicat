@@ -11,14 +11,12 @@
     clipState.update((s) => ({
       ...s,
       prefillText: null,
-      error: null,
     }));
   }
 
   async function handlePaste(text: string) {
     clipState.update((s) => ({
       ...s,
-      error: null,
       prefillText: text,
     }));
     await goto('/edit');
@@ -65,7 +63,6 @@
     clipState.set({
       clipId: null,
       decryptedText: null,
-      error: null,
       loading: false,
       prefillText,
     });

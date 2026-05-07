@@ -6,11 +6,15 @@
   import { getLocalClips, addLocalClip, updateLocalClip, getLocalClip } from '$lib/api/local-store';
   import { decrypt, encrypt } from '$lib/crypto';
   import { generateClipId } from '$lib/words';
+  import { validateCreateText } from '$lib/api/validate';
   import Header from '$lib/components/Header.svelte';
   import CreateForm from '$lib/components/CreateForm.svelte';
   import Footer from '$lib/components/Footer.svelte';
 
+  let error = $state<string | null>(null);
+
   function initFromUrl() {
+    error = null;
     let prefillText: string | null = $clipState.prefillText;
 
     const url = new URL(window.location.href);
@@ -25,7 +29,6 @@
     clipState.set({
       clipId: null,
       decryptedText: null,
-      error: null,
       loading: false,
       prefillText: prefillText || null,
     });
@@ -40,12 +43,14 @@
     burn_after_read: boolean,
     save_local: boolean,
   ) {
-    if (!text.trim()) {
-      clipState.update((s) => ({ ...s, error: 'Please enter some text to share' }));
+    const validationError = validateCreateText(text);
+    if (validationError) {
+      error = validationError;
       return;
     }
 
-    clipState.update((s) => ({ ...s, loading: true, error: null }));
+    error = null;
+    clipState.update((s) => ({ ...s, loading: true }));
     const encryptedBlob = await encrypt(text, pw);
 
     const clipId = generateClipId();
@@ -70,7 +75,8 @@
       } else {
         msg = 'Network Error. Please check your connection and try again.';
       }
-      clipState.update((s) => ({ ...s, error: msg || 'Failed to create clip', loading: false }));
+      clipState.update((s) => ({ ...s, loading: false }));
+      error = msg || 'Failed to create clip';
       return;
     }
 
@@ -106,7 +112,7 @@
 <Header />
 
 <main class="app-main">
-  <CreateForm onCreate={handleCreate} />
+  <CreateForm onCreate={handleCreate} {error} onClearError={() => (error = null)} />
 </main>
 
 <Footer />

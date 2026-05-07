@@ -6,10 +6,16 @@
     clip,
     onDismiss,
     onSave,
+    error: formError,
+    onError,
+    onClearError,
   }: {
     clip: any;
     onDismiss: () => void;
     onSave?: (clipId: string, text: string) => void;
+    error: string | null;
+    onError?: (msg: string) => void;
+    onClearError?: () => void;
   } = $props();
 
   let copyFeedback = $state<'text' | null>(null);
@@ -23,7 +29,7 @@
       copyFeedback = 'text';
       setTimeout(() => (copyFeedback = null), 2000);
     } catch {
-      clipState.update((s) => ({ ...s, error: 'Failed to copy to clipboard' }));
+      onError?.('Failed to copy to clipboard');
     }
   }
 
@@ -135,7 +141,7 @@
       </button>
     </div>
 
-    {#if $clipState.error}
+    {#if formError}
       <div class="error-banner">
         <svg
           width="16"
@@ -151,7 +157,7 @@
           <line x1="15" y1="9" x2="9" y2="15" />
           <line x1="9" y1="9" x2="15" y2="15" />
         </svg>
-        <span>{$clipState.error}</span>
+        <span>{formError}</span>
       </div>
     {/if}
   </div>

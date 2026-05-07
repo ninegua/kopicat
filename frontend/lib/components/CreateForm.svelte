@@ -6,6 +6,8 @@
 
   let {
     onCreate,
+    error: formError,
+    onClearError,
   }: {
     onCreate: (
       text: string,
@@ -14,6 +16,8 @@
       burn_after_read: boolean,
       save_local: boolean,
     ) => Promise<void>;
+    error: string | null;
+    onClearError: () => void;
   } = $props();
 
   let saveLocal = $state(false);
@@ -106,21 +110,14 @@
   });
 
   async function handleCreate() {
-    if (!text.trim()) {
-      clipState.update((s) => ({ ...s, error: 'Please enter some text to share' }));
-      return;
-    }
-
-    clipState.update((s) => ({ ...s, error: null }));
-    const pw = password || generatePassword(11);
-    await onCreate(text, pw, selectedTTL, burnAfterRead, saveLocal);
+    await onCreate(text, password || generatePassword(11), selectedTTL, burnAfterRead, saveLocal);
   }
 
   const charCount = $derived(text.length);
 
   function handleInput() {
-    if ($clipState.error) {
-      clipState.update((s) => ({ ...s, error: null }));
+    if (formError) {
+      onClearError();
     }
   }
 </script>
@@ -137,7 +134,7 @@
     <span class="char-count">{charCount} characters</span>
   </div>
 
-  {#if $clipState.error}
+  {#if formError}
     <div class="error-banner">
       <svg
         width="16"
@@ -153,7 +150,7 @@
         <line x1="15" y1="9" x2="9" y2="15" />
         <line x1="9" y1="9" x2="15" y2="15" />
       </svg>
-      <span>{$clipState.error}</span>
+      <span>{formError}</span>
     </div>
   {/if}
 
