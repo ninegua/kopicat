@@ -54,3 +54,14 @@ export function updateLocalClip(id: string, updates: Partial<LocalClip>): void {
 export function getLocalClip(id: string): LocalClip | undefined {
   return readClips().find((c) => c.id === id);
 }
+
+export function addReceivingClip(id: string): void {
+  const clips = readClips();
+  const exists = clips.findIndex((c) => c.id === id);
+  if (exists === -1) {
+    clips.push({ id, text: '', saved_at: null as unknown as number, receiving: true });
+  } else {
+    clips[exists] = { ...clips[exists], text: '', saved_at: null as unknown as number, receiving: true };
+  }
+  writeClips(clips);
+}

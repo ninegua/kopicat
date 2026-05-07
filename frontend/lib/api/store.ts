@@ -10,7 +10,6 @@ export interface LocalClip {
   id: string;
   text: string;
   saved_at?: number;
-  blob?: string;
   receiving?: boolean;
 }
 

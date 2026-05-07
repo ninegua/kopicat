@@ -7,7 +7,7 @@
     onSave,
   }: {
     onDismiss: () => void;
-    onSave?: (clipId: string, text: string, blob: string) => void;
+    onSave?: (clipId: string, text: string) => void;
   } = $props();
 
   let copyFeedback = $state<'text' | null>(null);
@@ -28,8 +28,8 @@
   function saveClip() {
     const clipId = $clipState.clipId;
     const text = $clipState.decryptedText;
-    if (!clipId || !text || !onSave || !$clipState.clip?.blob) return;
-    onSave(clipId, text, $clipState.clip!.blob);
+    if (!clipId || !text || !onSave) return;
+    onSave(clipId, text);
     saveFeedback = true;
     setTimeout(() => (saveFeedback = false), 2000);
   }

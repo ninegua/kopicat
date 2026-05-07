@@ -400,7 +400,11 @@
               </div>
             {:else}
               <div class="clip-box-collapsed">
-                <span class="clip-time">{formatTimeAgo(clip.saved_at)}</span>
+                {#if clip.receiving}
+                  <span class="clip-time">Not yet received...</span>
+                {:else}
+                  <span class="clip-time">{formatTimeAgo(clip.saved_at)}</span>
+                {/if}
                 <div class="clip-preview">
                   {@html truncateLines(clipEdits[clip.id] ?? clip.text, 4)}
                 </div>

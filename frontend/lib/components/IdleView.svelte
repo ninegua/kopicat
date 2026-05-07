@@ -4,10 +4,12 @@
   import ViewClipsLink from '$lib/components/ViewClipsLink.svelte';
   import { generateClipId } from '$lib/words';
   import { generatePassword } from '$lib/crypto';
+  import { addReceivingClip } from '$lib/api/local-store';
 
   function handleReceiveClick(e: MouseEvent) {
     e.stopPropagation();
     const id = generateClipId();
+    addReceivingClip(id);
     const pw = generatePassword(8);
     const url = `${location.origin}/send?${id}#${pw}`;
     clipState.update((s) => ({

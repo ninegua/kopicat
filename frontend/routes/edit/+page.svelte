@@ -89,7 +89,6 @@
         id: edit_clip_id,
         text,
         saved_at: now,
-        blob: encryptedBlob,
       });
       clipState.update((s) => ({
         ...s,
@@ -108,7 +107,6 @@
         id: clipId,
         text,
         saved_at: now,
-        blob: encryptedBlob,
       };
       let allClips: typeof $clipState.localClips;
       if (save_local) {

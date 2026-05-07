@@ -153,9 +153,9 @@
     goto('/');
   }
 
-  function handleSave(clipId: string, text: string, blob: string) {
+  function handleSave(clipId: string, text: string) {
     const now = Date.now();
-    const newClip = { id: clipId, text, saved_at: now, blob };
+    const newClip = { id: clipId, text, saved_at: now };
     addLocalClip(newClip);
   }
 

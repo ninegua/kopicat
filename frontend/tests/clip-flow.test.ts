@@ -69,10 +69,10 @@ describe('Clip creation flow', () => {
 
     render(IdleView, { props: { onPaste: vi.fn() } });
 
-    expect(screen.getByRole('button', { name: 'Paste from clipboard' })).toBeInTheDocument();
-    expect(screen.getByText(/input your text to share/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy from clipboard' })).toBeInTheDocument();
+    expect(screen.getByText(/Sending a copy\?/i)).toBeInTheDocument();
     expect(screen.getByText(/ctrl\+v/i)).toBeInTheDocument();
-    expect(screen.getByText(/Paste from clipboard/i)).toBeInTheDocument();
+    expect(screen.getByText(/Copy from clipboard/i)).toBeInTheDocument();
   });
 
   it('transitions to create form after pasting', async () => {
@@ -238,7 +238,7 @@ describe('Clip viewing flow', () => {
     render(Page2);
 
     await waitFor(() => {
-      expect(screen.getByText(/input your text/i)).toBeInTheDocument();
+      expect(screen.getByText(/Sending a copy\?/i)).toBeInTheDocument();
     });
   });
 
@@ -605,7 +605,7 @@ describe('Burn-after-read flow', () => {
     const createdData = { id: clipId, pw: password };
     const onCreate = vi.fn(async () => {
       const now = Date.now();
-      addLocalClip({ id: clipId, text: testText, saved_at: now, blob: encryptedBlob });
+      addLocalClip({ id: clipId, text: testText, saved_at: now });
       clipState.set({
         clipId,
         password: '',
@@ -794,7 +794,6 @@ describe('ResultView save local copy', () => {
     // Verify onSave was called with correct data
     expect(savedData.id).toBe(clipId);
     expect(savedData.text).toBe(testText);
-    expect(savedData.blob).toBe(blob);
   });
 
   it('does not save when copy icon is clicked', async () => {
@@ -877,9 +876,9 @@ describe('ResultView save local copy', () => {
       password: '',
     }));
 
-    const onSave = (savedClipId: string, savedText: string, savedBlob: string) => {
+    const onSave = (savedClipId: string, savedText: string) => {
       const now = Date.now();
-      const newClip = { id: savedClipId, text: savedText, saved_at: now, blob: savedBlob };
+      const newClip = { id: savedClipId, text: savedText, saved_at: now };
       addLocalClip(newClip);
       clipState.update((s) => ({
         ...s,
@@ -905,7 +904,6 @@ describe('ResultView save local copy', () => {
     expect(savedClips.length).toBe(1);
     expect(savedClips[0].id).toBe(clipId);
     expect(savedClips[0].text).toBe(testText);
-    expect(savedClips[0].blob).toBe(blob);
   });
 
   it('shows burned badge for burn-after-read clips', async () => {
