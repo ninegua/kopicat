@@ -100,6 +100,6 @@ describe('encrypt / decrypt roundtrip', () => {
 
   it('decrypting invalid blob throws', async () => {
     const password = 'TestPass1!';
-    await expect(decrypt('short', password)).rejects.toThrow('Invalid blob');
+    await expect(decrypt('short', password)).rejects.toThrow('Invalid message: Base64 decoding error.');
   });
 });

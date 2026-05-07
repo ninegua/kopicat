@@ -46,7 +46,7 @@ function fromBase64(b64: string): Uint8Array {
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     return bytes;
   } catch {
-    throw new Error('Invalid blob');
+    throw new Error('Invalid message: Base64 decoding error.');
   }
 }
 
@@ -71,7 +71,7 @@ export async function decrypt(blobB64: string, password: string): Promise<string
   const blob = fromBase64(blobB64);
 
   if (blob.length < SALT_BYTES + IV_BYTES) {
-    throw new Error('Invalid blob');
+    throw new Error('Decryption failed. Wrong password?');
   }
 
   const salt = blob.slice(0, SALT_BYTES);

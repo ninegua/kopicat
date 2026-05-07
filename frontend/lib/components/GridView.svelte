@@ -6,6 +6,8 @@
   import { flip } from 'svelte/animate';
   import { cubicOut } from 'svelte/easing';
   import { removeLocalClip, updateLocalClip } from '$lib/api/local-store';
+  import { fetchClip } from '$lib/api/client';
+  import { decrypt } from '$lib/crypto';
 
   let copiedId = $state<string | null>(null);
   let sharedClip = $state<string | null>(null);
@@ -68,6 +70,104 @@
           color: { dark: '#150D08', light: '#F7EFD2' },
         });
       }
+    }
+  });
+
+  function receivingStatus(clip: LocalClip): string {
+    return isURL(clip.text) ? "Not yet received..." : "Failed to receive";
+  }
+
+  let pollingTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function isURL(url: string): boolean {
+    const urlMatch = url.match(/^https?:\/\/[^#]+/);
+    return !!urlMatch;
+  }
+
+  async function pollReceivingClip(clip: LocalClip) {
+    const id = clip.id;
+    const url = clip.text;
+
+    if (!isURL(url)) return;
+
+    const baseUrl = urlMatch[0];
+    const hashPart = url.slice(url.indexOf('#') + 1);
+    const password = hashPart || '';
+
+    const apiMatch = url.match(/\/send\?(.+)/);
+    if (!apiMatch) return;
+    const clipIdFromUrl = apiMatch[1].split('#')[0];
+
+    const remoteClip = await fetchClip(clipIdFromUrl);
+    if (!remoteClip) {
+      return;
+    }
+
+    if (!password) {
+      return;
+    }
+
+    try {
+      const decryptedText = await decrypt(remoteClip.blob, password);
+
+      const now = Date.now();
+      clipState.update((s) => ({
+        ...s,
+        localClips: s.localClips.map((c) =>
+          c.id === id
+            ? { id, text: decryptedText, saved_at: now, receiving: false } as LocalClip
+            : c,
+        ),
+      }));
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : 'Decryption failed';
+      clipState.update((s) => ({
+        ...s,
+        localClips: s.localClips.map((c) =>
+          c.id === id ? { ...c, text: errorMessage, saved_at: Date.now() } : c,
+        ),
+      }));
+    }
+  }
+
+  $effect(() => {
+    const receivingClips = clips.filter((c) => c.receiving);
+
+    if (pollingTimer) {
+      clearTimeout(pollingTimer);
+      pollingTimer = null;
+    }
+
+    if (receivingClips.length > 0) {
+      let hasActivePoll = false;
+      const pendingIds = new Set<string>();
+
+      async function runPoll(clip: LocalClip) {
+        if (pendingIds.has(clip.id)) return;
+        pendingIds.add(clip.id);
+        await pollReceivingClip(clip);
+        pendingIds.delete(clip.id);
+      }
+
+      receivingClips.forEach((clip) => {
+        runPoll(clip);
+      });
+
+      pollingTimer = setInterval(() => {
+        const freshReceiving = clips.filter((c) => c.receiving);
+        freshReceiving.forEach((clip) => {
+          if (pendingIds.size < receivingClips.length) {
+            runPoll(clip);
+          }
+        });
+      }, 5000);
+
+      return () => {
+        if (pollingTimer) {
+          clearTimeout(pollingTimer);
+          pollingTimer = null;
+        }
+      };
     }
   });
 
@@ -288,7 +388,7 @@
                   </div>
                 {:else if clip.receiving}
                   <div class="clip-box-header">
-                    <span class="clip-time">Not yet received...</span>
+                    <span class="clip-time clip-time--receiving">{receivingStatus(clip)}</span>
                     <div style="display: flex; align-items: center; gap: var(--space-md);">
                       <button
                         class="footer-icon-btn footer-icon-btn--delete"
@@ -400,9 +500,13 @@
                     </div>
                   </div>
                   <div class="qr-view">
+                    {#if isURL(clip.text)}
                     <canvas id="qr-{clip.id}" class="qr-canvas"></canvas>
+                    {/if}
                     <div style="display: flex; flex-direction: column; align-items: center;">
+                    {#if isURL(clip.text)}
                     <span style="flex: 1; text-align: center; font-weight: 600; padding-bottom: var(--space-md);">Scan to send</span>
+                    {/if}
                     <span class="qr-url">{clip.text}</span>
                     </div>
                   </div>
@@ -536,7 +640,7 @@
             {:else}
               <div class="clip-box-collapsed">
                 {#if clip.receiving}
-                  <span class="clip-time clip-time--receiving">Not yet received...</span>
+                  <span class="clip-time clip-time--receiving">{receivingStatus(clip)}</span>
                 {:else}
                   <span class="clip-time">{formatTimeAgo(clip.saved_at)}</span>
                 {/if}
@@ -770,7 +874,6 @@
     font-size: 0.7rem;
     color: var(--text-secondary);
     word-break: break-all;
-    line-height: 1.4;
     padding: var(--space-md);
     border-radius: var(--radius-md);
     background: var(--bg-card-hover);
