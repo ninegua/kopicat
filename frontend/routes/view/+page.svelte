@@ -18,45 +18,7 @@
   function initFromUrl() {
     const url = new URL(window.location.href);
     const clipId = url.searchParams.get('clip');
-    const localId = url.searchParams.get('local');
     const password = url.hash.slice(1);
-
-    if (localId) {
-      const clip = getLocalClip(localId);
-      if (clip) {
-        clipState.set({
-          clipId: localId,
-          password: '',
-          decryptedText: clip.text,
-          clip: null,
-          error: null,
-          loading: false,
-          shareUrl: null,
-          showModal: null,
-          prefillText: null,
-          createMode: 'share',
-          editClipId: localId,
-          localClips: $clipState.localClips,
-        });
-        return;
-      } else {
-        clipState.set({
-          clipId: localId,
-          password: '',
-          decryptedText: null,
-          clip: null,
-          error: null,
-          loading: false,
-          shareUrl: null,
-          showModal: null,
-          prefillText: null,
-          createMode: 'share',
-          editClipId: null,
-          localClips: $clipState.localClips,
-        });
-        return;
-      }
-    }
 
     let prefillText: string | null = null;
     const shareParam = url.searchParams.get('share');
@@ -93,7 +55,6 @@
         showModal: null,
         prefillText,
         createMode: 'share',
-        editClipId: null,
         localClips: [],
       });
 

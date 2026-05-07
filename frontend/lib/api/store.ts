@@ -24,7 +24,6 @@ export interface ClipState {
   showModal: ModalType;
   prefillText: string | null;
   createMode: CreateMode;
-  editClipId: string | null;
   localClips: LocalClip[];
 }
 
@@ -39,7 +38,6 @@ const initial: ClipState = {
   showModal: null,
   prefillText: null,
   createMode: 'share',
-  editClipId: null,
   localClips: [],
 };
 

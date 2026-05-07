@@ -47,16 +47,6 @@
   });
 */
 
-  $effect(() => {
-    const editId = $clipState.editClipId;
-    if (editId && sharedClip === null && clips.length > 0) {
-      const exists = clips.some((c) => c.id === editId);
-      if (exists) {
-        sharedClip = editId;
-      }
-    }
-  });
-
   let previousSyncClipId: string | null = null;
 
   $effect.pre(() => {

@@ -13,7 +13,6 @@
       ttl: number,
       burn_after_read: boolean,
       save_local: boolean,
-      edit_clip_id: string | null,
     ) => Promise<void>;
   } = $props();
 
@@ -114,7 +113,7 @@
 
     clipState.update((s) => ({ ...s, error: null }));
     const pw = password || generatePassword(11);
-    await onCreate(text, pw, selectedTTL, burnAfterRead, saveLocal, $clipState.editClipId);
+    await onCreate(text, pw, selectedTTL, burnAfterRead, saveLocal);
   }
 
   const charCount = $derived(text.length);

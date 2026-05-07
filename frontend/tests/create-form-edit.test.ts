@@ -46,7 +46,6 @@ describe('CreateForm share mode - text prefill', () => {
       showModal: null,
       prefillText: 'Shared clip content',
       createMode: 'share' as const,
-      editClipId: null,
       localClips: [],
     });
   });
@@ -64,7 +63,6 @@ describe('CreateForm share mode - text prefill', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share' as const,
-      editClipId: null,
       localClips: [],
     });
   });
@@ -118,7 +116,6 @@ describe('CreateForm share mode - button text', () => {
       showModal: false,
       prefillText: null,
       createMode: 'share' as const,
-      editClipId: null,
       localClips: [],
     });
   });
@@ -136,7 +133,6 @@ describe('CreateForm share mode - button text', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share' as const,
-      editClipId: null,
       localClips: [],
     });
   });
@@ -193,7 +189,6 @@ describe('CreateForm share mode - burn after read', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share' as const,
-      editClipId: null,
       localClips: [],
     });
   });
@@ -211,7 +206,6 @@ describe('CreateForm share mode - burn after read', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share' as const,
-      editClipId: null,
       localClips: [],
     });
   });
@@ -252,7 +246,6 @@ describe('CreateForm share mode - TTL selector', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share' as const,
-      editClipId: null,
       localClips: [],
     });
   });
@@ -270,7 +263,6 @@ describe('CreateForm share mode - TTL selector', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share' as const,
-      editClipId: null,
       localClips: [],
     });
   });
@@ -293,66 +285,6 @@ describe('CreateForm share mode - TTL selector', () => {
 });
 
 // ---------------------------------------------------------------------------
-// CreateForm share mode - edit_clip_id
-// ---------------------------------------------------------------------------
-
-describe('CreateForm share mode - edit_clip_id', () => {
-  beforeEach(() => {
-    clipState.set({
-      clipId: null,
-      password: '',
-      decryptedText: null,
-      clip: null,
-      error: null,
-      loading: false,
-      shareUrl: null,
-      showModal: null,
-      prefillText: 'some text',
-      createMode: 'share' as const,
-      editClipId: 'clip-1',
-      localClips: [],
-    });
-  });
-
-  afterEach(() => {
-    cleanup();
-    clipState.set({
-      clipId: null,
-      password: '',
-      decryptedText: null,
-      clip: null,
-      error: null,
-      loading: false,
-      shareUrl: null,
-      showModal: null,
-      prefillText: null,
-      createMode: 'share' as const,
-      editClipId: null,
-      localClips: [],
-    });
-  });
-
-  it('passes edit_clip_id as seventh argument', async () => {
-    const onCreate = vi.fn();
-    const { container } = render(CreateForm, { onCreate });
-
-    await fillText(container, 'test');
-    await fireEvent.click(getCreateButton());
-
-    await waitFor(() => {
-      expect(onCreate).toHaveBeenCalled();
-      const args = onCreate.mock.calls[0] as any[];
-      expect(args[0]).toBe('test');
-      expect(typeof args[1]).toBe('string');
-      expect(typeof args[2]).toBe('number');
-      expect(typeof args[3]).toBe('boolean');
-      expect(typeof args[4]).toBe('boolean');
-      expect(args[5]).toBe('clip-1');
-    });
-  });
-});
-
-// ---------------------------------------------------------------------------
 // CreateForm share mode - button disabled
 // ---------------------------------------------------------------------------
 
@@ -369,7 +301,6 @@ describe('CreateForm share mode - button disabled', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share' as const,
-      editClipId: null,
       localClips: [],
     });
   });
@@ -387,7 +318,6 @@ describe('CreateForm share mode - button disabled', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share' as const,
-      editClipId: null,
       localClips: [],
     });
   });
@@ -418,7 +348,6 @@ describe('CreateForm share mode - error handling', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share' as const,
-      editClipId: null,
       localClips: [],
     });
   });
@@ -436,7 +365,6 @@ describe('CreateForm share mode - error handling', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share' as const,
-      editClipId: null,
       localClips: [],
     });
   });
@@ -482,7 +410,6 @@ describe('CreateForm share mode - local copy checkbox', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share' as const,
-      editClipId: null,
       localClips: [],
     });
   });
@@ -500,7 +427,6 @@ describe('CreateForm share mode - local copy checkbox', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share' as const,
-      editClipId: null,
       localClips: [],
     });
   });

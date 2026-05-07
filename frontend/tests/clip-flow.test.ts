@@ -63,7 +63,6 @@ describe('Clip creation flow', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      editClipId: null,
       localClips: [],
     });
 
@@ -89,7 +88,6 @@ describe('Clip creation flow', () => {
       showModal: null,
       prefillText: 'Test paste content',
       createMode: 'share',
-      editClipId: null,
       localClips: [],
     });
 
@@ -121,7 +119,6 @@ describe('Clip creation flow', () => {
         showModal: 'share',
         prefillText: null,
         createMode: 'share',
-        editClipId: null,
         localClips: getLocalClips(),
       });
     });
@@ -137,7 +134,6 @@ describe('Clip creation flow', () => {
       showModal: null,
       prefillText: testText,
       createMode: 'share',
-      editClipId: null,
       localClips: [],
     });
 
@@ -177,7 +173,6 @@ describe('Clip creation flow', () => {
       showModal: null,
       prefillText: '',
       createMode: 'share',
-      editClipId: null,
       localClips: [],
     });
 
@@ -215,7 +210,6 @@ describe('Clip viewing flow', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      editClipId: null,
       localClips: [],
     });
 
@@ -272,7 +266,6 @@ describe('Clip viewing flow', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      editClipId: null,
       localClips: [],
     });
 
@@ -339,7 +332,6 @@ describe('Clip viewing flow', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      editClipId: null,
       localClips: [],
     });
 
@@ -406,7 +398,6 @@ describe('Clip viewing flow', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      editClipId: null,
       localClips: [],
     });
 
@@ -617,7 +608,6 @@ describe('Burn-after-read flow', () => {
         showModal: 'share',
         prefillText: null,
         createMode: 'share',
-        editClipId: null,
         localClips: getLocalClips(),
       });
     });
@@ -633,7 +623,6 @@ describe('Burn-after-read flow', () => {
       showModal: null,
       prefillText: testText,
       createMode: 'share',
-      editClipId: null,
       localClips: [],
     });
 
@@ -682,7 +671,6 @@ describe('Burn-after-read flow', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      editClipId: null,
       localClips: [],
     });
 
@@ -714,7 +702,6 @@ describe('Burn-after-read flow', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      editClipId: null,
       localClips: [],
     });
 
@@ -762,7 +749,6 @@ describe('ResultView save local copy', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      editClipId: null,
       localClips: [],
       password: '',
     }));
@@ -820,7 +806,6 @@ describe('ResultView save local copy', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      editClipId: null,
       localClips: [],
       password: '',
     }));
@@ -871,7 +856,6 @@ describe('ResultView save local copy', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      editClipId: null,
       localClips: [],
       password: '',
     }));
@@ -930,7 +914,6 @@ describe('ResultView save local copy', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      editClipId: null,
       localClips: [],
       password: '',
     }));

@@ -33,7 +33,6 @@
       showModal: null,
       prefillText: prefillText || null,
       createMode: 'share',
-      editClipId: editClipId,
       localClips: getLocalClips(),
     });
   }
@@ -46,7 +45,6 @@
     ttl: number,
     burn_after_read: boolean,
     save_local: boolean,
-    edit_clip_id: string | null,
   ) {
     if (!text.trim()) {
       clipState.update((s) => ({ ...s, error: 'Please enter some text to share' }));
@@ -84,49 +82,28 @@
 
     const shareUrl = `${window.location.origin}/?${clipId}#${pw}`;
     const now = Date.now();
-    if (edit_clip_id) {
-      updateLocalClip(edit_clip_id, {
-        id: edit_clip_id,
-        text,
-        saved_at: now,
-      });
-      clipState.update((s) => ({
-        ...s,
-        clipId,
-        decryptedText: text,
-        shareUrl,
-        showModal: 'share',
-        prefillText: null,
-        createMode: 'share',
-        editClipId: null,
-        localClips: getLocalClips(),
-        loading: false,
-      }));
+    const newClip = {
+      id: clipId,
+      text,
+      saved_at: now,
+    };
+    let allClips: typeof $clipState.localClips;
+    if (save_local) {
+      allClips = addLocalClip(newClip);
     } else {
-      const newClip = {
-        id: clipId,
-        text,
-        saved_at: now,
-      };
-      let allClips: typeof $clipState.localClips;
-      if (save_local) {
-        allClips = addLocalClip(newClip);
-      } else {
-        allClips = [];
-      }
-      clipState.update((s) => ({
-        ...s,
-        clipId,
-        decryptedText: text,
-        shareUrl: shareUrl,
-        showModal: 'share',
-        prefillText: null,
-        createMode: 'share',
-        editClipId: clipId,
-        localClips: allClips,
-        loading: false,
-      }));
+      allClips = [];
     }
+    clipState.update((s) => ({
+      ...s,
+      clipId,
+      decryptedText: text,
+      shareUrl: shareUrl,
+      showModal: 'share',
+      prefillText: null,
+      createMode: 'share',
+      localClips: allClips,
+      loading: false,
+    }));
 
     goto('/list');
   }

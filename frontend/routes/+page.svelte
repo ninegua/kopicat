@@ -12,7 +12,6 @@
       ...s,
       prefillText: null,
       createMode: 'share',
-      editClipId: null,
       localClips: getLocalClips(),
       clip: null,
       decryptedText: null,
@@ -28,7 +27,6 @@
       error: null,
       prefillText: text,
       createMode: 'share',
-      editClipId: null,
     }));
     await goto('/edit');
   }
@@ -78,7 +76,6 @@
       showModal: null,
       prefillText,
       createMode: 'share',
-      editClipId: null,
       localClips: getLocalClips(),
     });
   }
