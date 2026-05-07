@@ -19,7 +19,6 @@ export interface ClipState {
   shareUrl: string | null;
   showModal: ModalType;
   prefillText: string | null;
-  createMode: CreateMode;
 }
 
 const initial: ClipState = {
@@ -30,7 +29,6 @@ const initial: ClipState = {
   shareUrl: null,
   showModal: null,
   prefillText: null,
-  createMode: 'share',
 };
 
 export const clipState = writable<ClipState>(initial);

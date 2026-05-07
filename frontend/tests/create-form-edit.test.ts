@@ -44,7 +44,6 @@ describe('CreateForm share mode - text prefill', () => {
       shareUrl: null,
       showModal: null,
       prefillText: 'Shared clip content',
-      createMode: 'share' as const,
       localClips: [],
     });
   });
@@ -60,7 +59,6 @@ describe('CreateForm share mode - text prefill', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share' as const,
       localClips: [],
     });
   });
@@ -112,7 +110,6 @@ describe('CreateForm share mode - button text', () => {
       shareUrl: null,
       showModal: false,
       prefillText: null,
-      createMode: 'share' as const,
       localClips: [],
     });
   });
@@ -128,7 +125,6 @@ describe('CreateForm share mode - button text', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share' as const,
       localClips: [],
     });
   });
@@ -183,7 +179,6 @@ describe('CreateForm share mode - burn after read', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share' as const,
       localClips: [],
     });
   });
@@ -199,7 +194,6 @@ describe('CreateForm share mode - burn after read', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share' as const,
       localClips: [],
     });
   });
@@ -238,7 +232,6 @@ describe('CreateForm share mode - TTL selector', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share' as const,
       localClips: [],
     });
   });
@@ -254,7 +247,6 @@ describe('CreateForm share mode - TTL selector', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share' as const,
       localClips: [],
     });
   });
@@ -291,7 +283,6 @@ describe('CreateForm share mode - button disabled', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share' as const,
       localClips: [],
     });
   });
@@ -307,7 +298,6 @@ describe('CreateForm share mode - button disabled', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share' as const,
       localClips: [],
     });
   });
@@ -336,7 +326,6 @@ describe('CreateForm share mode - error handling', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share' as const,
       localClips: [],
     });
   });
@@ -352,7 +341,6 @@ describe('CreateForm share mode - error handling', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share' as const,
       localClips: [],
     });
   });
@@ -396,7 +384,6 @@ describe('CreateForm share mode - local copy checkbox', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share' as const,
       localClips: [],
     });
   });
@@ -412,7 +399,6 @@ describe('CreateForm share mode - local copy checkbox', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share' as const,
       localClips: [],
     });
   });

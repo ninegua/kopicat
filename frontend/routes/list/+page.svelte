@@ -13,7 +13,6 @@
       showModal: null,
       shareUrl: null,
       prefillText: null,
-      createMode: 'share',
     }));
   }
 </script>

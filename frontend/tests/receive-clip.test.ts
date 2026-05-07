@@ -724,7 +724,6 @@ describe('pollReceivingClip — try again flow', () => {
     await waitFor(() => {
       const state = get(clipState);
       expect(state.showModal).toBe('receive');
-      expect(state.createMode).toBe('receive');
       expect(state.shareUrl).not.toBeNull();
     });
   });

@@ -54,7 +54,6 @@
         shareUrl: null,
         showModal: null,
         prefillText,
-        createMode: 'share',
       });
 
       void (async () => {

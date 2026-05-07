@@ -30,7 +30,6 @@
       shareUrl: null,
       showModal: null,
       prefillText: prefillText || null,
-      createMode: 'share',
     });
   }
 
@@ -94,7 +93,6 @@
       shareUrl: shareUrl,
       showModal: 'share',
       prefillText: null,
-      createMode: 'share',
       loading: false,
     }));
 

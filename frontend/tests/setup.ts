@@ -76,7 +76,6 @@ afterEach(() => {
     shareUrl: null,
     showModal: false,
     prefillText: null,
-    createMode: 'share',
   });
 });
 

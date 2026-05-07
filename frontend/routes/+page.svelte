@@ -10,7 +10,6 @@
     clipState.update((s) => ({
       ...s,
       prefillText: null,
-      createMode: 'share',
       clip: null,
       decryptedText: null,
       shareUrl: null,
@@ -24,7 +23,6 @@
       ...s,
       error: null,
       prefillText: text,
-      createMode: 'share',
     }));
     await goto('/edit');
   }
@@ -71,7 +69,6 @@
       shareUrl: null,
       showModal: null,
       prefillText,
-      createMode: 'share',
     });
   }
 

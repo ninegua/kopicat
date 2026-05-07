@@ -221,7 +221,6 @@
       ...s,
       showModal: 'receive',
       shareUrl: url,
-      createMode: 'receive',
     }));
     goto('/list');
   }

@@ -60,7 +60,6 @@ describe('Clip creation flow', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share',
     });
 
     render(IdleView, { props: { onPaste: vi.fn() } });
@@ -82,7 +81,6 @@ describe('Clip creation flow', () => {
       shareUrl: null,
       showModal: null,
       prefillText: 'Test paste content',
-      createMode: 'share',
     });
 
     render(CreateForm, { props: { onCreate: vi.fn() } });
@@ -110,7 +108,6 @@ describe('Clip creation flow', () => {
         shareUrl: `http://localhost/?${clipId}#testpw`,
         showModal: 'share',
         prefillText: null,
-        createMode: 'share',
       });
     });
 
@@ -122,7 +119,6 @@ describe('Clip creation flow', () => {
       shareUrl: null,
       showModal: null,
       prefillText: testText,
-      createMode: 'share',
     });
 
     const { container } = render(CreateForm, { props: { onCreate } });
@@ -158,7 +154,6 @@ describe('Clip creation flow', () => {
       shareUrl: null,
       showModal: null,
       prefillText: '',
-      createMode: 'share',
     });
 
     render(CreateForm, { props: { onCreate: vi.fn() } });
@@ -192,7 +187,6 @@ describe('Clip viewing flow', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share',
     });
 
     render(DecryptForm, {
@@ -247,7 +241,6 @@ describe('Clip viewing flow', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share',
     });
 
     const { container } = render(DecryptForm, {
@@ -315,7 +308,6 @@ describe('Clip viewing flow', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share',
     });
 
     const { container } = render(DecryptForm, {
@@ -383,7 +375,6 @@ describe('Clip viewing flow', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share',
     });
 
     render(DecryptForm, {
@@ -593,7 +584,6 @@ describe('Burn-after-read flow', () => {
         shareUrl: `http://localhost/?${clipId}#${password}`,
         showModal: 'share',
         prefillText: null,
-        createMode: 'share',
       });
     });
 
@@ -605,7 +595,6 @@ describe('Burn-after-read flow', () => {
       shareUrl: null,
       showModal: null,
       prefillText: testText,
-      createMode: 'share',
     });
 
     const { container } = render(CreateForm, { props: { onCreate } });
@@ -656,7 +645,6 @@ describe('Burn-after-read flow', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share',
     });
 
     render(DecryptForm, {
@@ -690,7 +678,6 @@ describe('Burn-after-read flow', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share',
     });
 
     render(DecryptForm, { props: { onDecrypt: vi.fn(), password: '', clip: null } });
@@ -734,7 +721,6 @@ describe('ResultView save local copy', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share',
     }));
 
     const savedData = {
@@ -789,7 +775,6 @@ describe('ResultView save local copy', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share',
     }));
 
     const onSave = vi.fn();
@@ -837,7 +822,6 @@ describe('ResultView save local copy', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share',
     }));
 
     const onSave = (savedClipId: string, savedText: string) => {
@@ -886,7 +870,6 @@ describe('ResultView save local copy', () => {
       shareUrl: null,
       showModal: null,
       prefillText: null,
-      createMode: 'share',
     }));
 
     const onSave = vi.fn();
