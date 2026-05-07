@@ -77,7 +77,6 @@ afterEach(() => {
     showModal: false,
     prefillText: null,
     createMode: 'share',
-    localClips: [],
   });
 });
 

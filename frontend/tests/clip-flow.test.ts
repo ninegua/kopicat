@@ -61,7 +61,6 @@ describe('Clip creation flow', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      localClips: [],
     });
 
     render(IdleView, { props: { onPaste: vi.fn() } });
@@ -84,7 +83,6 @@ describe('Clip creation flow', () => {
       showModal: null,
       prefillText: 'Test paste content',
       createMode: 'share',
-      localClips: [],
     });
 
     render(CreateForm, { props: { onCreate: vi.fn() } });
@@ -113,7 +111,6 @@ describe('Clip creation flow', () => {
         showModal: 'share',
         prefillText: null,
         createMode: 'share',
-        localClips: getLocalClips(),
       });
     });
 
@@ -126,7 +123,6 @@ describe('Clip creation flow', () => {
       showModal: null,
       prefillText: testText,
       createMode: 'share',
-      localClips: [],
     });
 
     const { container } = render(CreateForm, { props: { onCreate } });
@@ -148,7 +144,7 @@ describe('Clip creation flow', () => {
     const state = get(clipState);
     expect(state.clipId).toBe(clipId);
     expect(state.decryptedText).toBe(testText);
-    expect(state.localClips.length).toBe(1);
+    expect(getLocalClips().length).toBe(1);
   });
 
   it('shows validation error for empty text', async () => {
@@ -163,7 +159,6 @@ describe('Clip creation flow', () => {
       showModal: null,
       prefillText: '',
       createMode: 'share',
-      localClips: [],
     });
 
     render(CreateForm, { props: { onCreate: vi.fn() } });
@@ -198,7 +193,6 @@ describe('Clip viewing flow', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      localClips: [],
     });
 
     render(DecryptForm, {
@@ -254,7 +248,6 @@ describe('Clip viewing flow', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      localClips: [],
     });
 
     const { container } = render(DecryptForm, {
@@ -323,7 +316,6 @@ describe('Clip viewing flow', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      localClips: [],
     });
 
     const { container } = render(DecryptForm, {
@@ -392,7 +384,6 @@ describe('Clip viewing flow', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      localClips: [],
     });
 
     render(DecryptForm, {
@@ -423,16 +414,12 @@ describe('Clip viewing flow', () => {
 describe('Clip deletion flow', () => {
   beforeEach(() => {
     localStorage.clear();
-    clipState.update((s) => ({ ...s, localClips: [] }));
   });
 
   it('shows a snackbar when a clip is deleted', async () => {
     const testText = 'Delete me please';
     const now = Date.now();
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: 'del-clip-1', text: testText, saved_at: now }],
-    }));
+    localStorage.setItem('copycat_clips', JSON.stringify([{ id: 'del-clip-1', text: testText, saved_at: now }]));
 
     const { default: GridView } = await import('../lib/components/GridView.svelte');
     const { container } = render(GridView);
@@ -457,10 +444,7 @@ describe('Clip deletion flow', () => {
   it('removes clip from grid after snackbar timer expires', async () => {
     const testText = 'Temp clip';
     const now = Date.now();
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: 'temp-clip-1', text: testText, saved_at: now }],
-    }));
+    localStorage.setItem('copycat_clips', JSON.stringify([{ id: 'temp-clip-1', text: testText, saved_at: now }]));
 
     const { default: GridView } = await import('../lib/components/GridView.svelte');
     render(GridView);
@@ -498,10 +482,7 @@ describe('Clip deletion flow', () => {
   it('restores a deleted clip via snackbar', async () => {
     const testText = 'Restore me';
     const now = Date.now();
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: 'restore-clip-1', text: testText, saved_at: now }],
-    }));
+    localStorage.setItem('copycat_clips', JSON.stringify([{ id: 'restore-clip-1', text: testText, saved_at: now }]));
 
     const { default: GridView } = await import('../lib/components/GridView.svelte');
     render(GridView);
@@ -533,10 +514,7 @@ describe('Clip deletion flow', () => {
   it('shows empty state when all clips are deleted', async () => {
     const testText = 'Last clip';
     const now = Date.now();
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: 'last-clip-1', text: testText, saved_at: now }],
-    }));
+    localStorage.setItem('copycat_clips', JSON.stringify([{ id: 'last-clip-1', text: testText, saved_at: now }]));
 
     const { default: GridView } = await import('../lib/components/GridView.svelte');
     render(GridView);
@@ -604,7 +582,6 @@ describe('Burn-after-read flow', () => {
         showModal: 'share',
         prefillText: null,
         createMode: 'share',
-        localClips: getLocalClips(),
       });
     });
 
@@ -617,7 +594,6 @@ describe('Burn-after-read flow', () => {
       showModal: null,
       prefillText: testText,
       createMode: 'share',
-      localClips: [],
     });
 
     const { container } = render(CreateForm, { props: { onCreate } });
@@ -669,7 +645,6 @@ describe('Burn-after-read flow', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      localClips: [],
     });
 
     render(DecryptForm, {
@@ -704,7 +679,6 @@ describe('Burn-after-read flow', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      localClips: [],
     });
 
     render(DecryptForm, { props: { onDecrypt: vi.fn(), password: '', clip: null } });
@@ -723,7 +697,6 @@ describe('Burn-after-read flow', () => {
 describe('ResultView save local copy', () => {
   beforeEach(() => {
     localStorage.clear();
-    clipState.update((s) => ({ ...s, localClips: [] }));
   });
 
   it('saves a local copy when save icon is clicked', async () => {
@@ -750,7 +723,6 @@ describe('ResultView save local copy', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      localClips: [],
     }));
 
     const savedData = {
@@ -806,7 +778,6 @@ describe('ResultView save local copy', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      localClips: [],
     }));
 
     const onSave = vi.fn();
@@ -855,7 +826,6 @@ describe('ResultView save local copy', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      localClips: [],
     }));
 
     const onSave = (savedClipId: string, savedText: string) => {
@@ -865,7 +835,6 @@ describe('ResultView save local copy', () => {
       clipState.update((s) => ({
         ...s,
         clipId: savedClipId,
-        localClips: getLocalClips(),
       }));
     };
 
@@ -906,7 +875,6 @@ describe('ResultView save local copy', () => {
       showModal: null,
       prefillText: null,
       createMode: 'share',
-      localClips: [],
     }));
 
     const onSave = vi.fn();

@@ -5,7 +5,7 @@
   import type { Clip } from '$lib/api/client';
   import { fetchClip } from '$lib/api/client';
   import { decrypt, encrypt } from '$lib/crypto';
-  import { getLocalClips, addLocalClip, getLocalClip } from '$lib/api/local-store';
+  import { addLocalClip, getLocalClip } from '$lib/api/local-store';
   import Header from '$lib/components/Header.svelte';
   import DecryptForm from '$lib/components/DecryptForm.svelte';
   import ResultView from '$lib/components/ResultView.svelte';
@@ -55,7 +55,6 @@
         showModal: null,
         prefillText,
         createMode: 'share',
-        localClips: [],
       });
 
       void (async () => {
@@ -106,7 +105,6 @@
     clipState.update((s) => ({
       ...s,
       prefillText: null,
-      localClips: getLocalClips(),
     }));
     goto('/');
   }

@@ -20,7 +20,6 @@ export interface ClipState {
   showModal: ModalType;
   prefillText: string | null;
   createMode: CreateMode;
-  localClips: LocalClip[];
 }
 
 const initial: ClipState = {
@@ -32,7 +31,6 @@ const initial: ClipState = {
   showModal: null,
   prefillText: null,
   createMode: 'share',
-  localClips: [],
 };
 
 export const clipState = writable<ClipState>(initial);

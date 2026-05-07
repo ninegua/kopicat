@@ -1,12 +1,7 @@
 import { clipState } from '$lib/api/store';
-import { getLocalClips, getLocalClip } from '$lib/api/local-store';
+import { getLocalClip } from '$lib/api/local-store';
 
 export const load = async () => {
-  clipState.update((s) => ({
-    ...s,
-    localClips: getLocalClips(),
-  }));
-
   if (typeof window === 'undefined') return {};
 
   const url = new URL(window.location.href);

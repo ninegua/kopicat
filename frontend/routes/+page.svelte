@@ -2,7 +2,6 @@
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import { clipState } from '$lib/api/store';
-  import { getLocalClips } from '$lib/api/local-store';
   import Header from '$lib/components/Header.svelte';
   import IdleView from '$lib/components/IdleView.svelte';
   import Footer from '$lib/components/Footer.svelte';
@@ -12,7 +11,6 @@
       ...s,
       prefillText: null,
       createMode: 'share',
-      localClips: getLocalClips(),
       clip: null,
       decryptedText: null,
       shareUrl: null,
@@ -74,7 +72,6 @@
       showModal: null,
       prefillText,
       createMode: 'share',
-      localClips: getLocalClips(),
     });
   }
 

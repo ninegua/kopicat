@@ -31,7 +31,6 @@
       showModal: null,
       prefillText: prefillText || null,
       createMode: 'share',
-      localClips: getLocalClips(),
     });
   }
 
@@ -85,11 +84,8 @@
       text,
       saved_at: now,
     };
-    let allClips: typeof $clipState.localClips;
     if (save_local) {
-      allClips = addLocalClip(newClip);
-    } else {
-      allClips = [];
+      addLocalClip(newClip);
     }
     clipState.update((s) => ({
       ...s,
@@ -99,7 +95,6 @@
       showModal: 'share',
       prefillText: null,
       createMode: 'share',
-      localClips: allClips,
       loading: false,
     }));
 

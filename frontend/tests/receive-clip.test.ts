@@ -115,10 +115,6 @@ describe('pollReceivingClip — successful receive', () => {
     newReceivingClip('http://localhost');
     // Override the generated clip with our desired clipId
     const url = `http://localhost/send?${clipId}#${password}`;
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
@@ -130,8 +126,7 @@ describe('pollReceivingClip — successful receive', () => {
     await tick();
 
     await waitFor(() => {
-      const state = get(clipState);
-      const updatedClip = state.localClips.find((c) => c.id === clipId);
+      const updatedClip = getLocalClips().find((c) => c.id === clipId);
       expect(updatedClip).toBeDefined();
       expect(updatedClip!.receiving).toBe(false);
       expect(updatedClip!.text).toBe(decryptedText);
@@ -148,10 +143,6 @@ describe('pollReceivingClip — successful receive', () => {
 
     newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${password}`;
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
@@ -179,10 +170,6 @@ describe('pollReceivingClip — successful receive', () => {
 
     newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${password}`;
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
@@ -221,10 +208,6 @@ describe('pollReceivingClip — successful receive', () => {
     const beforeCreate = Date.now();
     newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${password}`;
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: clipId, text: url, saved_at: beforeCreate, receiving: true }],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: beforeCreate, receiving: true }]),
@@ -234,8 +217,7 @@ describe('pollReceivingClip — successful receive', () => {
     await tick();
 
     await waitFor(() => {
-      const state = get(clipState);
-      const updatedClip = state.localClips.find((c) => c.id === clipId);
+      const updatedClip = getLocalClips().find((c) => c.id === clipId);
       expect(updatedClip!.saved_at).toBeGreaterThan(beforeCreate);
     });
   });
@@ -250,10 +232,6 @@ describe('pollReceivingClip — successful receive', () => {
 
     newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${password}`;
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
@@ -263,8 +241,7 @@ describe('pollReceivingClip — successful receive', () => {
     await tick();
 
     await waitFor(() => {
-      const state = get(clipState);
-      const updatedClip = state.localClips.find((c) => c.id === clipId);
+      const updatedClip = getLocalClips().find((c) => c.id === clipId);
       expect(updatedClip?.receiving).toBe(false);
     });
   });
@@ -298,10 +275,6 @@ describe('pollReceivingClip — decryption failure', () => {
 
     newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${wrongPassword}`;
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
@@ -311,8 +284,7 @@ describe('pollReceivingClip — decryption failure', () => {
     await tick();
 
     await waitFor(() => {
-      const state = get(clipState);
-      const updatedClip = state.localClips.find((c) => c.id === clipId);
+      const updatedClip = getLocalClips().find((c) => c.id === clipId);
       expect(updatedClip).toBeDefined();
       // Text should be overwritten with error message
       expect(updatedClip!.text).not.toBe(url);
@@ -332,10 +304,6 @@ describe('pollReceivingClip — decryption failure', () => {
 
     newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${wrongPassword}`;
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
@@ -345,8 +313,7 @@ describe('pollReceivingClip — decryption failure', () => {
     await tick();
 
     await waitFor(() => {
-      const state = get(clipState);
-      const updatedClip = state.localClips.find((c) => c.id === clipId);
+      const updatedClip = getLocalClips().find((c) => c.id === clipId);
       if (updatedClip && updatedClip.text !== url) {
         expect(screen.getByText('Failed to receive')).toBeInTheDocument();
       }
@@ -364,10 +331,6 @@ describe('pollReceivingClip — decryption failure', () => {
 
     newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${wrongPassword}`;
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
@@ -400,10 +363,6 @@ describe('pollReceivingClip — decryption failure', () => {
     const originalSavedAt = 1000000;
     newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${wrongPassword}`;
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: clipId, text: url, saved_at: originalSavedAt, receiving: true }],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: originalSavedAt, receiving: true }]),
@@ -414,8 +373,7 @@ describe('pollReceivingClip — decryption failure', () => {
 
     // Just verify the clip is still receiving (polling happened but didn't succeed)
     await waitFor(() => {
-      const state = get(clipState);
-      const updatedClip = state.localClips.find((c) => c.id === clipId);
+      const updatedClip = getLocalClips().find((c) => c.id === clipId);
       expect(updatedClip?.receiving).toBe(true);
     });
   });
@@ -431,10 +389,6 @@ describe('pollReceivingClip — decryption failure', () => {
 
     newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${wrongPassword}`;
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
@@ -477,10 +431,6 @@ describe('pollReceivingClip — remote clip not found', () => {
     // Don't add any clip to the MSW store — simulates 404
     newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${password}`;
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
@@ -490,8 +440,7 @@ describe('pollReceivingClip — remote clip not found', () => {
     await tick();
 
     await waitFor(() => {
-      const state = get(clipState);
-      const updatedClip = state.localClips.find((c) => c.id === clipId);
+      const updatedClip = getLocalClips().find((c) => c.id === clipId);
       expect(updatedClip).toBeDefined();
       // Should still be receiving — no remote clip to decrypt
       expect(updatedClip!.receiving).toBe(true);
@@ -506,10 +455,6 @@ describe('pollReceivingClip — remote clip not found', () => {
 
     newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${password}`;
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
@@ -519,8 +464,7 @@ describe('pollReceivingClip — remote clip not found', () => {
     await tick();
 
     await waitFor(() => {
-      const state = get(clipState);
-      const updatedClip = state.localClips.find((c) => c.id === clipId);
+      const updatedClip = getLocalClips().find((c) => c.id === clipId);
       if (updatedClip && updatedClip.text === url) {
         expect(screen.getByText('Not yet received...')).toBeInTheDocument();
       }
@@ -533,10 +477,6 @@ describe('pollReceivingClip — remote clip not found', () => {
 
     newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${password}`;
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
@@ -588,10 +528,6 @@ describe('pollReceivingClip — try again flow', () => {
     // Create receiving clip with wrong password
     newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${wrongPassword}`;
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
@@ -606,8 +542,7 @@ describe('pollReceivingClip — try again flow', () => {
     await tick();
 
     await waitFor(() => {
-      const state = get(clipState);
-      const updatedClip = state.localClips.find((c) => c.id === clipId);
+      const updatedClip = getLocalClips().find((c) => c.id === clipId);
       expect(updatedClip).toBeDefined();
       expect(updatedClip!.receiving).toBe(true);
       expect(updatedClip!.text).not.toBe(url);
@@ -637,7 +572,7 @@ describe('pollReceivingClip — try again flow', () => {
     await tick();
 
     // Check clipState.localClips - old clip should be removed
-    const clips = get(clipState).localClips;
+    const clips = getLocalClips();
 
     // After deletion, the old clip is no longer in the store
     expect(clips.find((c) => c.id === oldClipId)).toBeUndefined();
@@ -659,10 +594,6 @@ describe('pollReceivingClip — try again flow', () => {
 
     newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${wrongPassword}`;
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
@@ -673,8 +604,7 @@ describe('pollReceivingClip — try again flow', () => {
     await tick();
 
     await waitFor(() => {
-      const state = get(clipState);
-      const updatedClip = state.localClips.find((c) => c.id === clipId);
+      const updatedClip = getLocalClips().find((c) => c.id === clipId);
       expect(updatedClip).toBeDefined();
       expect(updatedClip!.receiving).toBe(true);
       expect(updatedClip!.text).not.toBe(url);
@@ -715,10 +645,6 @@ describe('pollReceivingClip — try again flow', () => {
 
     newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${wrongPassword}`;
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
@@ -729,8 +655,7 @@ describe('pollReceivingClip — try again flow', () => {
     await tick();
 
     await waitFor(() => {
-      const state = get(clipState);
-      const updatedClip = state.localClips.find((c) => c.id === clipId);
+      const updatedClip = getLocalClips().find((c) => c.id === clipId);
       expect(updatedClip).toBeDefined();
       expect(updatedClip!.receiving).toBe(true);
       expect(updatedClip!.text).not.toBe(url);
@@ -766,10 +691,6 @@ describe('pollReceivingClip — try again flow', () => {
 
     newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${wrongPassword}`;
-    clipState.update((s) => ({
-      ...s,
-      localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
@@ -780,8 +701,7 @@ describe('pollReceivingClip — try again flow', () => {
     await tick();
 
     await waitFor(() => {
-      const state = get(clipState);
-      const updatedClip = state.localClips.find((c) => c.id === clipId);
+      const updatedClip = getLocalClips().find((c) => c.id === clipId);
       expect(updatedClip).toBeDefined();
       expect(updatedClip!.receiving).toBe(true);
       expect(updatedClip!.text).not.toBe(url);
@@ -841,13 +761,6 @@ describe('pollReceivingClip — multiple receiving clips', () => {
 
     const url1 = `http://localhost/send?${clipId1}#${password1}`;
     const url2 = `http://localhost/send?${clipId2}#${password2}`;
-    clipState.update((s) => ({
-      ...s,
-      localClips: [
-        { id: clipId1, text: url1, saved_at: Date.now(), receiving: true },
-        { id: clipId2, text: url2, saved_at: Date.now(), receiving: true },
-      ],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([
@@ -861,8 +774,8 @@ describe('pollReceivingClip — multiple receiving clips', () => {
 
     await waitFor(() => {
       const state = get(clipState);
-      const c1 = state.localClips.find((c) => c.id === clipId1);
-      const c2 = state.localClips.find((c) => c.id === clipId2);
+      const c1 = getLocalClips().find((c) => c.id === clipId1);
+      const c2 = getLocalClips().find((c) => c.id === clipId2);
       expect(c1?.receiving).toBe(false);
       expect(c1?.text).toBe(text1);
       expect(c2?.receiving).toBe(false);
@@ -884,18 +797,6 @@ describe('pollReceivingClip — multiple receiving clips', () => {
 
     addEncryptedClipToStore(clipId1, blob1);
 
-    clipState.update((s) => ({
-      ...s,
-      localClips: [
-        {
-          id: clipId1,
-          text: `http://localhost/send?${clipId1}#${password1}`,
-          saved_at: Date.now(),
-          receiving: true,
-        },
-        { id: clipId2, text: clip2Url, saved_at: Date.now(), receiving: true },
-      ],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([
@@ -914,8 +815,8 @@ describe('pollReceivingClip — multiple receiving clips', () => {
 
     await waitFor(() => {
       const state = get(clipState);
-      const c1 = state.localClips.find((c) => c.id === clipId1);
-      const c2 = state.localClips.find((c) => c.id === clipId2);
+      const c1 = getLocalClips().find((c) => c.id === clipId1);
+      const c2 = getLocalClips().find((c) => c.id === clipId2);
       // Clip 1 succeeded
       expect(c1?.receiving).toBe(false);
       expect(c1?.text).toBe(text1);
@@ -935,13 +836,6 @@ describe('pollReceivingClip — multiple receiving clips', () => {
 
     const url1 = `http://localhost/send?${clipId1}#${password1}`;
     const url2 = `http://localhost/send?${clipId2}#${password2}`;
-    clipState.update((s) => ({
-      ...s,
-      localClips: [
-        { id: clipId1, text: url1, saved_at: Date.now(), receiving: true },
-        { id: clipId2, text: url2, saved_at: Date.now(), receiving: true },
-      ],
-    }));
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([
@@ -956,8 +850,8 @@ describe('pollReceivingClip — multiple receiving clips', () => {
     // Both clips should still show "Not yet received..." since no remote clip exists
     await waitFor(() => {
       const state = get(clipState);
-      const c1 = state.localClips.find((c) => c.id === clipId1);
-      const c2 = state.localClips.find((c) => c.id === clipId2);
+      const c1 = getLocalClips().find((c) => c.id === clipId1);
+      const c2 = getLocalClips().find((c) => c.id === clipId2);
       expect(c1?.receiving).toBe(true);
       expect(c2?.receiving).toBe(true);
     });

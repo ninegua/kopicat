@@ -22,11 +22,23 @@
   let editingText = $state<string>('');
   let clipEdits: Record<string, string> = $state({});
   let clipModified: Record<string, boolean> = $state({});
+let localClips = $state<LocalClip[]>(getLocalClips());
+
+  $effect(() => {
+    function onStorage(e: StorageEvent) {
+      if (e.key === 'copycat_clips') {
+        localClips = getLocalClips();
+      }
+    }
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  });
+
   const clips = $derived.by(() => {
     const deletedIds = pendingDeletes.length > 0 ? new Set(pendingDeletes.map((d) => d.id)) : null;
     return deletedIds
-      ? $clipState.localClips.filter((c) => !deletedIds.has(c.id))
-      : $clipState.localClips;
+      ? localClips.filter((c) => !deletedIds.has(c.id))
+      : localClips;
   });
   let sharedClip = $state<string | null>($clipState.clipId);
 
@@ -95,19 +107,13 @@
       const now = Date.now();
       const newClip: LocalClip = { id, text: decryptedText, saved_at: now, receiving: false };
       updateLocalClip(clip.id, newClip);
-      clipState.update((s) => ({
-        ...s,
-        localClips: s.localClips.map((c) => (c.id === id ? newClip : c)),
-      }));
+      localClips = localClips.map((c) => (c.id === id ? newClip : c));
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : 'Decryption failed';
       updateLocalClip(clip.id, { text: errorMessage });
-      clipState.update((s) => ({
-        ...s,
-        localClips: s.localClips.map((c) =>
-          c.id === id ? { ...c, text: errorMessage, saved_at: Date.now() } : c,
-        ),
-      }));
+      localClips = localClips.map((c) =>
+        c.id === id ? { ...c, text: errorMessage, saved_at: Date.now() } : c,
+      );
     }
   }
 
@@ -205,7 +211,6 @@
       showModal: 'receive',
       shareUrl: url,
       createMode: 'receive',
-      localClips: getLocalClips(),
     }));
     goto('/list');
   }
@@ -258,10 +263,7 @@
     }
     const timer = setTimeout(() => {
       removeLocalClip(clip.id);
-      clipState.update((s) => ({
-        ...s,
-        localClips: s.localClips.filter((c) => c.id !== clip.id),
-      }));
+      localClips = localClips.filter((c) => c.id !== clip.id);
       pendingDeletes = pendingDeletes.filter((d) => d.id !== clip.id);
     }, 5000);
     pendingDeletes = [...pendingDeletes, { id: clip.id, text: clip.text, timer }];
@@ -280,10 +282,7 @@
     const text = editingText;
     updateLocalClip(clip.id, { text });
     const now = Date.now();
-    clipState.update((s) => ({
-      ...s,
-      localClips: s.localClips.map((c) => (c.id === clip.id ? { ...c, text, saved_at: now } : c)),
-    }));
+    localClips = localClips.map((c) => (c.id === clip.id ? { ...c, text, saved_at: now } : c));
     delete clipEdits[clip.id];
     delete clipModified[clip.id];
   }
