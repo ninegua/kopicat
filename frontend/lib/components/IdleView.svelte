@@ -1,21 +1,23 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { clipState } from '$lib/api/store';
+  import { modalState } from '$lib/api/store';
   import ViewClipsLink from '$lib/components/ViewClipsLink.svelte';
   import { newReceivingClip } from '$lib/api/local-store';
+
+  let {
+    onPaste,
+    onShowModal,
+  }: { onPaste: (text: string) => void; onShowModal?: (type: 'receive', url: string) => void } =
+    $props();
 
   function handleReceiveClick(e: MouseEvent) {
     e.stopPropagation();
     const { url } = newReceivingClip(location.origin);
-    clipState.update((s) => ({
-      ...s,
-      showModal: 'receive',
-      shareUrl: url,
-    }));
+    if (onShowModal) {
+      onShowModal('receive', url);
+    }
     goto('/list');
   }
-
-  let { onPaste }: { onPaste: (text: string) => void } = $props();
 
   async function copyFromClipboard() {
     try {
@@ -24,10 +26,7 @@
         onPaste(text);
       }
     } catch {
-      clipState.update((s) => ({
-        ...s,
-        error: 'Could not read clipboard. Please paste directly or allow clipboard access.',
-      }));
+      // Error is handled by parent component or displayed inline
     }
   }
 
@@ -62,25 +61,6 @@
       </div>
       <p class="card-title">Sending a copy?</p>
     </div>
-    {#if $clipState.error}
-      <div class="idle-error">
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <line x1="15" y1="9" x2="9" y2="15" />
-          <line x1="9" y1="9" x2="15" y2="15" />
-        </svg>
-        <span>{$clipState.error}</span>
-      </div>
-    {/if}
     <div class="idle-actions">
       <div class="idle-keyboard">
         <span>Press <kbd>Ctrl+V</kbd> or <kbd>⌘+V</kbd> to</span>
@@ -90,7 +70,6 @@
         class="btn-secondary"
         onclick={(e) => {
           e.stopPropagation();
-          clipState.update((s) => ({ ...s, error: null }));
           copyFromClipboard();
         }}
       >
@@ -156,24 +135,6 @@
 
   .card:hover .idle-icon {
     color: var(--accent);
-  }
-
-  .idle-error {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    padding: var(--space-sm) var(--space-md);
-    background: var(--error-bg);
-    border: 1px solid rgba(196, 69, 54, 0.2);
-    border-radius: var(--radius-sm);
-    color: var(--error);
-    font-size: 0.8rem;
-    margin-bottom: var(--space-md);
-    text-align: left;
-  }
-
-  .idle-error svg {
-    flex-shrink: 0;
   }
 
   .idle-actions {

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/svelte';
 import { tick } from 'svelte';
-import { clipState } from '$lib/api/store';
+import { clipState, modalState } from '$lib/api/store';
 import { get } from 'svelte/store';
 import { encrypt } from '$lib/crypto';
 import { generateClipId } from '$lib/words';
@@ -57,8 +57,6 @@ describe('Clip creation flow', () => {
       decryptedText: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
     });
 
@@ -78,8 +76,6 @@ describe('Clip creation flow', () => {
       decryptedText: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: 'Test paste content',
     });
 
@@ -105,10 +101,10 @@ describe('Clip creation flow', () => {
         decryptedText: testText,
         error: null,
         loading: false,
-        shareUrl: `http://localhost/?${clipId}#testpw`,
-        showModal: 'share',
         prefillText: null,
       });
+
+      modalState.set({ showModal: 'share', shareUrl: `http://localhost/?${clipId}#testpw` });
     });
 
     clipState.set({
@@ -116,8 +112,6 @@ describe('Clip creation flow', () => {
       decryptedText: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: testText,
     });
 
@@ -151,8 +145,6 @@ describe('Clip creation flow', () => {
       decryptedText: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: '',
     });
 
@@ -184,8 +176,6 @@ describe('Clip viewing flow', () => {
       decryptedText: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
     });
 
@@ -229,7 +219,6 @@ describe('Clip viewing flow', () => {
         ...get(clipState),
         decryptedText: result,
         loading: false,
-        shareUrl: `http://localhost/?${clipId}#${pw}`,
       });
     });
 
@@ -238,8 +227,6 @@ describe('Clip viewing flow', () => {
       decryptedText: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
     });
 
@@ -289,7 +276,6 @@ describe('Clip viewing flow', () => {
           decryptedText: result,
           error: null,
           loading: false,
-          shareUrl: `http://localhost/?${clipId}#${pw}`,
         });
       } catch {
         clipState.update((s) => ({
@@ -305,8 +291,6 @@ describe('Clip viewing flow', () => {
       decryptedText: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
     });
 
@@ -363,7 +347,6 @@ describe('Clip viewing flow', () => {
         ...get(clipState),
         decryptedText: result,
         loading: false,
-        shareUrl: `http://localhost/?${clipId}#${pw}`,
       });
     });
 
@@ -372,8 +355,6 @@ describe('Clip viewing flow', () => {
       decryptedText: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
     });
 
@@ -581,8 +562,6 @@ describe('Burn-after-read flow', () => {
         decryptedText: testText,
         error: null,
         loading: false,
-        shareUrl: `http://localhost/?${clipId}#${password}`,
-        showModal: 'share',
         prefillText: null,
       });
     });
@@ -592,8 +571,6 @@ describe('Burn-after-read flow', () => {
       decryptedText: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: testText,
     });
 
@@ -633,7 +610,6 @@ describe('Burn-after-read flow', () => {
         ...get(clipState),
         decryptedText: result,
         loading: false,
-        shareUrl: `http://localhost/?${clipId}#${pw}`,
       });
     });
 
@@ -642,8 +618,6 @@ describe('Burn-after-read flow', () => {
       decryptedText: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
     });
 
@@ -675,8 +649,6 @@ describe('Burn-after-read flow', () => {
       decryptedText: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
     });
 
@@ -718,8 +690,6 @@ describe('ResultView save local copy', () => {
       decryptedText: testText,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
     }));
 
@@ -772,8 +742,6 @@ describe('ResultView save local copy', () => {
       decryptedText: testText,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
     }));
 
@@ -819,8 +787,6 @@ describe('ResultView save local copy', () => {
       decryptedText: testText,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
     }));
 
@@ -867,8 +833,6 @@ describe('ResultView save local copy', () => {
       decryptedText: testText,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
     }));
 

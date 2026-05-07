@@ -1,20 +1,17 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
-  import { clipState } from '$lib/api/store';
+  import { clipState, modalState } from '$lib/api/store';
   import Header from '$lib/components/Header.svelte';
   import IdleView from '$lib/components/IdleView.svelte';
   import Footer from '$lib/components/Footer.svelte';
 
   function handleReset() {
+    modalState.set({ showModal: null, shareUrl: null });
     clipState.update((s) => ({
       ...s,
       prefillText: null,
-      clip: null,
-      decryptedText: null,
-      shareUrl: null,
       error: null,
-      showModal: null,
     }));
   }
 
@@ -25,6 +22,10 @@
       prefillText: text,
     }));
     await goto('/edit');
+  }
+
+  function handleShowModal(type: 'receive', url: string) {
+    modalState.set({ showModal: type, shareUrl: url });
   }
 
   function initFromUrl() {
@@ -66,8 +67,6 @@
       decryptedText: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText,
     });
   }
@@ -100,7 +99,7 @@
 <Header onReset={handleReset} />
 
 <main class="app-main">
-  <IdleView onPaste={handlePaste} />
+  <IdleView onPaste={handlePaste} onShowModal={handleShowModal} />
 </main>
 
 <Footer />

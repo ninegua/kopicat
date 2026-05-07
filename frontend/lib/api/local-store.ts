@@ -53,6 +53,7 @@ export function updateLocalClip(id: string, updates: Partial<LocalClip>): LocalC
     writeClips(clips);
     return clip;
   }
+  return null;
 }
 
 export function getLocalClip(id: string): LocalClip | undefined {

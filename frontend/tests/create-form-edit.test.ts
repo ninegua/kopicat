@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/svelte';
-import { clipState } from '$lib/api/store';
+import { clipState, modalState } from '$lib/api/store';
 import CreateForm from '$lib/components/CreateForm.svelte';
 
 // ---------------------------------------------------------------------------
@@ -41,8 +41,6 @@ describe('CreateForm share mode - text prefill', () => {
       clip: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: 'Shared clip content',
       localClips: [],
     });
@@ -56,8 +54,6 @@ describe('CreateForm share mode - text prefill', () => {
       clip: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
       localClips: [],
     });
@@ -107,8 +103,6 @@ describe('CreateForm share mode - button text', () => {
       clip: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: false,
       prefillText: null,
       localClips: [],
     });
@@ -122,8 +116,6 @@ describe('CreateForm share mode - button text', () => {
       clip: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
       localClips: [],
     });
@@ -176,8 +168,6 @@ describe('CreateForm share mode - burn after read', () => {
       clip: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
       localClips: [],
     });
@@ -191,8 +181,6 @@ describe('CreateForm share mode - burn after read', () => {
       clip: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
       localClips: [],
     });
@@ -229,8 +217,6 @@ describe('CreateForm share mode - TTL selector', () => {
       clip: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
       localClips: [],
     });
@@ -244,8 +230,6 @@ describe('CreateForm share mode - TTL selector', () => {
       clip: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
       localClips: [],
     });
@@ -280,8 +264,6 @@ describe('CreateForm share mode - button disabled', () => {
       clip: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
       localClips: [],
     });
@@ -295,8 +277,6 @@ describe('CreateForm share mode - button disabled', () => {
       clip: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
       localClips: [],
     });
@@ -323,8 +303,6 @@ describe('CreateForm share mode - error handling', () => {
       clip: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
       localClips: [],
     });
@@ -338,8 +316,6 @@ describe('CreateForm share mode - error handling', () => {
       clip: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
       localClips: [],
     });
@@ -381,8 +357,6 @@ describe('CreateForm share mode - local copy checkbox', () => {
       clip: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
       localClips: [],
     });
@@ -396,8 +370,6 @@ describe('CreateForm share mode - local copy checkbox', () => {
       clip: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
       localClips: [],
     });

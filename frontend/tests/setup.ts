@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { afterAll, afterEach, beforeAll, vi } from 'vitest';
-import { clipState } from '$lib/api/store';
+import { clipState, modalState } from '$lib/api/store';
 import { createMockServer, resetClipStore } from './msw-handlers';
 
 vi.mock('qrcode', () => ({
@@ -64,7 +64,7 @@ const server = createMockServer();
 
 beforeAll(() => server.listen());
 
-// Reset clip store + MSW state between tests
+// Reset clip store + modal store + MSW state between tests
 afterEach(() => {
   server.resetHandlers();
   resetClipStore();
@@ -73,9 +73,11 @@ afterEach(() => {
     decryptedText: null,
     error: null,
     loading: false,
-    shareUrl: null,
-    showModal: false,
     prefillText: null,
+  });
+  modalState.set({
+    showModal: null,
+    shareUrl: null,
   });
 });
 

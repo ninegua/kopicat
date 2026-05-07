@@ -11,11 +11,11 @@
   import ResultView from '$lib/components/ResultView.svelte';
   import ClipNotFound from '$lib/components/ClipNotFound.svelte';
   import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
-  import ShareCard from '$lib/components/ShareCard.svelte';
   import ViewClipsLink from '$lib/components/ViewClipsLink.svelte';
   import Footer from '$lib/components/Footer.svelte';
 
-  let pagePassword = '';
+  let pagePassword = $state('');
+  let shareUrl = $state<string | null>(null);
 
   function initFromUrl() {
     const url = new URL(window.location.href);
@@ -51,8 +51,6 @@
         decryptedText: null,
         error: null,
         loading: true,
-        shareUrl: null,
-        showModal: null,
         prefillText,
       });
 
@@ -83,12 +81,12 @@
 
     try {
       const text = await decrypt(fetchedClip!.blob, password);
+      shareUrl = `${window.location.origin}/?${$clipState.clipId}#${password}`;
 
       clipState.update((s) => ({
         ...s,
         error: null,
         decryptedText: text,
-        shareUrl: `${window.location.origin}/?${s.clipId}#${password}`,
         loading: false,
       }));
     } catch {
@@ -114,17 +112,7 @@
     addLocalClip(newClip);
   }
 
-  function handleShareDismiss() {
-    clipState.update((s) => ({
-      ...s,
-      showModal: null,
-      shareUrl: null,
-      prefillText: null,
-    }));
-    goto('/list');
-  }
-
-  let fetchedClip: Clip | null = null;
+  let fetchedClip: Clip | null = $state(null);
 
   onMount(initFromUrl);
 </script>
@@ -142,9 +130,6 @@
   {:else if fetchedClip && !$clipState.decryptedText}
     <DecryptForm clip={fetchedClip} password={pagePassword} onDecrypt={decryptClip} />
   {:else if $clipState.decryptedText}
-    {#if $clipState.showModal === 'share' && $clipState.shareUrl}
-      <ShareCard url={$clipState.shareUrl} onDismiss={handleShareDismiss} />
-    {/if}
     <ResultView clip={fetchedClip} onDismiss={handleDismiss} onSave={handleSave} />
     <ViewClipsLink />
   {:else if $clipState.clipId && !fetchedClip && !$clipState.loading}

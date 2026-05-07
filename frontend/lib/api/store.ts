@@ -4,6 +4,11 @@ export type CreateMode = 'share' | 'receive';
 
 export type ModalType = 'share' | 'receive' | null;
 
+export interface ModalState {
+  showModal: ModalType;
+  shareUrl: string | null;
+}
+
 export interface LocalClip {
   id: string;
   text: string;
@@ -16,18 +21,21 @@ export interface ClipState {
   decryptedText: string | null;
   error: string | null;
   loading: boolean;
-  shareUrl: string | null;
-  showModal: ModalType;
   prefillText: string | null;
 }
+
+const modalInitial: ModalState = {
+  showModal: null,
+  shareUrl: null,
+};
+
+export const modalState = writable<ModalState>(modalInitial);
 
 const initial: ClipState = {
   clipId: null,
   decryptedText: null,
   error: null,
   loading: false,
-  shareUrl: null,
-  showModal: null,
   prefillText: null,
 };
 

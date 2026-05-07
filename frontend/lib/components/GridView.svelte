@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { clipState } from '$lib/api/store';
+  import { modalState } from '$lib/api/store';
   import type { LocalClip } from '$lib/api/store';
   import * as QRCode from 'qrcode';
   import { flip } from 'svelte/animate';
@@ -43,7 +43,7 @@
     }
   }
 
-  function getClipsLength(): LocalClip[] {
+  function getClipsLength(): number {
     const deleted = pendingDeletes.length;
     return clips.length - deleted;
   }
@@ -55,7 +55,12 @@
     }
   }
 
-  let sharedClip = $state<string | null>($clipState.clipId);
+  let sharedClip = $state<string | null>(null);
+
+  $effect(() => {
+    const url = new URL(window.location.href);
+    sharedClip = url.searchParams.get('clip') || null;
+  });
 
   const unsavedCount = $derived.by(() => {
     return getClips().filter((c) => clipModified[c.id]).length;
@@ -217,11 +222,7 @@
 
   function handleSendAgain() {
     const { url } = newReceivingClip(location.origin);
-    clipState.update((s) => ({
-      ...s,
-      showModal: 'receive',
-      shareUrl: url,
-    }));
+    modalState.set({ showModal: 'receive', shareUrl: url });
     goto('/list');
   }
 

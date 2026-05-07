@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { get } from 'svelte/store';
-import { clipState } from './store';
+import { clipState, modalState } from './store';
 import { createClip, fetchClip } from './client';
 import { encrypt, decrypt } from '$lib/crypto';
 import { generateClipId } from '$lib/words';
@@ -89,10 +89,7 @@ beforeEach(() => {
     decryptedText: null,
     error: null,
     loading: false,
-    shareUrl: null,
-    showModal: null,
     prefillText: null,
-    localClips: [],
   });
 
   // Mock fetch
@@ -141,11 +138,10 @@ async function simulateCreateClip(
     ...get(clipState),
     clipId,
     decryptedText: text,
-    shareUrl,
-    showModal: 'share',
     loading: false,
     error: null,
   });
+  modalState.set({ showModal: 'share', shareUrl });
 
   return { success: true, clipId, shareUrl };
 }
@@ -200,7 +196,6 @@ async function simulateDecryptClip(clip: Clip | null, password: string) {
     clipState.set({
       ...get(clipState),
       decryptedText: text,
-      shareUrl: `http://localhost/?${get(clipState).clipId}#${password}`,
       loading: false,
       error: null,
     });
@@ -236,7 +231,7 @@ describe('Clip creation flow', () => {
 
     // Verify store state
     const finalState = get(clipState);
-    expect(finalState.showModal).toBe('share');
+    expect(get(modalState).showModal).toBe('share');
     expect(finalState.decryptedText).toBe(text);
     expect(finalState.loading).toBe(false);
     expect(finalState.error).toBeNull();
@@ -392,7 +387,7 @@ describe('Clip viewing flow', () => {
     expect(createResult.success).toBe(true);
 
     // Step 2: Store state should have showShareModal true
-    expect(get(clipState).showModal).toBe('share');
+    expect(get(modalState).showModal).toBe('share');
     expect(get(clipState).decryptedText).toBe(text);
 
     // Step 3: Simulate navigating to the clip URL (reset state first)
@@ -401,10 +396,7 @@ describe('Clip viewing flow', () => {
       decryptedText: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
-      localClips: [],
     });
 
     const clip = await simulateFetchClipById(createResult.clipId!);
@@ -510,10 +502,7 @@ describe('UI component state flow', () => {
       decryptedText: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
-      localClips: [],
     });
 
     // The DecryptForm.svelte button has: disabled={$clipState.loading || !password}
@@ -528,10 +517,7 @@ describe('UI component state flow', () => {
       decryptedText: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: null,
-      localClips: [],
     });
 
     // Password is passed as a prop to DecryptForm, not stored in clipState

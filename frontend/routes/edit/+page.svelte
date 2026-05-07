@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
-  import { clipState } from '$lib/api/store';
+  import { clipState, modalState } from '$lib/api/store';
   import { createClip } from '$lib/api/client';
   import { getLocalClips, addLocalClip, updateLocalClip, getLocalClip } from '$lib/api/local-store';
   import { decrypt, encrypt } from '$lib/crypto';
@@ -27,8 +27,6 @@
       decryptedText: null,
       error: null,
       loading: false,
-      shareUrl: null,
-      showModal: null,
       prefillText: prefillText || null,
     });
   }
@@ -86,12 +84,12 @@
     if (save_local) {
       addLocalClip(newClip);
     }
+    modalState.set({ showModal: 'share', shareUrl });
+
     clipState.update((s) => ({
       ...s,
       clipId,
       decryptedText: text,
-      shareUrl: shareUrl,
-      showModal: 'share',
       prefillText: null,
       loading: false,
     }));

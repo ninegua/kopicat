@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/svelte';
 import { tick } from 'svelte';
-import { clipState } from '$lib/api/store';
+import { clipState, modalState } from '$lib/api/store';
 import { get } from 'svelte/store';
 import { encrypt } from '$lib/crypto';
 import { generateClipId } from '$lib/words';
@@ -722,9 +722,9 @@ describe('pollReceivingClip — try again flow', () => {
 
     // Modal state should be set
     await waitFor(() => {
-      const state = get(clipState);
-      expect(state.showModal).toBe('receive');
-      expect(state.shareUrl).not.toBeNull();
+      const modal = get(modalState);
+      expect(modal.showModal).toBe('receive');
+      expect(modal.shareUrl).not.toBeNull();
     });
   });
 });
