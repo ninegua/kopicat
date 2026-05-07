@@ -2,6 +2,7 @@
   import { goto } from '$app/navigation';
   import { clipState } from '$lib/api/store';
   import type { LocalClip } from '$lib/api/store';
+  import * as QRCode from 'qrcode';
   import { flip } from 'svelte/animate';
   import { cubicOut } from 'svelte/easing';
   import { removeLocalClip, updateLocalClip } from '$lib/api/local-store';
@@ -57,7 +58,21 @@
     }
   });
 
-  function formatTimeAgo(timestamp: number): string {
+  $effect(() => {
+    const clip = clips.find((c) => c.id === sharedClip);
+    if (clip?.receiving && clip.text) {
+      const canvas = document.getElementById(`qr-${clip.id}`) as HTMLCanvasElement | null;
+      if (canvas) {
+        QRCode.toCanvas(canvas, clip.text, {
+          width: 150,
+          color: { dark: '#150D08', light: '#F7EFD2' },
+        });
+      }
+    }
+  });
+
+  function formatTimeAgo(timestamp: number | null | undefined): string {
+    if (!timestamp) return 'unknown';
     const diff = Date.now() - timestamp;
     const seconds = Math.floor(diff / 1000);
     const minutes = Math.floor(seconds / 60);
@@ -271,6 +286,126 @@
                       </button>
                     </div>
                   </div>
+                {:else if clip.receiving}
+                  <div class="clip-box-header">
+                    <span class="clip-time">Not yet received...</span>
+                    <div style="display: flex; align-items: center; gap: var(--space-md);">
+                      <button
+                        class="footer-icon-btn footer-icon-btn--delete"
+                        aria-label="Delete clip"
+                        onclick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(clip);
+                        }}
+                      >
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M3 6h18" />
+                          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                          <line x1="10" y1="11" x2="10" y2="17" />
+                          <line x1="14" y1="11" x2="14" y2="17" />
+                        </svg>
+                      </button>
+                      <button
+                        class="footer-icon-btn"
+                        class:footer-icon-btn-copied={copiedId === clip.id}
+                        aria-label="Copy text to clipboard"
+                        onclick={(e) => {
+                          e.stopPropagation();
+                          navigator.clipboard.writeText(clip.text);
+                          copiedId = clip.id;
+                          setTimeout(() => {
+                            copiedId = null;
+                          }, 1500);
+                        }}
+                      >
+                        {#if copiedId === clip.id}
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        {:else}
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                          </svg>
+                        {/if}
+                      </button>
+                      <button
+                        class="footer-icon-btn"
+                        class:footer-icon-btn--disabled={clip.receiving}
+                        aria-label={maximizedClip === clip.id ? 'Minimize' : 'Maximize'}
+                        disabled={clip.receiving}
+                      >
+                        {#if maximizedClip === clip.id}
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <path d="M4 14h6v6" />
+                            <path d="M20 10h-6V4" />
+                            <path d="M14 10l7-7" />
+                            <path d="M3 21l7-7" />
+                          </svg>
+                        {:else}
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <path d="M15 3h6v6" />
+                            <path d="M9 21H3v-6" />
+                            <path d="M21 3l-7 7" />
+                            <path d="M3 21l7-7" />
+                          </svg>
+                        {/if}
+                      </button>
+                    </div>
+                  </div>
+                  <div class="qr-view">
+                    <canvas id="qr-{clip.id}" class="qr-canvas"></canvas>
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                    <span style="flex: 1; text-align: center; font-weight: 600; padding-bottom: var(--space-md);">Scan to send</span>
+                    <span class="qr-url">{clip.text}</span>
+                    </div>
+                  </div>
                 {:else}
                   <div class="clip-box-header">
                     <span class="clip-time">Last modified {formatTimeAgo(clip.saved_at)}</span>
@@ -386,22 +521,22 @@
                       </button>
                     </div>
                   </div>
+                  <textarea
+                    class="clipped-text"
+                    class:clipped-text-modified={isModified(clip)}
+                    bind:value={editingText}
+                    oninput={(e) => {
+                      clipEdits[clip.id] = (e.target as HTMLTextAreaElement).value;
+                      clipModified[clip.id] = true;
+                    }}
+                    onkeydown={(e) => e.stopPropagation()}
+                  ></textarea>
                 {/if}
-                <textarea
-                  class="clipped-text"
-                  class:clipped-text-modified={isModified(clip)}
-                  bind:value={editingText}
-                  oninput={(e) => {
-                    clipEdits[clip.id] = (e.target as HTMLTextAreaElement).value;
-                    clipModified[clip.id] = true;
-                  }}
-                  onkeydown={(e) => e.stopPropagation()}
-                ></textarea>
               </div>
             {:else}
               <div class="clip-box-collapsed">
                 {#if clip.receiving}
-                  <span class="clip-time">Not yet received...</span>
+                  <span class="clip-time clip-time--receiving">Not yet received...</span>
                 {:else}
                   <span class="clip-time">{formatTimeAgo(clip.saved_at)}</span>
                 {/if}
@@ -601,11 +736,44 @@
     flex-shrink: 0;
   }
 
+  .clip-time--receiving {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
   .clip-save {
     font-size: 0.7rem;
     color: var(--text-muted);
     flex-shrink: 0;
     padding-right: 4px;
+  }
+
+  .qr-view {
+    flex: 1;
+    display: flex;
+    flex-direction: flex-end;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+  }
+
+  .qr-canvas {
+    flex: 1;
+    border-radius: var(--radius-md);
+    background: var(--bg-card-hover);
+  }
+
+  .qr-url {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    word-break: break-all;
+    line-height: 1.4;
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    background: var(--bg-card-hover);
   }
 
   .clip-box-content {
@@ -690,6 +858,11 @@
 
   .footer-icon-btn--cancel:hover {
     background: rgba(212, 117, 107, 0.15);
+  }
+
+  .footer-icon-btn--disabled {
+    opacity: 0.3;
+    pointer-events: none;
   }
 
   .snackbar-root {
