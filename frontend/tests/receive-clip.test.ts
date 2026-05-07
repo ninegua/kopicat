@@ -5,7 +5,12 @@ import { clipState } from '$lib/api/store';
 import { get } from 'svelte/store';
 import { encrypt } from '$lib/crypto';
 import { generateClipId } from '$lib/words';
-import { getLocalClips, getLocalClip, newReceivingClip, updateLocalClip } from '$lib/api/local-store';
+import {
+  getLocalClips,
+  getLocalClip,
+  newReceivingClip,
+  updateLocalClip,
+} from '$lib/api/local-store';
 import type { Clip } from '$lib/api/client';
 import { goto } from '$app/navigation';
 import { clipStore } from './msw-handlers';
@@ -114,9 +119,10 @@ describe('pollReceivingClip — successful receive', () => {
       ...s,
       localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId, text: url, saved_at: Date.now(), receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
+    );
 
     render(GridView);
 
@@ -146,9 +152,10 @@ describe('pollReceivingClip — successful receive', () => {
       ...s,
       localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId, text: url, saved_at: Date.now(), receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
+    );
 
     render(GridView);
     await tick();
@@ -176,9 +183,10 @@ describe('pollReceivingClip — successful receive', () => {
       ...s,
       localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId, text: url, saved_at: Date.now(), receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
+    );
 
     const { container } = render(GridView);
 
@@ -217,9 +225,10 @@ describe('pollReceivingClip — successful receive', () => {
       ...s,
       localClips: [{ id: clipId, text: url, saved_at: beforeCreate, receiving: true }],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId, text: url, saved_at: beforeCreate, receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: clipId, text: url, saved_at: beforeCreate, receiving: true }]),
+    );
 
     render(GridView);
     await tick();
@@ -245,9 +254,10 @@ describe('pollReceivingClip — successful receive', () => {
       ...s,
       localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId, text: url, saved_at: Date.now(), receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
+    );
 
     render(GridView);
     await tick();
@@ -292,9 +302,10 @@ describe('pollReceivingClip — decryption failure', () => {
       ...s,
       localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId, text: url, saved_at: Date.now(), receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
+    );
 
     render(GridView);
     await tick();
@@ -325,9 +336,10 @@ describe('pollReceivingClip — decryption failure', () => {
       ...s,
       localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId, text: url, saved_at: Date.now(), receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
+    );
 
     render(GridView);
     await tick();
@@ -356,9 +368,10 @@ describe('pollReceivingClip — decryption failure', () => {
       ...s,
       localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId, text: url, saved_at: Date.now(), receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
+    );
 
     const { container } = render(GridView);
 
@@ -391,9 +404,10 @@ describe('pollReceivingClip — decryption failure', () => {
       ...s,
       localClips: [{ id: clipId, text: url, saved_at: originalSavedAt, receiving: true }],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId, text: url, saved_at: originalSavedAt, receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: clipId, text: url, saved_at: originalSavedAt, receiving: true }]),
+    );
 
     render(GridView);
     await tick();
@@ -421,9 +435,10 @@ describe('pollReceivingClip — decryption failure', () => {
       ...s,
       localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId, text: url, saved_at: Date.now(), receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
+    );
 
     render(GridView);
 
@@ -434,9 +449,7 @@ describe('pollReceivingClip — decryption failure', () => {
     await tick();
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/try send again/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/try send again/i)).toBeInTheDocument();
     });
   });
 });
@@ -468,9 +481,10 @@ describe('pollReceivingClip — remote clip not found', () => {
       ...s,
       localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId, text: url, saved_at: Date.now(), receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
+    );
 
     render(GridView);
     await tick();
@@ -496,9 +510,10 @@ describe('pollReceivingClip — remote clip not found', () => {
       ...s,
       localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId, text: url, saved_at: Date.now(), receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
+    );
 
     render(GridView);
     await tick();
@@ -522,9 +537,10 @@ describe('pollReceivingClip — remote clip not found', () => {
       ...s,
       localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId, text: url, saved_at: Date.now(), receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
+    );
 
     const { container } = render(GridView);
 
@@ -560,7 +576,7 @@ describe('pollReceivingClip — try again flow', () => {
     cleanup();
   });
 
- it('generates a new receiving clip when user clicks "try send again"', async () => {
+  it('generates a new receiving clip when user clicks "try send again"', async () => {
     const clipId = generateClipId();
     const correctPassword = 'correctTryAgain';
     const wrongPassword = 'recvTryAgain';
@@ -576,9 +592,10 @@ describe('pollReceivingClip — try again flow', () => {
       ...s,
       localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId, text: url, saved_at: Date.now(), receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
+    );
 
     // Use fake timers from the start for timer-based operations
     vi.useFakeTimers();
@@ -604,9 +621,7 @@ describe('pollReceivingClip — try again flow', () => {
 
     // Wait for the try-again button to appear
     await waitFor(() => {
-      expect(
-        screen.getByText(/try send again/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/try send again/i)).toBeInTheDocument();
     });
 
     const oldClipId = clipId;
@@ -648,9 +663,10 @@ describe('pollReceivingClip — try again flow', () => {
       ...s,
       localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId, text: url, saved_at: Date.now(), receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
+    );
 
     render(GridView);
 
@@ -669,10 +685,8 @@ describe('pollReceivingClip — try again flow', () => {
 
     await tick();
 
-await waitFor(() => {
-      expect(
-        screen.getByText(/try send again/i),
-      ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/try send again/i)).toBeInTheDocument();
     });
 
     const btn2 = screen.getByText(/try send again/i);
@@ -705,9 +719,10 @@ await waitFor(() => {
       ...s,
       localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId, text: url, saved_at: Date.now(), receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
+    );
 
     render(GridView);
 
@@ -727,9 +742,7 @@ await waitFor(() => {
     await tick();
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/try send again/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/try send again/i)).toBeInTheDocument();
     });
 
     const navBtn = screen.getByText(/try send again/i);
@@ -757,9 +770,10 @@ await waitFor(() => {
       ...s,
       localClips: [{ id: clipId, text: url, saved_at: Date.now(), receiving: true }],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId, text: url, saved_at: Date.now(), receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
+    );
 
     render(GridView);
 
@@ -779,9 +793,7 @@ await waitFor(() => {
     await tick();
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/try send again/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/try send again/i)).toBeInTheDocument();
     });
 
     const modalBtn = screen.getByText(/try send again/i);
@@ -836,10 +848,13 @@ describe('pollReceivingClip — multiple receiving clips', () => {
         { id: clipId2, text: url2, saved_at: Date.now(), receiving: true },
       ],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId1, text: url1, saved_at: Date.now(), receiving: true },
-      { id: clipId2, text: url2, saved_at: Date.now(), receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([
+        { id: clipId1, text: url1, saved_at: Date.now(), receiving: true },
+        { id: clipId2, text: url2, saved_at: Date.now(), receiving: true },
+      ]),
+    );
 
     render(GridView);
     await tick();
@@ -872,14 +887,27 @@ describe('pollReceivingClip — multiple receiving clips', () => {
     clipState.update((s) => ({
       ...s,
       localClips: [
-        { id: clipId1, text: `http://localhost/send?${clipId1}#${password1}`, saved_at: Date.now(), receiving: true },
+        {
+          id: clipId1,
+          text: `http://localhost/send?${clipId1}#${password1}`,
+          saved_at: Date.now(),
+          receiving: true,
+        },
         { id: clipId2, text: clip2Url, saved_at: Date.now(), receiving: true },
       ],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId1, text: `http://localhost/send?${clipId1}#${password1}`, saved_at: Date.now(), receiving: true },
-      { id: clipId2, text: clip2Url, saved_at: Date.now(), receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([
+        {
+          id: clipId1,
+          text: `http://localhost/send?${clipId1}#${password1}`,
+          saved_at: Date.now(),
+          receiving: true,
+        },
+        { id: clipId2, text: clip2Url, saved_at: Date.now(), receiving: true },
+      ]),
+    );
 
     render(GridView);
     await tick();
@@ -914,10 +942,13 @@ describe('pollReceivingClip — multiple receiving clips', () => {
         { id: clipId2, text: url2, saved_at: Date.now(), receiving: true },
       ],
     }));
-    localStorage.setItem('copycat_clips', JSON.stringify([
-      { id: clipId1, text: url1, saved_at: Date.now(), receiving: true },
-      { id: clipId2, text: url2, saved_at: Date.now(), receiving: true },
-    ]));
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([
+        { id: clipId1, text: url1, saved_at: Date.now(), receiving: true },
+        { id: clipId2, text: url2, saved_at: Date.now(), receiving: true },
+      ]),
+    );
 
     render(GridView);
     await tick();

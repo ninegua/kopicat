@@ -520,14 +520,14 @@
                       {:else}
                         <span class="error-banner qr-header">{clip.text}</span>
                         <button
-                           type="button"
-                           class="btn-primary qr-button"
-                           onclick={(e) => {
-                             e.stopPropagation();
-                             handleDelete(clip);
-                             handleSendAgain();
-                           }}>Try send again with a fresh code?</button
-                         >
+                          type="button"
+                          class="btn-primary qr-button"
+                          onclick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(clip);
+                            handleSendAgain();
+                          }}>Try send again with a fresh code?</button
+                        >
                       {/if}
                     </div>
                   </div>

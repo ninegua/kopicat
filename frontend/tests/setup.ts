@@ -4,9 +4,11 @@ import { clipState } from '$lib/api/store';
 import { createMockServer, resetClipStore } from './msw-handlers';
 
 vi.mock('qrcode', () => ({
-  toCanvas: vi.fn((_canvas: unknown, _data: string, _opts: unknown, cb?: (err: Error | null) => void) => {
-    if (cb) cb(null);
-  }),
+  toCanvas: vi.fn(
+    (_canvas: unknown, _data: string, _opts: unknown, cb?: (err: Error | null) => void) => {
+      if (cb) cb(null);
+    },
+  ),
 }));
 
 // $app/paths mock — needed by Header.svelte
