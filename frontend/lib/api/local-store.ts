@@ -60,16 +60,17 @@ export function getLocalClip(id: string): LocalClip | undefined {
   return readClips().find((c) => c.id === id);
 }
 
-export function newReceivingClip(origin: string): { id: string; url: string } {
+export function newReceivingClip(origin: string): LocalClip {
   const clips = readClips();
   while (true) {
     const id = generateClipId();
     const pw = generatePassword(8);
     const url = `${origin}/send?${id}#${pw}`;
     if (clips.findIndex((c) => c.id === id) === -1) {
-      clips.push({ id, text: url, saved_at: Date.now(), receiving: true });
+      let clip = { id, text: url, saved_at: Date.now(), receiving: true };
+      clips.push(clip);
       writeClips(clips);
-      return { id, url };
+      return clip;
     }
   }
 }

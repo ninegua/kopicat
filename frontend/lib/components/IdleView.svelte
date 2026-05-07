@@ -12,9 +12,9 @@
 
   function handleReceiveClick(e: MouseEvent) {
     e.stopPropagation();
-    const { url } = newReceivingClip(location.origin);
+    const clip = newReceivingClip(location.origin);
     if (onShowModal) {
-      onShowModal('receive', url);
+      onShowModal('receive', clip.text);
     }
     goto('/list');
   }

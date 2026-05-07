@@ -221,8 +221,9 @@
   }
 
   function handleSendAgain() {
-    const { url } = newReceivingClip(location.origin);
-    modalState.set({ showModal: 'receive', shareUrl: url });
+    const clip = newReceivingClip(location.origin);
+    clips.push(clip);
+    modalState.set({ showModal: 'receive', shareUrl: clip.text });
     goto('/list');
   }
 
