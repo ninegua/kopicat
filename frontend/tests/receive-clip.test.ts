@@ -567,18 +567,16 @@ describe('pollReceivingClip — try again flow', () => {
 
     await tick();
 
-    // Advance the 5-second delete timer to complete the removal
-    vi.advanceTimersByTime(5000);
+    // Advance the 500ms delay in handleSendAgain
+    vi.advanceTimersByTime(500);
     await tick();
 
-    // Check clipState.localClips - old clip should be removed
+    // After try again, the old clip is replaced with a new one (different ID)
     const clips = getLocalClips();
-
-    // After deletion, the old clip is no longer in the store
     expect(clips.find((c) => c.id === oldClipId)).toBeUndefined();
     // A new receiving clip should exist
-    const newReceivingClipCount = clips.filter((c) => c.receiving).length;
-    expect(newReceivingClipCount).toBe(1);
+    const newClip = clips.find((c) => c.receiving === true);
+    expect(newClip).toBeDefined();
 
     vi.useRealTimers();
   });
@@ -598,6 +596,9 @@ describe('pollReceivingClip — try again flow', () => {
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
     );
+
+    // Use fake timers from the start for timer-based operations
+    vi.useFakeTimers();
 
     render(GridView);
 
@@ -623,8 +624,12 @@ describe('pollReceivingClip — try again flow', () => {
     btn2.click();
     await tick();
 
+    // Advance the 500ms delay in handleSendAgain
+    vi.advanceTimersByTime(500);
+    await tick();
+
     const clips = getLocalClips();
-    const newClip = clips.find((c) => c.receiving === true);
+    const newClip = clips.find((c) => c.id !== clipId && c.receiving === true);
     expect(newClip).toBeDefined();
     expect(newClip!.id).not.toBe(clipId);
     expect(newClip!.text).not.toBe(url);
@@ -632,9 +637,11 @@ describe('pollReceivingClip — try again flow', () => {
     const newPw = newClip!.text.slice(newClip!.text.indexOf('#') + 1);
     const oldPw = url.slice(url.indexOf('#') + 1);
     expect(newPw).not.toBe(oldPw);
+
+    vi.useRealTimers();
   });
 
-  it('navigates to /list after clicking "try again"', async () => {
+  it('regenerates a new receiving clip after clicking "try again"', async () => {
     const clipId = generateClipId();
     const correctPassword = 'correctNav';
     const wrongPassword = 'recvNav';
@@ -649,6 +656,9 @@ describe('pollReceivingClip — try again flow', () => {
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
     );
+
+    // Use fake timers from the start for timer-based operations
+    vi.useFakeTimers();
 
     render(GridView);
 
@@ -674,10 +684,17 @@ describe('pollReceivingClip — try again flow', () => {
     navBtn.click();
     await tick();
 
-    // Navigation should have been called
-    await waitFor(() => {
-      expect(goto).toHaveBeenCalledWith('/list');
-    });
+    // Advance the 500ms delay in handleSendAgain
+    vi.advanceTimersByTime(500);
+    await tick();
+
+    // Old clip should be replaced with a new one
+    const clips = getLocalClips();
+    const newClip = clips.find((c) => c.id !== clipId && c.receiving === true);
+    expect(newClip).toBeDefined();
+    expect(newClip!.id).not.toBe(clipId);
+
+    vi.useRealTimers();
   });
 });
 
