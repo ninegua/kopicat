@@ -50,8 +50,8 @@ interface CanisterActor {
     blob: string;
     expires_after?: bigint;
     burn_after_read: boolean;
-  }) => Promise<{ Ok?: string; Err?: string }>;
-  get_clip: (id: string) => Promise<{ some?: Clip; none?: never } | undefined>;
+  }) => Promise<{ ok?: string; err?: string }>;
+  get_clip: (id: string) => Promise<[] | [Clip]>;
   get_stats: () => Promise<ClipStats>;
 }
 
@@ -80,7 +80,7 @@ export async function createClip(input: ClipInput): Promise<{ ok: string } | { e
     const result = await actor.create_clip({
       id: input.id,
       blob: input.blob,
-      expires_after: input.expires_after !== undefined ? [BigInt(input.expires_after)] : [],
+      expires_after: input.expires_after !== undefined ? BigInt(input.expires_after) : undefined,
       burn_after_read: input.burn_after_read,
     });
 
@@ -88,7 +88,7 @@ export async function createClip(input: ClipInput): Promise<{ ok: string } | { e
       return { ok: result.ok };
     }
     if ('err' in result && result.err) {
-      return { error: result.Err };
+      return { error: result.err };
     }
 
     return { error: 'Unknown result format' };
@@ -106,8 +106,8 @@ export async function fetchClip(id: string): Promise<Clip | null> {
 
     console.log('fetchClip', result);
 
-    if (result.length > 0) {
-      const clip = result[0];
+    const clip = result.pop();
+    if (clip) {
       return {
         blob: clip.blob,
         created_at: Number(clip.created_at),

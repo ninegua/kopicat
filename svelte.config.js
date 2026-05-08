@@ -10,7 +10,7 @@ const config = {
 			fallback: 'index.html',
 		}),
 		alias: {
-			'$generated': path.resolve('./build'),
+			'$generated': path.resolve('build'),
 		},
 		paths: {
 			base: '',

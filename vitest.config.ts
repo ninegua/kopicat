@@ -77,6 +77,7 @@ export default defineConfig({
 		alias: {
 			'$app': path.resolve(__dirname, 'frontend/app'),
 			'$lib': path.resolve(__dirname, 'frontend/lib'),
+			'$generated': path.resolve(__dirname, 'build'),
 		},
 	},
 	test: {

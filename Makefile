@@ -8,7 +8,7 @@ DIDC=didc
 
 default: backend frontend
 
-backend: build/$(NAME)-did.mjs
+backend: build/$(NAME)-did.ts
 
 frontend:
 	pnpm run build
@@ -17,8 +17,8 @@ build/$(NAME).wasm build/$(NAME).did &: ${BACKEND_SRC} $(MOC) | .vessel/ build/
 	$(MOC) --public-metadata candid:service --public-metadata candid:args --public-metadata motoko:compiler \
 	    --idl -c -o $@ $$(vessel sources) $(BACKEND_MAIN_SRC)
 
-build/$(NAME)-did.mjs: build/$(NAME).did
-	$(DIDC) bind -t js $< > $@
+build/$(NAME)-did.ts: build/$(NAME).did
+	$(DIDC) bind -t ts $< > $@
 
 $(MOC): | .vessel/
 	vessel bin
