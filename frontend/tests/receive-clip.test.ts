@@ -160,7 +160,7 @@ describe('pollReceivingClip — successful receive', () => {
     });
   });
 
-  it('shows "Scan to send" while receiving and updates after receive', async () => {
+  it('shows "Ask sender to scan" while receiving and updates after receive', async () => {
     const clipId = generateClipId();
     const password = 'recvScanTest';
     const decryptedText = 'Received via scan';
@@ -178,13 +178,13 @@ describe('pollReceivingClip — successful receive', () => {
     const { container } = render(GridView);
 
     // Click the receiving clip to expand it
-    const clipBox = screen.getByText('Not yet received...').closest('.clip-box');
+    const clipBox = screen.getByText('Yet to receive').closest('.clip-box');
     expect(clipBox).not.toBeNull();
     await fireEvent.click(clipBox!);
 
     // Should show QR-related content while receiving
     await waitFor(() => {
-      expect(screen.getByText('Scan to send')).toBeInTheDocument();
+      expect(screen.getByText('Ask sender to scan')).toBeInTheDocument();
     });
 
     // Polling fires on mount
@@ -339,7 +339,7 @@ describe('pollReceivingClip — decryption failure', () => {
     const { container } = render(GridView);
 
     // Click to expand
-    const clipBox = screen.getByText('Not yet received...').closest('.clip-box');
+    const clipBox = screen.getByText('Yet to receive').closest('.clip-box');
     await fireEvent.click(clipBox!);
 
     await tick();
@@ -397,7 +397,7 @@ describe('pollReceivingClip — decryption failure', () => {
     render(GridView);
 
     // Click to expand the receiving clip
-    const clipBox = screen.getByText('Not yet received...').closest('.clip-box');
+    const clipBox = screen.getByText('Yet to receive').closest('.clip-box');
     await fireEvent.click(clipBox!);
 
     await tick();
@@ -449,7 +449,7 @@ describe('pollReceivingClip — remote clip not found', () => {
     });
   });
 
-  it('shows "Not yet received..." status when remote clip is not found', async () => {
+  it('shows "Yet to receive" status when remote clip is not found', async () => {
     const clipId = generateClipId();
     const password = 'recv404Status';
 
@@ -466,7 +466,7 @@ describe('pollReceivingClip — remote clip not found', () => {
     await waitFor(() => {
       const updatedClip = getLocalClips().find((c) => c.id === clipId);
       if (updatedClip && updatedClip.text === url) {
-        expect(screen.getByText('Not yet received...')).toBeInTheDocument();
+        expect(screen.getByText('Yet to receive')).toBeInTheDocument();
       }
     });
   });
@@ -484,18 +484,18 @@ describe('pollReceivingClip — remote clip not found', () => {
 
     const { container } = render(GridView);
 
-    const clipBox = screen.getByText('Not yet received...').closest('.clip-box');
+    const clipBox = screen.getByText('Yet to receive').closest('.clip-box');
     await fireEvent.click(clipBox!);
 
     await waitFor(() => {
-      expect(screen.getByText('Scan to send')).toBeInTheDocument();
+      expect(screen.getByText('Ask sender to scan')).toBeInTheDocument();
     });
 
     await tick();
 
     // Should still show the QR after 404
     await waitFor(() => {
-      expect(screen.getByText('Scan to send')).toBeInTheDocument();
+      expect(screen.getByText('Ask sender to scan')).toBeInTheDocument();
     });
   });
 });
@@ -827,7 +827,7 @@ describe('pollReceivingClip — multiple receiving clips', () => {
     });
   });
 
-  it('keeps both "Not yet received..." statuses when both clips are still waiting', async () => {
+  it('keeps both "Yet to receive" statuses when both clips are still waiting', async () => {
     const clipId1 = generateClipId();
     const clipId2 = generateClipId();
     const password1 = 'multiWait1';
@@ -846,7 +846,7 @@ describe('pollReceivingClip — multiple receiving clips', () => {
     render(GridView);
     await tick();
 
-    // Both clips should still show "Not yet received..." since no remote clip exists
+    // Both clips should still show "Yet to receive" since no remote clip exists
     await waitFor(() => {
       const state = get(clipState);
       const c1 = getLocalClips().find((c) => c.id === clipId1);
@@ -855,7 +855,7 @@ describe('pollReceivingClip — multiple receiving clips', () => {
       expect(c2?.receiving).toBe(true);
     });
 
-    expect(screen.getAllByText('Not yet received...').length).toBe(2);
+    expect(screen.getAllByText('Yet to receive').length).toBe(2);
   });
 });
 

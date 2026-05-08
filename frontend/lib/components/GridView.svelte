@@ -348,8 +348,10 @@
               <div class="clip-box-content">
                 {#if clip.receiving}
                   <div class="clip-box-header">
-                    <div class="clip-time clip-time--receiving">{receivingStatus(clip)}
-                    <span class="clip-id">({clip.id})</span></div>
+                    <div class="clip-time clip-time--receiving">
+                      {receivingStatus(clip)}
+                      <span class="clip-id">({clip.id})</span>
+                    </div>
                     <div style="display: flex; align-items: center; gap: var(--space-md);">
                       <button
                         class="footer-icon-btn footer-icon-btn--delete"
@@ -462,9 +464,15 @@
                     </div>
                   </div>
                   <div class="qr-view">
-                    <div style="display: flex; flex-direction: column; gap: var(--space-sm); align-items: center;">
+                    <div
+                      style="display: flex; flex-direction: column; gap: var(--space-sm); align-items: center;"
+                    >
                       {#if matchBaseUrl(clip.text)}
-                        <span class="qr-header">Ask sender to scan<br><small style="color: var(--text-muted)">or visit link </small><tiny>(click to copy)</tiny></span>
+                        <span class="qr-header"
+                          >Ask sender to scan<br /><small style="color: var(--text-muted)"
+                            >or visit link (click to copy)</small
+                          ></span
+                        >
                         <button
                           type="button"
                           class="btn-primary qr-url-button"
@@ -476,8 +484,8 @@
                             setTimeout(() => {
                               copiedId = null;
                             }, 1500);
-                          }}
-                        >{clip.text}</button>
+                          }}>{clip.text}</button
+                        >
                       {:else}
                         <span class="error-banner qr-header">{clip.text}</span>
                         <button
@@ -881,7 +889,8 @@
 
   .clip-save {
     font-size: 0.7rem;
-    color: var(--text-muted);
+    font-weight: 600;
+    color: var(--accent-amber);
     flex-shrink: 0;
     padding-right: 4px;
   }
@@ -912,7 +921,7 @@
     font-size: 0.8rem;
     font-weight: 200;
     color: var(--text-secondary);
-    text-align: left; 
+    text-align: left;
     padding: var(--space-sm);
     background: var(--bg-card-hover);
   }
