@@ -1,6 +1,5 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { modalState } from '$lib/api/store';
   import type { LocalClip } from '$lib/api/store';
   import * as QRCode from 'qrcode';
   import { flip } from 'svelte/animate';
@@ -55,20 +54,20 @@
     }
   }
 
-  let sharedClip = $state<string | null>(null);
+  let focusClip = $state<string | null>(null);
 
   $effect(() => {
     const url = new URL(window.location.href);
-    sharedClip = url.searchParams.get('clip') || null;
+    focusClip = url.searchParams.get('clip') || null;
   });
 
   const unsavedCount = $derived.by(() => {
     return getClips().filter((c) => clipModified[c.id]).length;
   });
 
-  // Sets editingText when sharedClip changes.
+  // Sets editingText when focusClip changes.
   $effect(() => {
-    const clip = getClips().find((c) => c.id === sharedClip);
+    const clip = getClips().find((c) => c.id === focusClip);
     if (clip) {
       if (clipEdits[clip.id] !== undefined) {
         editingText = clipEdits[clip.id];
@@ -78,9 +77,9 @@
     }
   });
 
-  // Fill QR code canvas with clip.text if sharedClip is receiving (whenever sharedClip changes).
+  // Fill QR code canvas with clip.text if focusClip is receiving (whenever focusClip changes).
   $effect(() => {
-    const clip = getClips().find((c) => c.id === sharedClip);
+    const clip = getClips().find((c) => c.id === focusClip);
     if (clip?.receiving && clip.text) {
       const canvas = document.getElementById(`qr-${clip.id}`) as HTMLCanvasElement | null;
       if (canvas) {
@@ -220,16 +219,33 @@
     return result;
   }
 
-  function handleSendAgain() {
-    const clip = newReceivingClip(location.origin);
-    clips.push(clip);
-    modalState.set({ showModal: 'receive', shareUrl: clip.text });
-    goto('/list');
+  const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+  async function handleSendAgain(clip: LocalClip) {
+    if (focusClip === clip.id) {
+      focusClip = null;
+    }
+    if (maximizedClip === clip.id) {
+      maximizedClip = null;
+    }
+    const existing = pendingDeletes.find((d) => d.id === clip.id);
+    if (existing) {
+      clearTimeout(existing.timer);
+      pendingDeletes = pendingDeletes.filter((d) => d.id !== clip.id);
+    }
+    const index = clips.findIndex((d) => d.id === clip.id);
+    if (index >= 0) {
+      clips.splice(index, 1);
+      await delay(500);
+      const newClip = newReceivingClip(location.origin, clip.id);
+      clips.splice(index, 0, newClip);
+      focusClip = newClip.id;
+    }
   }
 
   function handleClick(clipId: string) {
-    if (sharedClip === clipId) return;
-    sharedClip = clipId;
+    if (focusClip === clipId) return;
+    focusClip = clipId;
   }
 
   function rearrange(clips: LocalClip[]) {
@@ -238,7 +254,7 @@
     let result: LocalClip[] = [];
     for (var i = 0; i < clips.length; i++) {
       let clip = clips[i];
-      if (clip.id == sharedClip && (i + 1) % cols == 0) {
+      if (clip.id == focusClip && (i + 1) % cols == 0) {
         let prev = result.pop();
         if (prev) {
           result.push(clip);
@@ -261,9 +277,9 @@
     }
   }
 
-  function handleDelete(clip: LocalClip) {
-    if (sharedClip === clip.id) {
-      sharedClip = null;
+  async function handleDelete(clip: LocalClip) {
+    if (focusClip === clip.id) {
+      focusClip = null;
     }
     if (maximizedClip === clip.id) {
       maximizedClip = null;
@@ -273,11 +289,12 @@
       clearTimeout(existing.timer);
       pendingDeletes = pendingDeletes.filter((d) => d.id !== clip.id);
     }
-    const timer = setTimeout(() => {
+    function deleteIt() {
       removeLocalClip(clip.id);
       clips = clips.filter((c) => c.id !== clip.id);
       pendingDeletes = pendingDeletes.filter((d) => d.id !== clip.id);
-    }, 5000);
+    }
+    const timer = setTimeout(deleteIt, 5000);
     pendingDeletes = [...pendingDeletes, { id: clip.id, text: clip.text, timer }];
   }
 
@@ -286,7 +303,7 @@
     if (entry) {
       clearTimeout(entry.timer);
       pendingDeletes = pendingDeletes.filter((d) => d.id !== id);
-      sharedClip = id;
+      focusClip = id;
     }
   }
 
@@ -329,7 +346,7 @@
         {#each maximizedClip ? getClips().filter((c) => c.id === maximizedClip) : rearrange(getClips()) as clip (clip.id)}
           <div
             class="clip-box"
-            class:clip-box-focused={sharedClip === clip.id}
+            class:clip-box-focused={focusClip === clip.id}
             class:clip-box-modified={clipModified[clip.id] === true}
             class:clip-box-maximized={maximizedClip === clip.id}
             onclick={() => handleClick(clip.id)}
@@ -341,10 +358,10 @@
             }}
             role="button"
             tabindex="0"
-            aria-pressed={sharedClip === clip.id}
+            aria-pressed={focusClip === clip.id}
             animate:flip={{ duration: 300, easing: cubicOut }}
           >
-            {#if sharedClip === clip.id}
+            {#if focusClip === clip.id}
               <div class="clip-box-content">
                 {#if clip.receiving}
                   <div class="clip-box-header">
@@ -493,9 +510,8 @@
                           class="btn-primary qr-url-button"
                           onclick={(e) => {
                             e.stopPropagation();
-                            handleDelete(clip);
-                            handleSendAgain();
-                          }}>Try send again with a fresh code?</button
+                            handleSendAgain(clip);
+                          }}>Try again with a new code?</button
                         >
                       {/if}
                     </div>

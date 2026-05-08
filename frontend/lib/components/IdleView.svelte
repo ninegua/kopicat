@@ -1,33 +1,23 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { clipState, modalState } from '$lib/api/store';
-  import ViewClipsLink from '$lib/components/ViewClipsLink.svelte';
+  import { clipState } from '$lib/api/store';
   import { newReceivingClip } from '$lib/api/local-store';
+  import ViewClipsLink from '$lib/components/ViewClipsLink.svelte';
   import { onMount, onDestroy } from 'svelte';
 
-  let {
-    onShowModal,
-    mode,
-  }: { onShowModal?: (type: 'receive', url: string) => void; mode?: 'send' | 'default' } = $props();
+  let { mode }: { mode?: 'send' | 'default' } = $props();
 
   let targetClip = $derived($clipState.clipId ?? '');
 
   // TODO
   function handleChooseClick(e: MouseEvent) {
     e.stopPropagation();
-    const clip = newReceivingClip(location.origin);
-    if (onShowModal) {
-      onShowModal('receive', clip.text);
-    }
     goto('/list');
   }
 
   function handleReceiveClick(e: MouseEvent) {
     e.stopPropagation();
     const clip = newReceivingClip(location.origin);
-    if (onShowModal) {
-      onShowModal('receive', clip.text);
-    }
     goto(`/list?clip=${clip.id}`);
   }
 
@@ -139,14 +129,18 @@
       >Or do you want to <span class="idle-link-text">choose from saved clips</span>?</button
     >
   {:else}
-    <button type="button" class="idle-link" onclick={handleReceiveClick}
-      >Or do you want to <span class="idle-link-text">receive a clip</span>?</button
-    >
+    <button aria-label="not found" type="button" class="idle-link" onclick={handleReceiveClick}>&nbsp;</button>
   {/if}
 </div>
 
 {#if mode !== 'send'}
-  <ViewClipsLink />
+<div class="card card-small" role="presentation" onclick={handleReceiveClick}>
+  <p class="card-title card-title-small">
+     Or receiving a clip?
+  </p>
+</div>
+
+
 {/if}
 
 <style>
@@ -159,6 +153,16 @@
     cursor: pointer;
     transition: all 0.2s ease;
   }
+
+  .card-small {
+     width: 15rem;
+     margin: var(--space-xl);
+  }
+
+  .card-title-small {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+   }
 
   .card-header {
     padding-top: 0;

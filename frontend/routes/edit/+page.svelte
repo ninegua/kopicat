@@ -12,6 +12,7 @@
 
   let error = $state<string | null>(null);
   let loading = $state(false);
+  let sendMode = $state(false);
 
   function validateCreateText(text: string): string | null {
     if (!text.trim()) {
@@ -26,6 +27,10 @@
 
     const url = new URL(window.location.href);
     const editClipId = url.searchParams.get('edit') || null;
+    const isSend = url.searchParams.get('send');
+    if (isSend) {
+      sendMode = true;
+    }
     if (editClipId) {
       const clip = getLocalClip(editClipId);
       if (clip) {
@@ -94,7 +99,6 @@
     if (save_local) {
       addLocalClip(newClip);
     }
-    modalState.set({ showModal: 'share', shareUrl });
 
     clipState.update((s) => ({
       ...s,
@@ -104,7 +108,17 @@
     }));
     loading = false;
 
-    goto(`/list?clip=${clipId}`);
+    if (sendMode) {
+      modalState.set({
+        showModal: 'success',
+        shareUrl: null,
+        successMessage: 'Clip has been sent. Ask the receiver to check.',
+      });
+      goto('/list');
+    } else {
+      modalState.set({ showModal: 'share', shareUrl, successMessage: null });
+      goto(`/list?clip=${clipId}`);
+    }
   }
 </script>
 

@@ -7,15 +7,11 @@
   import Footer from '$lib/components/Footer.svelte';
 
   function handleReset() {
-    modalState.set({ showModal: null, shareUrl: null });
+    modalState.set({ showModal: null, shareUrl: null, successMessage: null });
     clipState.update((s) => ({
       ...s,
       prefillText: null,
     }));
-  }
-
-  function handleShowModal(type: 'receive', url: string) {
-    modalState.set({ showModal: type, shareUrl: url });
   }
 
   function initFromUrl() {
@@ -72,7 +68,7 @@
 <Header onReset={handleReset} />
 
 <main class="app-main">
-  <IdleView onShowModal={handleShowModal} />
+  <IdleView />
 </main>
 
 <Footer />

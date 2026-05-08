@@ -4,10 +4,11 @@
   import Header from '$lib/components/Header.svelte';
   import GridView from '$lib/components/GridView.svelte';
   import ShareCard from '$lib/components/ShareCard.svelte';
+  import SuccessCard from '$lib/components/SuccessCard.svelte';
   import Footer from '$lib/components/Footer.svelte';
 
   function handleDismiss() {
-    modalState.set({ showModal: null, shareUrl: null });
+    modalState.set({ showModal: null, shareUrl: null, successMessage: null });
     clipState.update((s) => ({
       ...s,
       prefillText: null,
@@ -25,6 +26,12 @@
 <main class="app-main">
   {#if $modalState.showModal === 'share' && $modalState.shareUrl}
     <ShareCard url={$modalState.shareUrl} onDismiss={handleDismiss} />
+  {/if}
+  {#if $modalState.showModal === 'success'}
+    <SuccessCard
+      onDismiss={() => modalState.set({ showModal: null, shareUrl: null, successMessage: null })}
+      onDone={handleDismiss}
+    />
   {/if}
   <GridView />
 </main>

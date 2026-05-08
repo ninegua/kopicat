@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/svelte';
 import { tick } from 'svelte';
-import { clipState, modalState } from '$lib/api/store';
+import { clipState } from '$lib/api/store';
 import { get } from 'svelte/store';
 import { encrypt } from '$lib/crypto';
 import { generateClipId } from '$lib/words';
@@ -378,7 +378,7 @@ describe('pollReceivingClip — decryption failure', () => {
     });
   });
 
-  it('shows "Try send again" button after decryption failure in expanded view', async () => {
+  it('shows "Try again" button after decryption failure in expanded view', async () => {
     const clipId = generateClipId();
     const correctPassword = 'correctRetryBtn';
     const wrongPassword = 'recvRetryBtn';
@@ -403,7 +403,7 @@ describe('pollReceivingClip — decryption failure', () => {
     await tick();
 
     await waitFor(() => {
-      expect(screen.getByText(/try send again/i)).toBeInTheDocument();
+      expect(screen.getByText(/try again/i)).toBeInTheDocument();
     });
   });
 });
@@ -516,7 +516,7 @@ describe('pollReceivingClip — try again flow', () => {
     cleanup();
   });
 
-  it('generates a new receiving clip when user clicks "try send again"', async () => {
+  it('generates a new receiving clip when user clicks "try again"', async () => {
     const clipId = generateClipId();
     const correctPassword = 'correctTryAgain';
     const wrongPassword = 'recvTryAgain';
@@ -556,13 +556,13 @@ describe('pollReceivingClip — try again flow', () => {
 
     // Wait for the try-again button to appear
     await waitFor(() => {
-      expect(screen.getByText(/try send again/i)).toBeInTheDocument();
+      expect(screen.getByText(/try again/i)).toBeInTheDocument();
     });
 
     const oldClipId = clipId;
 
-    // Click "try send again" using native click
-    const tryAgainBtn = screen.getByText(/try send again/i);
+    // Click "try again" using native click
+    const tryAgainBtn = screen.getByText(/try again/i);
     tryAgainBtn.click();
 
     await tick();
@@ -616,10 +616,10 @@ describe('pollReceivingClip — try again flow', () => {
     await tick();
 
     await waitFor(() => {
-      expect(screen.getByText(/try send again/i)).toBeInTheDocument();
+      expect(screen.getByText(/try again/i)).toBeInTheDocument();
     });
 
-    const btn2 = screen.getByText(/try send again/i);
+    const btn2 = screen.getByText(/try again/i);
     btn2.click();
     await tick();
 
@@ -634,7 +634,7 @@ describe('pollReceivingClip — try again flow', () => {
     expect(newPw).not.toBe(oldPw);
   });
 
-  it('navigates to /list after clicking "try send again"', async () => {
+  it('navigates to /list after clicking "try again"', async () => {
     const clipId = generateClipId();
     const correctPassword = 'correctNav';
     const wrongPassword = 'recvNav';
@@ -667,64 +667,16 @@ describe('pollReceivingClip — try again flow', () => {
     await tick();
 
     await waitFor(() => {
-      expect(screen.getByText(/try send again/i)).toBeInTheDocument();
+      expect(screen.getByText(/try again/i)).toBeInTheDocument();
     });
 
-    const navBtn = screen.getByText(/try send again/i);
+    const navBtn = screen.getByText(/try again/i);
     navBtn.click();
     await tick();
 
     // Navigation should have been called
     await waitFor(() => {
       expect(goto).toHaveBeenCalledWith('/list');
-    });
-  });
-
-  it('shows receive modal after "try send again"', async () => {
-    const clipId = generateClipId();
-    const correctPassword = 'correctModal';
-    const wrongPassword = 'recvModal';
-    const decryptedText = 'Modal content';
-    const encryptedBlob = await encrypt(decryptedText, correctPassword);
-
-    addEncryptedClipToStore(clipId, encryptedBlob);
-
-    newReceivingClip('http://localhost');
-    const url = `http://localhost/send?${clipId}#${wrongPassword}`;
-    localStorage.setItem(
-      'copycat_clips',
-      JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
-    );
-
-    render(GridView);
-
-    await tick();
-
-    await waitFor(() => {
-      const updatedClip = getLocalClips().find((c) => c.id === clipId);
-      expect(updatedClip).toBeDefined();
-      expect(updatedClip!.receiving).toBe(true);
-      expect(updatedClip!.text).not.toBe(url);
-    });
-
-    const clipBox = screen.getByText(/Failed to receive/).closest('.clip-box');
-    await fireEvent.click(clipBox!);
-
-    await tick();
-
-    await waitFor(() => {
-      expect(screen.getByText(/try send again/i)).toBeInTheDocument();
-    });
-
-    const modalBtn = screen.getByText(/try send again/i);
-    modalBtn.click();
-    await tick();
-
-    // Modal state should be set
-    await waitFor(() => {
-      const modal = get(modalState);
-      expect(modal.showModal).toBe('receive');
-      expect(modal.shareUrl).not.toBeNull();
     });
   });
 });

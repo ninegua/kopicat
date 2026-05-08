@@ -60,7 +60,7 @@ export function getLocalClip(id: string): LocalClip | undefined {
   return readClips().find((c) => c.id === id);
 }
 
-export function newReceivingClip(origin: string): LocalClip {
+export function newReceivingClip(origin: string, replacing : string | null = null): LocalClip {
   const clips = readClips();
   while (true) {
     const id = generateClipId();
@@ -68,7 +68,12 @@ export function newReceivingClip(origin: string): LocalClip {
     const url = `${origin}/send?${id}#${pw}`;
     if (clips.findIndex((c) => c.id === id) === -1) {
       let clip = { id, text: url, saved_at: Date.now(), receiving: true };
-      clips.push(clip);
+      let i = replacing ? clips.findIndex((x) => x.id === replacing) : -1;
+      if (i >= 0) {
+        clips[i] = clip;
+      } else {
+         clips.push(clip);
+      }
       writeClips(clips);
       return clip;
     }

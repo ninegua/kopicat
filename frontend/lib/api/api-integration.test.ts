@@ -133,7 +133,7 @@ async function simulateCreateClip(
     clipId,
     decryptedText: text,
   });
-  modalState.set({ showModal: 'share', shareUrl });
+  modalState.set({ showModal: 'share', shareUrl, successMessage: null });
 
   return { success: true, clipId, shareUrl };
 }

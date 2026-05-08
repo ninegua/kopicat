@@ -2,11 +2,12 @@ import { writable } from 'svelte/store';
 
 export type CreateMode = 'share' | 'receive';
 
-export type ModalType = 'share' | 'receive' | null;
+export type ModalType = 'share' | 'success' | null;
 
 export interface ModalState {
   showModal: ModalType;
   shareUrl: string | null;
+  successMessage: string | null;
 }
 
 export interface LocalClip {
@@ -26,6 +27,7 @@ export interface ClipState {
 const modalInitial: ModalState = {
   showModal: null,
   shareUrl: null,
+  successMessage: null,
 };
 
 export const modalState = writable<ModalState>(modalInitial);
