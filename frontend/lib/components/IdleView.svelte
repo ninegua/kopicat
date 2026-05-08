@@ -89,7 +89,7 @@
         </svg>
       </div>
       <p class="card-title">
-        Sending a clip{#if mode == 'send'}&nbsp;to{:else}?{/if}
+        Send{#if mode == 'send'}&nbsp;to{:else}{/if}
       </p>
       <p class="target-clip">{targetClip}&nbsp;</p>
     </div>
@@ -129,18 +129,16 @@
       >Or do you want to <span class="idle-link-text">choose from saved clips</span>?</button
     >
   {:else}
-    <button aria-label="not found" type="button" class="idle-link" onclick={handleReceiveClick}>&nbsp;</button>
+    <button aria-label="not found" type="button" class="idle-link" onclick={handleReceiveClick}
+      >&nbsp;</button
+    >
   {/if}
 </div>
 
 {#if mode !== 'send'}
-<div class="card card-small" role="presentation" onclick={handleReceiveClick}>
-  <p class="card-title card-title-small">
-     Or receiving a clip?
-  </p>
-</div>
-
-
+  <div class="card card-small" role="presentation" onclick={handleReceiveClick}>
+    <p class="card-title card-title-small">Or receive?</p>
+  </div>
 {/if}
 
 <style>
@@ -155,14 +153,14 @@
   }
 
   .card-small {
-     width: 15rem;
-     margin: var(--space-xl);
+    width: 15rem;
+    margin: var(--space-lg);
   }
 
   .card-title-small {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-   }
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
 
   .card-header {
     padding-top: 0;

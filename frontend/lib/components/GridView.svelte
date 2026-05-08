@@ -487,7 +487,7 @@
                       {#if matchBaseUrl(clip.text)}
                         <span class="qr-header"
                           >Ask sender to scan<br /><small style="color: var(--text-muted)"
-                            >or visit link (click to copy)</small
+                            >or visit link</small
                           ></span
                         >
                         <button
@@ -934,7 +934,7 @@
   .qr-url-button {
     flex: 1;
     font-family: var(--font-mono);
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     font-weight: 200;
     color: var(--text-secondary);
     text-align: left;

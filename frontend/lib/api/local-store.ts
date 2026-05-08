@@ -60,7 +60,7 @@ export function getLocalClip(id: string): LocalClip | undefined {
   return readClips().find((c) => c.id === id);
 }
 
-export function newReceivingClip(origin: string, replacing : string | null = null): LocalClip {
+export function newReceivingClip(origin: string, replacing: string | null = null): LocalClip {
   const clips = readClips();
   while (true) {
     const id = generateClipId();
@@ -72,7 +72,7 @@ export function newReceivingClip(origin: string, replacing : string | null = nul
       if (i >= 0) {
         clips[i] = clip;
       } else {
-         clips.push(clip);
+        clips.push(clip);
       }
       writeClips(clips);
       return clip;
