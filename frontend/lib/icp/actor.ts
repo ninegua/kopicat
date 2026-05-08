@@ -3,7 +3,7 @@ import { IDL } from '@icp-sdk/core/candid';
 import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 import { Principal } from '@icp-sdk/core/principal';
 import type { Clip, ClipInput, ClipStats } from './types';
-import { idlFactory } from '$generated/backend-did';
+import type { idlFactory } from '$generated/backend-did';
 
 const DEFAULT_HOST = 'https://icp-api.io';
 const LOCAL_HOST = 'http://localhost:4943';
