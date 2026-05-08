@@ -12,7 +12,8 @@
 
   let targetClip = $derived($clipState.clipId ?? '');
 
-  function handleReceiveClick(e: MouseEvent) {
+  // TODO
+  function handleChooseClick(e: MouseEvent) {
     e.stopPropagation();
     const clip = newReceivingClip(location.origin);
     if (onShowModal) {
@@ -21,12 +22,21 @@
     goto('/list');
   }
 
+  function handleReceiveClick(e: MouseEvent) {
+    e.stopPropagation();
+    const clip = newReceivingClip(location.origin);
+    if (onShowModal) {
+      onShowModal('receive', clip.text);
+    }
+    goto(`/list?clip=${clip.id}`);
+  }
+
   async function handlePaste(text: string) {
     clipState.update((s) => ({
       ...s,
       prefillText: text,
     }));
-    await goto('/edit');
+    handleBoxClick();
   }
 
   async function copyFromClipboard() {
@@ -41,7 +51,11 @@
   }
 
   function handleBoxClick() {
-    goto('/edit');
+    if (targetClip) {
+      goto(`/edit?send=${targetClip}`);
+    } else {
+      goto('/edit');
+    }
   }
 
   function handlePasteEvent(e: ClipboardEvent) {
@@ -85,7 +99,7 @@
         </svg>
       </div>
       <p class="card-title">
-        Sending a copy{#if mode == 'send'}&nbsp;to{:else}?{/if}
+        Sending a clip{#if mode == 'send'}&nbsp;to{:else}?{/if}
       </p>
       <p class="target-clip">{targetClip}&nbsp;</p>
     </div>
@@ -126,7 +140,7 @@
     >
   {:else}
     <button type="button" class="idle-link" onclick={handleReceiveClick}
-      >Or do you want to <span class="idle-link-text">receive a copy</span>?</button
+      >Or do you want to <span class="idle-link-text">receive a clip</span>?</button
     >
   {/if}
 </div>

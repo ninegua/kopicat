@@ -44,7 +44,7 @@
     --accent-active: #9a7018;
     --accent-glow: rgba(255, 193, 7, 0.12);
     --accent-gradient: linear-gradient(135deg, #c59645, #a38660);
-
+    --accent-amber: #f0a040;
     --border-color: #cbb796;
     --border-focus: #c59645;
 

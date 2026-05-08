@@ -93,7 +93,7 @@
   });
 
   function receivingStatus(clip: LocalClip): string {
-    return matchBaseUrl(clip.text) ? 'Not yet received...' : 'Failed to receive';
+    return matchBaseUrl(clip.text) ? 'Yet to receive' : 'Failed to receive';
   }
 
   let pollingTimer: ReturnType<typeof setTimeout> | null = null;
@@ -348,7 +348,8 @@
               <div class="clip-box-content">
                 {#if clip.receiving}
                   <div class="clip-box-header">
-                    <span class="clip-time clip-time--receiving">{receivingStatus(clip)}</span>
+                    <div class="clip-time clip-time--receiving">{receivingStatus(clip)}
+                    <span class="clip-id">({clip.id})</span></div>
                     <div style="display: flex; align-items: center; gap: var(--space-md);">
                       <button
                         class="footer-icon-btn footer-icon-btn--delete"
@@ -394,6 +395,7 @@
                             height="20"
                             viewBox="0 0 24 24"
                             fill="none"
+                            style="color: var(--success)"
                             stroke="currentColor"
                             stroke-width="2.5"
                             stroke-linecap="round"
@@ -460,18 +462,27 @@
                     </div>
                   </div>
                   <div class="qr-view">
-                    {#if matchBaseUrl(clip.text)}
-                      <canvas id="qr-{clip.id}" class="qr-canvas"></canvas>
-                    {/if}
-                    <div style="display: flex; flex-direction: column; align-items: center;">
+                    <div style="display: flex; flex-direction: column; gap: var(--space-sm); align-items: center;">
                       {#if matchBaseUrl(clip.text)}
-                        <span class="qr-header">Scan to send</span>
-                        <span class="qr-button">{clip.text}</span>
+                        <span class="qr-header">Ask sender to scan<br><small style="color: var(--text-muted)">or visit link <small><tiny>(click to copy)</tiny></span>
+                        <button
+                          type="button"
+                          class="btn-primary qr-url-button"
+                          class:btn-primary--copied={copiedId == clip.id}
+                          onclick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText(clip.text);
+                            copiedId = clip.id;
+                            setTimeout(() => {
+                              copiedId = null;
+                            }, 1500);
+                          }}
+                        >{clip.text}</button>
                       {:else}
                         <span class="error-banner qr-header">{clip.text}</span>
                         <button
                           type="button"
-                          class="btn-primary qr-button"
+                          class="btn-primary qr-url-button"
                           onclick={(e) => {
                             e.stopPropagation();
                             handleDelete(clip);
@@ -480,6 +491,9 @@
                         >
                       {/if}
                     </div>
+                    {#if matchBaseUrl(clip.text)}
+                      <canvas id="qr-{clip.id}" class="qr-canvas"></canvas>
+                    {/if}
                   </div>
                 {:else}
                   <div class="clip-box-header">
@@ -752,7 +766,7 @@
   }
 
   .unsaved-count {
-    color: #f0a040;
+    color: --var(--accent-amber);
   }
 
   .empty-state {
@@ -802,6 +816,7 @@
   .clip-box-focused {
     grid-column: span 2;
     grid-row: span 2;
+    cursor: default;
   }
 
   .clip-box-maximized {
@@ -855,8 +870,13 @@
   }
 
   .clip-time--receiving {
-    color: var(--accent);
+    color: var(--accent-amber);
     font-weight: 600;
+  }
+
+  .clip-id {
+    font-weight: 400;
+    color: var(--success);
   }
 
   .clip-save {
@@ -879,25 +899,21 @@
   .qr-canvas {
     flex: 1;
     border-radius: var(--radius-md);
-    background: var(--bg-card-hover);
   }
 
   .qr-header {
     flex: 1;
     text-align: center;
-    padding-bottom: var(--space-md);
-    background: none;
-    border: 0;
   }
 
-  .qr-button {
+  .qr-url-button {
     flex: 1;
     font-family: var(--font-mono);
-    font-size: 0.7rem;
+    font-size: 0.8rem;
+    font-weight: 200;
     color: var(--text-secondary);
-    word-break: break-all;
-    padding: var(--space-md);
-    border-radius: var(--radius-md);
+    text-align: left; 
+    padding: var(--space-sm);
     background: var(--bg-card-hover);
   }
 

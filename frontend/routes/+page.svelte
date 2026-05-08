@@ -72,7 +72,7 @@
 <Header onReset={handleReset} />
 
 <main class="app-main">
-  <IdleView onShowModal={handleShowModal} mode="receive" />
+  <IdleView onShowModal={handleShowModal} />
 </main>
 
 <Footer />

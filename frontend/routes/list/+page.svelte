@@ -4,7 +4,6 @@
   import Header from '$lib/components/Header.svelte';
   import GridView from '$lib/components/GridView.svelte';
   import ShareCard from '$lib/components/ShareCard.svelte';
-  import ReceiveCard from '$lib/components/ReceiveCard.svelte';
   import Footer from '$lib/components/Footer.svelte';
 
   function handleDismiss() {
@@ -27,8 +26,7 @@
   {#if $modalState.showModal === 'share' && $modalState.shareUrl}
     <ShareCard url={$modalState.shareUrl} onDismiss={handleDismiss} />
   {/if}
-  {#if $modalState.showModal === 'receive' && $modalState.shareUrl}
-    <ReceiveCard url={$modalState.shareUrl} onDismiss={handleDismiss} />
+  {#if $modalState.showModal === 'receive'}
   {/if}
   <GridView />
 </main>

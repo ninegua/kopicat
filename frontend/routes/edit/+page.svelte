@@ -25,7 +25,7 @@
     let prefillText: string | null = $clipState.prefillText;
 
     const url = new URL(window.location.href);
-    const editClipId = url.searchParams.get('clip') || null;
+    const editClipId = url.searchParams.get('edit') || null;
     if (editClipId) {
       const clip = getLocalClip(editClipId);
       if (clip) {
@@ -56,7 +56,8 @@
     loading = true;
     const encryptedBlob = await encrypt(text, pw);
 
-    const clipId = $clipState.clipId ?? generateClipId();
+    const url = new URL(window.location.href);
+    const clipId = url.searchParams.get('send') ?? generateClipId();
     const expires_after = ttl === 0 ? undefined : ttl;
 
     const result = await createClip({
@@ -103,7 +104,7 @@
     }));
     loading = false;
 
-    goto('/list');
+    goto(`/list?clip=${clipId}`);
   }
 </script>
 
