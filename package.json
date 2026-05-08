@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.6",
+    "@icp-sdk/core": "^5.4.0",
     "qrcode": "^1.5.4",
     "vite-plugin-pwa": "^1.2.0",
     "workbox-core": "^7.4.0",

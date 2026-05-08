@@ -1,4 +1,5 @@
 import adapter from '@sveltejs/adapter-static';
+import path from 'path';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -8,6 +9,9 @@ const config = {
 			assets: 'dist',
 			fallback: 'index.html',
 		}),
+		alias: {
+			'$generated': path.resolve('./build'),
+		},
 		paths: {
 			base: '',
 		},

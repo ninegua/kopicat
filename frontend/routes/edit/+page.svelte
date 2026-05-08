@@ -74,14 +74,7 @@
 
     if ('error' in result) {
       let msg = result.error;
-      if (result.status) {
-        if (result.status === 403) msg = result.error;
-        else if (result.status === 400) msg = 'Invalid request. Please try again.';
-        else if (result.status === 404) msg = 'Clip endpoint not found.';
-        else if (result.status === 429) msg = 'Too many requests. Please wait a moment.';
-        else if (result.status >= 500) msg = 'Server error. Please try again later.';
-        else msg = `Request failed (${result.status}). Please try again.`;
-      } else {
+      if (msg.toLowerCase().includes('network')) {
         msg = 'Network Error. Please check your connection and try again.';
       }
       loading = false;

@@ -13,7 +13,7 @@ import {
 } from '$lib/api/local-store';
 import type { Clip } from '$lib/api/client';
 import { goto } from '$app/navigation';
-import { clipStore } from './msw-handlers';
+import { clipStore } from './setup';
 
 import GridView from '../lib/components/GridView.svelte';
 

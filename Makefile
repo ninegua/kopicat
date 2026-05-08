@@ -1,13 +1,14 @@
-NAME=copycat
+NAME=backend
 VERSION?=$(shell git rev-parse --abbrev-ref HEAD)
 BACKEND_MAIN_SRC=backend/main.mo
 BACKEND_SRC=$(wildcard backend/*.mo)
 MOC_VERSION=$(shell grep compiler vessel.dhall|cut -d\" -f2)
 MOC=.vessel/.bin/$(MOC_VERSION)/moc
+DIDC=didc
 
 default: backend frontend
 
-backend: build/$(NAME).wasm
+backend: build/$(NAME)-did.mjs
 
 frontend:
 	pnpm run build
@@ -15,6 +16,9 @@ frontend:
 build/$(NAME).wasm build/$(NAME).did &: ${BACKEND_SRC} $(MOC) | .vessel/ build/
 	$(MOC) --public-metadata candid:service --public-metadata candid:args --public-metadata motoko:compiler \
 	    --idl -c -o $@ $$(vessel sources) $(BACKEND_MAIN_SRC)
+
+build/$(NAME)-did.mjs: build/$(NAME).did
+	$(DIDC) bind -t js $< > $@
 
 $(MOC): | .vessel/
 	vessel bin
