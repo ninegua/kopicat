@@ -61,8 +61,8 @@ describe('Clip creation flow', () => {
     render(IdleView, { props: { onPaste: vi.fn() } });
 
     expect(screen.getByRole('button', { name: 'Copy from clipboard' })).toBeInTheDocument();
-    expect(screen.getByText(/Sending a clip\?/i)).toBeInTheDocument();
-    expect(screen.getByText(/ctrl\+v/i)).toBeInTheDocument();
+    expect(screen.getByText(/Send/i)).toBeInTheDocument();
+    expect(screen.getByText(/Ctrl\+V/i)).toBeInTheDocument();
     expect(screen.getByText(/Copy from clipboard/i)).toBeInTheDocument();
   });
 
@@ -192,7 +192,7 @@ describe('Clip viewing flow', () => {
     render(Page2);
 
     await waitFor(() => {
-      expect(screen.getByText(/Sending a clip\?/i)).toBeInTheDocument();
+      expect(screen.getByText(/Send/i)).toBeInTheDocument();
     });
   });
 
