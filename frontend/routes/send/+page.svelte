@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { clipState, stateInitial } from '$lib/api/store';
   import { onMount } from 'svelte';
-  import { clipState } from '$lib/api/store';
   import Header from '$lib/components/Header.svelte';
   import IdleView from '$lib/components/IdleView.svelte';
   import Footer from '$lib/components/Footer.svelte';
@@ -17,40 +17,11 @@
     if (rawQuery && clipIdPattern.test(rawQuery)) {
       sendClipId = rawQuery;
       sendPass = hash || null;
-      clipState.set({
-        clipId: rawQuery,
-        decryptedText: null,
-        prefillText: null,
-        clipPass: sendPass,
-      });
+      clipState.set({ ...stateInitial, clipId: rawQuery, clipPass: sendPass });
     }
   }
-
-  async function handlePaste(text: string) {
-    clipState.update((s) => ({
-      ...s,
-      prefillText: text,
-    }));
-    if (sendClipId) {
-      await goto(`/edit?clip=${sendClipId}`, { replaceState: true });
-    } else {
-      await goto('/edit');
-    }
-  }
-
   onMount(() => {
     initFromUrl();
-
-    function onPaste(event: ClipboardEvent) {
-      const text = event.clipboardData?.getData('text/plain');
-      if (text) {
-        event.preventDefault();
-        handlePaste(text);
-      }
-    }
-
-    window.addEventListener('paste', onPaste);
-    return () => window.removeEventListener('paste', onPaste);
   });
 </script>
 
@@ -61,7 +32,7 @@
 <Header />
 
 <main class="app-main">
-  <IdleView onPaste={handlePaste} cardTitle="Sending a copy to" />
+  <IdleView mode="send" />
 </main>
 
 <Footer />

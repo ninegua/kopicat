@@ -1,18 +1,24 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
-  import { clipState, modalState } from '$lib/api/store';
+  import { clipState, modalState, stateInitial } from '$lib/api/store';
   import { createClip } from '$lib/api/client';
   import { getLocalClips, addLocalClip, updateLocalClip, getLocalClip } from '$lib/api/local-store';
   import { decrypt, encrypt } from '$lib/crypto';
   import { generateClipId } from '$lib/words';
-  import { validateCreateText } from '$lib/api/validate';
   import Header from '$lib/components/Header.svelte';
   import CreateForm from '$lib/components/CreateForm.svelte';
   import Footer from '$lib/components/Footer.svelte';
 
   let error = $state<string | null>(null);
   let loading = $state(false);
+
+  function validateCreateText(text: string): string | null {
+    if (!text.trim()) {
+      return 'Please enter some text to share';
+    }
+    return null;
+  }
 
   function initFromUrl() {
     error = null;
@@ -27,11 +33,8 @@
       }
     }
 
-    clipState.set({
-      clipId: null,
-      decryptedText: null,
-      prefillText: prefillText || null,
-    });
+    // Use update here because clipId may be passed in from clipState.
+    clipState.update((s) => ({ ...s, prefillText: prefillText || null }));
   }
 
   onMount(initFromUrl);
@@ -53,7 +56,7 @@
     loading = true;
     const encryptedBlob = await encrypt(text, pw);
 
-    const clipId = generateClipId();
+    const clipId = $clipState.clipId ?? generateClipId();
     const expires_after = ttl === 0 ? undefined : ttl;
 
     const result = await createClip({

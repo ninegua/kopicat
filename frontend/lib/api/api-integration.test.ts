@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { get } from 'svelte/store';
-import { clipState, modalState } from './store';
+import { clipState, modalState, stateInitial } from './store';
 import { createClip, fetchClip } from './client';
 import { encrypt, decrypt } from '$lib/crypto';
 import { generateClipId } from '$lib/words';
@@ -84,11 +84,7 @@ beforeEach(() => {
   clipStore.clear();
 
   // Reset the client store to initial state
-  clipState.set({
-    clipId: null,
-    decryptedText: null,
-    prefillText: null,
-  });
+  clipState.set({ ...stateInitial });
 
   // Mock fetch
   mockFetch();
@@ -363,11 +359,7 @@ describe('Clip viewing flow', () => {
     expect(get(clipState).decryptedText).toBe(text);
 
     // Step 3: Simulate navigating to the clip URL (reset state first)
-    clipState.set({
-      clipId: null,
-      decryptedText: null,
-      prefillText: null,
-    });
+    clipState.set({ ...stateInitial });
 
     const clip = await simulateFetchClipById(createResult.clipId!);
     expect(clip).not.toBeNull();
@@ -454,11 +446,7 @@ describe('UI component state flow', () => {
   });
 
   it('decrypt form: disables button when no password entered', () => {
-    clipState.set({
-      clipId: 'test',
-      decryptedText: null,
-      prefillText: null,
-    });
+    clipState.set({ ...stateInitial, clipId: 'test' });
 
     // The DecryptForm.svelte button has: disabled={loading || !password}
     // where password is a local state initialized from the password prop
@@ -468,11 +456,7 @@ describe('UI component state flow', () => {
   });
 
   it('decrypt form: enables button when password is provided', () => {
-    clipState.set({
-      clipId: 'test',
-      decryptedText: null,
-      prefillText: null,
-    });
+    clipState.set({ ...stateInitial, clipId: 'test' });
 
     // Password is passed as a prop to DecryptForm, not stored in clipState
     // loading is also a page-local prop, not in clipState

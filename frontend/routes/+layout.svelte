@@ -48,7 +48,7 @@
     --border-color: #cbb796;
     --border-focus: #c59645;
 
-    --success: #22c55e;
+    --success: #22a55e;
     --success-bg: rgba(34, 197, 94, 0.1);
     --warning: #ff495c;
     --warning-bg: rgba(212, 135, 28, 0.1);

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
-  import { clipState, modalState } from '$lib/api/store';
+  import { clipState, modalState, stateInitial } from '$lib/api/store';
   import Header from '$lib/components/Header.svelte';
   import IdleView from '$lib/components/IdleView.svelte';
   import Footer from '$lib/components/Footer.svelte';
@@ -14,14 +14,6 @@
     }));
   }
 
-  async function handlePaste(text: string) {
-    clipState.update((s) => ({
-      ...s,
-      prefillText: text,
-    }));
-    await goto('/edit');
-  }
-
   function handleShowModal(type: 'receive', url: string) {
     modalState.set({ showModal: type, shareUrl: url });
   }
@@ -31,7 +23,7 @@
     const clipIdPattern = /^[a-z]+-[a-z]+-[a-z]+$/i;
     const hash = window.location.hash;
 
-    if (rawQuery && clipIdPattern.test(rawQuery)) {
+    if (window.location.pathname === '/' && rawQuery && clipIdPattern.test(rawQuery)) {
       void goto(`/view?clip=${rawQuery}${hash}`, { replaceState: true });
       return;
     }
@@ -60,26 +52,11 @@
       }
     }
 
-    clipState.set({
-      clipId: null,
-      decryptedText: null,
-      prefillText,
-    });
+    clipState.set({ ...stateInitial, prefillText });
   }
 
   onMount(() => {
     initFromUrl();
-
-    function onPaste(event: ClipboardEvent) {
-      const text = event.clipboardData?.getData('text/plain');
-      if (text) {
-        event.preventDefault();
-        handlePaste(text);
-      }
-    }
-
-    window.addEventListener('paste', onPaste);
-    return () => window.removeEventListener('paste', onPaste);
   });
 </script>
 
@@ -95,7 +72,7 @@
 <Header onReset={handleReset} />
 
 <main class="app-main">
-  <IdleView onPaste={handlePaste} onShowModal={handleShowModal} />
+  <IdleView onShowModal={handleShowModal} mode="receive" />
 </main>
 
 <Footer />

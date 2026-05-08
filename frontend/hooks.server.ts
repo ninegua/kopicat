@@ -10,7 +10,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     // prerendering doesn't support url.search
   }
 
-  if (clipId && clipPattern.test(clipId)) {
+  if (event.url.pathname === '/' && clipId && clipPattern.test(clipId)) {
     // Old URL format - redirect to /view
     return new Response('', {
       status: 302,

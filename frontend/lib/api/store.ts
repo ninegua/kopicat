@@ -20,6 +20,7 @@ export interface ClipState {
   clipId: string | null;
   decryptedText: string | null;
   prefillText: string | null;
+  clipPass: string | null;
 }
 
 const modalInitial: ModalState = {
@@ -29,10 +30,11 @@ const modalInitial: ModalState = {
 
 export const modalState = writable<ModalState>(modalInitial);
 
-const initial: ClipState = {
+export const stateInitial: ClipState = {
   clipId: null,
   decryptedText: null,
   prefillText: null,
+  clipPass: null,
 };
 
-export const clipState = writable<ClipState>(initial);
+export const clipState = writable<ClipState>(stateInitial);

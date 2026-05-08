@@ -1,14 +1,16 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { modalState } from '$lib/api/store';
+  import { clipState, modalState } from '$lib/api/store';
   import ViewClipsLink from '$lib/components/ViewClipsLink.svelte';
   import { newReceivingClip } from '$lib/api/local-store';
+  import { onMount, onDestroy } from 'svelte';
 
   let {
-    onPaste,
     onShowModal,
-  }: { onPaste: (text: string) => void; onShowModal?: (type: 'receive', url: string) => void } =
-    $props();
+    mode,
+  }: { onShowModal?: (type: 'receive', url: string) => void; mode?: 'send' | 'default' } = $props();
+
+  let targetClip = $derived($clipState.clipId ?? '');
 
   function handleReceiveClick(e: MouseEvent) {
     e.stopPropagation();
@@ -19,11 +21,19 @@
     goto('/list');
   }
 
+  async function handlePaste(text: string) {
+    clipState.update((s) => ({
+      ...s,
+      prefillText: text,
+    }));
+    await goto('/edit');
+  }
+
   async function copyFromClipboard() {
     try {
       const text = await navigator.clipboard.readText();
       if (text) {
-        onPaste(text);
+        handlePaste(text);
       }
     } catch {
       // Error is handled by parent component or displayed inline
@@ -34,14 +44,29 @@
     goto('/edit');
   }
 
-  function handleKeyDown(e: KeyboardEvent) {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
-      // Let the window paste event handle this
+  function handlePasteEvent(e: ClipboardEvent) {
+    e.stopPropagation();
+    e.preventDefault();
+    const text = e.clipboardData?.getData('text/plain');
+    if (text) {
+      handlePaste(text);
     }
   }
+
+  onMount(() => {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('paste', handlePasteEvent);
+    }
+  });
+
+  onDestroy(() => {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('paste', handlePasteEvent);
+    }
+  });
 </script>
 
-<div class="card" role="presentation" onclick={handleBoxClick} onkeydown={handleKeyDown}>
+<div class="card" role="presentation" onclick={handleBoxClick}>
   <div class="idle-inner">
     <div class="card-header">
       <div class="idle-icon">
@@ -59,7 +84,10 @@
           <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
         </svg>
       </div>
-      <p class="card-title">Sending a copy?</p>
+      <p class="card-title">
+        Sending a copy{#if mode == 'send'}&nbsp;to{:else}?{/if}
+      </p>
+      <p class="target-clip">{targetClip}&nbsp;</p>
     </div>
     <div class="idle-actions">
       <div class="idle-keyboard">
@@ -92,12 +120,20 @@
       </button>
     </div>
   </div>
-  <button type="button" class="idle-link" onclick={handleReceiveClick}
-    >Or do you want to <span class="idle-link-text">receive a copy</span>?</button
-  >
+  {#if mode == 'send'}
+    <button type="button" class="idle-link" onclick={handleChooseClick}
+      >Or do you want to <span class="idle-link-text">choose from saved clips</span>?</button
+    >
+  {:else}
+    <button type="button" class="idle-link" onclick={handleReceiveClick}
+      >Or do you want to <span class="idle-link-text">receive a copy</span>?</button
+    >
+  {/if}
 </div>
 
-<ViewClipsLink />
+{#if mode !== 'send'}
+  <ViewClipsLink />
+{/if}
 
 <style>
   .card {
@@ -110,8 +146,20 @@
     transition: all 0.2s ease;
   }
 
+  .card-header {
+    padding-top: 0;
+    padding-bottom: var(--space-sm);
+  }
+
+  .target-clip {
+    color: var(--success);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: var(--space-md);
+  }
+
   .idle-inner {
-    padding: var(--space-xl) var(--space-2xl) var(--space-xl) var(--space-2xl);
+    padding: var(--space-lg) var(--space-2xl) var(--space-lg) var(--space-2xl);
     width: 100%;
   }
 
