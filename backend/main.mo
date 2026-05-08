@@ -47,7 +47,7 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
     available_clips: Nat;
   };
 
-  public func get_stats() : async Stats {
+  public shared func get_stats() : async Stats {
     let max_seconds_to_live = switch (init_arg) {
       case (null) MAX_SECONDS_TO_LIVE;
       case (?{ max_seconds_to_live }) max_seconds_to_live;
@@ -59,7 +59,7 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
     { max_seconds_to_live; total_clips_created; available_clips }
   };
 
-  func create_clip(input : Input) : (Result.Result<Text, Text>) {
+  public shared func create_clip(input : Input) : async (Result.Result<Text, Text>) {
     let { id; blob; expires_after; burn_after_read } = input;
     let now = now_secs();
 
@@ -107,7 +107,7 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
     Time.now() / 1_000_000_000
   };
 
-  func get_clip(id: Text) : ?Clip {
+  public shared query func get_clip(id: Text) : async ?Clip {
     switch (Map.get(clips, Text.compare, id)) {
       case (?clip) {
         // Check if expired
@@ -215,7 +215,7 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
                 (400: Nat16, "\"" # "Malformed input" # "\"")
               };
               case (?input) {
-                switch (create_clip(input)) {
+                switch (await create_clip(input)) {
                   case (#err(err)) {
                     (403 : Nat16, "\"" # err # "\"")
                   };
@@ -246,7 +246,7 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
         (400: Nat16, "\"" # "Parameter /api/clip/:id not found" # "\"", #noCache)
       };
       case (?id) {
-        switch (get_clip(id)) {
+        switch (await get_clip(id)) {
           case (null) {
             (404: Nat16, "\"" # "Not found" # "\"", #noCache)
           };
