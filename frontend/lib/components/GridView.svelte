@@ -464,7 +464,7 @@
                   <div class="qr-view">
                     <div style="display: flex; flex-direction: column; gap: var(--space-sm); align-items: center;">
                       {#if matchBaseUrl(clip.text)}
-                        <span class="qr-header">Ask sender to scan<br><small style="color: var(--text-muted)">or visit link <small><tiny>(click to copy)</tiny></span>
+                        <span class="qr-header">Ask sender to scan<br><small style="color: var(--text-muted)">or visit link </small><tiny>(click to copy)</tiny></span>
                         <button
                           type="button"
                           class="btn-primary qr-url-button"

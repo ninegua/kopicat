@@ -26,8 +26,6 @@
   {#if $modalState.showModal === 'share' && $modalState.shareUrl}
     <ShareCard url={$modalState.shareUrl} onDismiss={handleDismiss} />
   {/if}
-  {#if $modalState.showModal === 'receive'}
-  {/if}
   <GridView />
 </main>
 
