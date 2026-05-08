@@ -485,7 +485,7 @@
                   <div class="clip-box-header">
                     {#if isModified(clip)}
                       <div style="display: flex; align-items: center; gap: var(--space-xs);">
-                        <span class="clip-save">Save?</span>
+                        <span class="clip-save">Save changes?</span>
                         <button
                           class="footer-icon-btn footer-icon-btn--save"
                           aria-label="Save changes"
@@ -526,6 +526,7 @@
                       </div>
                     {:else}
                       <span class="clip-time">Last modified {formatTimeAgo(clip.saved_at)}</span>
+                    {/if}
                       <div style="display: flex; align-items: center; gap: var(--space-md);">
                         <button
                           class="footer-icon-btn footer-icon-btn--delete"
@@ -637,7 +638,6 @@
                           {/if}
                         </button>
                       </div>
-                    {/if}
                   </div>
                   <textarea
                     class="clipped-text"
