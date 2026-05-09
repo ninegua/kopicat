@@ -203,26 +203,13 @@
 
   .action-icon-btn-copied {
     color: var(--accent);
-    animation: icon-bounce 0.4s ease;
+    animation: copy-bounce 0.4s ease;
   }
 
   .action-icon-btn-saved {
     color: var(--success);
-    animation: icon-bounce 0.4s ease;
+    animation: copy-bounce 0.4s ease;
   }
 
-  @keyframes icon-bounce {
-    0% {
-      transform: scale(1);
-    }
-    30% {
-      transform: scale(1.3);
-    }
-    60% {
-      transform: scale(0.9);
-    }
-    100% {
-      transform: scale(1);
-    }
-  }
+
 </style>

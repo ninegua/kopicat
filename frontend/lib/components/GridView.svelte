@@ -758,7 +758,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 1000;
+    z-index: var(--z-modal);
     display: flex;
     flex-direction: column;
     background: var(--bg-primary);
@@ -1012,7 +1012,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-xs);
-    z-index: 100;
+    z-index: var(--z-dropdown);
     width: 300px;
     font-size: 0.8rem;
   }

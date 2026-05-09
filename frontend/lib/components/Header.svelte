@@ -72,7 +72,7 @@
   .header {
     position: sticky;
     top: 0;
-    z-index: 50;
+    z-index: var(--z-header);
     background: linear-gradient(180deg, rgba(232, 223, 192, 0.85), rgba(244, 236, 208, 0.85));
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -160,7 +160,7 @@
     box-shadow: var(--shadow-dropdown);
     min-width: 200px;
     padding: var(--space-xs) 0;
-    z-index: 100;
+    z-index: var(--z-dropdown);
     animation: menu-fade-in 0.15s ease-out;
   }
 
