@@ -1,4 +1,5 @@
 import Array "mo:core/Array";
+import Blob "mo:core/Blob";
 import Int "mo:core/Int";
 import Map "mo:core/Map";
 import Nat "mo:core/Nat";
@@ -290,9 +291,22 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
     res.json({ status_code = 200; body = JSON.show(json); cache_strategy = #noCache; })
   };
 
+  // This just returns the send.html asset.
+  func handle_send(req : Request, res : ResponseClass) : async Response {
+    let result = server.http_request({ method = req.method; url = "/send.html"; headers = []; body = Blob.empty(); });
+    res.send({
+      status_code = result.status_code;
+      headers = result.headers;
+      body = result.body;
+      streaming_strategy = result.streaming_strategy;
+      cache_strategy = #default;
+    });
+  };
+
   server.get("/api/clip/:id", handle_get);
   server.put("/api/clip/:id", handle_put);
   server.get("/api/stats", handle_stats);
+  server.get("/send", handle_send);
 
   system func preupgrade() {
     serializedEntries := server.entries();

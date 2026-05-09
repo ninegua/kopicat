@@ -40,10 +40,10 @@
   <meta property="og:site_name" content="KopiCat" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="KopiCat - Send a copy" />
+  <meta name="twitter:title" content="KopiCat - Send a clip" />
   <meta
     name="twitter:description"
-    content="clipboard sharing via simple links."
+    content="Clipboard sharing via simple links."
   />
   <meta name="twitter:image" content="https://kopicat.cc/kopicat-192x192.png" />
 </svelte:head>

@@ -99,6 +99,7 @@ mixin(creator: Principal) {
       caller;
       args;
     });
+/*
     // Debug.print("commit_batch " # debug_show(args.batch_id));
     for (arg in args.operations.vals()) {
       // Debug.print("  :" # debug_show(arg));
@@ -120,6 +121,7 @@ mixin(creator: Principal) {
         let _ = await server.http_request_update(request);
       };
     };
+*/
   };
 
   public shared ({ caller }) func create_asset(arg : AssetsTypes.CreateAssetArguments) : async () {

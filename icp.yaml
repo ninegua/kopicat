@@ -5,7 +5,7 @@ canisters:
         - type: script
           commands:
             - make backend
-            - cp build/copycat.wasm "$ICP_WASM_OUTPUT_PATH"
+            - cp build/backend.wasm "$ICP_WASM_OUTPUT_PATH"
             - sed -i "s/VITE_CANISTER_ID=.*$/VITE_CANISTER_ID=$(icp canister status backend -i)/" .env.development
             - sed -i "s/VITE_CANISTER_ID=.*$/VITE_CANISTER_ID=$(icp canister status backend -i -e ic)/" .env.production
     sync:

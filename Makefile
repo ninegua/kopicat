@@ -8,7 +8,7 @@ DIDC=didc
 
 default: backend frontend
 
-backend: build/$(NAME)-did.ts build/$(NAME)-did.mjs
+backend: build/$(NAME).wasm build/$(NAME)-did.ts build/$(NAME)-did.mjs
 
 frontend:
 	pnpm run build
