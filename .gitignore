@@ -5,10 +5,11 @@
 .vessel/
 build/
 dist/
-**/*.swp
+**/*.sw[po]
 node_modules/
 skills-lock.json
 static/kopicat-*.png
 assets/
+.env.development
 .env.local
 .env.production
