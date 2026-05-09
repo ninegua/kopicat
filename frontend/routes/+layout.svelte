@@ -484,4 +484,21 @@
   :global(.color-success) {
     color: var(--success);
   }
+
+  /* --- Modal --- */
+  :global(.modal-backdrop) {
+    position: fixed;
+    inset: 0;
+    background: rgba(21, 13, 8, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-modal);
+    padding: var(--space-lg);
+  }
+
+  :global(.modal-content) {
+    width: 100%;
+    max-width: var(--modal-max-width);
+  }
 </style>

@@ -39,22 +39,6 @@
 </div>
 
 <style>
-  .modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(21, 13, 8, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: var(--space-lg);
-  }
-
-  .modal-content {
-    width: 100%;
-    max-width: 420px;
-  }
-
   .success-icon {
     width: 64px;
     height: 64px;
