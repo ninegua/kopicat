@@ -64,10 +64,10 @@
   />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <meta property="og:title" content="KopiCat - Copy simply. Share securely." />
+  <meta property="og:title" content="KopiCat - Share securely" />
   <meta
     property="og:description"
-    content="Secure clipboard sharing via simple links. End to end encrypted."
+    content="Clipboard sharing via simple links."
   />
   <meta property="og:url" content="https://kopicat.cc" />
   <meta property="og:type" content="website" />
@@ -77,10 +77,10 @@
   <meta property="og:site_name" content="KopiCat" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="KopiCat - Copy simply. Share securely." />
+  <meta name="twitter:title" content="KopiCat - Share securely" />
   <meta
     name="twitter:description"
-    content="Secure clipboard sharing via simple links. End to end encrypted."
+    content="Clipboard sharing via simple links."
   />
   <meta name="twitter:image" content="https://kopicat.cc/kopicat-192x192.png" />
 </svelte:head>

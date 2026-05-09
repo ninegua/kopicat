@@ -30,7 +30,7 @@
   <meta property="og:title" content="KopiCat - Send a clip" />
   <meta
     property="og:description"
-    content="Secure clipboard sharing via simple links. End to end encrypted."
+    content="Clipboard sharing via simple links."
   />
   <meta property="og:url" content="https://kopicat.cc/send" />
   <meta property="og:type" content="website" />
@@ -43,7 +43,7 @@
   <meta name="twitter:title" content="KopiCat - Send a copy" />
   <meta
     name="twitter:description"
-    content="Secure clipboard sharing via simple links. End to end encrypted."
+    content="clipboard sharing via simple links."
   />
   <meta name="twitter:image" content="https://kopicat.cc/kopicat-192x192.png" />
 </svelte:head>

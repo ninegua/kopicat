@@ -7,7 +7,7 @@ const config = {
 		adapter: adapter({
 			pages: 'dist',
 			assets: 'dist',
-			fallback: 'index.html',
+			fallback: undefined,
 		}),
 		alias: {
 			'$generated': path.resolve('build'),
