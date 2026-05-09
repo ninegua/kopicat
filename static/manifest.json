@@ -1,7 +1,7 @@
 {
   "name": "KopiCat",
   "short_name": "KopiCat",
-  "description": "Copy from or to, end-to-end encrypted",
+  "description": "Copy simply. Share securely.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#F4ECD0",

@@ -57,7 +57,7 @@
 </script>
 
 <svelte:head>
-  <title>KopiCat - Copy. Clip. Clip.</title>
+  <title>KopiCat - Copy simply. Share securely.</title>
   <meta
     name="description"
     content="Share encrypted text via simple links. Your data is encrypted client-side before being stored on the Internet Computer."
