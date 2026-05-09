@@ -14,7 +14,7 @@
 
   let editorEl: HTMLElement | undefined = $state();
   let jar: any = $state();
-  let internalUpdate = false;
+  let syncing = false;
 
   function highlight(el: HTMLElement) {
     const code = el.textContent || '';
@@ -29,8 +29,8 @@
         jar = CodeJar(editorEl!, highlight, { tab: '  ' });
         jar.updateCode(value);
         jar.onUpdate((code: string) => {
+          if (syncing) return;
           if (code !== value) {
-            internalUpdate = true;
             value = code;
             oninput?.(code);
           }
@@ -48,13 +48,11 @@
 
   // Sync external value changes into the editor
   $effect(() => {
-    if (jar && !internalUpdate) {
-      const current = jar.toString();
-      if (value !== current) {
-        jar.updateCode(value);
-      }
+    if (jar && value !== jar.toString()) {
+      syncing = true;
+      jar.updateCode(value);
+      syncing = false;
     }
-    internalUpdate = false;
   });
 </script>
 
