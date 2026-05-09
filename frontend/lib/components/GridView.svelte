@@ -66,6 +66,14 @@
     return getClips().filter((c) => clipModified[c.id]).length;
   });
 
+  const displayClips = $derived.by(() => {
+    const visible = getClips();
+    if (maximizedClip) {
+      return visible.filter((c) => c.id === maximizedClip);
+    }
+    return rearrange(visible);
+  });
+
   // Sets editingText when focusClip changes.
   $effect(() => {
     const clip = getClips().find((c) => c.id === focusClip);
@@ -351,7 +359,7 @@
       </div>
     {:else}
       <div class="clips-grid" class:grid-maximized={maximizedClip !== null}>
-        {#each maximizedClip ? getClips().filter((c) => c.id === maximizedClip) : rearrange(getClips()) as clip (clip.id)}
+        {#each displayClips as clip (clip.id)}
           <div
             class="clip-box"
             class:clip-box-focused={focusClip === clip.id}
