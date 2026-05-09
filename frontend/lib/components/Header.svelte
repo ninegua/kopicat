@@ -79,7 +79,7 @@
   }
 
   .header-inner {
-    max-width: 700px;
+    max-width: var(--header-max-width);
     margin: 0 auto;
     padding: var(--space-md);
     display: flex;
@@ -104,8 +104,8 @@
   }
 
   .logo-img {
-    width: 48px;
-    height: 48px;
+    width: 3rem;
+    height: 3rem;
     border-radius: 4px;
   }
 
@@ -117,7 +117,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 4px;
+    gap: var(--space-xs);
     background: none;
     border: none;
     cursor: pointer;
@@ -158,7 +158,7 @@
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-dropdown);
-    min-width: 200px;
+    min-width: 12.5rem;
     padding: var(--space-xs) 0;
     z-index: var(--z-dropdown);
     animation: menu-fade-in 0.15s ease-out;

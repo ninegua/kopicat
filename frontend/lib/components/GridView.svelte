@@ -766,7 +766,7 @@
 
   .grid-container {
     width: 100%;
-    max-width: 600px;
+    max-width: var(--grid-max-width);
     margin: 0 auto;
     transition: max-width 0.3s;
   }
@@ -919,7 +919,7 @@
     font-weight: 600;
     color: var(--accent-amber);
     flex-shrink: 0;
-    padding-right: 4px;
+    padding-right: var(--space-xs);
   }
 
   .qr-view {
@@ -1013,7 +1013,7 @@
     flex-direction: column;
     gap: var(--space-xs);
     z-index: var(--z-dropdown);
-    width: 300px;
+    width: 18.75rem;
     font-size: 0.8rem;
   }
 

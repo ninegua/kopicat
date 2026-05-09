@@ -16,7 +16,7 @@
   }
 
   .footer-inner {
-    max-width: 720px;
+    max-width: var(--footer-max-width);
     margin: 0 auto;
   }
 

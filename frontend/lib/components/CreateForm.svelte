@@ -374,7 +374,7 @@
 
   .ttl-option {
     width: 100%;
-    padding: var(--space-md) var(--space-md) var(--space-md) 16px;
+    padding: var(--space-md);
     background: none;
     border: none;
     color: var(--text-secondary);

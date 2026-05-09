@@ -114,8 +114,8 @@
   }
 
   .lock-icon {
-    width: 32px;
-    height: 32px;
+    width: var(--icon-lg);
+    height: var(--icon-lg);
     stroke: var(--accent);
     margin-bottom: var(--space-sm);
   }

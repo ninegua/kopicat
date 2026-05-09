@@ -40,8 +40,8 @@
 
 <style>
   .success-icon {
-    width: 64px;
-    height: 64px;
+    width: var(--icon-xl);
+    height: var(--icon-xl);
     color: var(--success);
     animation: scaleIn 0.3s ease-out;
   }

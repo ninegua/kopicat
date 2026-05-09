@@ -49,7 +49,7 @@
     text-align: center;
     padding: var(--space-2xl) var(--space-lg);
     width: 100%;
-    max-width: 480px;
+    max-width: var(--content-max-width);
     margin: 2rem auto;
     display: flex;
     flex-direction: column;
@@ -57,8 +57,8 @@
   }
 
   .notfound-icon {
-    width: 64px;
-    height: 64px;
+    width: var(--icon-xl);
+    height: var(--icon-xl);
     margin: 0 auto var(--space-lg);
     display: flex;
     align-items: center;
@@ -69,8 +69,8 @@
 
   .notfound-icon svg {
     stroke: var(--error);
-    width: 32px;
-    height: 32px;
+    width: var(--icon-lg);
+    height: var(--icon-lg);
   }
 
   .notfound-title {
