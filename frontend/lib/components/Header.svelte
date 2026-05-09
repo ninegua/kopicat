@@ -61,7 +61,7 @@
     src: url('/komica-display.woff2') format('woff2');
     font-weight: normal;
     font-style: normal;
-    font-display: block;
+    font-display: swap;
   }
 
   .logo-text {
