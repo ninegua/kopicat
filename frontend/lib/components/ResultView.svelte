@@ -1,6 +1,10 @@
 <script lang="ts">
   import { clipState } from '$lib/api/store';
-  import { goto } from '$app/navigation';
+  import '$lib/styles/highlight.css';
+  import hljs from 'highlight.js/lib/core';
+  import markdown from 'highlight.js/lib/languages/markdown';
+
+  hljs.registerLanguage('markdown', markdown);
 
   let {
     clip,
@@ -20,6 +24,13 @@
 
   let copyFeedback = $state<'text' | null>(null);
   let saveFeedback = $state<boolean>(false);
+  let maximized = $state(false);
+
+  const highlightedText = $derived.by(() => {
+    const text = $clipState.decryptedText;
+    if (!text) return '';
+    return hljs.highlight(text, { language: 'markdown' }).value;
+  });
 
   async function copyText() {
     const text = $clipState.decryptedText;
@@ -43,7 +54,7 @@
   }
 </script>
 
-<div class="card">
+<div class="card" class:card-maximized={maximized}>
   <div class="card-status-header">
     <div class="flex-row gap-sm">
       {#if clip?.burn_after_read}
@@ -122,22 +133,44 @@
           </svg>
         {/if}
       </button>
-      <button class="icon-btn action-icon-btn" onclick={() => goto('/list')} title="Back to clips">
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <polyline points="4 14 10 14 10 20" />
-          <polyline points="20 10 14 10 14 4" />
-          <line x1="14" y1="10" x2="21" y2="3" />
-          <line x1="3" y1="21" x2="10" y2="14" />
-        </svg>
+      <button
+        class="icon-btn action-icon-btn"
+        onclick={() => (maximized = !maximized)}
+        title={maximized ? 'Minimize' : 'Maximize'}
+      >
+        {#if maximized}
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M4 14h6v6" />
+            <path d="M20 10h-6V4" />
+            <path d="M14 10l7-7" />
+            <path d="M3 21l7-7" />
+          </svg>
+        {:else}
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M15 3h6v6" />
+            <path d="M9 21H3v-6" />
+            <path d="M21 3l-7 7" />
+            <path d="M3 21l7-7" />
+          </svg>
+        {/if}
       </button>
     </div>
 
@@ -163,7 +196,7 @@
   </div>
   {#if $clipState.decryptedText}
     <div class="card-textarea-group">
-      <pre class="clipped-text">{$clipState.decryptedText}</pre>
+      <pre class="clipped-text hljs">{@html highlightedText}</pre>
       <span class="char-count">{$clipState.decryptedText.length} characters</span>
     </div>
   {/if}
@@ -209,6 +242,28 @@
   .action-icon-btn-saved {
     color: var(--success);
     animation: copy-bounce 0.4s ease;
+  }
+
+  .card-maximized {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--z-modal);
+    max-width: 100%;
+    border-radius: 0;
+    margin: 0;
+  }
+
+  .card-maximized .card-textarea-group {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .card-maximized .clipped-text {
+    flex: 1;
+    min-height: 0;
   }
 
 
