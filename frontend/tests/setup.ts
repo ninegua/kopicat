@@ -15,6 +15,7 @@ vi.mock('qrcode', () => ({
   toCanvas: vi.fn(
     (_canvas: unknown, _data: string, _opts: unknown, cb?: (err: Error | null) => void) => {
       if (cb) cb(null);
+      return Promise.resolve(_canvas);
     },
   ),
 }));
@@ -139,6 +140,29 @@ window.matchMedia = vi.fn().mockImplementation((query: string) => ({
   removeEventListener: () => {},
   dispatchEvent: () => false,
 }));
+
+// ---------------------------------------------------------------------------
+// Mock HTMLCanvasElement.getContext (not supported by jsdom)
+// ---------------------------------------------------------------------------
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(HTMLCanvasElement.prototype.getContext as any) = function (
+  contextId: string,
+) {
+  if (contextId === '2d') {
+    return {
+      beginPath: () => {},
+      arc: () => {},
+      fill: () => {},
+      save: () => {},
+      clip: () => {},
+      drawImage: () => {},
+      restore: () => {},
+      stroke: () => {},
+    };
+  }
+  return null;
+};
 
 // ---------------------------------------------------------------------------
 // Reset clip store + modal store between tests

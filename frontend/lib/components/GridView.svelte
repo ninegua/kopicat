@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation';
   import type { LocalClip } from '$lib/api/store';
   import { headerClipCount } from '$lib/api/store';
-  import { toCanvas } from 'qrcode';
+  import { renderQR } from '$lib/qr';
   import { flip } from 'svelte/animate';
   import { cubicOut } from 'svelte/easing';
   import {
@@ -115,10 +115,7 @@
     if (clip?.receiving && clip.text) {
       const canvas = document.getElementById(`qr-${clip.id}`) as HTMLCanvasElement | null;
       if (canvas) {
-        toCanvas(canvas, clip.text, {
-          width: 150,
-          color: { dark: '#150D08', light: '#F7EFD2' },
-        });
+        renderQR(canvas, clip.text);
       }
     }
   });
@@ -955,6 +952,9 @@
   .qr-canvas {
     flex: 1;
     border-radius: var(--radius-md);
+    max-width: 150px;
+    max-height: 150px;
+    object-fit: contain;
   }
 
   .qr-header {

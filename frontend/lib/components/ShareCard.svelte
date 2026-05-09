@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
-  import { toCanvas } from 'qrcode';
+  import { renderQR } from '$lib/qr';
 
   let { url, onDismiss }: { url: string; onDismiss: () => void } = $props();
 
@@ -9,18 +9,7 @@
       tick().then(() => {
         const canvas = document.getElementById('qr-canvas') as HTMLCanvasElement | null;
         if (canvas && url) {
-          toCanvas(
-            canvas,
-            url,
-            {
-              width: 200,
-              margin: 1,
-              color: { dark: '#150D08', light: '#F7EFD2' },
-            },
-            (err: Error | null | undefined) => {
-              if (err) console.error('QR generation failed:', err);
-            },
-          );
+          renderQR(canvas, url, { width: 200, margin: 1 });
         }
       });
     });
