@@ -188,10 +188,13 @@
     return 'just now';
   }
 
-  function escapeHtml(str: string) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
+  function escapeHtml(str: string): string {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   function truncate(text: string, count: number): string {
