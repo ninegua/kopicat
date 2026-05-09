@@ -99,6 +99,7 @@
     const now = Date.now();
     const newClip = { id: clipId, text, saved_at: now };
     addLocalClip(newClip);
+    window.dispatchEvent(new StorageEvent('storage', { key: 'copycat_clips' }));
   }
 
   let fetchedClip: Clip | null = $state(null);

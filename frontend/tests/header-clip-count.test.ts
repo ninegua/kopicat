@@ -97,6 +97,19 @@ describe('Header clip count', () => {
     expect(screen.getByText('2 saved clips')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /saved clips/i })).not.toBeInTheDocument();
   });
+
+  it('updates count reactively on storage event from another tab', async () => {
+    addLocalClip({ id: 'a', text: 'test', saved_at: Date.now() });
+    render(Header, { props: { linkMode: 'link' } });
+    await tick();
+    expect(screen.getByText('1 saved clip')).toBeInTheDocument();
+
+    // Simulate adding a clip in another tab (or /view page) via storage event
+    addLocalClip({ id: 'b', text: 'test2', saved_at: Date.now() });
+    window.dispatchEvent(new StorageEvent('storage', { key: 'copycat_clips' }));
+    await tick();
+    expect(screen.getByText('2 saved clips')).toBeInTheDocument();
+  });
 });
 
 describe('Header add new button', () => {
