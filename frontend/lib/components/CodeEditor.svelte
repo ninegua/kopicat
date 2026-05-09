@@ -25,6 +25,7 @@
   $effect(() => {
     if (editorEl && !jar) {
       import('codejar').then(({ CodeJar }) => {
+        if (!editorEl) return;
         jar = CodeJar(editorEl!, highlight, { tab: '  ' });
         jar.updateCode(value);
         jar.onUpdate((code: string) => {
