@@ -230,3 +230,33 @@ describe('Edit page chooser workflow', () => {
     expect(screen.getByText('Browse saved clips')).toBeInTheDocument();
   });
 });
+
+// ---------------------------------------------------------------------------
+// GridView focusClipId prop
+// ---------------------------------------------------------------------------
+
+describe('GridView focusClipId prop', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('expands the clip matching focusClipId', async () => {
+    const testText = 'Focus me';
+    seedLocalClips([{ id: 'focus-1', text: testText, saved_at: Date.now() }]);
+
+    const { container } = render(GridView, { props: { focusClipId: 'focus-1' } });
+
+    await waitFor(() => {
+      expect(screen.getByText(testText)).toBeInTheDocument();
+    });
+
+    // The expanded (focused) state shows the delete button
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Delete clip' })).toBeInTheDocument();
+    });
+  });
+});

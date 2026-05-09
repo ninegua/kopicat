@@ -1,11 +1,15 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { clipState, modalState } from '$lib/api/store';
+  import { generateClipId } from '$lib/words';
+  import { addLocalClip } from '$lib/api/local-store';
   import Header from '$lib/components/Header.svelte';
   import GridView from '$lib/components/GridView.svelte';
   import ShareCard from '$lib/components/ShareCard.svelte';
   import SuccessCard from '$lib/components/SuccessCard.svelte';
   import Footer from '$lib/components/Footer.svelte';
+
+  let focusClipId = $state<string | null>(null);
 
   function handleDismiss() {
     modalState.set({ showModal: null, shareUrl: null, successMessage: null });
@@ -14,6 +18,13 @@
       prefillText: null,
     }));
   }
+
+  function handleAddNew() {
+    const id = generateClipId();
+    addLocalClip({ id, text: '', saved_at: Date.now() });
+    window.dispatchEvent(new StorageEvent('storage', { key: 'copycat_clips' }));
+    focusClipId = id;
+  }
 </script>
 
 <svelte:head>
@@ -21,7 +32,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </svelte:head>
 
-<Header onReset={() => goto('/')} linkMode="show" />
+<Header onReset={() => goto('/')} linkMode="show" showAddNew onAddNew={handleAddNew} />
 
 <main class="app-main">
   {#if $modalState.showModal === 'share' && $modalState.shareUrl}
@@ -33,7 +44,7 @@
       onDone={handleDismiss}
     />
   {/if}
-  <GridView />
+  <GridView {focusClipId} />
 </main>
 
 <Footer />

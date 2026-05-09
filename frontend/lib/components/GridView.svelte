@@ -17,8 +17,10 @@
 
   let {
     onChoose,
+    focusClipId,
   }: {
     onChoose?: (clip: LocalClip) => void;
+    focusClipId?: string | null;
   } = $props();
 
   let copiedId = $state<string | null>(null);
@@ -65,6 +67,10 @@
   let focusClip = $state<string | null>(null);
 
   $effect(() => {
+    if (focusClipId !== undefined && focusClipId !== null) {
+      focusClip = focusClipId;
+      return;
+    }
     if (onChoose) {
       focusClip = null;
       return;
