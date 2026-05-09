@@ -1,7 +1,7 @@
 import { Actor, HttpAgent } from '@icp-sdk/core/agent';
 import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 import { Principal } from '@icp-sdk/core/principal';
-import type { Clip, ClipInput, ClipStats } from './types';
+import type { Clip, ClipInput } from './types';
 import { idlFactory } from '$generated/backend-did';
 
 const DEFAULT_HOST = 'https://icp-api.io';
@@ -51,7 +51,6 @@ interface CanisterActor {
     burn_after_read: boolean;
   }) => Promise<{ ok?: string; err?: string }>;
   get_clip: (id: string) => Promise<[] | [Clip]>;
-  get_stats: () => Promise<ClipStats>;
 }
 
 let actorPromise: Promise<CanisterActor> | null = null;
@@ -118,20 +117,4 @@ export async function fetchClip(id: string): Promise<Clip | null> {
     console.log(err);
   }
   return null;
-}
-
-export async function getStats(): Promise<ClipStats | null> {
-  try {
-    const actor = await getActor();
-
-    const stats = await actor.get_stats();
-
-    return {
-      max_seconds_to_live: Number(stats.max_seconds_to_live),
-      total_clips_created: Number(stats.total_clips_created),
-      available_clips: Number(stats.available_clips),
-    };
-  } catch {
-    return null;
-  }
 }

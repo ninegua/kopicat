@@ -3,8 +3,6 @@ import { createClip as icpCreateClip, fetchClip as icpFetchClip } from '$lib/icp
 
 export type { Clip, ClipInput } from '$lib/icp/types';
 
-export type CreateResult = { ok: string } | { error: string };
-
 export async function createClip(input: ClipInput): Promise<{ ok: string } | { error: string }> {
   try {
     return await icpCreateClip(input);

@@ -4,7 +4,7 @@
   import { clipState, stateInitial } from '$lib/api/store';
   import type { Clip } from '$lib/api/client';
   import { fetchClip } from '$lib/api/client';
-  import { decrypt, encrypt } from '$lib/crypto';
+  import { decrypt } from '$lib/crypto';
   import { addLocalClip, getLocalClip } from '$lib/api/local-store';
   import Header from '$lib/components/Header.svelte';
   import DecryptForm from '$lib/components/DecryptForm.svelte';
@@ -15,7 +15,6 @@
   import Footer from '$lib/components/Footer.svelte';
 
   let pagePassword = $state('');
-  let shareUrl = $state<string | null>(null);
   let error = $state<string | null>(null);
   let loading = $state(false);
 
@@ -76,7 +75,6 @@
 
     try {
       const text = await decrypt(fetchedClip!.blob, password);
-      shareUrl = `${window.location.origin}/?${$clipState.clipId}#${password}`;
 
       clipState.update((s) => ({
         ...s,

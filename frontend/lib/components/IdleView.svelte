@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation';
   import { clipState } from '$lib/api/store';
   import { newReceivingClip } from '$lib/api/local-store';
-  import ViewClipsLink from '$lib/components/ViewClipsLink.svelte';
+
   import { onMount, onDestroy } from 'svelte';
 
   let { mode }: { mode?: 'send' | 'default' } = $props();

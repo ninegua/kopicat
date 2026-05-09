@@ -1,7 +1,5 @@
 import { writable } from 'svelte/store';
 
-export type CreateMode = 'share' | 'receive';
-
 export type ModalType = 'share' | 'success' | null;
 
 export interface ModalState {

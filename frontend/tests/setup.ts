@@ -87,15 +87,6 @@ vi.mock('$lib/icp/actor', () => {
 
       return clip;
     }),
-
-    getStats: vi.fn(async () => {
-      const count = clipStore.size;
-      return {
-        max_seconds_to_live: 604800,
-        total_clips_created: count,
-        available_clips: count,
-      };
-    }),
   };
 });
 

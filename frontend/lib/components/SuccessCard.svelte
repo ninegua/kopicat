@@ -1,13 +1,8 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
   import { modalState } from '$lib/api/store';
 
   export let onDismiss: () => void;
   export let onDone: () => void;
-
-  function handleClose() {
-    modalState.set({ showModal: null, shareUrl: null, successMessage: null });
-  }
 </script>
 
 <div

@@ -6,17 +6,3 @@ export function goto(url: string | URL): Promise<void> {
   }
   return Promise.resolve();
 }
-
-export function navigate(url: string | URL): Promise<{ discardPage: () => void }> {
-  return Promise.resolve({
-    discardPage: () => {},
-  });
-}
-
-export function invalidate(url: string | URL): Promise<void> {
-  return Promise.resolve();
-}
-
-export function invalidateAll(): Promise<void> {
-  return Promise.resolve();
-}

@@ -4,7 +4,7 @@
   import { clipState, modalState, stateInitial } from '$lib/api/store';
   import { createClip } from '$lib/api/client';
   import { getLocalClips, addLocalClip, updateLocalClip, getLocalClip } from '$lib/api/local-store';
-  import { decrypt, encrypt } from '$lib/crypto';
+  import { encrypt } from '$lib/crypto';
   import { generateClipId } from '$lib/words';
   import Header from '$lib/components/Header.svelte';
   import CreateForm from '$lib/components/CreateForm.svelte';

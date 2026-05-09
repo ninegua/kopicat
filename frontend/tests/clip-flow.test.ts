@@ -6,7 +6,6 @@ import { get } from 'svelte/store';
 import { encrypt } from '$lib/crypto';
 import { generateClipId } from '$lib/words';
 import { getLocalClips, addLocalClip } from '$lib/api/local-store';
-import type { ClipInput } from '$lib/api/client';
 
 import Page from '../routes/+page.svelte';
 
