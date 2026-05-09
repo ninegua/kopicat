@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import type { LocalClip } from '$lib/api/store';
+  import { headerClipCount } from '$lib/api/store';
   import { toCanvas } from 'qrcode';
   import { flip } from 'svelte/animate';
   import { cubicOut } from 'svelte/easing';
@@ -14,7 +15,11 @@
   import { decrypt } from '$lib/crypto';
   import CodeEditor from './CodeEditor.svelte';
 
-  let { onChoose }: { onChoose?: (clip: LocalClip) => void } = $props();
+  let {
+    onChoose,
+  }: {
+    onChoose?: (clip: LocalClip) => void;
+  } = $props();
 
   let copiedId = $state<string | null>(null);
   let maximizedClip = $state<string | null>(null);
@@ -70,6 +75,10 @@
 
   const unsavedCount = $derived.by(() => {
     return getClips().filter((c) => clipModified[c.id]).length;
+  });
+
+  $effect(() => {
+    headerClipCount.set({ total: getClipsLength(), unsaved: unsavedCount });
   });
 
   const displayClips = $derived.by(() => {
@@ -356,16 +365,6 @@
 
 <div class="grid-wrapper" class:grid-maximized={maximizedClip !== null}>
   <div class="grid-container" class:grid-maximized={maximizedClip !== null}>
-    {#if maximizedClip === null}
-      <div class="grid-header">
-        <span class="clip-count">
-          total: {getClipsLength()}
-          {#if unsavedCount > 0}
-            (<span class="unsaved-count">{unsavedCount} unsaved</span>)
-          {/if}
-        </span>
-      </div>
-    {/if}
     {#if getClipsLength() === 0}
       <div class="empty-state">
         <p>No clips yet. Create one to get started.</p>
@@ -513,8 +512,7 @@
                     <div class="flex-col-center gap-sm">
                       {#if matchBaseUrl(clip.text)}
                         <span class="qr-header"
-                          >Ask sender to scan<br /><small class="color-muted"
-                            >or visit link</small
+                          >Ask sender to scan<br /><small class="color-muted">or visit link</small
                           ></span
                         >
                         <button
@@ -793,30 +791,6 @@
     overflow: hidden;
   }
 
-  .grid-wrapper.grid-maximized .grid-header {
-    padding-left: var(--space-md);
-    padding-right: var(--space-md);
-    margin-bottom: 0;
-  }
-
-  .grid-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    padding: 0 var(--space-sm);
-    margin-bottom: var(--space-sm);
-  }
-
-  .clip-count {
-    color: var(--text-muted);
-    font-size: 0.8rem;
-    user-select: none;
-  }
-
-  .unsaved-count {
-    color: --var(--accent-amber);
-  }
-
   .empty-state {
     text-align: center;
     padding: var(--space-3xl) var(--space-md);
@@ -972,8 +946,6 @@
     flex-direction: column;
     min-height: 0;
   }
-
-
 
   .clip-box-header {
     display: flex;

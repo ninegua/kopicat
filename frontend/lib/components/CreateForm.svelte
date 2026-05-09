@@ -2,7 +2,7 @@
   import { computePosition, flip, offset, shift } from '@floating-ui/dom';
   import { generatePassword } from '$lib/crypto';
   import { clipState } from '$lib/api/store';
-  import ViewClipsLink from '$lib/components/ViewClipsLink.svelte';
+  import { getLocalClips } from '$lib/api/local-store';
 
   let {
     onCreate,
@@ -27,6 +27,7 @@
   let saveLocal = $state(false);
   let validationError = $state<string | null>(null);
   const displayError = $derived(validationError ?? serverError ?? null);
+  let hasLocalClips = $derived(getLocalClips().length > 0);
 
   const TTL_OPTIONS = [
     { label: '1 minute', value: 60 },
@@ -244,7 +245,26 @@
   </div>
 </div>
 
-<ViewClipsLink label="Choose from saved clips" onClick={onBrowseClips} />
+{#if hasLocalClips && onBrowseClips}
+  <button type="button" class="browse-clips-btn" onclick={onBrowseClips}>
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <rect x="3" y="3" width="7" height="7" />
+      <rect x="14" y="3" width="7" height="7" />
+      <rect x="14" y="14" width="7" height="7" />
+      <rect x="3" y="14" width="7" height="7" />
+    </svg>
+    Browse saved clips
+  </button>
+{/if}
 
 <div bind:this={ttlPortal} class="ttl-portal" hidden>
   <div class="ttl-options" role="listbox">
@@ -412,5 +432,28 @@
     color: var(--accent);
     font-weight: 600;
     background: var(--accent-bg-subtle);
+  }
+
+  .browse-clips-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: var(--space-sm) var(--space-md);
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-md);
+    transition: color 0.15s;
+  }
+
+  .browse-clips-btn:hover {
+    color: var(--accent);
+  }
+
+  .browse-clips-btn svg {
+    stroke: currentColor;
   }
 </style>

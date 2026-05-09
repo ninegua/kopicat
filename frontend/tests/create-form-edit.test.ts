@@ -315,7 +315,9 @@ describe('CreateForm share mode - error handling', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Network Error. Please check your connection and try again.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Network Error. Please check your connection and try again.'),
+      ).toBeInTheDocument();
     });
   });
 

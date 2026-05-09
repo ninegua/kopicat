@@ -115,7 +115,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </svelte:head>
 
-<Header />
+<Header linkMode="hide" />
 
 <main class="app-main">
   {#if chooserMode}

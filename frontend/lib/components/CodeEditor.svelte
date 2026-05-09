@@ -60,13 +60,11 @@
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <pre
   class="code-editor"
-
   bind:this={editorEl}
   onkeydown={(e) => {
     e.stopPropagation();
     onkeydown?.(e);
-  }}
-></pre>
+  }}></pre>
 
 <style>
   .code-editor {
@@ -87,8 +85,4 @@
     white-space: pre-wrap;
     border-radius: var(--radius-sm);
   }
-
-
-
-
 </style>

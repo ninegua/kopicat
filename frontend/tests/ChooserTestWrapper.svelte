@@ -24,11 +24,11 @@
     }}
   />
 {:else}
-<CreateForm
-  onCreate={() => {}}
-  loading={false}
-  onBrowseClips={() => {
-    chooserMode = true;
-  }}
-/>
+  <CreateForm
+    onCreate={() => {}}
+    loading={false}
+    onBrowseClips={() => {
+      chooserMode = true;
+    }}
+  />
 {/if}

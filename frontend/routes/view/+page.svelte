@@ -11,7 +11,6 @@
   import ResultView from '$lib/components/ResultView.svelte';
   import ClipNotFound from '$lib/components/ClipNotFound.svelte';
   import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
-  import ViewClipsLink from '$lib/components/ViewClipsLink.svelte';
   import Footer from '$lib/components/Footer.svelte';
 
   let pagePassword = $state('');
@@ -134,7 +133,6 @@
       onError={(msg) => (error = msg)}
       onClearError={() => (error = null)}
     />
-    <ViewClipsLink />
   {:else if $clipState.clipId && !fetchedClip && !loading}
     <ClipNotFound />
   {/if}

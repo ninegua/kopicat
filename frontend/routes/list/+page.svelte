@@ -21,7 +21,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </svelte:head>
 
-<Header onReset={() => goto('/')} showMenu />
+<Header onReset={() => goto('/')} linkMode="show" />
 
 <main class="app-main">
   {#if $modalState.showModal === 'share' && $modalState.shareUrl}

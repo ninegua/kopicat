@@ -124,7 +124,7 @@ describe('CreateForm browse saved clips button', () => {
     });
   });
 
-  it('shows "Choose from saved clips" when local clips exist and onBrowseClips is provided', async () => {
+  it('shows "Browse saved clips" when local clips exist and onBrowseClips is provided', async () => {
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: 'browse-1', text: 'Browse me', saved_at: Date.now() }]),
@@ -136,7 +136,7 @@ describe('CreateForm browse saved clips button', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Choose from saved clips')).toBeInTheDocument();
+      expect(screen.getByText('Browse saved clips')).toBeInTheDocument();
     });
   });
 
@@ -146,7 +146,7 @@ describe('CreateForm browse saved clips button', () => {
       props: { onCreate: vi.fn(), loading: false, onBrowseClips },
     });
 
-    expect(screen.queryByText('Choose from saved clips')).not.toBeInTheDocument();
+    expect(screen.queryByText('Browse saved clips')).not.toBeInTheDocument();
   });
 
   it('calls onBrowseClips when the button is clicked', async () => {
@@ -160,7 +160,7 @@ describe('CreateForm browse saved clips button', () => {
       props: { onCreate: vi.fn(), loading: false, onBrowseClips },
     });
 
-    const btn = await screen.findByText('Choose from saved clips');
+    const btn = await screen.findByText('Browse saved clips');
     await fireEvent.click(btn);
 
     expect(onBrowseClips).toHaveBeenCalledOnce();
@@ -203,11 +203,11 @@ describe('Edit page chooser workflow', () => {
 
     // Start in normal (CreateForm) mode — button should be visible
     await waitFor(() => {
-      expect(screen.getByText('Choose from saved clips')).toBeInTheDocument();
+      expect(screen.getByText('Browse saved clips')).toBeInTheDocument();
     });
 
     // Click browse to enter chooser mode
-    await fireEvent.click(screen.getByText('Choose from saved clips'));
+    await fireEvent.click(screen.getByText('Browse saved clips'));
     await tick();
 
     // GridView should now be rendered with chooser mode
@@ -227,6 +227,6 @@ describe('Edit page chooser workflow', () => {
     });
 
     // Ensure the chooser button is still present after returning
-    expect(screen.getByText('Choose from saved clips')).toBeInTheDocument();
+    expect(screen.getByText('Browse saved clips')).toBeInTheDocument();
   });
 });

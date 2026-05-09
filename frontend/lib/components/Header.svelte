@@ -1,14 +1,31 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
+  import { headerClipCount } from '$lib/api/store';
+  import { getLocalClips } from '$lib/api/local-store';
 
-  let { onReset, showMenu = false }: { onReset?: () => void; showMenu?: boolean } = $props();
+  let {
+    onReset,
+    linkMode = 'link',
+  }: {
+    onReset?: () => void;
+    linkMode?: 'link' | 'show' | 'hide';
+  } = $props();
 
-  let open = $state(false);
-
-  function handleNewClip() {
-    goto('/edit');
-    open = false;
+  function clipWord(n: number): string {
+    return n === 1 ? 'clip' : 'clips';
   }
+
+  $effect(() => {
+    function update() {
+      const clips = getLocalClips();
+      headerClipCount.update((c) => ({ ...c, total: clips.length }));
+    }
+    update();
+    function onStorage(e: StorageEvent) {
+      if (e.key === 'copycat_clips') update();
+    }
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  });
 </script>
 
 <header class="header">
@@ -17,40 +34,26 @@
       <img src="/kopicat-logo.png" alt="KopiCat" class="logo-img" />
       <span class="logo-text">KopiCat</span>
     </a>
-    {#if showMenu}
-      <div class="menu-wrapper">
-        <button
-          class="hamburger"
-          aria-label="Menu"
-          aria-expanded={open}
-          aria-haspopup="menu"
-          onclick={() => (open = !open)}
-        >
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-        {#if open}
-          <div class="menu-dropdown" role="menu" tabindex="-1">
-            <button class="menu-item" role="menuitem" onclick={handleNewClip}>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              New clip
-            </button>
-          </div>
-        {/if}
-      </div>
+    {#if linkMode !== 'hide' && $headerClipCount.total > 0}
+      {#if linkMode === 'link'}
+        <a href="/list" class="clip-count clip-count--link">
+          <span>{$headerClipCount.total} saved {clipWord($headerClipCount.total)}</span>
+          {#if $headerClipCount.unsaved > 0}
+            <span class="unsaved-count"
+              >{$headerClipCount.unsaved} unsaved {clipWord($headerClipCount.unsaved)}</span
+            >
+          {/if}
+        </a>
+      {:else}
+        <span class="clip-count">
+          <span>{$headerClipCount.total} saved {clipWord($headerClipCount.total)}</span>
+          {#if $headerClipCount.unsaved > 0}
+            <span class="unsaved-count"
+              >{$headerClipCount.unsaved} unsaved {clipWord($headerClipCount.unsaved)}</span
+            >
+          {/if}
+        </span>
+      {/if}
     {/if}
   </div>
 </header>
@@ -84,7 +87,7 @@
     padding: var(--space-md);
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-end;
     gap: var(--space-md);
   }
 
@@ -109,88 +112,28 @@
     border-radius: 4px;
   }
 
-  .menu-wrapper {
-    position: relative;
-  }
-
-  .hamburger {
+  .clip-count {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: var(--space-xs);
+    align-items: flex-end;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    user-select: none;
+  }
+
+  .clip-count--link {
     background: none;
     border: none;
     cursor: pointer;
-    padding: var(--space-xs);
-    min-width: 40px;
-    min-height: 40px;
-    align-items: center;
+    padding: 0;
+    transition: color 0.15s;
   }
 
-  .hamburger span {
-    display: block;
-    width: 20px;
-    height: 2px;
-    background: var(--text-primary);
-    border-radius: 2px;
-    transition:
-      transform 0.2s,
-      opacity 0.2s;
+  .clip-count--link:hover {
+    color: var(--accent);
   }
 
-  .hamburger[aria-expanded='true'] span:nth-child(1) {
-    transform: translateY(6px) rotate(45deg);
-  }
-
-  .hamburger[aria-expanded='true'] span:nth-child(2) {
-    opacity: 0;
-  }
-
-  .hamburger[aria-expanded='true'] span:nth-child(3) {
-    transform: translateY(-6px) rotate(-45deg);
-  }
-
-  .menu-dropdown {
-    position: absolute;
-    top: calc(100% + var(--space-xs));
-    right: 0;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-dropdown);
-    min-width: 12.5rem;
-    padding: var(--space-xs) 0;
-    z-index: var(--z-dropdown);
-    animation: menu-fade-in 0.15s ease-out;
-  }
-
-  @keyframes menu-fade-in {
-    from {
-      opacity: 0;
-      transform: translateY(-4px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .menu-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    width: 100%;
-    padding: var(--space-sm) var(--space-md);
-    border: none;
-    background: none;
-    font-size: 0.85rem;
-    color: var(--text-primary);
-    cursor: pointer;
-    text-align: left;
-    transition: background 0.1s;
-  }
-
-  .menu-item:hover {
-    background: var(--hover-bg);
+  .unsaved-count {
+    color: var(--accent-amber);
   }
 </style>

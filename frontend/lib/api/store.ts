@@ -38,3 +38,10 @@ export const stateInitial: ClipState = {
 };
 
 export const clipState = writable<ClipState>(stateInitial);
+
+export interface HeaderClipCount {
+  total: number;
+  unsaved: number;
+}
+
+export const headerClipCount = writable<HeaderClipCount>({ total: 0, unsaved: 0 });
