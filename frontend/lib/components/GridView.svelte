@@ -18,9 +18,11 @@
   let {
     onChoose,
     focusClipId,
+    onShare,
   }: {
     onChoose?: (clip: LocalClip) => void;
     focusClipId?: string | null;
+    onShare?: (clip: LocalClip) => void;
   } = $props();
 
   let copiedId = $state<string | null>(null);
@@ -665,6 +667,30 @@
                           </svg>
                         {/if}
                       </button>
+                      {#if onShare}
+                        <button
+                          class="icon-btn footer-icon-btn"
+                          aria-label="Share clip"
+                          onclick={(e) => {
+                            e.stopPropagation();
+                            onShare(clip);
+                          }}
+                        >
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <path d="M22 2L11 13" />
+                            <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+                          </svg>
+                        </button>
+                      {/if}
                       <button
                         class="icon-btn footer-icon-btn"
                         aria-label={maximizedClip === clip.id ? 'Minimize' : 'Maximize'}

@@ -25,6 +25,11 @@
     window.dispatchEvent(new StorageEvent('storage', { key: 'copycat_clips' }));
     focusClipId = id;
   }
+
+  function handleShare(clip: { text: string }) {
+    clipState.update((s) => ({ ...s, prefillText: clip.text }));
+    goto('/edit');
+  }
 </script>
 
 <svelte:head>
@@ -44,7 +49,7 @@
       onDone={handleDismiss}
     />
   {/if}
-  <GridView {focusClipId} />
+  <GridView {focusClipId} onShare={handleShare} />
 </main>
 
 <Footer />
