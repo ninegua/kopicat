@@ -1,9 +1,8 @@
 import { Actor, HttpAgent } from '@icp-sdk/core/agent';
-import { IDL } from '@icp-sdk/core/candid';
 import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 import { Principal } from '@icp-sdk/core/principal';
 import type { Clip, ClipInput, ClipStats } from './types';
-import type { idlFactory } from '$generated/backend-did';
+import { idlFactory } from '$generated/backend-did';
 
 const DEFAULT_HOST = 'https://icp-api.io';
 const LOCAL_HOST = 'http://localhost:4943';
@@ -80,7 +79,7 @@ export async function createClip(input: ClipInput): Promise<{ ok: string } | { e
     const result = await actor.create_clip({
       id: input.id,
       blob: input.blob,
-      expires_after: input.expires_after !== undefined ? BigInt(input.expires_after) : undefined,
+      expires_after: input.expires_after !== undefined ? [BigInt(input.expires_after)] : [],
       burn_after_read: input.burn_after_read,
     });
 

@@ -8,7 +8,7 @@ DIDC=didc
 
 default: backend frontend
 
-backend: build/$(NAME)-did.ts
+backend: build/$(NAME)-did.ts build/$(NAME)-did.mjs
 
 frontend:
 	pnpm run build
@@ -19,6 +19,9 @@ build/$(NAME).wasm build/$(NAME).did &: ${BACKEND_SRC} $(MOC) | .vessel/ build/
 
 build/$(NAME)-did.ts: build/$(NAME).did
 	$(DIDC) bind -t ts $< > $@
+
+build/$(NAME)-did.mjs: build/$(NAME).did
+	$(DIDC) bind -t js $< > $@
 
 $(MOC): | .vessel/
 	vessel bin
