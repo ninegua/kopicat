@@ -34,6 +34,8 @@
   "dependencies": {
     "@floating-ui/dom": "^1.7.6",
     "@icp-sdk/core": "^5.4.0",
+    "codejar": "^4.3.0",
+    "highlight.js": "^11.11.1",
     "qrcode": "^1.5.4",
     "vite-plugin-pwa": "^1.2.0",
     "workbox-core": "^7.4.0",

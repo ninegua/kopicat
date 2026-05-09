@@ -12,6 +12,7 @@
   } from '$lib/api/local-store';
   import { fetchClip } from '$lib/api/client';
   import { decrypt } from '$lib/crypto';
+  import CodeEditor from './CodeEditor.svelte';
 
   let copiedId = $state<string | null>(null);
   let maximizedClip = $state<string | null>(null);
@@ -677,16 +678,14 @@
                       </button>
                     </div>
                   </div>
-                  <textarea
-                    class="clipped-text"
-                    class:clipped-text-modified={isModified(clip)}
+                  <CodeEditor
                     bind:value={editingText}
-                    oninput={(e) => {
-                      clipEdits[clip.id] = (e.target as HTMLTextAreaElement).value;
+                    modified={isModified(clip)}
+                    oninput={(code) => {
+                      clipEdits[clip.id] = code;
                       clipModified[clip.id] = true;
                     }}
-                    onkeydown={(e) => e.stopPropagation()}
-                  ></textarea>
+                  />
                 {/if}
               </div>
             {:else}
@@ -949,27 +948,7 @@
     min-height: 0;
   }
 
-  .clip-box-content .clipped-text {
-    flex: 1;
-    overflow-y: auto;
-    min-height: 0;
-    font-size: 0.8rem;
-    line-height: 1.5;
-    white-space: pre-wrap;
-    word-break: break-word;
-    margin: 0;
-    padding: 0;
-    background: transparent;
-    color: var(--text-primary);
-    resize: none;
-    border: none;
-    outline: none;
-    width: 100%;
-  }
 
-  .clipped-text-modified {
-    background: var(--accent-glow);
-  }
 
   .clip-box-header {
     display: flex;
