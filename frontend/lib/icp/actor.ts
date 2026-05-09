@@ -47,7 +47,7 @@ interface CanisterActor {
   create_clip: (input: {
     id: string;
     blob: string;
-    expires_after?: bigint;
+    expires_after?: bigint | bigint[];
     burn_after_read: boolean;
   }) => Promise<{ ok?: string; err?: string }>;
   get_clip: (id: string) => Promise<[] | [Clip]>;
