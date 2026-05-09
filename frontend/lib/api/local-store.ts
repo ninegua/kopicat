@@ -4,6 +4,9 @@ import { generatePassword } from '$lib/crypto';
 
 const STORAGE_KEY = 'copycat_clips';
 
+let cacheRaw: string | null = null;
+let cache: LocalClip[] | null = null;
+
 function readClips(): LocalClip[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -16,19 +19,31 @@ function readClips(): LocalClip[] {
 
 function writeClips(clips: LocalClip[]) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(clips));
+    const raw = JSON.stringify(clips);
+    localStorage.setItem(STORAGE_KEY, raw);
+    cacheRaw = raw;
+    cache = clips;
   } catch {
     console.error('Failed to save clips to localStorage');
   }
 }
 
+function getCache(): LocalClip[] {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw !== cacheRaw || cache === null) {
+    cacheRaw = raw;
+    cache = raw ? readClips() : [];
+  }
+  return cache;
+}
+
 export function getLocalClips(): LocalClip[] {
   // In reverse order of when they are added to storage
-  return readClips().reverse();
+  return getCache().slice().reverse();
 }
 
 export function addLocalClip(clip: LocalClip): LocalClip[] {
-  const clips = readClips();
+  const clips = getCache();
   const exists = clips.findIndex((c) => c.id === clip.id);
   if (exists !== -1) {
     clips[exists] = { ...clips[exists], ...clip, saved_at: Date.now() };
@@ -36,16 +51,16 @@ export function addLocalClip(clip: LocalClip): LocalClip[] {
     clips.push({ ...clip, saved_at: Date.now() });
   }
   writeClips(clips);
-  return clips.reverse();
+  return clips.slice().reverse();
 }
 
 export function removeLocalClip(id: string): void {
-  const clips = readClips().filter((c) => c.id !== id);
+  const clips = getCache().filter((c) => c.id !== id);
   writeClips(clips);
 }
 
 export function updateLocalClip(id: string, updates: Partial<LocalClip>): LocalClip | null {
-  const clips = readClips();
+  const clips = getCache();
   const index = clips.findIndex((c) => c.id === id);
   if (index !== -1) {
     let clip = { ...clips[index], ...updates, saved_at: Date.now() };
@@ -57,11 +72,11 @@ export function updateLocalClip(id: string, updates: Partial<LocalClip>): LocalC
 }
 
 export function getLocalClip(id: string): LocalClip | undefined {
-  return readClips().find((c) => c.id === id);
+  return getCache().find((c) => c.id === id);
 }
 
 export function newReceivingClip(origin: string, replacing: string | null = null): LocalClip {
-  const clips = readClips();
+  const clips = getCache();
   while (true) {
     const id = generateClipId();
     const pw = generatePassword(8);
@@ -78,4 +93,10 @@ export function newReceivingClip(origin: string, replacing: string | null = null
       return clip;
     }
   }
+}
+
+/** Reset internal cache. For tests only. */
+export function __resetLocalStore(): void {
+  cacheRaw = null;
+  cache = null;
 }

@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 import { clipState, modalState } from '$lib/api/store';
+import { __resetLocalStore } from '$lib/api/local-store';
 import type { Clip } from '$lib/icp/types';
 
 // In-memory "backend" store shared across all requests
@@ -165,6 +166,7 @@ afterEach(() => {
     shareUrl: null,
     successMessage: null,
   });
+  __resetLocalStore();
 });
 
 // Reset mock function calls between tests
