@@ -24,13 +24,6 @@ registerRoute(
   }),
 );
 
-self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
-  if (url.origin !== location.origin) {
-    console.log('[SW] fetch:', event.request.method, event.request.url);
-  }
-});
-
 self.addEventListener('message', (event) => {
   console.log('[SW] message from client:', event.data);
 });
