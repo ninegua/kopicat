@@ -680,7 +680,6 @@
                   </div>
                   <CodeEditor
                     bind:value={editingText}
-                    modified={isModified(clip)}
                     oninput={(code) => {
                       clipEdits[clip.id] = code;
                       clipModified[clip.id] = true;

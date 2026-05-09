@@ -9,10 +9,9 @@
     value: string;
     oninput?: (value: string) => void;
     onkeydown?: (e: KeyboardEvent) => void;
-    modified?: boolean;
   }
 
-  let { value = $bindable(), oninput, onkeydown, modified = false }: Props = $props();
+  let { value = $bindable(), oninput, onkeydown }: Props = $props();
 
   let editorEl: HTMLElement | undefined = $state();
   let jar: ReturnType<typeof CodeJar> | undefined = $state();
@@ -60,7 +59,7 @@
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <pre
   class="code-editor"
-  class:code-editor-modified={modified}
+
   bind:this={editorEl}
   onkeydown={(e) => {
     e.stopPropagation();
@@ -88,9 +87,7 @@
     border-radius: var(--radius-sm);
   }
 
-  .code-editor-modified {
-    background: var(--accent-glow);
-  }
+
 
   /* Custom highlight tokens for warm cream/parchment background */
   .code-editor :global(.hljs) {
