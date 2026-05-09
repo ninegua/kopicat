@@ -7,8 +7,13 @@ const STORAGE_KEY = 'copycat_clips';
 let cacheRaw: string | null = null;
 let cache: LocalClip[] | null = null;
 
+function isBrowser(): boolean {
+  return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+}
+
 function readClips(): LocalClip[] {
   try {
+    if (!isBrowser()) return [];
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     return (JSON.parse(raw) as LocalClip[]).map((c) => ({ ...c, receiving: c.receiving ?? false }));
@@ -18,6 +23,7 @@ function readClips(): LocalClip[] {
 }
 
 function writeClips(clips: LocalClip[]) {
+  if (!isBrowser()) return;
   try {
     const raw = JSON.stringify(clips);
     localStorage.setItem(STORAGE_KEY, raw);
@@ -29,6 +35,10 @@ function writeClips(clips: LocalClip[]) {
 }
 
 function getCache(): LocalClip[] {
+  if (!isBrowser()) {
+    if (cache === null) cache = [];
+    return cache;
+  }
   const raw = localStorage.getItem(STORAGE_KEY);
   if (raw !== cacheRaw || cache === null) {
     cacheRaw = raw;
