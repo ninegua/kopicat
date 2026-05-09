@@ -385,7 +385,7 @@
                       {receivingStatus(clip)}
                       <span class="clip-id">({clip.id})</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: var(--space-md);">
+                    <div class="flex-row gap-md">
                       <button
                         class="footer-icon-btn footer-icon-btn--delete"
                         aria-label="Delete clip"
@@ -430,7 +430,7 @@
                             height="20"
                             viewBox="0 0 24 24"
                             fill="none"
-                            style="color: var(--success)"
+                            class="color-success"
                             stroke="currentColor"
                             stroke-width="2.5"
                             stroke-linecap="round"
@@ -497,12 +497,10 @@
                     </div>
                   </div>
                   <div class="qr-view">
-                    <div
-                      style="display: flex; flex-direction: column; gap: var(--space-sm); align-items: center;"
-                    >
+                    <div class="flex-col-center gap-sm">
                       {#if matchBaseUrl(clip.text)}
                         <span class="qr-header"
-                          >Ask sender to scan<br /><small style="color: var(--text-muted)"
+                          >Ask sender to scan<br /><small class="color-muted"
                             >or visit link</small
                           ></span
                         >
@@ -538,7 +536,7 @@
                 {:else}
                   <div class="clip-box-header">
                     {#if isModified(clip)}
-                      <div style="display: flex; align-items: center; gap: var(--space-xs);">
+                      <div class="flex-row gap-xs">
                         <span class="clip-save">Save changes?</span>
                         <button
                           class="footer-icon-btn footer-icon-btn--save"
@@ -581,7 +579,7 @@
                     {:else}
                       <span class="clip-time">Last modified {formatTimeAgo(clip.saved_at)}</span>
                     {/if}
-                    <div style="display: flex; align-items: center; gap: var(--space-md);">
+                    <div class="flex-row gap-md">
                       <button
                         class="footer-icon-btn footer-icon-btn--delete"
                         aria-label="Delete clip"

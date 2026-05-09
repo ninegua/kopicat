@@ -45,7 +45,7 @@
 
 <div class="card">
   <div class="card-status-header">
-    <div style="display: flex; align-items: center; gap: var(--space-sm);">
+    <div class="flex-row gap-sm">
       {#if clip?.burn_after_read}
         <span class="burn-badge">Burned</span>
       {:else if onSave}

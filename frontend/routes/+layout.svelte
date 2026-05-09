@@ -458,4 +458,30 @@
       transform: rotate(360deg);
     }
   }
+
+  /* --- Utility helpers --- */
+  :global(.flex-row) {
+    display: flex;
+    align-items: center;
+  }
+  :global(.flex-col-center) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  :global(.gap-xs) {
+    gap: var(--space-xs);
+  }
+  :global(.gap-sm) {
+    gap: var(--space-sm);
+  }
+  :global(.gap-md) {
+    gap: var(--space-md);
+  }
+  :global(.color-muted) {
+    color: var(--text-muted);
+  }
+  :global(.color-success) {
+    color: var(--success);
+  }
 </style>
