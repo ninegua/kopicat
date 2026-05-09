@@ -143,7 +143,6 @@
     }
 
     if (receivingClips.length > 0) {
-      let hasActivePoll = false;
       const pendingIds = new Set<string>();
 
       async function runPoll(clip: LocalClip) {
@@ -157,14 +156,19 @@
         runPoll(clip);
       });
 
-      pollingTimer = setInterval(() => {
-        const freshReceiving = getClips().filter((c) => c.receiving);
-        freshReceiving.forEach((clip) => {
-          if (pendingIds.size < receivingClips.length) {
-            runPoll(clip);
-          }
-        });
-      }, 5000);
+      function scheduleNext() {
+        pollingTimer = setTimeout(() => {
+          const freshReceiving = getClips().filter((c) => c.receiving);
+          freshReceiving.forEach((clip) => {
+            if (pendingIds.size < receivingClips.length) {
+              runPoll(clip);
+            }
+          });
+          scheduleNext();
+        }, 5000);
+      }
+
+      scheduleNext();
 
       return () => {
         if (pollingTimer) {
