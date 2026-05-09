@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import type { LocalClip } from '$lib/api/store';
-  import * as QRCode from 'qrcode';
+  import { toCanvas } from 'qrcode';
   import { flip } from 'svelte/animate';
   import { cubicOut } from 'svelte/easing';
   import {
@@ -92,7 +92,7 @@
     if (clip?.receiving && clip.text) {
       const canvas = document.getElementById(`qr-${clip.id}`) as HTMLCanvasElement | null;
       if (canvas) {
-        QRCode.toCanvas(canvas, clip.text, {
+        toCanvas(canvas, clip.text, {
           width: 150,
           color: { dark: '#150D08', light: '#F7EFD2' },
         });

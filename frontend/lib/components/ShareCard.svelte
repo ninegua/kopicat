@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
-  import * as QRCode from 'qrcode';
+  import { toCanvas } from 'qrcode';
 
   let { url, onDismiss }: { url: string; onDismiss: () => void } = $props();
 
@@ -9,7 +9,7 @@
       tick().then(() => {
         const canvas = document.getElementById('qr-canvas') as HTMLCanvasElement | null;
         if (canvas && url) {
-          QRCode.toCanvas(
+          toCanvas(
             canvas,
             url,
             {
