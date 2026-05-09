@@ -21,6 +21,12 @@ registerRoute(
   /\.(?:png|gif|jpg|jpeg|svg|woff2)/,
   new StaleWhileRevalidate({
     cacheName: 'images',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 60,
+        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+      }),
+    ],
   }),
 );
 

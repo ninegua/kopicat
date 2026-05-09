@@ -12,6 +12,7 @@ export default defineConfig({
 			injectRegister: false,
 			injectManifest: {
 				globPatterns: ['**/*.{html,js,css,woff2,png,svg,json}'],
+				globIgnores: ['**/screenshot-*.png'],
 			},
 			manifest: false,
 		}),
