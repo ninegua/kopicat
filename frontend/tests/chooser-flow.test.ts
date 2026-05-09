@@ -259,4 +259,48 @@ describe('GridView focusClipId prop', () => {
       expect(screen.getByRole('button', { name: 'Delete clip' })).toBeInTheDocument();
     });
   });
+
+  it('reverts changes when undo button is clicked', async () => {
+    const testText = 'Original text';
+    seedLocalClips([{ id: 'undo-1', text: testText, saved_at: Date.now() }]);
+
+    const { container } = render(GridView, { props: { focusClipId: 'undo-1' } });
+
+    await waitFor(() => {
+      expect(screen.getByText(testText)).toBeInTheDocument();
+    });
+
+    // Initially no "Save changes?" prompt
+    expect(screen.queryByText('Save changes?')).not.toBeInTheDocument();
+
+    // Simulate typing in the CodeJar editor via keyup
+    const pre = container.querySelector<HTMLElement>('pre.code-editor');
+    expect(pre).not.toBeNull();
+
+    pre!.textContent = 'Modified text';
+    // Fire keyup without keydown; codejar's prev starts undefined,
+    // so prev !== toString() will be true, triggering onUpdate.
+    await fireEvent.keyUp(pre!, { key: 'a', code: 'KeyA' });
+
+    // Wait for modification state to appear
+    await waitFor(() => {
+      expect(screen.getByText('Save changes?')).toBeInTheDocument();
+    });
+
+    // Click the undo button
+    const undoBtn = screen.getByRole('button', { name: 'Revert changes' });
+    expect(undoBtn).toBeInTheDocument();
+    await fireEvent.click(undoBtn);
+
+    // The "Save changes?" prompt should disappear
+    await waitFor(() => {
+      expect(screen.queryByText('Save changes?')).not.toBeInTheDocument();
+    });
+
+    // And the original text should be restored in the editor
+    await waitFor(() => {
+      const editor = container.querySelector<HTMLElement>('pre.code-editor');
+      expect(editor?.textContent).toBe(testText);
+    });
+  });
 });
