@@ -34,9 +34,12 @@ async function deriveCryptoKey(password: string, salt: Uint8Array): Promise<Cryp
 }
 
 function toBase64(bytes: Uint8Array): string {
-  let binary = '';
-  for (const b of bytes) binary += String.fromCharCode(b);
-  return btoa(binary);
+  const chunkSize = 0x8000; // 32768 — avoids stack overflow from huge spread
+  const chunks: string[] = [];
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    chunks.push(String.fromCharCode(...bytes.subarray(i, i + chunkSize)));
+  }
+  return btoa(chunks.join(''));
 }
 
 function fromBase64(b64: string): Uint8Array {
