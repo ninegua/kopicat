@@ -14,6 +14,8 @@
   import { decrypt } from '$lib/crypto';
   import CodeEditor from './CodeEditor.svelte';
 
+  let { onChoose }: { onChoose?: (clip: LocalClip) => void } = $props();
+
   let copiedId = $state<string | null>(null);
   let maximizedClip = $state<string | null>(null);
   let pendingDeletes = $state<{ id: string; text: string; timer: ReturnType<typeof setTimeout> }[]>(
@@ -58,6 +60,10 @@
   let focusClip = $state<string | null>(null);
 
   $effect(() => {
+    if (onChoose) {
+      focusClip = null;
+      return;
+    }
     const url = new URL(window.location.href);
     focusClip = url.searchParams.get('clip') || null;
   });
@@ -261,6 +267,13 @@
 
   function handleClick(clipId: string) {
     if (focusClip === clipId) return;
+    if (onChoose) {
+      const clip = getClips().find((c) => c.id === clipId);
+      if (clip) {
+        onChoose(clip);
+      }
+      return;
+    }
     focusClip = clipId;
   }
 

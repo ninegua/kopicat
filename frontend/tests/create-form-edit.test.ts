@@ -296,16 +296,60 @@ describe('CreateForm share mode - error handling', () => {
     });
   });
 
-  it('shows error message when text is empty', async () => {
-    const { container } = render(CreateForm, {
-      onCreate: vi.fn(),
-      error: 'Please enter some text to share',
-      onClearError: vi.fn(),
-    });
+  it('shows validation error when Share is clicked with empty text', async () => {
+    render(CreateForm, { onCreate: vi.fn(), loading: false });
+
+    const createBtn = getCreateButton();
+    await fireEvent.click(createBtn);
 
     await waitFor(() => {
       expect(screen.getByText('Please enter some text to share')).toBeInTheDocument();
     });
+  });
+
+  it('shows serverError when provided', async () => {
+    render(CreateForm, {
+      onCreate: vi.fn(),
+      loading: false,
+      serverError: 'Network Error. Please check your connection and try again.',
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Network Error. Please check your connection and try again.')).toBeInTheDocument();
+    });
+  });
+
+  it('clears validation error when user starts typing', async () => {
+    const { container } = render(CreateForm, { onCreate: vi.fn(), loading: false });
+
+    // Trigger validation error
+    await fireEvent.click(getCreateButton());
+    expect(screen.getByText('Please enter some text to share')).toBeInTheDocument();
+
+    // Type something
+    await fillText(container, 'fixing it');
+
+    await waitFor(() => {
+      expect(screen.queryByText('Please enter some text to share')).not.toBeInTheDocument();
+    });
+  });
+
+  it('clears validation error when text is pre-filled from clipState', async () => {
+    const { container } = render(CreateForm, { onCreate: vi.fn(), loading: false });
+
+    // Trigger validation error
+    await fireEvent.click(getCreateButton());
+    expect(screen.getByText('Please enter some text to share')).toBeInTheDocument();
+
+    // Simulate prefill (e.g., from chooser or clipboard paste)
+    clipState.update((s) => ({ ...s, prefillText: 'Filled by chooser' }));
+
+    await waitFor(() => {
+      expect(screen.queryByText('Please enter some text to share')).not.toBeInTheDocument();
+    });
+
+    const textarea = container.querySelector<HTMLTextAreaElement>('textarea');
+    expect(textarea?.value).toBe('Filled by chooser');
   });
 });
 

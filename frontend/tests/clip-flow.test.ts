@@ -74,7 +74,7 @@ describe('Clip creation flow', () => {
       prefillText: 'Test paste content',
     });
 
-    render(CreateForm, { props: { onCreate: vi.fn(), error: null, onClearError: vi.fn() } });
+    render(CreateForm, { props: { onCreate: vi.fn() } });
 
     await waitFor(() => {
       expect(screen.getByPlaceholderText(/enter your text/i)).toBeInTheDocument();
@@ -107,7 +107,7 @@ describe('Clip creation flow', () => {
     });
 
     const { container } = render(CreateForm, {
-      props: { onCreate, error: null, onClearError: vi.fn() },
+      props: { onCreate },
     });
     await fillText(container, testText);
 
@@ -139,9 +139,7 @@ describe('Clip creation flow', () => {
       prefillText: '',
     });
 
-    render(CreateForm, {
-      props: { onCreate: vi.fn(), error: 'Please enter some text to share', onClearError: vi.fn() },
-    });
+    render(CreateForm, { props: { onCreate: vi.fn() } });
 
     const createBtn = getCreateButton();
     await fireEvent.click(createBtn);
@@ -530,7 +528,7 @@ describe('Burn-after-read flow', () => {
     });
 
     const { container } = render(CreateForm, {
-      props: { onCreate, error: null, onClearError: vi.fn(), loading: false },
+      props: { onCreate, loading: false },
     });
     await fillText(container, testText);
 

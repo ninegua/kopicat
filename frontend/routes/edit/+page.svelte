@@ -8,21 +8,17 @@
   import { generateClipId } from '$lib/words';
   import Header from '$lib/components/Header.svelte';
   import CreateForm from '$lib/components/CreateForm.svelte';
+  import GridView from '$lib/components/GridView.svelte';
   import Footer from '$lib/components/Footer.svelte';
+  import type { LocalClip } from '$lib/api/store';
 
-  let error = $state<string | null>(null);
+  let serverError = $state<string | null>(null);
   let loading = $state(false);
   let sendMode = $state(false);
-
-  function validateCreateText(text: string): string | null {
-    if (!text.trim()) {
-      return 'Please enter some text to share';
-    }
-    return null;
-  }
+  let chooserMode = $state(false);
 
   function initFromUrl() {
-    error = null;
+    serverError = null;
     let prefillText: string | null = $clipState.prefillText;
 
     const url = new URL(window.location.href);
@@ -44,6 +40,11 @@
 
   onMount(initFromUrl);
 
+  function handleChoose(clip: LocalClip) {
+    clipState.update((s) => ({ ...s, prefillText: clip.text }));
+    chooserMode = false;
+  }
+
   async function handleCreate(
     text: string,
     pw: string,
@@ -51,13 +52,7 @@
     burn_after_read: boolean,
     save_local: boolean,
   ) {
-    const validationError = validateCreateText(text);
-    if (validationError) {
-      error = validationError;
-      return;
-    }
-
-    error = null;
+    serverError = null;
     loading = true;
     const encryptedBlob = await encrypt(text, pw);
 
@@ -78,7 +73,7 @@
         msg = 'Network Error. Please check your connection and try again.';
       }
       loading = false;
-      error = msg || 'Failed to create clip';
+      serverError = msg || 'Failed to create clip';
       return;
     }
 
@@ -123,7 +118,17 @@
 <Header />
 
 <main class="app-main">
-  <CreateForm onCreate={handleCreate} {error} onClearError={() => (error = null)} {loading} />
+  {#if chooserMode}
+    <GridView onChoose={handleChoose} />
+  {:else}
+    <CreateForm
+      onCreate={handleCreate}
+      {serverError}
+      onClearServerError={() => (serverError = null)}
+      {loading}
+      onBrowseClips={() => (chooserMode = true)}
+    />
+  {/if}
 </main>
 
 <Footer />

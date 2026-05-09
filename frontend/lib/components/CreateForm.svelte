@@ -6,9 +6,10 @@
 
   let {
     onCreate,
-    error: formError,
-    onClearError,
     loading,
+    onBrowseClips,
+    serverError,
+    onClearServerError,
   }: {
     onCreate: (
       text: string,
@@ -17,12 +18,15 @@
       burn_after_read: boolean,
       save_local: boolean,
     ) => Promise<void>;
-    error: string | null;
-    onClearError: () => void;
     loading: boolean;
+    onBrowseClips?: () => void;
+    serverError?: string | null;
+    onClearServerError?: () => void;
   } = $props();
 
   let saveLocal = $state(false);
+  let validationError = $state<string | null>(null);
+  const displayError = $derived(validationError ?? serverError ?? null);
 
   const TTL_OPTIONS = [
     { label: '1 minute', value: 60 },
@@ -50,7 +54,15 @@
     const p = $clipState.prefillText;
     if (p) {
       text = p;
+      validationError = null;
       clipState.update((s) => ({ ...s, prefillText: null }));
+    }
+  });
+
+  // Auto-clear validation error when text becomes non-empty.
+  $effect(() => {
+    if (text.trim() && validationError) {
+      validationError = null;
     }
   });
 
@@ -112,15 +124,20 @@
   });
 
   async function handleCreate() {
+    if (!text.trim()) {
+      validationError = 'Please enter some text to share';
+      return;
+    }
+    validationError = null;
+    onClearServerError?.();
     await onCreate(text, password || generatePassword(11), selectedTTL, burnAfterRead, saveLocal);
   }
 
   const charCount = $derived(text.length);
 
   function handleInput() {
-    if (formError) {
-      onClearError();
-    }
+    validationError = null;
+    onClearServerError?.();
   }
 </script>
 
@@ -136,7 +153,7 @@
     <span class="char-count">{charCount} characters</span>
   </div>
 
-  {#if formError}
+  {#if displayError}
     <div class="error-banner">
       <svg
         width="16"
@@ -152,7 +169,7 @@
         <line x1="15" y1="9" x2="9" y2="15" />
         <line x1="9" y1="9" x2="15" y2="15" />
       </svg>
-      <span>{formError}</span>
+      <span>{displayError}</span>
     </div>
   {/if}
 
@@ -227,7 +244,7 @@
   </div>
 </div>
 
-<ViewClipsLink />
+<ViewClipsLink label="Choose from saved clips" onClick={onBrowseClips} />
 
 <div bind:this={ttlPortal} class="ttl-portal" hidden>
   <div class="ttl-options" role="listbox">
