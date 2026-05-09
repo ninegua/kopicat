@@ -50,7 +50,7 @@
         <span class="burn-badge">Burned</span>
       {:else if onSave}
         <button
-          class="action-icon-btn"
+          class="icon-btn action-icon-btn"
           class:action-icon-btn-saved={saveFeedback}
           onclick={saveClip}
           title="Add to collection"
@@ -88,7 +88,7 @@
       {/if}
 
       <button
-        class="action-icon-btn"
+        class="icon-btn action-icon-btn"
         class:action-icon-btn-copied={copyFeedback === 'text'}
         onclick={copyText}
         title="Copy to clipboard"
@@ -122,7 +122,7 @@
           </svg>
         {/if}
       </button>
-      <button class="action-icon-btn" onclick={() => goto('/list')} title="Back to clips">
+      <button class="icon-btn action-icon-btn" onclick={() => goto('/list')} title="Back to clips">
         <svg
           width="20"
           height="20"
@@ -199,24 +199,6 @@
 
   .error-banner {
     margin: var(--space-md) var(--space-md) 0;
-  }
-
-  .action-icon-btn {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    padding: var(--space-xs);
-    border-radius: var(--radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
-  }
-
-  .action-icon-btn:hover {
-    color: var(--accent);
-    background: var(--accent-glow);
   }
 
   .action-icon-btn-copied {

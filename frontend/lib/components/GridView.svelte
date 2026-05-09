@@ -387,7 +387,7 @@
                     </div>
                     <div class="flex-row gap-md">
                       <button
-                        class="footer-icon-btn footer-icon-btn--delete"
+                        class="icon-btn footer-icon-btn footer-icon-btn--delete"
                         aria-label="Delete clip"
                         onclick={(e) => {
                           e.stopPropagation();
@@ -412,7 +412,7 @@
                         </svg>
                       </button>
                       <button
-                        class="footer-icon-btn"
+                        class="icon-btn footer-icon-btn"
                         class:footer-icon-btn-copied={copiedId === clip.id}
                         aria-label="Copy text to clipboard"
                         onclick={(e) => {
@@ -455,7 +455,7 @@
                         {/if}
                       </button>
                       <button
-                        class="footer-icon-btn"
+                        class="icon-btn footer-icon-btn"
                         class:footer-icon-btn--disabled={clip.receiving}
                         aria-label={maximizedClip === clip.id ? 'Minimize' : 'Maximize'}
                         disabled={clip.receiving}
@@ -539,7 +539,7 @@
                       <div class="flex-row gap-xs">
                         <span class="clip-save">Save changes?</span>
                         <button
-                          class="footer-icon-btn footer-icon-btn--save"
+                          class="icon-btn footer-icon-btn footer-icon-btn--save"
                           aria-label="Save changes"
                           onclick={() => handleSave(clip)}
                         >
@@ -557,7 +557,7 @@
                           </svg>
                         </button>
                         <button
-                          class="footer-icon-btn footer-icon-btn--cancel"
+                          class="icon-btn footer-icon-btn footer-icon-btn--cancel"
                           aria-label="Cancel and revert"
                           onclick={() => handleCancel(clip)}
                         >
@@ -581,7 +581,7 @@
                     {/if}
                     <div class="flex-row gap-md">
                       <button
-                        class="footer-icon-btn footer-icon-btn--delete"
+                        class="icon-btn footer-icon-btn footer-icon-btn--delete"
                         aria-label="Delete clip"
                         onclick={(e) => {
                           e.stopPropagation();
@@ -606,7 +606,7 @@
                         </svg>
                       </button>
                       <button
-                        class="footer-icon-btn"
+                        class="icon-btn footer-icon-btn"
                         class:footer-icon-btn-copied={copiedId === clip.id}
                         aria-label="Copy text to clipboard"
                         onclick={(e) => {
@@ -648,7 +648,7 @@
                         {/if}
                       </button>
                       <button
-                        class="footer-icon-btn"
+                        class="icon-btn footer-icon-btn"
                         aria-label={maximizedClip === clip.id ? 'Minimize' : 'Maximize'}
                         onclick={(e) => {
                           e.stopPropagation();
@@ -971,24 +971,6 @@
     margin-bottom: var(--space-sm);
     border-bottom: 1px solid var(--border-color);
     flex-shrink: 0;
-  }
-
-  .footer-icon-btn {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    padding: 4px;
-    border-radius: var(--radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--duration-base);
-  }
-
-  .footer-icon-btn:hover {
-    color: var(--accent);
-    background: var(--accent-glow);
   }
 
   .footer-icon-btn-copied {

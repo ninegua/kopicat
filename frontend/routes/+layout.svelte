@@ -485,6 +485,25 @@
     color: var(--success);
   }
 
+  /* --- Icon buttons --- */
+  :global(.icon-btn) {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: var(--space-xs);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--duration-base);
+  }
+
+  :global(.icon-btn:hover) {
+    color: var(--accent);
+    background: var(--accent-glow);
+  }
+
   /* --- Modal --- */
   :global(.modal-backdrop) {
     position: fixed;
