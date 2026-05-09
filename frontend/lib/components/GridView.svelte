@@ -360,6 +360,7 @@
   }
 
   function handleCancel(clip: LocalClip) {
+    editingText = clip.text;
     delete clipEdits[clip.id];
     delete clipModified[clip.id];
   }
@@ -575,7 +576,7 @@
                         </button>
                         <button
                           class="icon-btn footer-icon-btn footer-icon-btn--cancel"
-                          aria-label="Cancel and revert"
+                          aria-label="Revert changes"
                           onclick={() => handleCancel(clip)}
                         >
                           <svg
@@ -588,8 +589,8 @@
                             stroke-linecap="round"
                             stroke-linejoin="round"
                           >
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
+                            <path d="M3 7v6h6" />
+                            <path d="M21 17a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 13" />
                           </svg>
                         </button>
                       </div>
