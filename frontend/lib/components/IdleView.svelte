@@ -197,7 +197,7 @@
     border-color: var(--accent);
     background: var(--bg-card-hover);
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.1);
+    box-shadow: var(--shadow-card-hover);
   }
 
   .idle-icon {
@@ -233,7 +233,7 @@
 
   .idle-link-text {
     text-decoration: underline;
-    color: #1e40af;
+    color: var(--accent-hover);
   }
 
   kbd {

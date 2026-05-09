@@ -157,7 +157,7 @@
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-dropdown);
     min-width: 200px;
     padding: var(--space-xs) 0;
     z-index: 100;
@@ -191,6 +191,6 @@
   }
 
   .menu-item:hover {
-    background: rgba(0, 0, 0, 0.04);
+    background: var(--hover-bg);
   }
 </style>

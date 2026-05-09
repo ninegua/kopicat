@@ -874,18 +874,18 @@
   }
 
   .clip-box-modified {
-    border: 1px solid #f0a040;
-    box-shadow: 0 0 12px rgba(240, 160, 64, 0.3);
+    border: 1px solid var(--accent-amber);
+    box-shadow: 0 0 12px var(--amber-glow);
     animation: modified-pulse 2s ease-in-out infinite;
   }
 
   @keyframes modified-pulse {
     0%,
     100% {
-      box-shadow: 0 0 12px rgba(240, 160, 64, 0.3);
+      box-shadow: 0 0 12px var(--amber-glow);
     }
     50% {
-      box-shadow: 0 0 20px rgba(240, 160, 64, 0.45);
+      box-shadow: 0 0 20px var(--amber-glow-strong);
     }
   }
 
@@ -985,7 +985,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.15s;
+    transition: all var(--duration-base);
   }
 
   .footer-icon-btn:hover {
@@ -1004,19 +1004,19 @@
   }
 
   .footer-icon-btn--save {
-    color: #6fc18a;
+    color: var(--success-soft);
   }
 
   .footer-icon-btn--save:hover {
-    background: rgba(111, 193, 138, 0.15);
+    background: var(--success-soft-bg);
   }
 
   .footer-icon-btn--cancel {
-    color: #d4756b;
+    color: var(--error-soft);
   }
 
   .footer-icon-btn--cancel:hover {
-    background: rgba(212, 117, 107, 0.15);
+    background: var(--error-soft-bg);
   }
 
   .footer-icon-btn--disabled {
@@ -1045,9 +1045,9 @@
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     color: var(--text-primary);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-overlay);
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background var(--duration-base);
     animation: snackbar-in 0.3s ease;
     justify-content: center;
   }

@@ -188,7 +188,7 @@
   .burn-badge {
     padding: var(--space-xs) var(--space-sm);
     background: var(--error-bg);
-    border: 1px solid rgba(196, 69, 54, 0.2);
+    border: 1px solid var(--error-border);
     border-radius: 100px;
     color: var(--error);
     font-weight: 600;

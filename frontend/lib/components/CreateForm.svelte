@@ -175,7 +175,7 @@
           height="14"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#e74c3c"
+          stroke="currentColor"
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
@@ -313,7 +313,7 @@
   }
 
   .fire-icon {
-    color: #e74c3c;
+    color: var(--error);
   }
 
   .ttl-select {
@@ -368,7 +368,7 @@
     background: var(--bg-input);
     border: 1px solid var(--border-focus);
     border-radius: var(--radius-md);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-dropdown);
     overflow: hidden;
   }
 
@@ -394,6 +394,6 @@
   .ttl-option.active {
     color: var(--accent);
     font-weight: 600;
-    background: rgba(102, 126, 234, 0.08);
+    background: var(--accent-bg-subtle);
   }
 </style>

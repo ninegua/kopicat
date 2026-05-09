@@ -55,6 +55,18 @@
     --error: #c44536;
     --error-bg: rgba(196, 69, 54, 0.1);
     --error-border: rgba(196, 69, 54, 0.2);
+    --error-soft: #d4756b;
+    --error-soft-bg: rgba(212, 117, 107, 0.15);
+
+    --success-soft: #6fc18a;
+    --success-soft-bg: rgba(111, 193, 138, 0.15);
+
+    --amber-glow: rgba(240, 160, 64, 0.3);
+    --amber-glow-strong: rgba(240, 160, 64, 0.45);
+
+    --hover-bg: rgba(0, 0, 0, 0.04);
+    --shadow-card-hover: 0 4px 16px rgba(197, 150, 69, 0.1);
+    --accent-bg-subtle: rgba(197, 150, 69, 0.08);
 
     --radius-sm: 6px;
     --radius-md: 10px;
