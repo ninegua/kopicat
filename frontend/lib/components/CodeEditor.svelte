@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { CodeJar } from 'codejar';
   import hljs from 'highlight.js/lib/core';
   import markdown from 'highlight.js/lib/languages/markdown';
 
@@ -14,7 +13,7 @@
   let { value = $bindable(), oninput, onkeydown }: Props = $props();
 
   let editorEl: HTMLElement | undefined = $state();
-  let jar: ReturnType<typeof CodeJar> | undefined = $state();
+  let jar: any = $state();
   let internalUpdate = false;
 
   function highlight(el: HTMLElement) {
@@ -25,14 +24,16 @@
 
   $effect(() => {
     if (editorEl && !jar) {
-      jar = CodeJar(editorEl, highlight, { tab: '  ' });
-      jar.updateCode(value);
-      jar.onUpdate((code) => {
-        if (code !== value) {
-          internalUpdate = true;
-          value = code;
-          oninput?.(code);
-        }
+      import('codejar').then(({ CodeJar }) => {
+        jar = CodeJar(editorEl!, highlight, { tab: '  ' });
+        jar.updateCode(value);
+        jar.onUpdate((code: string) => {
+          if (code !== value) {
+            internalUpdate = true;
+            value = code;
+            oninput?.(code);
+          }
+        });
       });
     }
 
