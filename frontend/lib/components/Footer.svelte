@@ -3,7 +3,7 @@
 
 <footer class="footer">
   <div class="footer-inner">
-    <p class="footer-text">Secure clipboard sharing between devices. End to end encrypted.</p>
+    <p class="footer-text">Secure clipboard sharing via simple links. End to end encrypted.</p>
     <p class="footer-meta">Built on the Internet Computer</p>
   </div>
 </footer>

@@ -107,7 +107,7 @@
 </script>
 
 <svelte:head>
-  <title>KopiCat - Clip Result</title>
+  <title>KopiCat - View a clip</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </svelte:head>
 

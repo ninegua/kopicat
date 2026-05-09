@@ -26,7 +26,26 @@
 </script>
 
 <svelte:head>
-  <title>KopiCat - Send a copy</title>
+  <title>KopiCat - Send a clip</title>
+  <meta property="og:title" content="KopiCat - Send a clip" />
+  <meta
+    property="og:description"
+    content="Secure clipboard sharing via simple links. End to end encrypted."
+  />
+  <meta property="og:url" content="https://kopicat.cc/send" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://kopicat.cc/kopicat-192x192.png" />
+  <meta property="og:image:width" content="192" />
+  <meta property="og:image:height" content="192" />
+  <meta property="og:site_name" content="KopiCat" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="KopiCat - Send a copy" />
+  <meta
+    name="twitter:description"
+    content="Secure clipboard sharing via simple links. End to end encrypted."
+  />
+  <meta name="twitter:image" content="https://kopicat.cc/kopicat-192x192.png" />
 </svelte:head>
 
 <Header />

@@ -60,9 +60,29 @@
   <title>KopiCat - Copy simply. Share securely.</title>
   <meta
     name="description"
-    content="Share encrypted text via simple links. Your data is encrypted client-side before being stored on the Internet Computer."
+    content="Secure clipboard sharing via simple links. Your data is encrypted client-side before being transported."
   />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta property="og:title" content="KopiCat - Copy simply. Share securely." />
+  <meta
+    property="og:description"
+    content="Secure clipboard sharing via simple links. End to end encrypted."
+  />
+  <meta property="og:url" content="https://kopicat.cc" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://kopicat.cc/kopicat-192x192.png" />
+  <meta property="og:image:width" content="192" />
+  <meta property="og:image:height" content="192" />
+  <meta property="og:site_name" content="KopiCat" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="KopiCat - Copy simply. Share securely." />
+  <meta
+    name="twitter:description"
+    content="Secure clipboard sharing via simple links. End to end encrypted."
+  />
+  <meta name="twitter:image" content="https://kopicat.cc/kopicat-192x192.png" />
 </svelte:head>
 
 <Header onReset={handleReset} />
