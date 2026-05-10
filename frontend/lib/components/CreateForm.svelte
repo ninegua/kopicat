@@ -69,7 +69,7 @@
   });
 
   let password = $clipState.clipPass;
-  let selectedTTL = $state(900);
+  let selectedTTL = $state(3600);
   let ttlOpen = $state(false);
   let ttlButton: HTMLButtonElement | undefined = $state();
   let ttlPortal: HTMLDivElement | undefined;
