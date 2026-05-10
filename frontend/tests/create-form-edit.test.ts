@@ -237,7 +237,7 @@ describe('CreateForm share mode - TTL selector', () => {
     const { container } = render(CreateForm, { onCreate: vi.fn(), loading: false });
 
     await waitFor(() => {
-      expect(getTTLSelect()).toHaveTextContent('15 min');
+      expect(getTTLSelect()).toHaveTextContent('Expire (1 hour)');
     });
   });
 });

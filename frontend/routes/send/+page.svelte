@@ -48,7 +48,7 @@
   <meta name="twitter:image" content="https://kopicat.cc/kopicat-192x192.png" />
 </svelte:head>
 
-<Header />
+<Header linkMode="show" />
 
 <main class="app-main">
   <IdleView mode="send" />

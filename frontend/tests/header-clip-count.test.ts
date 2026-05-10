@@ -94,7 +94,7 @@ describe('Header clip count', () => {
     addLocalClip({ id: 'b', text: 'test2', saved_at: Date.now() });
     render(Header, { props: { linkMode: 'show' } });
     await tick();
-    expect(screen.getByText('2 saved clips')).toBeInTheDocument();
+    expect(screen.getByText('2 clips on device')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /saved clips/i })).not.toBeInTheDocument();
   });
 
