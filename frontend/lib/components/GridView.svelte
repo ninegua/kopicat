@@ -113,7 +113,7 @@
   // Sets editingText when focusClip changes.
   $effect(() => {
     if (focusClip !== null) {
-      let clip = getLocalClip(focusClip);
+      let clip = getLocalClip(focusClip, 'scratch') ?? getLocalClip(focusClip);
       if (clip !== undefined) {
         editingText = clip.text;
       }
