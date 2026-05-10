@@ -145,7 +145,7 @@
 
 <div class="card">
   <div class="card-textarea-group">
-    <CodeEditor bind:value={text} oninput={handleInput} />
+    <CodeEditor bind:value={text} oninput={handleInput} class="editor-compact" />
     <span class="char-count">{charCount} characters</span>
   </div>
 

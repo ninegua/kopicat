@@ -9,9 +9,10 @@
     value: string;
     oninput?: (value: string) => void;
     onkeydown?: (e: KeyboardEvent) => void;
+    class?: string;
   }
 
-  let { value = $bindable(), oninput, onkeydown }: Props = $props();
+  let { value = $bindable(), oninput, onkeydown, class: className = '' }: Props = $props();
 
   let editorEl: HTMLElement | undefined = $state();
   let jar: any = $state();
@@ -59,7 +60,7 @@
 
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <pre
-  class="code-editor"
+  class="code-editor {className}"
   bind:this={editorEl}
   onkeydown={(e) => {
     e.stopPropagation();
@@ -84,5 +85,9 @@
     width: 100%;
     white-space: pre-wrap;
     border-radius: var(--radius-sm);
+  }
+
+  .code-editor.editor-compact {
+    max-height: 192px;
   }
 </style>
