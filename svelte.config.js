@@ -3,7 +3,21 @@ import path from 'path';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	kit: {
+		kit: {
+		version: {
+			name: 'static'
+		},
+		csp: {
+			mode: 'hash',
+			directives: {
+				'default-src': ['self'],
+				'script-src': ['self'],
+				'style-src': ['self', 'unsafe-inline'],
+				'font-src': ['self'],
+				'img-src': ['self', 'data:', 'blob:'],
+				'connect-src': ['self', 'https://icp-api.io'],
+			}
+		},
 		adapter: adapter({
 			pages: 'dist',
 			assets: 'dist',

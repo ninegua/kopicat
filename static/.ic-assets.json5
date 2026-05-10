@@ -1,0 +1,26 @@
+[
+  {
+    // Default settings for all files
+    "match": "**/*",
+    "security_policy": "standard",
+    "headers": {
+      "Cache-Control": "public, max-age=0, must-revalidate"
+    },
+    // Disable raw (uncertified) access by default
+    "allow_raw_access": false
+  },
+  {
+    // Cache immutable assets aggressively
+    "match": "_app/immutable/**/*",
+    "headers": {
+      "Cache-Control": "public, max-age=31536000, immutable"
+    }
+  },
+  {
+    // Disable the automatic security-policy header for HTML files.
+    // SvelteKit injects a <meta> CSP tag with per-page SHA-256 hashes
+    // for inline scripts. An HTTP header would override that meta tag.
+    "match": "**/*.html",
+    "security_policy": "disabled"
+  }
+]

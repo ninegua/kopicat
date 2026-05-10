@@ -1,5 +1,3 @@
-import Array "mo:core/Array";
-import Blob "mo:core/Blob";
 import Int "mo:core/Int";
 import Map "mo:core/Map";
 import Nat "mo:core/Nat";
@@ -8,14 +6,7 @@ import Time "mo:core/Time";
 import Result "mo:core/Result";
 import Option "mo:core/Option";
 
-import JSON "mo:json/JSON";
-import ServeHttpRequest "./http";
-
 shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_to_live: Nat; max_blob_bytes: Nat }) {
-
-  include ServeHttpRequest(creator);
-
-  type JSON = JSON.JSON;
 
   // Both created_at and expires_at are timestamp in seconds.
   type Clip = {
@@ -122,10 +113,6 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
     }
   };
 
-  func delete_clip(id: Text) {
-    Map.remove(clips, Text.compare, id);
-  };
-
   /**
    * Internal: remove all expired clips
    */
@@ -139,180 +126,5 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
         f(key, clip);
       };
     }
-  };
-
-  func fieldOf(json: ?JSON, name: Text) : ?JSON {
-     switch json {
-       case (?(#Object(fields))) {
-         for ((key, value) in Array.values(fields)) {
-           if (key == name) {
-             return ?value;
-           }
-         }
-       };
-       case _ {}
-     };
-     null
-  };
-
-  func expectText(json: JSON, field: Text) : ?Text {
-    switch (fieldOf(?json, field)) {
-      case (?(#String(val))) { ?val };
-      case _ { null };
-    };
-  };
-
-  func expectInt(json: JSON, field: Text) : ?Int {
-    switch (fieldOf(?json, field)) {
-      case (?(#Number(val))) { ?val };
-      case _ { null };
-    };
-  };
-
-  func expectNat(json: JSON, field: Text) : ?Nat {
-    do ? {
-      let val = expectInt(json, field) !;
-      let nat = (if (val < 0) { null } else { ?Int.abs(val) }) !;
-      nat
-    };
-  };
-
-  func expectBool(json: JSON, field: Text) : ?Bool {
-    switch (fieldOf(?json, field)) {
-      case (?(#Boolean(val))) { ?val };
-      case _ { null };
-    };
-  };
-
-  func parseInput(id: Text, json: JSON) : ?Input {
-    do ? {
-      let blob = expectText(json, "blob") !;
-      let expires_after = expectNat(json, "expires_after");
-      let burn_after_read = Option.get(expectBool(json, "burn_after_read"), false);
-      { id; blob; expires_after; burn_after_read }
-    }
-  };
-
-  func handle_put(req : Request, res : ResponseClass) : async Response {
-    let id = do ? {
-      let map = req.params !;
-      map.get("id") !;
-    };
-    let (status_code, body) = switch (id, req.body) {
-      case (null, _) {
-        (400: Nat16, "\"" # "Parameter /api/clip/:id not found" # "\"")
-      };
-      case (_, null) {
-         (400: Nat16, "\"" # "Missing body" # "\"")
-      };
-      case (?id, ?body) {
-        switch (body.deserialize()) {
-          case (null) {
-            (400: Nat16, "\"" # "Malformed JSON body" # "\"")
-          };
-          case (?json) {
-            switch (parseInput(id, json)) {
-              case (null) {
-                (400: Nat16, "\"" # "Malformed input" # "\"")
-              };
-              case (?input) {
-                switch (await create_clip(input)) {
-                  case (#err(err)) {
-                    (403 : Nat16, "\"" # err # "\"")
-                  };
-                  case (#ok(board)) {
-                    (200 : Nat16, "\"" # board # "\"")
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    };
-    res.json({
-      status_code = status_code;
-      body = body;
-      cache_strategy = #noCache;
-    })
-  };
-
-  func handle_get(req : Request, res : ResponseClass) : async Response {
-    let board = do ? {
-      let map = req.params !;
-      map.get("id") !;
-    };
-    let (status_code, body, cache_strategy) = switch (board) {
-      case (null) {
-        (400: Nat16, "\"" # "Parameter /api/clip/:id not found" # "\"", #noCache)
-      };
-      case (?id) {
-        switch (await get_clip(id)) {
-          case (null) {
-            (404: Nat16, "\"" # "Not found" # "\"", #noCache)
-          };
-          case (?clip) {
-            // TODO: encode blob with base64
-            let blob = clip.blob;
-            let cache_strategy = if (clip.burn_after_read) {
-              delete_clip(id);
-              #noCache
-            } else {
-              // certified-cache has expiration related bugs. So always noCache for now.
-              #noCache
-              // Since get_clip already handles expiry, nanoseconds is always > 0
-              // let nanoseconds = (clip.expires_at - now_secs()) * 1_000_000_000;
-              // #expireAfter{ nanoseconds = Int.abs(nanoseconds) }
-            };
-            (
-              200 : Nat16,
-              JSON.show(#Object([
-                ("blob", #String(clip.blob)),
-                ("created_at", #Number(clip.created_at)),
-                ("expires_at", #Number(clip.expires_at)),
-                ("burn_after_read", #Boolean(clip.burn_after_read)),
-              ])),
-              cache_strategy
-            )
-          }
-        }
-      }
-    };
-    res.json({ status_code; body; cache_strategy; })
-  };
-
-  func handle_stats(_ : Request, res : ResponseClass) : async Response {
-    let stats = await get_stats();
-    let json = #Object([
-        ("max_seconds_to_live", #Number(stats.max_seconds_to_live)),
-        ("total_clips_created", #Number(stats.total_clips_created)),
-        ("available_clips", #Number(stats.available_clips)),
-      ]);
-    res.json({ status_code = 200; body = JSON.show(json); cache_strategy = #noCache; })
-  };
-
-  // This just returns the send.html asset.
-  func handle_send(req : Request, res : ResponseClass) : async Response {
-    let result = server.http_request({ method = req.method; url = "/send.html"; headers = []; body = Blob.empty(); });
-    res.send({
-      status_code = result.status_code;
-      headers = result.headers;
-      body = result.body;
-      streaming_strategy = result.streaming_strategy;
-      cache_strategy = #default;
-    });
-  };
-
-  server.get("/api/clip/:id", handle_get);
-  server.put("/api/clip/:id", handle_put);
-  server.get("/api/stats", handle_stats);
-  server.get("/send", handle_send);
-
-  system func preupgrade() {
-    serializedEntries := server.entries();
-  };
-
-  system func postupgrade() {
-    ignore server.cache.pruneAll();
   };
 };
