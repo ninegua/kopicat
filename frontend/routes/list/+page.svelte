@@ -21,7 +21,7 @@
 
   function handleAddNew() {
     const id = generateClipId();
-    addLocalClip({ id, text: '', saved_at: Date.now() });
+    addLocalClip({ id, text: '', saved_at: Date.now() }, 'scratch');
     window.dispatchEvent(new StorageEvent('storage', { key: 'copycat_clips' }));
     focusClipId = id;
   }

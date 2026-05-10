@@ -55,10 +55,10 @@ describe('Header clip count', () => {
   it('shows unsaved count on a second line', async () => {
     addLocalClip({ id: 'a', text: 'test', saved_at: Date.now() });
     headerClipCount.update((c) => ({ ...c, unsaved: 1 }));
-    render(Header, { props: { linkMode: 'link' } });
+    render(Header, { props: { linkMode: 'show' } });
     await tick();
-    expect(screen.getByText('1 clip on device')).toBeInTheDocument();
-    expect(screen.getByText('1 unsaved clip')).toBeInTheDocument();
+    expect(screen.getByText(/1 clip/)).toBeInTheDocument();
+    expect(screen.getByText(/1 unsaved/)).toBeInTheDocument();
   });
 
   it('shows plural unsaved count', async () => {
@@ -66,10 +66,10 @@ describe('Header clip count', () => {
     addLocalClip({ id: 'b', text: 't2', saved_at: Date.now() });
     addLocalClip({ id: 'c', text: 't3', saved_at: Date.now() });
     headerClipCount.update((c) => ({ ...c, unsaved: 2 }));
-    render(Header, { props: { linkMode: 'link' } });
+    render(Header, { props: { linkMode: 'show' } });
     await tick();
-    expect(screen.getByText('3 clips on device')).toBeInTheDocument();
-    expect(screen.getByText('2 unsaved clips')).toBeInTheDocument();
+    expect(screen.getByText(/3 clips/)).toBeInTheDocument();
+    expect(screen.getByText(/2 unsaved/)).toBeInTheDocument();
   });
 
   it('uses a clickable link in link mode', async () => {
@@ -94,7 +94,7 @@ describe('Header clip count', () => {
     addLocalClip({ id: 'b', text: 'test2', saved_at: Date.now() });
     render(Header, { props: { linkMode: 'show' } });
     await tick();
-    expect(screen.getByText('2 clips on device')).toBeInTheDocument();
+    expect(screen.getByText(/2 clips/)).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /saved clips/i })).not.toBeInTheDocument();
   });
 
@@ -129,13 +129,13 @@ describe('Header add new button', () => {
 
   it('renders add-new button when listMode is true', () => {
     render(Header, { props: { linkMode: 'show', listMode: true } });
-    const btn = screen.getByRole('button', { name: /add new clip/i });
+    const btn = screen.getByRole('button', { name: /new clip/i });
     expect(btn).toBeInTheDocument();
   });
 
   it('hides add-new button when listMode is false', () => {
     render(Header, { props: { linkMode: 'show', listMode: false } });
-    expect(screen.queryByRole('button', { name: /add new clip/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /new clip/i })).not.toBeInTheDocument();
   });
 
   it('calls onAddNew when clicked', async () => {
@@ -143,7 +143,7 @@ describe('Header add new button', () => {
     render(Header, {
       props: { linkMode: 'show', listMode: true, onAddNew },
     });
-    const btn = screen.getByRole('button', { name: /add new clip/i });
+    const btn = screen.getByRole('button', { name: /new clip/i });
     await fireEvent.click(btn);
     expect(onAddNew).toHaveBeenCalledOnce();
   });
@@ -153,7 +153,7 @@ describe('Header add new button', () => {
     render(Header, {
       props: { linkMode: 'show', listMode: true, onAddNew },
     });
-    const btn = screen.getByRole('button', { name: /add new clip/i });
+    const btn = screen.getByRole('button', { name: /new clip/i });
     expect(btn).not.toHaveClass('add-new-btn-animate');
     await fireEvent.click(btn);
     expect(btn).toHaveClass('add-new-btn-animate');

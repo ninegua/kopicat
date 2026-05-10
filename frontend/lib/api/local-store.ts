@@ -6,6 +6,7 @@ const STORAGE_KEY = 'copycat_clips';
 
 let cacheRaw: string | null = null;
 let cache: LocalClip[] | null = null;
+let scratchpad: Map<string, LocalClip> = new Map();
 
 function isBrowser(): boolean {
   return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
@@ -52,7 +53,7 @@ export function getLocalClips(): LocalClip[] {
   return getCache().slice().reverse();
 }
 
-export function addLocalClip(clip: LocalClip): LocalClip[] {
+export function addLocalClip(clip: LocalClip, purpose?: 'scratch'): LocalClip[] {
   const clips = getCache();
   const exists = clips.findIndex((c) => c.id === clip.id);
   if (exists !== -1) {
@@ -60,29 +61,63 @@ export function addLocalClip(clip: LocalClip): LocalClip[] {
   } else {
     clips.push({ ...clip, saved_at: Date.now() });
   }
-  writeClips(clips);
+  if (purpose === 'scratch') {
+    scratchpad.set(clip.id, clip);
+  } else {
+    writeClips(clips);
+  }
   return clips.slice().reverse();
 }
 
-export function removeLocalClip(id: string): void {
+export function removeLocalClip(id: string, purpose?: 'scratch'): void {
+  scratchpad.delete(id);
+  if (purpose === 'scratch') {
+    return;
+  }
   const clips = getCache().filter((c) => c.id !== id);
   writeClips(clips);
 }
 
-export function updateLocalClip(id: string, updates: Partial<LocalClip>): LocalClip | null {
-  const clips = getCache();
-  const index = clips.findIndex((c) => c.id === id);
-  if (index !== -1) {
-    let clip = { ...clips[index], ...updates, saved_at: Date.now() };
-    clips[index] = clip;
-    writeClips(clips);
-    return clip;
+export function updateLocalClip(
+  id: string,
+  updates: Partial<LocalClip>,
+  purpose?: 'scratch',
+): LocalClip | null {
+  if (purpose === 'scratch') {
+    let clip = scratchpad.get(id);
+    if (clip === undefined) {
+      clip = getLocalClip(id);
+    }
+    if (clip === undefined) {
+      return null;
+    }
+    let updated = { ...clip, ...updates };
+    scratchpad.set(id, updated);
+    return updated;
+  } else {
+    scratchpad.delete(id);
+    const clips = getCache();
+    const index = clips.findIndex((c) => c.id === id);
+    if (index !== -1) {
+      let clip = { ...clips[index], ...updates, saved_at: Date.now() };
+      clips[index] = clip;
+      writeClips(clips);
+      return clip;
+    }
   }
   return null;
 }
 
-export function getLocalClip(id: string): LocalClip | undefined {
-  return getCache().find((c) => c.id === id);
+export function isOnScratchpad(id: string): boolean {
+  return scratchpad.has(id);
+}
+
+export function getLocalClip(id: string, purpose?: 'scratch'): LocalClip | undefined {
+  if (purpose === 'scratch') {
+    return scratchpad.get(id);
+  } else {
+    return getCache().find((c) => c.id === id);
+  }
 }
 
 export function newReceivingClip(origin: string, replacing: string | null = null): LocalClip {

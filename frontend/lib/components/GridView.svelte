@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { SvelteSet } from 'svelte/reactivity';
   import { goto } from '$app/navigation';
   import type { LocalClip } from '$lib/api/store';
   import { headerClipCount } from '$lib/api/store';
@@ -6,10 +7,12 @@
   import { flip } from 'svelte/animate';
   import { cubicOut } from 'svelte/easing';
   import {
+    getLocalClip,
     getLocalClips,
     newReceivingClip,
     removeLocalClip,
     updateLocalClip,
+    isOnScratchpad,
   } from '$lib/api/local-store';
   import { fetchClip } from '$lib/api/client';
   import { decrypt } from '$lib/crypto';
@@ -30,10 +33,14 @@
   let pendingDeletes = $state<{ id: string; text: string; timer: ReturnType<typeof setTimeout> }[]>(
     [],
   );
-  let editingText = $state<string>('');
-  let clipEdits: Record<string, string> = $state({});
-  let clipModified: Record<string, boolean> = $state({});
   let clips = $state<LocalClip[]>(getLocalClips());
+  let edits = $state<SvelteSet<string>>(
+    new SvelteSet(
+      getLocalClips()
+        .filter((clip) => isOnScratchpad(clip.id))
+        .map((clip) => clip.id),
+    ),
+  );
 
   $effect(() => {
     function onStorage(e: StorageEvent) {
@@ -83,7 +90,7 @@
   });
 
   const unsavedCount = $derived.by(() => {
-    return getClips().filter((c) => clipModified[c.id]).length;
+    return getClips().filter((c) => edits.has(c.id)).length;
   });
 
   $effect(() => {
@@ -101,13 +108,13 @@
     return rearrange(visible);
   });
 
+  let editingText = $state<string>('');
+
   // Sets editingText when focusClip changes.
   $effect(() => {
-    const clip = getClips().find((c) => c.id === focusClip);
-    if (clip) {
-      if (clipEdits[clip.id] !== undefined) {
-        editingText = clipEdits[clip.id];
-      } else {
+    if (focusClip !== null) {
+      let clip = getLocalClip(focusClip);
+      if (clip !== undefined) {
         editingText = clip.text;
       }
     }
@@ -354,22 +361,19 @@
     }
   }
 
-  function handleSave(clip: LocalClip) {
-    const text = editingText;
-    const now = Date.now();
-    updateClip(clip.id, { text, saved_at: now });
-    delete clipEdits[clip.id];
-    delete clipModified[clip.id];
+  function handleSave(clipId: string) {
+    let clip = getLocalClip(clipId, 'scratch');
+    if (clip !== undefined) {
+      const now = Date.now();
+      updateClip(clip.id, { text: clip.text, saved_at: now });
+      edits.delete(clipId);
+    }
   }
 
-  function handleCancel(clip: LocalClip) {
-    editingText = clip.text;
-    delete clipEdits[clip.id];
-    delete clipModified[clip.id];
-  }
-
-  function isModified(clip: LocalClip): boolean {
-    return !!clipModified[clip.id];
+  function handleCancel(clipId: string) {
+    edits.delete(clipId);
+    removeLocalClip(clipId, 'scratch');
+    editingText = getLocalClip(clipId)?.text ?? '';
   }
 </script>
 
@@ -385,7 +389,7 @@
           <div
             class="clip-box"
             class:clip-box-focused={focusClip === clip.id}
-            class:clip-box-modified={clipModified[clip.id] === true}
+            class:clip-box-modified={edits.has(clip.id)}
             class:clip-box-maximized={maximizedClip === clip.id}
             onclick={() => handleClick(clip.id)}
             onkeydown={(e) => {
@@ -407,13 +411,13 @@
                       {receivingStatus(clip)}
                       <span class="clip-id">({clip.id})</span>
                     </div>
-                  {:else if isModified(clip)}
+                  {:else if edits.has(clip.id)}
                     <div class="flex-row gap-xs">
                       <span class="clip-save">Save changes?</span>
                       <button
                         class="icon-btn footer-icon-btn footer-icon-btn--save"
                         aria-label="Save changes"
-                        onclick={() => handleSave(clip)}
+                        onclick={() => handleSave(clip.id)}
                       >
                         <svg
                           width="20"
@@ -431,7 +435,7 @@
                       <button
                         class="icon-btn footer-icon-btn footer-icon-btn--cancel"
                         aria-label="Revert changes"
-                        onclick={() => handleCancel(clip)}
+                        onclick={() => handleCancel(clip.id)}
                       >
                         <svg
                           width="20"
@@ -631,8 +635,9 @@
                   <CodeEditor
                     bind:value={editingText}
                     oninput={(code) => {
-                      clipEdits[clip.id] = code;
-                      clipModified[clip.id] = true;
+                      console.log('edits');
+                      edits.add(clip.id);
+                      updateLocalClip(clip.id, { text: code }, 'scratch');
                     }}
                   />
                 {/if}
@@ -645,7 +650,7 @@
                   <span class="clip-time">{formatTimeAgo(clip.saved_at)}</span>
                 {/if}
                 <div class="clip-preview">
-                  {@html truncateLines(clipEdits[clip.id] ?? clip.text, 4)}
+                  {@html truncateLines(getLocalClip(clip.id, 'scratch')?.text ?? clip.text, 4)}
                 </div>
               </div>
             {/if}
@@ -835,16 +840,6 @@
     padding-right: var(--space-xs);
   }
 
-  .qr-container {
-    flex: 1;
-    display: flex;
-    flex-direction: flex-end;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-md);
-    padding: var(--space-md);
-  }
-
   .qr-view-container {
     flex: 1;
     display: flex;
@@ -930,11 +925,6 @@
 
   .footer-icon-btn--cancel:hover {
     background: var(--error-soft-bg);
-  }
-
-  .footer-icon-btn--disabled {
-    opacity: 0.3;
-    pointer-events: none;
   }
 
   .snackbar-root {
