@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { smartBack } from '$lib/navigation';
   import { onMount } from 'svelte';
   import { clipState, modalState, stateInitial } from '$lib/api/store';
   import { createClip } from '$lib/api/client';
@@ -115,7 +116,7 @@
 
   function handleBrowseClick() {
     if (fromClipId) {
-      goto(`/list?clip={fromClipId}`);
+      smartBack(`/list?clip=${fromClipId}`);
     } else {
       chooserMode = true;
     }
@@ -127,7 +128,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </svelte:head>
 
-<Header linkMode={(chooserMode || fromClipId) ? 'hide' : 'link'} />
+<Header linkMode={chooserMode || fromClipId ? 'hide' : 'link'} />
 
 <main class="app-main">
   {#if chooserMode}
