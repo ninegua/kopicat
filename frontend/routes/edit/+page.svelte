@@ -10,7 +10,7 @@
   import CreateForm from '$lib/components/CreateForm.svelte';
   import GridView from '$lib/components/GridView.svelte';
   import Footer from '$lib/components/Footer.svelte';
-  import type { LocalClip } from '$lib/api/store';
+  import type { LocalClip } from '$lib/api/local-store';
 
   let serverError = $state<string | null>(null);
   let loading = $state(false);

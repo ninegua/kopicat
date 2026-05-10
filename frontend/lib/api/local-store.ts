@@ -1,4 +1,9 @@
-import type { LocalClip } from './store';
+export interface LocalClip {
+  id: string;
+  text: string;
+  saved_at: number;
+  receiving?: boolean;
+}
 import { generateClipId } from '$lib/words';
 import { generatePassword } from '$lib/crypto';
 

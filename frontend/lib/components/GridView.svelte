@@ -1,7 +1,7 @@
 <script lang="ts">
   import { SvelteSet } from 'svelte/reactivity';
   import { goto } from '$app/navigation';
-  import type { LocalClip } from '$lib/api/store';
+  import type { LocalClip } from '$lib/api/local-store';
   import { headerClipCount } from '$lib/api/store';
   import { renderQR } from '$lib/qr';
   import { flip } from 'svelte/animate';

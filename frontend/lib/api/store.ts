@@ -8,13 +8,6 @@ export interface ModalState {
   successMessage: string | null;
 }
 
-export interface LocalClip {
-  id: string;
-  text: string;
-  saved_at: number;
-  receiving?: boolean;
-}
-
 export interface ClipState {
   clipId: string | null;
   decryptedText: string | null;
