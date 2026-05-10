@@ -27,6 +27,9 @@
     if (isSend) {
       sendMode = true;
     }
+    if (url.searchParams.get('chooser') === 'true') {
+      chooserMode = true;
+    }
     if (editClipId) {
       const clip = getLocalClip(editClipId);
       if (clip) {

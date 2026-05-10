@@ -9,10 +9,13 @@
 
   let targetClip = $derived($clipState.clipId ?? '');
 
-  // TODO
   function handleChooseClick(e: MouseEvent) {
     e.stopPropagation();
-    goto('/list');
+    if (targetClip) {
+      goto(`/edit?chooser=true&send=${targetClip}`);
+    } else {
+      goto('/edit?chooser=true');
+    }
   }
 
   function handleReceiveClick(e: MouseEvent) {

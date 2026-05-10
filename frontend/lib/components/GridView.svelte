@@ -56,7 +56,8 @@
 
   function getClipsLength(): number {
     const deleted = pendingDeletes.length;
-    return clips.length - deleted;
+    const filtered = onChoose ? clips.filter((c) => !c.receiving) : clips;
+    return filtered.length - deleted;
   }
 
   function updateClip(id: string, updates: Partial<LocalClip>) {
@@ -93,6 +94,9 @@
     const visible = getClips();
     if (maximizedClip) {
       return visible.filter((c) => c.id === maximizedClip);
+    }
+    if (onChoose) {
+      return rearrange(visible.filter((c) => !c.receiving));
     }
     return rearrange(visible);
   });

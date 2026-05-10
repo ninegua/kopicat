@@ -84,7 +84,7 @@
           </a>
         {:else}
           <span class="clip-count">
-            <span>{$headerClipCount.total} saved {clipWord($headerClipCount.total)}</span>
+            <span>{$headerClipCount.total} {clipWord($headerClipCount.total)} on device</span>
             {#if $headerClipCount.unsaved > 0}
               <span class="unsaved-count"
                 >{$headerClipCount.unsaved} unsaved {clipWord($headerClipCount.unsaved)}</span
