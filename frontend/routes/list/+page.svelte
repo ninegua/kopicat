@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation';
   import { clipState, modalState } from '$lib/api/store';
   import { generateClipId } from '$lib/words';
-  import { addLocalClip } from '$lib/api/local-store';
+  import { addLocalClip, newReceivingClip } from '$lib/api/local-store';
   import Header from '$lib/components/Header.svelte';
   import GridView from '$lib/components/GridView.svelte';
   import ShareCard from '$lib/components/ShareCard.svelte';
@@ -26,6 +26,12 @@
     focusClipId = id;
   }
 
+  function handleReceive() {
+    const clip = newReceivingClip(location.origin);
+    window.dispatchEvent(new StorageEvent('storage', { key: 'copycat_clips' }));
+    focusClipId = clip.id;
+  }
+
   function handleShare(clip: { text: string }) {
     clipState.update((s) => ({ ...s, prefillText: clip.text }));
     goto('/edit');
@@ -37,7 +43,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </svelte:head>
 
-<Header onReset={() => goto('/')} linkMode="show" showAddNew onAddNew={handleAddNew} />
+<Header onReset={() => goto('/')} linkMode="show" listMode onAddNew={handleAddNew} onReceive={handleReceive} />
 
 <main class="app-main">
   {#if $modalState.showModal === 'share' && $modalState.shareUrl}

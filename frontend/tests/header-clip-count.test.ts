@@ -127,21 +127,21 @@ describe('Header add new button', () => {
     vi.clearAllMocks();
   });
 
-  it('renders add-new button when showAddNew is true', () => {
-    render(Header, { props: { linkMode: 'show', showAddNew: true } });
+  it('renders add-new button when listMode is true', () => {
+    render(Header, { props: { linkMode: 'show', listMode: true } });
     const btn = screen.getByRole('button', { name: /add new clip/i });
     expect(btn).toBeInTheDocument();
   });
 
-  it('hides add-new button when showAddNew is false', () => {
-    render(Header, { props: { linkMode: 'show', showAddNew: false } });
+  it('hides add-new button when listMode is false', () => {
+    render(Header, { props: { linkMode: 'show', listMode: false } });
     expect(screen.queryByRole('button', { name: /add new clip/i })).not.toBeInTheDocument();
   });
 
   it('calls onAddNew when clicked', async () => {
     const onAddNew = vi.fn();
     render(Header, {
-      props: { linkMode: 'show', showAddNew: true, onAddNew },
+      props: { linkMode: 'show', listMode: true, onAddNew },
     });
     const btn = screen.getByRole('button', { name: /add new clip/i });
     await fireEvent.click(btn);
@@ -151,7 +151,7 @@ describe('Header add new button', () => {
   it('applies animation class on click then removes it', async () => {
     const onAddNew = vi.fn();
     render(Header, {
-      props: { linkMode: 'show', showAddNew: true, onAddNew },
+      props: { linkMode: 'show', listMode: true, onAddNew },
     });
     const btn = screen.getByRole('button', { name: /add new clip/i });
     expect(btn).not.toHaveClass('add-new-btn-animate');

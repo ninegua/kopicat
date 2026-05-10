@@ -5,21 +5,30 @@
   let {
     onReset,
     linkMode = 'link',
-    showAddNew = false,
+    listMode = false,
     onAddNew,
+    onReceive,
   }: {
     onReset?: () => void;
     linkMode?: 'link' | 'show' | 'hide';
-    showAddNew?: boolean;
+    listMode?: boolean;
     onAddNew?: () => void;
+    onReceive?: () => void;
   } = $props();
 
   let animateAdd = $state(false);
+  let animateReceive = $state(false);
 
   function handleAddNew() {
     animateAdd = true;
     setTimeout(() => (animateAdd = false), 300);
     onAddNew?.();
+  }
+
+  function handleReceive() {
+    animateReceive = true;
+    setTimeout(() => (animateReceive = false), 300);
+    onReceive?.();
   }
 
   function clipWord(n: number): string {
@@ -40,20 +49,21 @@
   });
 </script>
 
-<header class="header">
-  <div class="header-inner">
+<header class="header" >
+  <div class="header-inner" class:header--list={listMode}>
+    {#if !listMode}
     <a href="/" class="logo" tabindex="0" role="button" aria-label="Home" onclick={onReset}>
       <img src="/kopicat-logo.png" alt="KopiCat" class="logo-img" />
       <span class="logo-text">KopiCat</span>
     </a>
+    {:else}
     <div class="header-actions">
-      {#if showAddNew}
         <button
           type="button"
           class="add-new-btn"
           class:add-new-btn-animate={animateAdd}
           onclick={handleAddNew}
-          title="Add new clip"
+          title="New clip"
         >
           <svg
             width="20"
@@ -71,7 +81,31 @@
             <line x1="9" y1="14" x2="15" y2="14" />
           </svg>
         </button>
+        <button
+          type="button"
+          class="receive-btn"
+          class:receive-btn-animate={animateReceive}
+          onclick={handleReceive}
+          title="New receive"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+            <polyline points="16 11 12 15 8 11" />
+            <line x1="12" y1="2" x2="12" y2="15" />
+          </svg>
+        </button>
+      </div>
       {/if}
+      <div>
       {#if linkMode !== 'hide' && $headerClipCount.total > 0}
         {#if linkMode === 'link'}
           <a href="/list" class="clip-count clip-count--link">
@@ -128,6 +162,10 @@
     justify-content: space-between;
     align-items: flex-end;
     gap: var(--space-md);
+    &.header--list {
+      max-width: 600px;
+      padding: var(--space-sm) var(--space-xs) 0 var(--space-xs);
+    }
   }
 
   .logo {
@@ -180,6 +218,30 @@
     display: flex;
     align-items: flex-end;
     gap: var(--space-sm);
+  }
+
+  .receive-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: var(--space-xs);
+    border-radius: var(--radius-sm);
+    transition:
+      color 0.15s,
+      transform 0.1s;
+  }
+
+  .receive-btn:hover {
+    color: var(--accent);
+    background: var(--hover-bg);
+  }
+
+  .receive-btn-animate {
+    animation: add-bounce 0.3s ease;
   }
 
   .add-new-btn {
