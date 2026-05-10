@@ -110,19 +110,14 @@
         {#if linkMode === 'link'}
           <a href="/list" class="clip-count clip-count--link">
             <span>{$headerClipCount.total} {clipWord($headerClipCount.total)} on device</span>
-            {#if $headerClipCount.unsaved > 0}
-              <span class="unsaved-count"
-                >{$headerClipCount.unsaved} unsaved {clipWord($headerClipCount.unsaved)}</span
-              >
-            {/if}
           </a>
         {:else}
           <span class="clip-count">
-            <span>{$headerClipCount.total} {clipWord($headerClipCount.total)} on device</span>
+            <span>{$headerClipCount.total} {clipWord($headerClipCount.total)}</span>
             {#if $headerClipCount.unsaved > 0}
-              <span class="unsaved-count"
-                >{$headerClipCount.unsaved} unsaved {clipWord($headerClipCount.unsaved)}</span
-              >
+              <span class="unsaved-count">({$headerClipCount.unsaved} unsaved)</span>
+            {:else}
+              <span>on device</span>
             {/if}
           </span>
         {/if}
@@ -190,7 +185,6 @@
   }
 
   .clip-count {
-    display: flex;
     flex-direction: column;
     align-items: flex-end;
     color: var(--text-muted);
