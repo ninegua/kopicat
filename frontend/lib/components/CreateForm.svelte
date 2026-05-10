@@ -3,6 +3,7 @@
   import { generatePassword } from '$lib/crypto';
   import { clipState } from '$lib/api/store';
   import { getLocalClips } from '$lib/api/local-store';
+  import CodeEditor from './CodeEditor.svelte';
 
   let {
     onCreate,
@@ -144,13 +145,7 @@
 
 <div class="card">
   <div class="card-textarea-group">
-    <textarea
-      id="clip-text"
-      bind:value={text}
-      placeholder="Enter your text here..."
-      class="card-textarea"
-      oninput={handleInput}
-    ></textarea>
+    <CodeEditor bind:value={text} oninput={handleInput} />
     <span class="char-count">{charCount} characters</span>
   </div>
 

@@ -70,7 +70,7 @@
   .code-editor {
     flex: 1;
     overflow-y: auto;
-    min-height: 0;
+    min-height: 192px;
     font-family: monospace;
     font-size: 0.8rem;
     line-height: 1.5;
