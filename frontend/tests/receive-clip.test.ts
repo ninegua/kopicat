@@ -216,7 +216,8 @@ describe('pollReceivingClip — successful receive', () => {
 
     await waitFor(() => {
       const updatedClip = getLocalClips().find((c) => c.id === clipId);
-      expect(updatedClip!.saved_at).toBeGreaterThan(beforeCreate);
+      expect(updatedClip!.saved_at).toBe(beforeCreate);
+      expect(updatedClip!.last_modified ?? 0).toBeGreaterThan(beforeCreate);
     });
   });
 

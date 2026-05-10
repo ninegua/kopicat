@@ -2,8 +2,10 @@ export interface LocalClip {
   id: string;
   text: string;
   saved_at: number;
+  last_modified?: number;
   receiving?: boolean;
 }
+
 import { generateClipId } from '$lib/words';
 import { generatePassword } from '$lib/crypto';
 
@@ -62,7 +64,7 @@ export function addLocalClip(clip: LocalClip, purpose?: 'scratch'): LocalClip[] 
   const clips = getCache();
   const exists = clips.findIndex((c) => c.id === clip.id);
   if (exists !== -1) {
-    clips[exists] = { ...clips[exists], ...clip, saved_at: Date.now() };
+    clips[exists] = { ...clips[exists], ...clip, last_modified: Date.now() };
   } else {
     clips.push({ ...clip, saved_at: Date.now() });
   }
@@ -104,7 +106,7 @@ export function updateLocalClip(
     const clips = getCache();
     const index = clips.findIndex((c) => c.id === id);
     if (index !== -1) {
-      let clip = { ...clips[index], ...updates, saved_at: Date.now() };
+      let clip = { ...clips[index], ...updates, last_modified: Date.now() };
       clips[index] = clip;
       writeClips(clips);
       return clip;

@@ -164,11 +164,10 @@
       const decryptedText = await decrypt(remoteClip.blob, password);
 
       const now = Date.now();
-      const newClip: LocalClip = { id, text: decryptedText, saved_at: now, receiving: false };
-      updateClip(clip.id, newClip);
+      updateClip(clip.id, { text: decryptedText, last_modified: now, receiving: false });
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : 'Decryption failed';
-      updateClip(clip.id, { text: errorMessage, saved_at: Date.now() });
+      updateClip(clip.id, { text: errorMessage, last_modified: Date.now() });
     }
   }
 
@@ -365,7 +364,7 @@
     let clip = getLocalClip(clipId, 'scratch');
     if (clip !== undefined) {
       const now = Date.now();
-      updateClip(clip.id, { text: clip.text, saved_at: now });
+      updateClip(clip.id, { text: clip.text, last_modified: now });
       edits.delete(clipId);
     }
   }
@@ -453,7 +452,9 @@
                       </button>
                     </div>
                   {:else}
-                    <span class="clip-time">Last modified {formatTimeAgo(clip.saved_at)}</span>
+                    <span class="clip-time"
+                      >Last modified {formatTimeAgo(clip.last_modified ?? clip.saved_at)}</span
+                    >
                   {/if}
                   <div class="flex-row gap-md">
                     <button
@@ -647,7 +648,8 @@
                 {#if clip.receiving}
                   <span class="clip-time clip-time--receiving">{receivingStatus(clip)}</span>
                 {:else}
-                  <span class="clip-time">{formatTimeAgo(clip.saved_at)}</span>
+                  <span class="clip-time">{formatTimeAgo(clip.last_modified ?? clip.saved_at)}</span
+                  >
                 {/if}
                 <div class="clip-preview">
                   {@html truncateLines(getLocalClip(clip.id, 'scratch')?.text ?? clip.text, 4)}
