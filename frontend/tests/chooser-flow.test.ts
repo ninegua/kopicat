@@ -222,8 +222,8 @@ describe('Edit page chooser workflow', () => {
 
     // Should switch back to CreateForm with the text prefilled
     await waitFor(() => {
-      const textarea = container.querySelector<HTMLTextAreaElement>('textarea');
-      expect(textarea?.value).toBe(testText);
+      const pre = container.querySelector<HTMLElement>('pre.code-editor');
+      expect(pre?.textContent).toBe(testText);
     });
 
     // Ensure the chooser button is still present after returning

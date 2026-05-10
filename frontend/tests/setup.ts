@@ -8,6 +8,48 @@ import type { Clip } from '$lib/icp/types';
 export const clipStore = new Map<string, Clip>();
 
 // ---------------------------------------------------------------------------
+// Mock: codejar (replaces contenteditable editor with a simple version for tests)
+// ---------------------------------------------------------------------------
+
+vi.mock('codejar', () => ({
+  CodeJar(editor: HTMLElement, highlight: (el: HTMLElement) => void) {
+    let onUpdateCallback: ((code: string) => void) | undefined;
+
+    const updateCode = (code: string, callOnUpdate = true) => {
+      editor.textContent = code;
+      highlight(editor);
+      if (callOnUpdate) onUpdateCallback?.(code);
+    };
+
+    const onUpdate = (cb: (code: string) => void) => {
+      onUpdateCallback = cb;
+    };
+
+    const toString = () => editor.textContent || '';
+
+    const keyupHandler = () => {
+      onUpdateCallback?.(toString());
+    };
+
+    editor.addEventListener('keyup', keyupHandler);
+
+    const destroy = () => {
+      editor.removeEventListener('keyup', keyupHandler);
+    };
+
+    return {
+      updateCode,
+      onUpdate,
+      toString,
+      save: () => ({ start: 0, end: 0, dir: '->' }),
+      restore: () => {},
+      recordHistory: () => {},
+      destroy,
+    };
+  },
+}));
+
+// ---------------------------------------------------------------------------
 // Mock: qrcode (not needed in tests)
 // ---------------------------------------------------------------------------
 

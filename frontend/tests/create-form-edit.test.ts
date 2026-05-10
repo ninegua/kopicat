@@ -8,9 +8,15 @@ import CreateForm from '$lib/components/CreateForm.svelte';
 // ---------------------------------------------------------------------------
 
 async function fillText(container: HTMLElement, text: string) {
-  const textarea = container.querySelector<HTMLTextAreaElement>('textarea');
-  expect(textarea).not.toBeNull();
-  await fireEvent.input(textarea!, { target: { value: text } });
+  const pre = container.querySelector<HTMLElement>('pre.code-editor');
+  expect(pre).not.toBeNull();
+
+  await waitFor(async () => {
+    pre!.textContent = text;
+    await fireEvent.keyUp(pre!, { key: 'a', code: 'KeyA' });
+    const charCount = container.querySelector('.char-count');
+    expect(charCount?.textContent).toContain(`${text.length} characters`);
+  });
 }
 
 function getCreateButton(): HTMLButtonElement {
@@ -60,8 +66,8 @@ describe('CreateForm share mode - text prefill', () => {
     const { container } = render(CreateForm, { onCreate, loading: false });
 
     await waitFor(() => {
-      const textarea = container.querySelector<HTMLTextAreaElement>('textarea');
-      expect(textarea?.value).toBe('Shared clip content');
+      const pre = container.querySelector<HTMLElement>('pre.code-editor');
+      expect(pre?.textContent).toBe('Shared clip content');
     });
   });
 
@@ -72,8 +78,8 @@ describe('CreateForm share mode - text prefill', () => {
     await fillText(container, 'Modified text content');
 
     await waitFor(() => {
-      const textarea = container.querySelector<HTMLTextAreaElement>('textarea');
-      expect(textarea?.value).toBe('Modified text content');
+      const pre = container.querySelector<HTMLElement>('pre.code-editor');
+      expect(pre?.textContent).toBe('Modified text content');
     });
   });
 
@@ -350,8 +356,10 @@ describe('CreateForm share mode - error handling', () => {
       expect(screen.queryByText('Please enter some text to share')).not.toBeInTheDocument();
     });
 
-    const textarea = container.querySelector<HTMLTextAreaElement>('textarea');
-    expect(textarea?.value).toBe('Filled by chooser');
+    await waitFor(() => {
+      const pre = container.querySelector<HTMLElement>('pre.code-editor');
+      expect(pre?.textContent).toBe('Filled by chooser');
+    });
   });
 });
 

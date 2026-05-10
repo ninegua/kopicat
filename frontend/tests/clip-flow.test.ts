@@ -14,9 +14,15 @@ import Page from '../routes/+page.svelte';
 // ---------------------------------------------------------------------------
 
 async function fillText(container: HTMLElement, text: string) {
-  const textarea = container.querySelector<HTMLTextAreaElement>('textarea');
-  expect(textarea).not.toBeNull();
-  await fireEvent.input(textarea!, { target: { value: text } });
+  const pre = container.querySelector<HTMLElement>('pre.code-editor');
+  expect(pre).not.toBeNull();
+
+  await waitFor(async () => {
+    pre!.textContent = text;
+    await fireEvent.keyUp(pre!, { key: 'a', code: 'KeyA' });
+    const charCount = container.querySelector('.char-count');
+    expect(charCount?.textContent).toContain(`${text.length} characters`);
+  });
 }
 
 function getCreateButton(): HTMLButtonElement {
@@ -74,10 +80,10 @@ describe('Clip creation flow', () => {
       prefillText: 'Test paste content',
     });
 
-    render(CreateForm, { props: { onCreate: vi.fn() } });
+    const { container } = render(CreateForm, { props: { onCreate: vi.fn() } });
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText(/enter your text/i)).toBeInTheDocument();
+      expect(container.querySelector('pre.code-editor')).toBeInTheDocument();
     });
   });
 
