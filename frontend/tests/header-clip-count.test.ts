@@ -23,7 +23,7 @@ describe('Header clip count', () => {
 
   it('hides count when total is 0 in link mode', () => {
     render(Header, { props: { linkMode: 'link' } });
-    expect(screen.queryByText(/saved clip/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/clip on device/)).not.toBeInTheDocument();
   });
 
   it('hides count when total is 0 in show mode', () => {
@@ -37,19 +37,19 @@ describe('Header clip count', () => {
     expect(screen.queryByText(/saved clip/)).not.toBeInTheDocument();
   });
 
-  it('shows "1 saved clip" in link mode', async () => {
+  it('shows "1 clip on device" in link mode', async () => {
     addLocalClip({ id: 'a', text: 'test', saved_at: Date.now() });
     render(Header, { props: { linkMode: 'link' } });
     await tick();
-    expect(screen.getByText('1 saved clip')).toBeInTheDocument();
+    expect(screen.getByText('1 clip on device')).toBeInTheDocument();
   });
 
-  it('shows "2 saved clips" in link mode', async () => {
+  it('shows "2 clips on device" in link mode', async () => {
     addLocalClip({ id: 'a', text: 'test1', saved_at: Date.now() });
     addLocalClip({ id: 'b', text: 'test2', saved_at: Date.now() });
     render(Header, { props: { linkMode: 'link' } });
     await tick();
-    expect(screen.getByText('2 saved clips')).toBeInTheDocument();
+    expect(screen.getByText('2 clips on device')).toBeInTheDocument();
   });
 
   it('shows unsaved count on a second line', async () => {
@@ -57,7 +57,7 @@ describe('Header clip count', () => {
     headerClipCount.update((c) => ({ ...c, unsaved: 1 }));
     render(Header, { props: { linkMode: 'link' } });
     await tick();
-    expect(screen.getByText('1 saved clip')).toBeInTheDocument();
+    expect(screen.getByText('1 clip on device')).toBeInTheDocument();
     expect(screen.getByText('1 unsaved clip')).toBeInTheDocument();
   });
 
@@ -68,7 +68,7 @@ describe('Header clip count', () => {
     headerClipCount.update((c) => ({ ...c, unsaved: 2 }));
     render(Header, { props: { linkMode: 'link' } });
     await tick();
-    expect(screen.getByText('3 saved clips')).toBeInTheDocument();
+    expect(screen.getByText('3 clips on device')).toBeInTheDocument();
     expect(screen.getByText('2 unsaved clips')).toBeInTheDocument();
   });
 
@@ -76,7 +76,7 @@ describe('Header clip count', () => {
     addLocalClip({ id: 'a', text: 'test', saved_at: Date.now() });
     render(Header, { props: { linkMode: 'link' } });
     await tick();
-    const link = screen.getByText('1 saved clip').closest('a');
+    const link = screen.getByText('1 clip on device').closest('a');
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', '/list');
   });
@@ -85,7 +85,7 @@ describe('Header clip count', () => {
     addLocalClip({ id: 'a', text: 'test', saved_at: Date.now() });
     render(Header, { props: { linkMode: 'link' } });
     await tick();
-    const link = screen.getByText('1 saved clip').closest('a')!;
+    const link = screen.getByText('1 clip on device').closest('a')!;
     expect(link).toHaveAttribute('href', '/list');
   });
 
@@ -102,13 +102,13 @@ describe('Header clip count', () => {
     addLocalClip({ id: 'a', text: 'test', saved_at: Date.now() });
     render(Header, { props: { linkMode: 'link' } });
     await tick();
-    expect(screen.getByText('1 saved clip')).toBeInTheDocument();
+    expect(screen.getByText('1 clip on device')).toBeInTheDocument();
 
     // Simulate adding a clip in another tab (or /view page) via storage event
     addLocalClip({ id: 'b', text: 'test2', saved_at: Date.now() });
     window.dispatchEvent(new StorageEvent('storage', { key: 'copycat_clips' }));
     await tick();
-    expect(screen.getByText('2 saved clips')).toBeInTheDocument();
+    expect(screen.getByText('2 clips on device')).toBeInTheDocument();
   });
 });
 

@@ -75,7 +75,7 @@
       {#if linkMode !== 'hide' && $headerClipCount.total > 0}
         {#if linkMode === 'link'}
           <a href="/list" class="clip-count clip-count--link">
-            <span>{$headerClipCount.total} saved {clipWord($headerClipCount.total)}</span>
+            <span>{$headerClipCount.total} {clipWord($headerClipCount.total)} on device</span>
             {#if $headerClipCount.unsaved > 0}
               <span class="unsaved-count"
                 >{$headerClipCount.unsaved} unsaved {clipWord($headerClipCount.unsaved)}</span
