@@ -5,9 +5,6 @@
   import Header from '$lib/components/Header.svelte';
   import IdleView from '$lib/components/IdleView.svelte';
   import Footer from '$lib/components/Footer.svelte';
-  import { watchHistory } from '$lib/navigation';
-
-  watchHistory();
 
   function handleReset() {
     modalState.set({ showModal: null, shareUrl: null, successMessage: null });

@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
-  import { smartBack } from '$lib/navigation';
+  import { goto, afterNavigate } from '$app/navigation';
   import { onMount } from 'svelte';
   import { clipState, modalState, stateInitial } from '$lib/api/store';
   import { createClip } from '$lib/api/client';
@@ -12,6 +11,22 @@
   import GridView from '$lib/components/GridView.svelte';
   import Footer from '$lib/components/Footer.svelte';
   import type { LocalClip } from '$lib/api/local-store';
+
+  let previousPath: string | null = null;
+
+  afterNavigate(({ from }) => {
+    console.log('previousPath', from);
+    previousPath = from?.url.pathname || null;
+  });
+
+  // Pop the navigation history, and rewrite the path.
+  export function smartBack(target: string) {
+    if (previousPath && window) {
+      // If we have an internal path tracked, use the browser back
+      window.history.back();
+    }
+    goto(target);
+  }
 
   let serverError = $state<string | null>(null);
   let loading = $state(false);
@@ -110,7 +125,7 @@
       goto('/list');
     } else {
       modalState.set({ showModal: 'share', shareUrl, successMessage: null });
-      goto(`/list?clip=${fromClipId ?? clipId}`);
+      smartBack(`/list?clip=${fromClipId ?? clipId}`);
     }
   }
 
