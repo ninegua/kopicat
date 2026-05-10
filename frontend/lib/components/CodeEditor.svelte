@@ -28,7 +28,7 @@
     if (editorEl && !jar) {
       import('codejar').then(({ CodeJar }) => {
         if (!editorEl) return;
-        jar = CodeJar(editorEl!, highlight, { tab: '  ' });
+        jar = CodeJar(editorEl!, highlight, { tab: '  ', addClosing: false });
         jar.updateCode(value);
         jar.onUpdate((code: string) => {
           if (syncing) return;
