@@ -43,7 +43,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </svelte:head>
 
-<Header onReset={() => goto('/')} linkMode="show" listMode onAddNew={handleAddNew} onReceive={handleReceive} />
+<Header
+  onReset={() => goto('/')}
+  linkMode="show"
+  listMode
+  onAddNew={handleAddNew}
+  onReceive={handleReceive}
+/>
 
 <main class="app-main">
   {#if $modalState.showModal === 'share' && $modalState.shareUrl}

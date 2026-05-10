@@ -343,7 +343,7 @@
     transform: translateY(0);
   }
 
-:global(.btn-row) {
+  :global(.btn-row) {
     display: flex;
     gap: var(--space-sm);
     padding: var(--space-md) 0;

@@ -49,15 +49,15 @@
   });
 </script>
 
-<header class="header" >
+<header class="header">
   <div class="header-inner" class:header--list={listMode}>
     {#if !listMode}
-    <a href="/" class="logo" tabindex="0" role="button" aria-label="Home" onclick={onReset}>
-      <img src="/kopicat-logo.png" alt="KopiCat" class="logo-img" />
-      <span class="logo-text">KopiCat</span>
-    </a>
+      <a href="/" class="logo" tabindex="0" role="button" aria-label="Home" onclick={onReset}>
+        <img src="/kopicat-logo.png" alt="KopiCat" class="logo-img" />
+        <span class="logo-text">KopiCat</span>
+      </a>
     {:else}
-    <div class="header-actions">
+      <div class="header-actions">
         <button
           type="button"
           class="add-new-btn"
@@ -104,8 +104,8 @@
           </svg>
         </button>
       </div>
-      {/if}
-      <div>
+    {/if}
+    <div>
       {#if linkMode !== 'hide' && $headerClipCount.total > 0}
         {#if linkMode === 'link'}
           <a href="/list" class="clip-count clip-count--link">

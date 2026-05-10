@@ -28,10 +28,7 @@
 <svelte:head>
   <title>KopiCat - Send a clip</title>
   <meta property="og:title" content="KopiCat - Send a clip" />
-  <meta
-    property="og:description"
-    content="Clipboard sharing via simple links."
-  />
+  <meta property="og:description" content="Clipboard sharing via simple links." />
   <meta property="og:url" content="https://kopicat.cc/send" />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="https://kopicat.cc/kopicat-192x192.png" />
@@ -41,10 +38,7 @@
 
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="KopiCat - Send a clip" />
-  <meta
-    name="twitter:description"
-    content="Clipboard sharing via simple links."
-  />
+  <meta name="twitter:description" content="Clipboard sharing via simple links." />
   <meta name="twitter:image" content="https://kopicat.cc/kopicat-192x192.png" />
 </svelte:head>
 

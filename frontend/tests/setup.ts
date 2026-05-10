@@ -188,9 +188,7 @@ window.matchMedia = vi.fn().mockImplementation((query: string) => ({
 // ---------------------------------------------------------------------------
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-(HTMLCanvasElement.prototype.getContext as any) = function (
-  contextId: string,
-) {
+(HTMLCanvasElement.prototype.getContext as any) = function (contextId: string) {
   if (contextId === '2d') {
     return {
       beginPath: () => {},

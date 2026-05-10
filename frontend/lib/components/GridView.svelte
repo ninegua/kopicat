@@ -521,42 +521,42 @@
                     </div>
                   </div>
                   <div class="qr-view-container">
-                  <div class="qr-view">
-                    <div class="flex-col-center gap-sm">
+                    <div class="qr-view">
+                      <div class="flex-col-center gap-sm">
+                        {#if matchBaseUrl(clip.text)}
+                          <span class="qr-header"
+                            >Ask sender to scan<br /><small class="color-muted">or visit link</small
+                            ></span
+                          >
+                          <button
+                            type="button"
+                            class="btn-primary qr-url-button"
+                            class:btn-primary--copied={copiedId == clip.id}
+                            onclick={(e) => {
+                              e.stopPropagation();
+                              navigator.clipboard.writeText(clip.text);
+                              copiedId = clip.id;
+                              setTimeout(() => {
+                                copiedId = null;
+                              }, 1500);
+                            }}>{clip.text}</button
+                          >
+                        {:else}
+                          <span class="error-banner qr-header">{clip.text}</span>
+                          <button
+                            type="button"
+                            class="btn-primary qr-url-button"
+                            onclick={(e) => {
+                              e.stopPropagation();
+                              handleSendAgain(clip);
+                            }}>Try again with a new code?</button
+                          >
+                        {/if}
+                      </div>
                       {#if matchBaseUrl(clip.text)}
-                        <span class="qr-header"
-                          >Ask sender to scan<br /><small class="color-muted">or visit link</small
-                          ></span
-                        >
-                        <button
-                          type="button"
-                          class="btn-primary qr-url-button"
-                          class:btn-primary--copied={copiedId == clip.id}
-                          onclick={(e) => {
-                            e.stopPropagation();
-                            navigator.clipboard.writeText(clip.text);
-                            copiedId = clip.id;
-                            setTimeout(() => {
-                              copiedId = null;
-                            }, 1500);
-                          }}>{clip.text}</button
-                        >
-                      {:else}
-                        <span class="error-banner qr-header">{clip.text}</span>
-                        <button
-                          type="button"
-                          class="btn-primary qr-url-button"
-                          onclick={(e) => {
-                            e.stopPropagation();
-                            handleSendAgain(clip);
-                          }}>Try again with a new code?</button
-                        >
+                        <canvas id="qr-{clip.id}" class="qr-canvas"></canvas>
                       {/if}
                     </div>
-                    {#if matchBaseUrl(clip.text)}
-                      <canvas id="qr-{clip.id}" class="qr-canvas"></canvas>
-                    {/if}
-                  </div>
                   </div>
                 {:else}
                   <div class="clip-box-header">
