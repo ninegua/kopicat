@@ -28,7 +28,7 @@
 
   $effect(() => {
     function update() {
-      const clips = getLocalClips();
+      const clips = getLocalClips().filter((c) => !c.receiving);
       headerClipCount.update((c) => ({ ...c, total: clips.length }));
     }
     update();
