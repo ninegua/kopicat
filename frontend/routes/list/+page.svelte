@@ -32,9 +32,8 @@
     focusClipId = clip.id;
   }
 
-  function handleShare(clip: { text: string }) {
-    clipState.update((s) => ({ ...s, prefillText: clip.text }));
-    goto('/edit');
+  function handleShare(clip: { id: string }) {
+    goto(`/edit?from=${clip.id}`);
   }
 </script>
 

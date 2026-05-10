@@ -136,7 +136,7 @@
   </div>
   {#if mode == 'send'}
     <button type="button" class="idle-link" onclick={handleChooseClick}
-      >Or do you want to <span class="idle-link-text">choose from saved clips</span>?</button
+      ><span class="idle-link-text">Or choose from saved clips</span>?</button
     >
   {:else}
     <button aria-label="not found" type="button" class="idle-link" onclick={handleReceiveClick}

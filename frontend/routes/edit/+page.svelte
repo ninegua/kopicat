@@ -16,13 +16,14 @@
   let loading = $state(false);
   let sendMode = $state(false);
   let chooserMode = $state(false);
+  let fromClipId = $state<string | null>(null);
 
   function initFromUrl() {
     serverError = null;
     let prefillText: string | null = $clipState.prefillText;
 
     const url = new URL(window.location.href);
-    const editClipId = url.searchParams.get('edit') || null;
+    fromClipId = url.searchParams.get('from') || null;
     const isSend = url.searchParams.get('send');
     if (isSend) {
       sendMode = true;
@@ -30,8 +31,8 @@
     if (url.searchParams.get('chooser') === 'true') {
       chooserMode = true;
     }
-    if (editClipId) {
-      const clip = getLocalClip(editClipId);
+    if (fromClipId) {
+      const clip = getLocalClip(fromClipId);
       if (clip) {
         prefillText = clip.text;
       }
@@ -108,7 +109,15 @@
       goto('/list');
     } else {
       modalState.set({ showModal: 'share', shareUrl, successMessage: null });
-      goto(`/list?clip=${clipId}`);
+      goto(`/list?clip=${fromClipId ?? clipId}`);
+    }
+  }
+
+  function handleBrowseClick() {
+    if (fromClipId) {
+      goto(`/list?clip={fromClipId}`);
+    } else {
+      chooserMode = true;
     }
   }
 </script>
@@ -118,7 +127,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </svelte:head>
 
-<Header linkMode="hide" />
+<Header linkMode={(chooserMode || fromClipId) ? 'hide' : 'link'} />
 
 <main class="app-main">
   {#if chooserMode}
@@ -129,7 +138,8 @@
       {serverError}
       onClearServerError={() => (serverError = null)}
       {loading}
-      onBrowseClips={() => (chooserMode = true)}
+      onBrowseClips={handleBrowseClick}
+      enableBrowse={fromClipId ? false : true}
     />
   {/if}
 </main>

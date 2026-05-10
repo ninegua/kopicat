@@ -11,6 +11,7 @@
     onBrowseClips,
     serverError,
     onClearServerError,
+    enableBrowse,
   }: {
     onCreate: (
       text: string,
@@ -23,6 +24,7 @@
     onBrowseClips?: () => void;
     serverError?: string | null;
     onClearServerError?: () => void;
+    enableBrowse?: boolean;
   } = $props();
 
   let saveLocal = $state(false);
@@ -239,24 +241,39 @@
   </div>
 </div>
 
-{#if hasLocalClips && onBrowseClips}
+{#if hasLocalClips}
   <button type="button" class="browse-clips-btn" onclick={onBrowseClips}>
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    >
-      <rect x="3" y="3" width="7" height="7" />
-      <rect x="14" y="3" width="7" height="7" />
-      <rect x="14" y="14" width="7" height="7" />
-      <rect x="3" y="14" width="7" height="7" />
-    </svg>
-    Browse saved clips
+    {#if enableBrowse}
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="5" y1="12" x2="19" y2="12" />
+        <polyline points="12 5 19 12 12 19" />
+      </svg>
+      Or choose from saved clips
+    {:else}
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="5" y1="12" x2="19" y2="12" />
+        <polyline points="12 5 5 12 12 19" />
+      </svg>
+      Back to saved clips
+    {/if}
   </button>
 {/if}
 
