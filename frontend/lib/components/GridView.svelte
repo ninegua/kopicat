@@ -478,9 +478,11 @@
                       </button>
                       <button
                         class="icon-btn footer-icon-btn"
-                        class:footer-icon-btn--disabled={clip.receiving}
                         aria-label={maximizedClip === clip.id ? 'Minimize' : 'Maximize'}
-                        disabled={clip.receiving}
+                        onclick={(e) => {
+                          e.stopPropagation();
+                          handleToggleMaximize(clip);
+                        }}
                       >
                         {#if maximizedClip === clip.id}
                           <svg
@@ -518,6 +520,7 @@
                       </button>
                     </div>
                   </div>
+                  <div class="qr-view-container">
                   <div class="qr-view">
                     <div class="flex-col-center gap-sm">
                       {#if matchBaseUrl(clip.text)}
@@ -553,6 +556,7 @@
                     {#if matchBaseUrl(clip.text)}
                       <canvas id="qr-{clip.id}" class="qr-canvas"></canvas>
                     {/if}
+                  </div>
                   </div>
                 {:else}
                   <div class="clip-box-header">
@@ -943,7 +947,7 @@
     padding-right: var(--space-xs);
   }
 
-  .qr-view {
+  .qr-container {
     flex: 1;
     display: flex;
     flex-direction: flex-end;
@@ -951,6 +955,25 @@
     justify-content: center;
     gap: var(--space-md);
     padding: var(--space-md);
+  }
+
+  .qr-view-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .qr-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+  }
+
+  .grid-wrapper.grid-maximized .qr-view {
+    max-width: 400px;
   }
 
   .qr-canvas {
