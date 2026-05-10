@@ -9,17 +9,19 @@ const config = {
 		version: {
 			name: 'static'
 		},
-		csp: {
-			mode: 'hash',
-			directives: {
-				'default-src': ['self'],
-				'script-src': ['self', ...(dev ? ['unsafe-inline'] : [])],
-				'style-src': ['self', 'unsafe-inline'],
-				'font-src': ['self'],
-				'img-src': ['self', 'data:', 'blob:'],
-				'connect-src': ['self', 'https://icp-api.io', ...(dev ? ['http://localhost:*'] : [])],
-			}
-		},
+		csp: dev
+			? undefined
+			: {
+				mode: 'hash',
+				directives: {
+					'default-src': ['self'],
+					'script-src': ['self'],
+					'style-src': ['self', 'unsafe-inline'],
+					'font-src': ['self'],
+					'img-src': ['self', 'data:', 'blob:'],
+					'connect-src': ['self', 'https://icp-api.io'],
+				},
+			},
 		adapter: adapter({
 			pages: 'dist',
 			assets: 'dist',

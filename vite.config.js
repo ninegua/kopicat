@@ -18,6 +18,7 @@ export default defineConfig({
 		}),
 	],
 	server: {
+		strictSSL: false,
 		proxy: {
 			'/api': {
 				target: 'http://backend.local.localhost:8000',
