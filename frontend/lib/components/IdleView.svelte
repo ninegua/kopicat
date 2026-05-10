@@ -157,11 +157,13 @@
     text-align: center;
     cursor: pointer;
     transition: all 0.2s ease;
+    box-shadow: var(--shadow-accent);
   }
 
   .card-small {
     width: 15rem;
     margin: var(--space-lg);
+    box-shadow: var(--shadow-accent);
   }
 
   .card-title-small {
@@ -194,8 +196,6 @@
   .card:hover {
     border-color: var(--accent);
     background: var(--bg-card-hover);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-card-hover);
   }
 
   .idle-icon {

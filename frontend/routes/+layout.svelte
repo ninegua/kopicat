@@ -65,7 +65,6 @@
     --amber-glow-strong: rgba(240, 160, 64, 0.45);
 
     --hover-bg: rgba(0, 0, 0, 0.04);
-    --shadow-card-hover: 0 4px 16px rgba(197, 150, 69, 0.1);
     --accent-bg-subtle: rgba(197, 150, 69, 0.08);
 
     --radius-sm: 6px;
@@ -289,7 +288,7 @@
     display: flex;
     padding: var(--space-md);
     background: var(--accent-gradient);
-    border: none;
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     color: white;
     font-size: var(--text-md);
@@ -332,15 +331,19 @@
     justify-content: center;
     gap: var(--space-sm);
     transition: all var(--duration-base);
+    box-shadow: var(--shadow-accent);
   }
 
   :global(.btn-secondary:hover) {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-glow);
+    box-shadow: var(--shadow-accent-hover);
+    transform: translateY(-1px);
   }
 
-  :global(.btn-row) {
+  :global(.btn-secondary:active:not(:disabled)) {
+    transform: translateY(0);
+  }
+
+:global(.btn-row) {
     display: flex;
     gap: var(--space-sm);
     padding: var(--space-md) 0;
