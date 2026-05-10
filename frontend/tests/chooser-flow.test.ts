@@ -132,7 +132,7 @@ describe('CreateForm browse saved clips button', () => {
 
     const onBrowseClips = vi.fn();
     render(CreateForm, {
-      props: { onCreate: vi.fn(), loading: false, onBrowseClips },
+      props: { onCreate: vi.fn(), loading: false, onBrowseClips, enableBrowse: true },
     });
 
     await waitFor(() => {
@@ -143,7 +143,7 @@ describe('CreateForm browse saved clips button', () => {
   it('does not show the button when no local clips exist', async () => {
     const onBrowseClips = vi.fn();
     render(CreateForm, {
-      props: { onCreate: vi.fn(), loading: false, onBrowseClips },
+      props: { onCreate: vi.fn(), loading: false, onBrowseClips, enableBrowse: true },
     });
 
     expect(screen.queryByText('Or choose from saved clips')).not.toBeInTheDocument();
@@ -157,7 +157,7 @@ describe('CreateForm browse saved clips button', () => {
 
     const onBrowseClips = vi.fn();
     render(CreateForm, {
-      props: { onCreate: vi.fn(), loading: false, onBrowseClips },
+      props: { onCreate: vi.fn(), loading: false, onBrowseClips, enableBrowse: true },
     });
 
     const btn = await screen.findByText('Or choose from saved clips');

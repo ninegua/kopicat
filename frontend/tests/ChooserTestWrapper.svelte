@@ -27,6 +27,7 @@
   <CreateForm
     onCreate={() => {}}
     loading={false}
+    enableBrowse={true}
     onBrowseClips={() => {
       chooserMode = true;
     }}

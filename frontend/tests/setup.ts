@@ -76,6 +76,7 @@ vi.mock('$app/paths', () => ({
 
 vi.mock('$app/navigation', () => ({
   goto: vi.fn(),
+  afterNavigate: vi.fn(),
 }));
 
 // ---------------------------------------------------------------------------
