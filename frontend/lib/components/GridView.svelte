@@ -703,9 +703,8 @@
     right: 0;
     bottom: 0;
     z-index: var(--z-modal);
-    display: flex;
-    flex-direction: column;
     background: var(--bg-primary);
+    overflow-y: auto;
   }
 
   .grid-container {
@@ -718,10 +717,6 @@
   .grid-container.grid-maximized {
     max-width: 100%;
     margin: 0;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
   }
 
   .empty-state {
@@ -740,10 +735,7 @@
   }
 
   .grid-container.grid-maximized .clips-grid {
-    grid-template-columns: 1fr;
-    grid-auto-rows: 1fr;
-    flex: 1;
-    min-height: 0;
+    display: block;
     width: 100%;
   }
 
@@ -775,11 +767,30 @@
   }
 
   .clip-box-maximized {
-    grid-column: 1 / -1;
-    grid-row: 1;
-    min-height: 0;
-    flex: 1;
-    height: 100%;
+    min-height: 100vh;
+    flex-shrink: 0;
+    height: auto;
+  }
+
+  .clip-box-maximized .clip-box-content {
+    flex: none;
+    height: auto;
+  }
+
+  .clip-box-maximized .clip-box-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--bg-card);
+    margin: calc(-1 * var(--space-sm)) calc(-1 * var(--space-sm)) 0;
+    padding: var(--space-sm) var(--space-sm) var(--space-xs);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+  }
+
+  .clip-box-maximized :global(.code-editor) {
+    overflow-y: visible;
+    flex: none;
+    height: auto;
     min-height: 0;
   }
 
