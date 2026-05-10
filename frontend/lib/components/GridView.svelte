@@ -401,19 +401,132 @@
           >
             {#if focusClip === clip.id}
               <div class="clip-box-content">
-                {#if clip.receiving}
-                  <div class="clip-box-header">
+                <div class="clip-box-header">
+                  {#if clip.receiving}
                     <div class="clip-time clip-time--receiving">
                       {receivingStatus(clip)}
                       <span class="clip-id">({clip.id})</span>
                     </div>
-                    <div class="flex-row gap-md">
+                  {:else if isModified(clip)}
+                    <div class="flex-row gap-xs">
+                      <span class="clip-save">Save changes?</span>
                       <button
-                        class="icon-btn footer-icon-btn footer-icon-btn--delete"
-                        aria-label="Delete clip"
+                        class="icon-btn footer-icon-btn footer-icon-btn--save"
+                        aria-label="Save changes"
+                        onclick={() => handleSave(clip)}
+                      >
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      </button>
+                      <button
+                        class="icon-btn footer-icon-btn footer-icon-btn--cancel"
+                        aria-label="Revert changes"
+                        onclick={() => handleCancel(clip)}
+                      >
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M3 7v6h6" />
+                          <path d="M21 17a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 13" />
+                        </svg>
+                      </button>
+                    </div>
+                  {:else}
+                    <span class="clip-time">Last modified {formatTimeAgo(clip.saved_at)}</span>
+                  {/if}
+                  <div class="flex-row gap-md">
+                    <button
+                      class="icon-btn footer-icon-btn footer-icon-btn--delete"
+                      aria-label="Delete clip"
+                      onclick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(clip);
+                      }}
+                    >
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M3 6h18" />
+                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                        <line x1="10" y1="11" x2="10" y2="17" />
+                        <line x1="14" y1="11" x2="14" y2="17" />
+                      </svg>
+                    </button>
+                    <button
+                      class="icon-btn footer-icon-btn"
+                      class:footer-icon-btn-copied={copiedId === clip.id}
+                      aria-label="Copy text to clipboard"
+                      onclick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(clip.text);
+                        copiedId = clip.id;
+                        setTimeout(() => {
+                          copiedId = null;
+                        }, 1500);
+                      }}
+                    >
+                      {#if copiedId === clip.id}
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          class="color-success"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      {:else}
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                        </svg>
+                      {/if}
+                    </button>
+                    {#if onShare && !clip.receiving}
+                      <button
+                        class="icon-btn footer-icon-btn"
+                        aria-label="Share clip"
                         onclick={(e) => {
                           e.stopPropagation();
-                          handleDelete(clip);
+                          onShare(clip);
                         }}
                       >
                         <svg
@@ -426,100 +539,56 @@
                           stroke-linecap="round"
                           stroke-linejoin="round"
                         >
-                          <path d="M3 6h18" />
-                          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                          <line x1="10" y1="11" x2="10" y2="17" />
-                          <line x1="14" y1="11" x2="14" y2="17" />
+                          <path d="M22 2L11 13" />
+                          <path d="M22 2l-7 20-4-9-9-4 20-7z" />
                         </svg>
                       </button>
-                      <button
-                        class="icon-btn footer-icon-btn"
-                        class:footer-icon-btn-copied={copiedId === clip.id}
-                        aria-label="Copy text to clipboard"
-                        onclick={(e) => {
-                          e.stopPropagation();
-                          navigator.clipboard.writeText(clip.text);
-                          copiedId = clip.id;
-                          setTimeout(() => {
-                            copiedId = null;
-                          }, 1500);
-                        }}
-                      >
-                        {#if copiedId === clip.id}
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            class="color-success"
-                            stroke="currentColor"
-                            stroke-width="2.5"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
-                        {:else}
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                          </svg>
-                        {/if}
-                      </button>
-                      <button
-                        class="icon-btn footer-icon-btn"
-                        aria-label={maximizedClip === clip.id ? 'Minimize' : 'Maximize'}
-                        onclick={(e) => {
-                          e.stopPropagation();
-                          handleToggleMaximize(clip);
-                        }}
-                      >
-                        {#if maximizedClip === clip.id}
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <path d="M4 14h6v6" />
-                            <path d="M20 10h-6V4" />
-                            <path d="M14 10l7-7" />
-                            <path d="M3 21l7-7" />
-                          </svg>
-                        {:else}
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <path d="M15 3h6v6" />
-                            <path d="M9 21H3v-6" />
-                            <path d="M21 3l-7 7" />
-                            <path d="M3 21l7-7" />
-                          </svg>
-                        {/if}
-                      </button>
-                    </div>
+                    {/if}
+                    <button
+                      class="icon-btn footer-icon-btn"
+                      aria-label={maximizedClip === clip.id ? 'Minimize' : 'Maximize'}
+                      onclick={(e) => {
+                        e.stopPropagation();
+                        handleToggleMaximize(clip);
+                      }}
+                    >
+                      {#if maximizedClip === clip.id}
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M4 14h6v6" />
+                          <path d="M20 10h-6V4" />
+                          <path d="M14 10l7-7" />
+                          <path d="M3 21l7-7" />
+                        </svg>
+                      {:else}
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M15 3h6v6" />
+                          <path d="M9 21H3v-6" />
+                          <path d="M21 3l-7 7" />
+                          <path d="M3 21l7-7" />
+                        </svg>
+                      {/if}
+                    </button>
                   </div>
+                </div>
+                {#if clip.receiving}
                   <div class="qr-view-container">
                     <div class="qr-view">
                       <div class="flex-col-center gap-sm">
@@ -559,187 +628,6 @@
                     </div>
                   </div>
                 {:else}
-                  <div class="clip-box-header">
-                    {#if isModified(clip)}
-                      <div class="flex-row gap-xs">
-                        <span class="clip-save">Save changes?</span>
-                        <button
-                          class="icon-btn footer-icon-btn footer-icon-btn--save"
-                          aria-label="Save changes"
-                          onclick={() => handleSave(clip)}
-                        >
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
-                        </button>
-                        <button
-                          class="icon-btn footer-icon-btn footer-icon-btn--cancel"
-                          aria-label="Revert changes"
-                          onclick={() => handleCancel(clip)}
-                        >
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <path d="M3 7v6h6" />
-                            <path d="M21 17a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 13" />
-                          </svg>
-                        </button>
-                      </div>
-                    {:else}
-                      <span class="clip-time">Last modified {formatTimeAgo(clip.saved_at)}</span>
-                    {/if}
-                    <div class="flex-row gap-md">
-                      <button
-                        class="icon-btn footer-icon-btn footer-icon-btn--delete"
-                        aria-label="Delete clip"
-                        onclick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(clip);
-                        }}
-                      >
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <path d="M3 6h18" />
-                          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                          <line x1="10" y1="11" x2="10" y2="17" />
-                          <line x1="14" y1="11" x2="14" y2="17" />
-                        </svg>
-                      </button>
-                      <button
-                        class="icon-btn footer-icon-btn"
-                        class:footer-icon-btn-copied={copiedId === clip.id}
-                        aria-label="Copy text to clipboard"
-                        onclick={(e) => {
-                          e.stopPropagation();
-                          navigator.clipboard.writeText(clip.text);
-                          copiedId = clip.id;
-                          setTimeout(() => {
-                            copiedId = null;
-                          }, 1500);
-                        }}
-                      >
-                        {#if copiedId === clip.id}
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2.5"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
-                        {:else}
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                          </svg>
-                        {/if}
-                      </button>
-                      {#if onShare}
-                        <button
-                          class="icon-btn footer-icon-btn"
-                          aria-label="Share clip"
-                          onclick={(e) => {
-                            e.stopPropagation();
-                            onShare(clip);
-                          }}
-                        >
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <path d="M22 2L11 13" />
-                            <path d="M22 2l-7 20-4-9-9-4 20-7z" />
-                          </svg>
-                        </button>
-                      {/if}
-                      <button
-                        class="icon-btn footer-icon-btn"
-                        aria-label={maximizedClip === clip.id ? 'Minimize' : 'Maximize'}
-                        onclick={(e) => {
-                          e.stopPropagation();
-                          handleToggleMaximize(clip);
-                        }}
-                      >
-                        {#if maximizedClip === clip.id}
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <path d="M4 14h6v6" />
-                            <path d="M20 10h-6V4" />
-                            <path d="M14 10l7-7" />
-                            <path d="M3 21l7-7" />
-                          </svg>
-                        {:else}
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <path d="M15 3h6v6" />
-                            <path d="M9 21H3v-6" />
-                            <path d="M21 3l-7 7" />
-                            <path d="M3 21l7-7" />
-                          </svg>
-                        {/if}
-                      </button>
-                    </div>
-                  </div>
                   <CodeEditor
                     bind:value={editingText}
                     oninput={(code) => {
