@@ -38,7 +38,7 @@
     <div class="card">
       <div class="card-header card-header--centered">
         <svg
-          class="icon-md-sm"
+          class="icon-md"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"

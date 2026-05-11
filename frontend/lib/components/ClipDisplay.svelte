@@ -103,10 +103,10 @@
       {#if burnAfterRead}
         <span class="burn-badge">Burned</span>
       {:else if isModified}
-        <div class="flex-row gap-xs">
+        <div class="flex-row gap-xs color-muted">
           <span class="clip-save">Save?</span>
           <button
-            class="icon-btn action-icon-btn"
+            class="icon-btn action-icon-btn color-success"
             class:action-icon-btn-saved={saveFeedback}
             onclick={handleSave}
             aria-label="Save changes"
@@ -139,7 +139,7 @@
             {/if}
           </button>
           <button
-            class="icon-btn action-icon-btn"
+            class="icon-btn action-icon-btn color-warning"
             onclick={onCancel}
             aria-label="Revert changes"
             title="Revert changes"
@@ -167,11 +167,11 @@
     <div class="clip-display-header-right">
       {#if maximized && showMarkdown}
         <button
-          class="icon-btn footer-icon-btn footer-icon-btn--markdown"
+          class="icon-btn footer-icon-btn footer-icon-btn--markdown color-muted"
           class:footer-icon-btn--markdown-active={markdownMode}
           onclick={() => (markdownMode = !markdownMode)}
-          aria-label={markdownMode ? 'Edit clip' : 'Preview markdown'}
-          title={markdownMode ? 'Edit clip' : 'Preview markdown'}
+          aria-label={markdownMode ? 'Preview off' : 'Preview on'}
+          title={markdownMode ? 'Preview off' : 'Preview on'}
         >
           <svg
             class="icon-md"
@@ -187,9 +187,9 @@
           </svg>
         </button>
       {/if}
-      {#if showShare && !(maximized && isMobile)}
+      {#if showShare && (!maximized || isMobile)}
         <button
-          class="icon-btn footer-icon-btn"
+          class="icon-btn footer-icon-btn color-muted"
           onclick={onShare}
           aria-label="Share clip"
           title="Share clip"
@@ -210,7 +210,7 @@
       {/if}
       {#if showSave}
         <button
-          class="icon-btn footer-icon-btn"
+          class="icon-btn footer-icon-btn color-muted"
           class:footer-icon-btn-saved={saveFeedback}
           onclick={handleSave}
           aria-label="Add to collection"
@@ -245,7 +245,7 @@
       {/if}
       {#if showDelete}
         <button
-          class="icon-btn footer-icon-btn footer-icon-btn--delete"
+          class="icon-btn footer-icon-btn footer-icon-btn--delete color-muted"
           onclick={onDelete}
           aria-label="Delete clip"
           title="Delete clip"
@@ -268,7 +268,7 @@
         </button>
       {/if}
       <button
-        class="icon-btn footer-icon-btn"
+        class="icon-btn footer-icon-btn color-muted"
         class:footer-icon-btn-copied={copyFeedback}
         onclick={handleCopy}
         aria-label="Copy text to clipboard"
@@ -303,7 +303,7 @@
       </button>
       {#if showMaximize}
         <button
-          class="icon-btn footer-icon-btn"
+          class="icon-btn footer-icon-btn color-muted"
           onclick={onToggleMaximize}
           aria-label={maximized ? 'Minimize' : 'Maximize'}
           title={maximized ? 'Minimize' : 'Maximize'}

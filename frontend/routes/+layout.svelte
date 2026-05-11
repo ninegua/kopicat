@@ -133,7 +133,6 @@
     /* Icon sizes */
     --icon-xs: 14px;
     --icon-sm: 20px;
-    --icon-md-sm: 24px;
     --icon-md: 24px;
     --icon-lg: 32px;
     --icon-xl: 64px;
@@ -503,12 +502,14 @@
   :global(.color-success) {
     color: var(--success);
   }
+  :global(.color-warning) {
+    color: var(--warning);
+  }
 
   /* --- Icon buttons --- */
   :global(.icon-btn) {
     background: none;
     border: none;
-    color: var(--text-muted);
     cursor: pointer;
     padding: var(--space-xs);
     border-radius: var(--radius-sm);
@@ -555,11 +556,6 @@
   :global(.icon-xs) {
     width: var(--icon-xs) !important;
     height: var(--icon-xs) !important;
-  }
-
-  :global(.icon-md-sm) {
-    width: var(--icon-md-sm) !important;
-    height: var(--icon-md-sm) !important;
   }
 
   :global(.icon-lg) {

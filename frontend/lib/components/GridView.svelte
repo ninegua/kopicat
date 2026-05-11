@@ -738,7 +738,7 @@
     gap: var(--space-xs);
     z-index: var(--z-dropdown);
     width: 18.75rem;
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
   }
 
   .snackbar {
