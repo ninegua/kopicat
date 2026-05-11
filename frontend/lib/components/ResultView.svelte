@@ -213,7 +213,7 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
   }
 
   .burn-badge {
@@ -225,7 +225,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    font-size: 0.7rem;
+    font-size: var(--text-xs);
   }
 
   .error-banner {

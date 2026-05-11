@@ -74,14 +74,14 @@
   }
 
   .notfound-title {
-    font-size: 1.25rem;
+    font-size: var(--text-2xl);
     font-weight: 700;
     margin-bottom: var(--space-sm);
   }
 
   .notfound-desc {
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: var(--text-md);
     line-height: 1.6;
     margin-bottom: var(--space-lg);
   }

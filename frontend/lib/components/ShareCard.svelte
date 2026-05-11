@@ -114,7 +114,7 @@
 
   .share-url-text {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: var(--mono-text-xs);
     color: var(--text-secondary);
     word-break: break-all;
     line-height: 1.5;

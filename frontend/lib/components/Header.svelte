@@ -169,7 +169,7 @@
     gap: var(--space-sm);
     color: var(--text-primary);
     font-weight: 700;
-    font-size: 1.15rem;
+    font-size: var(--text-xl);
     letter-spacing: -0.02em;
     line-height: 1;
   }
@@ -188,7 +188,7 @@
     flex-direction: column;
     align-items: flex-end;
     color: var(--text-muted);
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     user-select: none;
   }
 

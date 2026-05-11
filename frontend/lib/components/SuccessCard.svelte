@@ -60,7 +60,7 @@
     color: var(--text-primary);
     text-align: center;
     margin: 0;
-    font-size: 1rem;
+    font-size: var(--text-lg);
     line-height: 1.5;
   }
 

@@ -48,7 +48,7 @@
 
   .loading-text {
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: var(--text-base);
   }
 
   @keyframes spinner-rotate {

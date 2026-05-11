@@ -170,7 +170,7 @@
   }
 
   .card-title-small {
-    font-size: 0.85rem;
+    font-size: var(--text-base);
     color: var(--text-secondary);
   }
 
@@ -181,7 +181,7 @@
 
   .target-clip {
     color: var(--success);
-    font-size: 0.85rem;
+    font-size: var(--text-base);
     font-weight: 500;
     padding: var(--space-md);
   }
@@ -220,12 +220,12 @@
 
   .idle-keyboard {
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: var(--text-base);
   }
 
   .idle-link {
     color: var(--text-muted);
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     text-decoration: none;
     cursor: pointer;
     border: 0;
@@ -244,7 +244,7 @@
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     font-family: var(--font-mono);
-    font-size: 0.8rem;
+    font-size: var(--mono-text-sm);
     color: var(--text-secondary);
     line-height: 1.4;
   }

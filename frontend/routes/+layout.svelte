@@ -94,14 +94,20 @@
     --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
 
     /* Font sizes */
-    --text-xs: 0.7rem;
-    --text-sm: 0.8rem;
-    --text-base: 0.85rem;
-    --text-md: 0.9rem;
-    --text-lg: 1rem;
-    --text-xl: 1.1rem;
-    --text-2xl: 1.25rem;
+    --font-size-base: 16px;
+    --text-xs: 0.8rem;
+    --text-sm: 0.9rem;
+    --text-base: 0.9rem;
+    --text-md: 1rem;
+    --text-lg: 1.1rem;
+    --text-xl: 1.2rem;
+    --text-2xl: 1.3rem;
     --text-3xl: 2.5rem;
+
+    /* Monospace font sizes */
+    --mono-text-xs: 0.8rem;
+    --mono-text-sm: 0.9rem;
+    --mono-text-base: 0.9rem;
 
     /* Shadows */
     --shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.2);
@@ -142,7 +148,7 @@
   }
 
   :global(html) {
-    font-size: 16px;
+    font-size: var(--font-size-base);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -273,7 +279,7 @@
     border-radius: 0;
     color: var(--text-primary);
     font-family: monospace;
-    font-size: var(--text-sm);
+    font-size: var(--mono-text-sm);
     line-height: 1.5;
     resize: none;
     outline: none;
@@ -402,7 +408,7 @@
 
   :global(.clipped-text) {
     font-family: monospace;
-    font-size: var(--text-sm);
+    font-size: var(--mono-text-sm);
     background: transparent;
     padding-bottom: var(--space-md);
     color: var(--text-primary);

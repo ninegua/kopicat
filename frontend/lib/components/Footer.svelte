@@ -22,13 +22,13 @@
 
   .footer-text {
     color: var(--text-muted);
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     line-height: 1.5;
   }
 
   .footer-meta {
     color: var(--text-muted);
-    font-size: 0.7rem;
+    font-size: var(--text-xs);
     margin-top: var(--space-xs);
     opacity: 0.6;
   }

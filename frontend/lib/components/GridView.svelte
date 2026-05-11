@@ -723,7 +723,7 @@
     text-align: center;
     padding: var(--space-3xl) var(--space-md);
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: var(--text-md);
   }
 
   .clips-grid {
@@ -820,7 +820,7 @@
 
   .clip-preview {
     font-family: monospace;
-    font-size: 0.7rem;
+    font-size: var(--mono-text-xs);
     color: var(--text-primary);
     line-height: 1.4;
     flex: 1;
@@ -830,7 +830,7 @@
   }
 
   .clip-time {
-    font-size: 0.7rem;
+    font-size: var(--text-xs);
     color: var(--text-muted);
     flex-shrink: 0;
   }
@@ -846,7 +846,7 @@
   }
 
   .clip-save {
-    font-size: 0.7rem;
+    font-size: var(--text-xs);
     font-weight: 600;
     color: var(--accent-amber);
     flex-shrink: 0;
@@ -888,7 +888,7 @@
   .qr-url-button {
     flex: 1;
     font-family: var(--font-mono);
-    font-size: 0.7rem;
+    font-size: var(--mono-text-xs);
     font-weight: 200;
     color: var(--text-secondary);
     text-align: left;
@@ -950,7 +950,7 @@
     gap: var(--space-xs);
     z-index: var(--z-dropdown);
     width: 18.75rem;
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
   }
 
   .snackbar {

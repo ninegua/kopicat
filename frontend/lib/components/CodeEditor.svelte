@@ -73,7 +73,7 @@
     overflow-y: auto;
     min-height: 192px;
     font-family: monospace;
-    font-size: 0.8rem;
+    font-size: var(--mono-text-sm);
     line-height: 1.5;
     word-break: break-word;
     margin: 0;
