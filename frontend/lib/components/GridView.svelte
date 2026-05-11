@@ -77,27 +77,46 @@
   let focusMaximized = $state(false);
   let maximizedClip = $derived(focusMaximized ? focusClip : null);
 
+  // Initialize state from URL or prop.
   $effect(() => {
     if (focusClipId !== undefined && focusClipId !== null) {
       focusClip = focusClipId;
+      focusMaximized = false;
       return;
     }
     if (onChoose) {
       focusClip = null;
+      focusMaximized = false;
       return;
     }
     const url = new URL(window.location.href);
     focusClip = url.searchParams.get('clip') || null;
+    focusMaximized = url.searchParams.get('max') === '1';
   });
 
-  // Sync URL search param with focusClip state.
+  // Keep state in sync with browser back/forward navigation.
+  $effect(() => {
+    function onPopState() {
+      if (onChoose) return;
+      const url = new URL(window.location.href);
+      focusClip = url.searchParams.get('clip') || null;
+      focusMaximized = url.searchParams.get('max') === '1';
+    }
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  });
+
+  // Sync URL search params with focusClip and focusMaximized state.
   $effect(() => {
     if (onChoose) return;
     const url = new URL(window.location.href);
-    const current = url.searchParams.get('clip');
-    if (focusClip === current) return;
+    const currentClip = url.searchParams.get('clip');
+    const currentMax = url.searchParams.get('max') === '1';
+    if (focusClip === currentClip && focusMaximized === currentMax) return;
     if (focusClip) {
-      goto(`?clip=${focusClip}`, { replaceState: true, keepFocus: true, noScroll: true });
+      const query = focusMaximized ? `?clip=${focusClip}&max=1` : `?clip=${focusClip}`;
+      const isMaximizing = focusMaximized && !currentMax;
+      goto(query, { replaceState: !isMaximizing, keepFocus: true, noScroll: true });
     } else {
       goto(location.pathname, { replaceState: true, keepFocus: true, noScroll: true });
     }
@@ -283,11 +302,11 @@
   const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
   async function handleSendAgain(clip: LocalClip) {
-    if (focusClip === clip.id) {
-      focusClip = null;
-    }
     if (focusMaximized && focusClip === clip.id) {
       focusMaximized = false;
+    }
+    if (focusClip === clip.id) {
+      focusClip = null;
     }
     const existing = pendingDeletes.find((d) => d.id === clip.id);
     if (existing) {
@@ -347,11 +366,11 @@
   }
 
   async function handleDelete(clip: LocalClip) {
-    if (focusClip === clip.id) {
-      focusClip = null;
-    }
     if (focusMaximized && focusClip === clip.id) {
       focusMaximized = false;
+    }
+    if (focusClip === clip.id) {
+      focusClip = null;
     }
     const existing = pendingDeletes.find((d) => d.id === clip.id);
     if (existing) {
