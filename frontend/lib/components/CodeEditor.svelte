@@ -96,10 +96,6 @@
       e.stopPropagation();
       return;
     }
-    e.preventDefault();
-    e.stopPropagation();
-    const text = e.clipboardData?.getData('text/plain') ?? '';
-    document.execCommand('insertText', false, text);
   }}></pre>
 
 <style>
