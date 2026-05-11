@@ -18,13 +18,14 @@
     previousPath = from?.url.pathname || null;
   });
 
-  // Pop the navigation history, and rewrite the path.
+  // Pop the navigation history if possible.
   export function smartBack(target: string) {
     if (previousPath && window) {
       // If we have an internal path tracked, use the browser back
       window.history.back();
+    } else {
+      goto(target);
     }
-    goto(target);
   }
 
   let serverError = $state<string | null>(null);

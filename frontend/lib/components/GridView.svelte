@@ -89,6 +89,19 @@
     focusClip = url.searchParams.get('clip') || null;
   });
 
+  // Sync URL search param with focusClip state.
+  $effect(() => {
+    if (onChoose) return;
+    const url = new URL(window.location.href);
+    const current = url.searchParams.get('clip');
+    if (focusClip === current) return;
+    if (focusClip) {
+      goto(`?clip=${focusClip}`, { replaceState: true, keepFocus: true, noScroll: true });
+    } else {
+      goto(location.pathname, { replaceState: true, keepFocus: true, noScroll: true });
+    }
+  });
+
   const unsavedCount = $derived.by(() => {
     return getClips().filter((c) => edits.has(c.id)).length;
   });
