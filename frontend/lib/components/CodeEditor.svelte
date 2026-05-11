@@ -13,7 +13,13 @@
     readOnly?: boolean;
   }
 
-  let { value = $bindable(), oninput, onkeydown, class: className = '', readOnly = false }: Props = $props();
+  let {
+    value = $bindable(),
+    oninput,
+    onkeydown,
+    class: className = '',
+    readOnly = false,
+  }: Props = $props();
 
   let editorEl: HTMLElement | undefined = $state();
   let jar: any = $state();

@@ -100,10 +100,10 @@
 <div class="clip-display">
   <div class="clip-display-header" class:clip-display-header-sticky={maximized}>
     <div class="clip-display-header-left">
-      {#if burnAfterRead}
-        <span class="burn-badge">Burned</span>
-      {:else if isModified}
-        <div class="flex-row gap-xs color-muted">
+      <div class="flex-row gap-xs color-muted">
+        {#if burnAfterRead}
+          <span class="burn-badge">Burned</span>
+        {:else if isModified}
           <span class="clip-save">Save?</span>
           <button
             class="icon-btn action-icon-btn color-success"
@@ -114,7 +114,7 @@
           >
             {#if saveFeedback}
               <svg
-                class="icon-md"
+                class="icon-sm"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -126,7 +126,7 @@
               </svg>
             {:else}
               <svg
-                class="icon-md"
+                class="icon-sm"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -157,12 +157,12 @@
               <path d="M21 17a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 13" />
             </svg>
           </button>
-        </div>
-      {:else}
-        <span class="clip-time"
-          >Last modified {formatTimeAgo(lastModified ?? savedAt ?? Date.now())}</span
-        >
-      {/if}
+        {:else}
+          <span class="clip-time"
+            >Last modified {formatTimeAgo(lastModified ?? savedAt ?? Date.now())}</span
+          >
+        {/if}
+      </div>
     </div>
     <div class="clip-display-header-right">
       {#if maximized && showMarkdown}
@@ -369,7 +369,7 @@
         {@html marked.parse(text)}
       </div>
     {:else}
-       <CodeEditor bind:value={text} readOnly />
+      <CodeEditor bind:value={text} readOnly />
     {/if}
   </div>
 </div>
@@ -420,8 +420,6 @@
     align-items: center;
     gap: var(--space-xs);
     min-width: 0;
-    margin-top: auto;
-    margin-bottom: var(--space-xs);
   }
 
   .clip-display-header-right {
@@ -446,6 +444,8 @@
     font-size: var(--text-xs);
     color: var(--text-muted);
     flex-shrink: 0;
+    margin-top: 0;
+    margin-bottom: auto;
   }
 
   .clip-save {
