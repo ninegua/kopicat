@@ -18,6 +18,7 @@
 
   let animateAdd = $state(false);
   let animateReceive = $state(false);
+  let menuOpen = $state(false);
 
   function handleAddNew() {
     animateAdd = true;
@@ -46,6 +47,19 @@
     }
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
+  });
+
+  $effect(() => {
+    if (!menuOpen) return;
+    function onClick(e: MouseEvent) {
+      const target = e.target as HTMLElement;
+      const menu = target.closest('.menu-wrapper');
+      if (!menu) {
+        menuOpen = false;
+      }
+    }
+    document.addEventListener('click', onClick);
+    return () => document.removeEventListener('click', onClick);
   });
 </script>
 
@@ -121,6 +135,31 @@
         {/if}
       {/if}
     </div>
+      <div class="menu-wrapper">
+        <button
+          type="button"
+          class="hamburger-btn"
+          class:hamburger-btn-open={menuOpen}
+          onclick={() => (menuOpen = !menuOpen)}
+          aria-label="Menu"
+          aria-expanded={menuOpen}
+        >
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+        {#if menuOpen}
+          <nav class="menu-dropdown" aria-label="Main menu">
+            <a href="/" class="menu-item" onclick={() => (menuOpen = false)}>
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+              <span>Home</span>
+            </a>
+          </nav>
+        {/if}
+      </div>
   </div>
 </header>
 
@@ -156,7 +195,7 @@
     align-items: flex-end;
     gap: var(--space-md);
     &.header--list {
-      max-width: 600px;
+      max-width: var(--grid-max-width);
       padding: var(--space-sm) var(--space-xs) 0 var(--space-xs);
     }
   }
@@ -270,5 +309,84 @@
     100% {
       transform: scale(1);
     }
+  }
+
+  .menu-wrapper {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-xs);
+  }
+
+  .hamburger-btn {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-xs);
+    border-radius: var(--radius-sm);
+    transition: background 0.15s;
+    gap: 3.9px;
+    width: var(--icon-lg);
+    height: var(--icon-lg);
+  }
+
+  .hamburger-btn:hover {
+    background: var(--hover-bg);
+  }
+
+  .hamburger-line {
+    display: block;
+    width: var(--space-md);
+    height: 2px;
+    background: var(--text-primary);
+    border-radius: 1px;
+    transition:
+      transform 0.2s ease,
+      opacity 0.2s ease;
+  }
+
+  .hamburger-btn-open .hamburger-line:first-child {
+    transform: translateY(6px) rotate(45deg);
+  }
+
+  .hamburger-btn-open .hamburger-line:nth-child(2) {
+    opacity: 0;
+  }
+
+  .hamburger-btn-open .hamburger-line:last-child {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+
+  .menu-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: var(--space-xs) 0;
+    min-width: 140px;
+    z-index: var(--z-dropdown);
+  }
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+
+  .menu-item:hover {
+    background: var(--hover-bg);
   }
 </style>

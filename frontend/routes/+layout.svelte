@@ -144,7 +144,7 @@
     --modal-max-width: 420px;
     --header-max-width: 700px;
     --footer-max-width: 720px;
-    --grid-max-width: 600px;
+    --grid-max-width: 700px;
   }
 
   :global(*) {
