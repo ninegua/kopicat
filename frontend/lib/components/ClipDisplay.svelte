@@ -187,7 +187,7 @@
           </svg>
         </button>
       {/if}
-      {#if showShare && (!maximized || isMobile)}
+      {#if showShare && (!maximized || !isMobile)}
         <button
           class="icon-btn footer-icon-btn color-muted"
           onclick={onShare}
@@ -510,6 +510,7 @@
     line-height: 1.6;
     color: var(--text-primary);
     padding: var(--space-xs) 0;
+    background: var(--bg-card);
   }
 
   .markdown-preview :global(h1),
@@ -523,7 +524,7 @@
   }
 
   .markdown-preview :global(p) {
-    margin: var(--space-xs) 0;
+    margin: var(--space-md) 0;
   }
 
   .markdown-preview :global(ul),
