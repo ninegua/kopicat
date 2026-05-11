@@ -29,7 +29,6 @@
   } = $props();
 
   let copiedId = $state<string | null>(null);
-  let maximizedClip = $state<string | null>(null);
   let pendingDeletes = $state<{ id: string; text: string; timer: ReturnType<typeof setTimeout> }[]>(
     [],
   );
@@ -75,6 +74,8 @@
   }
 
   let focusClip = $state<string | null>(null);
+  let focusMaximized = $state(false);
+  let maximizedClip = $derived(focusMaximized ? focusClip : null);
 
   $effect(() => {
     if (focusClipId !== undefined && focusClipId !== null) {
@@ -285,8 +286,8 @@
     if (focusClip === clip.id) {
       focusClip = null;
     }
-    if (maximizedClip === clip.id) {
-      maximizedClip = null;
+    if (focusMaximized && focusClip === clip.id) {
+      focusMaximized = false;
     }
     const existing = pendingDeletes.find((d) => d.id === clip.id);
     if (existing) {
@@ -337,10 +338,11 @@
   }
 
   function handleToggleMaximize(clip: LocalClip) {
-    if (maximizedClip === clip.id) {
-      maximizedClip = null;
+    if (focusMaximized && focusClip === clip.id) {
+      focusMaximized = false;
     } else {
-      maximizedClip = clip.id;
+      focusClip = clip.id;
+      focusMaximized = true;
     }
   }
 
@@ -348,8 +350,8 @@
     if (focusClip === clip.id) {
       focusClip = null;
     }
-    if (maximizedClip === clip.id) {
-      maximizedClip = null;
+    if (focusMaximized && focusClip === clip.id) {
+      focusMaximized = false;
     }
     const existing = pendingDeletes.find((d) => d.id === clip.id);
     if (existing) {
