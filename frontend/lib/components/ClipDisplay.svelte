@@ -1,0 +1,571 @@
+<script lang="ts">
+  import '$lib/styles/highlight.css';
+  import hljs from 'highlight.js/lib/core';
+  import markdown from 'highlight.js/lib/languages/markdown';
+  import { marked } from 'marked';
+  import CodeEditor from './CodeEditor.svelte';
+
+  hljs.registerLanguage('markdown', markdown);
+
+  interface Props {
+    text: string;
+    lastModified?: number;
+    savedAt?: number;
+    burnAfterRead?: boolean;
+
+    showShare?: boolean;
+    showDelete?: boolean;
+    showSave?: boolean;
+    showEdit?: boolean;
+    showMarkdown?: boolean;
+    showMaximize?: boolean;
+
+    maximized?: boolean;
+    isModified?: boolean;
+    error?: string | null;
+
+    onTextChange?: (text: string) => void;
+    onShare?: () => void;
+    onDelete?: () => void;
+    onSave?: () => void;
+    onCancel?: () => void;
+    onCopy?: () => void;
+    onCopyError?: (msg: string) => void;
+    onToggleMaximize?: () => void;
+  }
+
+  let {
+    text = $bindable(),
+    lastModified,
+    savedAt,
+    burnAfterRead = false,
+    showShare = false,
+    showDelete = false,
+    showSave = false,
+    showEdit = false,
+    showMarkdown = false,
+    showMaximize = true,
+    maximized = false,
+    isModified = false,
+    error = null,
+    onTextChange,
+    onShare,
+    onDelete,
+    onSave,
+    onCancel,
+    onCopy,
+    onCopyError,
+    onToggleMaximize,
+  }: Props = $props();
+
+  let copyFeedback = $state(false);
+  let saveFeedback = $state(false);
+  let markdownMode = $state(false);
+
+  $effect(() => {
+    if (!maximized) {
+      markdownMode = false;
+    }
+  });
+
+  const highlightedText = $derived.by(() => {
+    if (!text) return '';
+    return hljs.highlight(text, { language: 'markdown' }).value;
+  });
+
+  async function handleCopy() {
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      copyFeedback = true;
+      setTimeout(() => (copyFeedback = false), 1500);
+      onCopy?.();
+    } catch {
+      onCopyError?.('Failed to copy to clipboard');
+    }
+  }
+
+  function handleSave() {
+    onSave?.();
+    saveFeedback = true;
+    setTimeout(() => (saveFeedback = false), 2000);
+  }
+
+  function formatTimeAgo(timestamp: number): string {
+    const diff = Date.now() - timestamp;
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (days > 0) return `${days}d ago`;
+    if (hours > 0) return `${hours}h ago`;
+    if (minutes > 0) return `${minutes}m ago`;
+    return 'just now';
+  }
+</script>
+
+<div class="clip-display">
+  <div class="clip-display-header">
+    <div class="clip-display-header-left">
+      {#if burnAfterRead}
+        <span class="burn-badge">Burned</span>
+      {:else if isModified}
+        <div class="flex-row gap-xs">
+          <span class="clip-save">Save?</span>
+          <button
+            class="icon-btn action-icon-btn"
+            class:action-icon-btn-saved={saveFeedback}
+            onclick={handleSave}
+            aria-label="Save changes"
+            title="Save changes"
+          >
+            {#if saveFeedback}
+              <svg
+                class="icon-md"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            {:else}
+              <svg
+                class="icon-md"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            {/if}
+          </button>
+          <button
+            class="icon-btn action-icon-btn"
+            onclick={onCancel}
+            aria-label="Revert changes"
+            title="Revert changes"
+          >
+            <svg
+              class="icon-md"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M3 7v6h6" />
+              <path d="M21 17a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 13" />
+            </svg>
+          </button>
+        </div>
+      {:else}
+        <span class="clip-time"
+          >Last modified {formatTimeAgo(lastModified ?? savedAt ?? Date.now())}</span
+        >
+      {/if}
+    </div>
+    <div class="clip-display-header-right">
+      {#if maximized && showMarkdown}
+        <button
+          class="icon-btn footer-icon-btn footer-icon-btn--markdown"
+          class:footer-icon-btn--markdown-active={markdownMode}
+          onclick={() => (markdownMode = !markdownMode)}
+          aria-label={markdownMode ? 'Edit clip' : 'Preview markdown'}
+          title={markdownMode ? 'Edit clip' : 'Preview markdown'}
+        >
+          <svg
+            class="icon-md"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+          </svg>
+        </button>
+      {:else if showDelete}
+        <button
+          class="icon-btn footer-icon-btn footer-icon-btn--delete"
+          onclick={onDelete}
+          aria-label="Delete clip"
+          title="Delete clip"
+        >
+          <svg
+            class="icon-md"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 6h18" />
+            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+            <line x1="10" y1="11" x2="10" y2="17" />
+            <line x1="14" y1="11" x2="14" y2="17" />
+          </svg>
+        </button>
+      {/if}
+      <button
+        class="icon-btn footer-icon-btn"
+        class:footer-icon-btn-copied={copyFeedback}
+        onclick={handleCopy}
+        aria-label="Copy text to clipboard"
+        title="Copy to clipboard"
+      >
+        {#if copyFeedback}
+          <svg
+            class="icon-md color-success"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        {:else}
+          <svg
+            class="icon-md"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+        {/if}
+      </button>
+      {#if showShare}
+        <button
+          class="icon-btn footer-icon-btn"
+          onclick={onShare}
+          aria-label="Share clip"
+          title="Share clip"
+        >
+          <svg
+            class="icon-md"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M22 2L11 13" />
+            <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+          </svg>
+        </button>
+      {/if}
+      {#if showSave && !isModified}
+        <button
+          class="icon-btn footer-icon-btn"
+          class:footer-icon-btn-saved={saveFeedback}
+          onclick={handleSave}
+          aria-label="Add to collection"
+          title="Add to collection"
+        >
+          {#if saveFeedback}
+            <svg
+              class="icon-md"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          {:else}
+            <svg
+              class="icon-md"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+          {/if}
+        </button>
+      {/if}
+      {#if showMaximize}
+        <button
+          class="icon-btn footer-icon-btn"
+          onclick={onToggleMaximize}
+          aria-label={maximized ? 'Minimize' : 'Maximize'}
+          title={maximized ? 'Minimize' : 'Maximize'}
+        >
+          {#if maximized}
+            <svg
+              class="icon-md"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M4 14h6v6" />
+              <path d="M20 10h-6V4" />
+              <path d="M14 10l7-7" />
+              <path d="M3 21l7-7" />
+            </svg>
+          {:else}
+            <svg
+              class="icon-md"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M15 3h6v6" />
+              <path d="M9 21H3v-6" />
+              <path d="M21 3l-7 7" />
+              <path d="M3 21l7-7" />
+            </svg>
+          {/if}
+        </button>
+      {/if}
+    </div>
+  </div>
+  {#if error}
+    <div class="error-banner clip-display-error">
+      <svg
+        class="icon-sm"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <line x1="15" y1="9" x2="9" y2="15" />
+        <line x1="9" y1="9" x2="15" y2="15" />
+      </svg>
+      <span>{error}</span>
+    </div>
+  {/if}
+  <div class="clip-display-body">
+    {#if showEdit && !markdownMode}
+      <CodeEditor bind:value={text} oninput={onTextChange} />
+    {:else if markdownMode && showMarkdown}
+      <div class="markdown-preview">
+        {@html marked.parse(text)}
+      </div>
+    {:else}
+      <pre class="clipped-text hljs">{@html highlightedText}</pre>
+    {/if}
+  </div>
+</div>
+
+<style>
+  .clip-display {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .clip-display-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-xs);
+    padding-bottom: var(--space-xs);
+    margin-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+  }
+
+  .clip-display-header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    min-width: 0;
+  }
+
+  .clip-display-header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    flex-shrink: 0;
+  }
+
+  .clip-display-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .clip-display-error {
+    margin-bottom: var(--space-sm);
+  }
+
+  .clip-time {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .clip-save {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--accent-amber);
+    flex-shrink: 0;
+    padding-right: var(--space-xs);
+  }
+
+  .burn-badge {
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--error-bg);
+    border: 1px solid var(--error-border);
+    border-radius: 100px;
+    color: var(--error);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: var(--text-xs);
+  }
+
+  .action-icon-btn-saved {
+    color: var(--success);
+    animation: copy-bounce 0.4s ease;
+  }
+
+  .footer-icon-btn-copied {
+    color: var(--accent);
+    animation: copy-bounce 0.4s ease;
+  }
+
+  .footer-icon-btn-saved {
+    color: var(--success);
+    animation: copy-bounce 0.4s ease;
+  }
+
+  .footer-icon-btn--delete:hover {
+    color: var(--error);
+    background: var(--error-bg);
+  }
+
+  .footer-icon-btn--markdown {
+    color: var(--text-muted);
+  }
+
+  .footer-icon-btn--markdown-active {
+    color: var(--accent-amber);
+  }
+
+  .footer-icon-btn--markdown:hover {
+    background: var(--accent-glow);
+  }
+
+  .markdown-preview {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 192px;
+    max-width: 800px;
+    margin: 0 auto;
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    color: var(--text-primary);
+    padding: var(--space-xs) 0;
+  }
+
+  .markdown-preview :global(h1),
+  .markdown-preview :global(h2),
+  .markdown-preview :global(h3),
+  .markdown-preview :global(h4),
+  .markdown-preview :global(h5),
+  .markdown-preview :global(h6) {
+    margin: var(--space-sm) 0;
+    font-weight: 600;
+  }
+
+  .markdown-preview :global(p) {
+    margin: var(--space-xs) 0;
+  }
+
+  .markdown-preview :global(ul),
+  .markdown-preview :global(ol) {
+    margin: var(--space-xs) 0;
+    padding-left: var(--space-md);
+  }
+
+  .markdown-preview :global(code) {
+    background: var(--bg-primary);
+    padding: 2px 4px;
+    border-radius: var(--radius-sm);
+    font-family: monospace;
+    font-size: var(--mono-text-sm);
+  }
+
+  .markdown-preview :global(pre) {
+    background: var(--bg-primary);
+    padding: var(--space-sm);
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+  }
+
+  .markdown-preview :global(pre code) {
+    background: transparent;
+    padding: 0;
+  }
+
+  .markdown-preview :global(blockquote) {
+    border-left: 3px solid var(--border-color);
+    margin: var(--space-xs) 0;
+    padding-left: var(--space-sm);
+    color: var(--text-muted);
+  }
+
+  .markdown-preview :global(a) {
+    color: var(--accent);
+  }
+
+  .markdown-preview :global(hr) {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: var(--space-sm) 0;
+  }
+
+  .markdown-preview :global(table) {
+    border-collapse: collapse;
+    width: 100%;
+    margin: var(--space-sm) 0;
+  }
+
+  .markdown-preview :global(th),
+  .markdown-preview :global(td) {
+    border: 1px solid var(--border-color);
+    padding: var(--space-xs);
+    text-align: left;
+  }
+
+  .markdown-preview :global(th) {
+    background: var(--bg-secondary);
+  }
+</style>

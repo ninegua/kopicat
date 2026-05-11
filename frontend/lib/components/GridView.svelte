@@ -16,8 +16,7 @@
   } from '$lib/api/local-store';
   import { fetchClip } from '$lib/api/client';
   import { decrypt } from '$lib/crypto';
-  import CodeEditor from './CodeEditor.svelte';
-  import { marked } from 'marked';
+  import ClipDisplay from './ClipDisplay.svelte';
 
   let {
     onChoose,
@@ -31,7 +30,6 @@
 
   let copiedId = $state<string | null>(null);
   let maximizedClip = $state<string | null>(null);
-  let markdownModeClip = $state<string | null>(null);
   let pendingDeletes = $state<{ id: string; text: string; timer: ReturnType<typeof setTimeout> }[]>(
     [],
   );
@@ -340,10 +338,8 @@
   function handleToggleMaximize(clip: LocalClip) {
     if (maximizedClip === clip.id) {
       maximizedClip = null;
-      markdownModeClip = null;
     } else {
       maximizedClip = clip.id;
-      markdownModeClip = null;
     }
   }
 
@@ -353,7 +349,6 @@
     }
     if (maximizedClip === clip.id) {
       maximizedClip = null;
-      markdownModeClip = null;
     }
     const existing = pendingDeletes.find((d) => d.id === clip.id);
     if (existing) {
@@ -422,215 +417,6 @@
           >
             {#if focusClip === clip.id}
               <div class="clip-box-content">
-                <div class="clip-box-header">
-                  {#if clip.receiving}
-                    <div class="clip-time clip-time--receiving">
-                      {receivingStatus(clip)}
-                      <!-- span class="clip-id">({clip.id})</span -->
-                    </div>
-                  {:else if edits.has(clip.id)}
-                    <div class="flex-row gap-xs">
-                      <span class="clip-save">Save?</span>
-                      <button
-                        class="icon-btn footer-icon-btn footer-icon-btn--save"
-                        aria-label="Save changes"
-                        onclick={() => handleSave(clip.id)}
-                      >
-                        <svg
-                          class="icon-md"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      </button>
-                      <button
-                        class="icon-btn footer-icon-btn footer-icon-btn--cancel"
-                        aria-label="Revert changes"
-                        onclick={() => handleCancel(clip.id)}
-                      >
-                        <svg
-                          class="icon-md"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <path d="M3 7v6h6" />
-                          <path d="M21 17a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 13" />
-                        </svg>
-                      </button>
-                    </div>
-                  {:else}
-                    <span class="clip-time"
-                      >Last modified {formatTimeAgo(clip.last_modified ?? clip.saved_at)}</span
-                    >
-                  {/if}
-                  <div class="flex-row gap-md">
-                    {#if maximizedClip === clip.id}
-                      <button
-                        class="icon-btn footer-icon-btn footer-icon-btn--markdown"
-                        class:footer-icon-btn--markdown-active={markdownModeClip === clip.id}
-                        aria-label={markdownModeClip === clip.id ? 'Edit clip' : 'Preview markdown'}
-                        onclick={(e) => {
-                          e.stopPropagation();
-                          if (markdownModeClip === clip.id) {
-                            markdownModeClip = null;
-                          } else {
-                            markdownModeClip = clip.id;
-                          }
-                        }}
-                      >
-                        <svg
-                          class="icon-md"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-                        </svg>
-                      </button>
-                    {:else}
-                      <button
-                        class="icon-btn footer-icon-btn footer-icon-btn--delete"
-                        aria-label="Delete clip"
-                        onclick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(clip);
-                        }}
-                      >
-                        <svg
-                          class="icon-md"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <path d="M3 6h18" />
-                          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                          <line x1="10" y1="11" x2="10" y2="17" />
-                          <line x1="14" y1="11" x2="14" y2="17" />
-                        </svg>
-                      </button>
-                    {/if}
-                    <button
-                      class="icon-btn footer-icon-btn"
-                      class:footer-icon-btn-copied={copiedId === clip.id}
-                      aria-label="Copy text to clipboard"
-                      onclick={(e) => {
-                        e.stopPropagation();
-                        navigator.clipboard.writeText(clip.text);
-                        copiedId = clip.id;
-                        setTimeout(() => {
-                          copiedId = null;
-                        }, 1500);
-                      }}
-                    >
-                      {#if copiedId === clip.id}
-                        <svg
-                          class="icon-md color-success"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      {:else}
-                        <svg
-                          class="icon-md"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                        </svg>
-                      {/if}
-                    </button>
-                    {#if onShare && !clip.receiving}
-                      <button
-                        class="icon-btn footer-icon-btn"
-                        aria-label="Share clip"
-                        onclick={(e) => {
-                          e.stopPropagation();
-                          onShare(clip);
-                        }}
-                      >
-                        <svg
-                          class="icon-md"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <path d="M22 2L11 13" />
-                          <path d="M22 2l-7 20-4-9-9-4 20-7z" />
-                        </svg>
-                      </button>
-                    {/if}
-                    <button
-                      class="icon-btn footer-icon-btn"
-                      aria-label={maximizedClip === clip.id ? 'Minimize' : 'Maximize'}
-                      onclick={(e) => {
-                        e.stopPropagation();
-                        handleToggleMaximize(clip);
-                      }}
-                    >
-                      {#if maximizedClip === clip.id}
-                        <svg
-                          class="icon-md"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <path d="M4 14h6v6" />
-                          <path d="M20 10h-6V4" />
-                          <path d="M14 10l7-7" />
-                          <path d="M3 21l7-7" />
-                        </svg>
-                      {:else}
-                        <svg
-                          class="icon-md"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <path d="M15 3h6v6" />
-                          <path d="M9 21H3v-6" />
-                          <path d="M21 3l-7 7" />
-                          <path d="M3 21l7-7" />
-                        </svg>
-                      {/if}
-                    </button>
-                  </div>
-                </div>
                 {#if clip.receiving}
                   <div class="qr-view-container">
                     <div class="qr-view">
@@ -670,17 +456,27 @@
                       {/if}
                     </div>
                   </div>
-                {:else if maximizedClip === clip.id && markdownModeClip === clip.id}
-                  <div class="markdown-preview">
-                    {@html marked.parse(editingText)}
-                  </div>
                 {:else}
-                  <CodeEditor
-                    bind:value={editingText}
-                    oninput={(code) => {
+                  <ClipDisplay
+                    bind:text={editingText}
+                    lastModified={clip.last_modified}
+                    savedAt={clip.saved_at}
+                    showEdit={true}
+                    showDelete={true}
+                    showShare={!!onShare}
+                    showMarkdown={true}
+                    showMaximize={true}
+                    maximized={maximizedClip === clip.id}
+                    isModified={edits.has(clip.id)}
+                    onTextChange={(code) => {
                       edits.add(clip.id);
                       updateLocalClip(clip.id, { text: code }, 'scratch');
                     }}
+                    onDelete={() => handleDelete(clip)}
+                    onShare={() => onShare?.(clip)}
+                    onSave={() => handleSave(clip.id)}
+                    onCancel={() => handleCancel(clip.id)}
+                    onToggleMaximize={() => handleToggleMaximize(clip)}
                   />
                 {/if}
               </div>
@@ -816,16 +612,6 @@
     height: auto;
   }
 
-  .clip-box-maximized .clip-box-header {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    background: var(--bg-card);
-    margin: calc(-1 * var(--space-sm)) calc(-1 * var(--space-sm)) 0;
-    padding: var(--space-sm) var(--space-sm) var(--space-xs);
-    border-radius: var(--radius-md) var(--radius-md) 0 0;
-  }
-
   .clip-box-maximized :global(.code-editor) {
     overflow-y: visible;
     flex: none;
@@ -886,14 +672,6 @@
   }
 */
 
-  .clip-save {
-    font-size: var(--text-xs);
-    font-weight: 600;
-    color: var(--accent-amber);
-    flex-shrink: 0;
-    padding-right: var(--space-xs);
-  }
-
   .qr-view-container {
     flex: 1;
     display: flex;
@@ -942,141 +720,6 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
-  }
-
-  .clip-box-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-xs);
-    padding-bottom: var(--space-xs);
-    margin-bottom: var(--space-sm);
-    border-bottom: 1px solid var(--border-color);
-    flex-shrink: 0;
-  }
-
-  .footer-icon-btn-copied {
-    color: var(--accent);
-    animation: copy-bounce 0.4s ease;
-  }
-
-  .footer-icon-btn--delete:hover {
-    color: var(--error);
-    background: var(--error-bg);
-  }
-
-  .footer-icon-btn--markdown {
-    color: var(--text-muted);
-  }
-
-  .footer-icon-btn--markdown-active {
-    color: var(--accent-amber);
-  }
-
-  .footer-icon-btn--markdown:hover {
-    background: var(--accent-glow);
-  }
-
-  .markdown-preview {
-    flex: 1;
-    overflow-y: auto;
-    min-height: 192px;
-    max-width: 800px;
-    margin: 0 auto;
-    font-size: var(--text-sm);
-    line-height: 1.6;
-    color: var(--text-primary);
-    padding: var(--space-xs) 0;
-  }
-
-  .markdown-preview :global(h1),
-  .markdown-preview :global(h2),
-  .markdown-preview :global(h3),
-  .markdown-preview :global(h4),
-  .markdown-preview :global(h5),
-  .markdown-preview :global(h6) {
-    margin: var(--space-sm) 0;
-    font-weight: 600;
-  }
-
-  .markdown-preview :global(p) {
-    margin: var(--space-xs) 0;
-  }
-
-  .markdown-preview :global(ul),
-  .markdown-preview :global(ol) {
-    margin: var(--space-xs) 0;
-    padding-left: var(--space-md);
-  }
-
-  .markdown-preview :global(code) {
-    background: var(--bg-primary);
-    padding: 2px 4px;
-    border-radius: var(--radius-sm);
-    font-family: monospace;
-    font-size: var(--mono-text-sm);
-  }
-
-  .markdown-preview :global(pre) {
-    background: var(--bg-primary);
-    padding: var(--space-sm);
-    border-radius: var(--radius-sm);
-    overflow-x: auto;
-  }
-
-  .markdown-preview :global(pre code) {
-    background: transparent;
-    padding: 0;
-  }
-
-  .markdown-preview :global(blockquote) {
-    border-left: 3px solid var(--border-color);
-    margin: var(--space-xs) 0;
-    padding-left: var(--space-sm);
-    color: var(--text-muted);
-  }
-
-  .markdown-preview :global(a) {
-    color: var(--accent);
-  }
-
-  .markdown-preview :global(hr) {
-    border: none;
-    border-top: 1px solid var(--border-color);
-    margin: var(--space-sm) 0;
-  }
-
-  .markdown-preview :global(table) {
-    border-collapse: collapse;
-    width: 100%;
-    margin: var(--space-sm) 0;
-  }
-
-  .markdown-preview :global(th),
-  .markdown-preview :global(td) {
-    border: 1px solid var(--border-color);
-    padding: var(--space-xs);
-    text-align: left;
-  }
-
-  .markdown-preview :global(th) {
-    background: var(--bg-secondary);
-  }
-
-  .footer-icon-btn--save {
-    color: var(--success-soft);
-  }
-
-  .footer-icon-btn--save:hover {
-    background: var(--success-soft-bg);
-  }
-
-  .footer-icon-btn--cancel {
-    color: var(--error-soft);
-  }
-
-  .footer-icon-btn--cancel:hover {
-    background: var(--error-soft-bg);
   }
 
   .snackbar-root {

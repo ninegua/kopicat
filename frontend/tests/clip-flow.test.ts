@@ -708,7 +708,7 @@ describe('ResultView save local copy', () => {
       },
     });
 
-    const copyIcon = screen.getByRole('button', { name: /copy to clipboard/i });
+    const copyIcon = screen.getByRole('button', { name: /copy text to clipboard/i });
     expect(copyIcon).toBeInTheDocument();
 
     await fireEvent.click(copyIcon);
@@ -808,7 +808,7 @@ describe('ResultView save local copy', () => {
     expect(screen.queryByRole('button', { name: /download clip/i })).not.toBeInTheDocument();
 
     // Copy icon should still be visible
-    const copyIcon = screen.getByRole('button', { name: /copy to clipboard/i });
+    const copyIcon = screen.getByRole('button', { name: /copy text to clipboard/i });
     expect(copyIcon).toBeInTheDocument();
   });
 });
