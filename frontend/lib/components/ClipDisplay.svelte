@@ -1,11 +1,6 @@
 <script lang="ts">
-  import '$lib/styles/highlight.css';
-  import hljs from 'highlight.js/lib/core';
-  import markdown from 'highlight.js/lib/languages/markdown';
   import { marked } from 'marked';
   import CodeEditor from './CodeEditor.svelte';
-
-  hljs.registerLanguage('markdown', markdown);
 
   interface Props {
     text: string;
@@ -68,11 +63,6 @@
     }
   });
 
-  const highlightedText = $derived.by(() => {
-    if (!text) return '';
-    return hljs.highlight(text, { language: 'markdown' }).value;
-  });
-
   async function handleCopy() {
     if (!text) return;
     try {
@@ -106,7 +96,7 @@
 </script>
 
 <div class="clip-display">
-  <div class="clip-display-header">
+  <div class="clip-display-header" class:clip-display-header-sticky={maximized}>
     <div class="clip-display-header-left">
       {#if burnAfterRead}
         <span class="burn-badge">Burned</span>
@@ -376,7 +366,7 @@
         {@html marked.parse(text)}
       </div>
     {:else}
-      <pre class="clipped-text hljs">{@html highlightedText}</pre>
+       <CodeEditor bind:value={text} readOnly />
     {/if}
   </div>
 </div>
@@ -400,11 +390,35 @@
     flex-shrink: 0;
   }
 
+  .clip-display-header-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--bg-card);
+    margin-left: calc(-1 * var(--card-pad) - 1px);
+    margin-right: calc(-1 * var(--card-pad) - 1px);
+    padding: var(--card-pad) calc(var(--card-pad) + 1px) var(--space-xs) calc(var(--card-pad) + 1px);
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+    border-radius: var(--card-radius) var(--card-radius) 0 0;
+  }
+
+  .clip-display-header-sticky::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: calc(var(--card-pad) + 1px);
+    right: calc(var(--card-pad) + 1px);
+    border-bottom: 1px solid var(--border-color);
+  }
+
   .clip-display-header-left {
     display: flex;
     align-items: center;
     gap: var(--space-xs);
     min-width: 0;
+    margin-top: auto;
+    margin-bottom: var(--space-xs);
   }
 
   .clip-display-header-right {
@@ -489,7 +503,7 @@
     min-height: 192px;
     max-width: 800px;
     margin: 0 auto;
-    font-size: var(--text-sm);
+    font-size: var(--text-md);
     line-height: 1.6;
     color: var(--text-primary);
     padding: var(--space-xs) 0;
@@ -519,7 +533,7 @@
     background: var(--bg-primary);
     padding: 2px 4px;
     border-radius: var(--radius-sm);
-    font-family: monospace;
+    font-family: var(--font-mono);
     font-size: var(--mono-text-sm);
   }
 
@@ -527,6 +541,7 @@
     background: var(--bg-primary);
     padding: var(--space-sm);
     border-radius: var(--radius-sm);
+    line-height: 1.4;
     overflow-x: auto;
   }
 

@@ -284,7 +284,7 @@
     border: none;
     border-radius: 0;
     color: var(--text-primary);
-    font-family: monospace;
+    font-family: var(--font-mono);
     font-size: var(--mono-text-sm);
     line-height: 1.5;
     resize: none;

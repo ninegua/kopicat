@@ -10,9 +10,10 @@
     oninput?: (value: string) => void;
     onkeydown?: (e: KeyboardEvent) => void;
     class?: string;
+    readOnly?: boolean;
   }
 
-  let { value = $bindable(), oninput, onkeydown, class: className = '' }: Props = $props();
+  let { value = $bindable(), oninput, onkeydown, class: className = '', readOnly = false }: Props = $props();
 
   let editorEl: HTMLElement | undefined = $state();
   let jar: any = $state();
@@ -25,9 +26,23 @@
   }
 
   $effect(() => {
-    if (editorEl && !jar) {
+    if (!editorEl) return;
+
+    if (readOnly) {
+      // Clean up any existing CodeJar instance
+      if (jar) {
+        jar.destroy();
+        jar = undefined;
+      }
+      // Populate with value first, then highlight
+      editorEl.textContent = value;
+      highlight(editorEl);
+      return;
+    }
+
+    if (!jar) {
       import('codejar').then(({ CodeJar }) => {
-        if (!editorEl) return;
+        if (!editorEl || readOnly) return;
         jar = CodeJar(editorEl!, highlight, { tab: '  ', addClosing: false });
         jar.updateCode(value);
         jar.onUpdate((code: string) => {
@@ -50,6 +65,13 @@
 
   // Sync external value changes into the editor
   $effect(() => {
+    if (readOnly) {
+      if (editorEl) {
+        editorEl.textContent = value;
+        highlight(editorEl);
+      }
+      return;
+    }
     if (jar && value !== jar.toString()) {
       syncing = true;
       jar.updateCode(value);
@@ -61,12 +83,19 @@
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <pre
   class="code-editor {className}"
+  class:code-editor-readonly={readOnly}
   bind:this={editorEl}
+  contenteditable={!readOnly}
   onkeydown={(e) => {
     e.stopPropagation();
     onkeydown?.(e);
   }}
   onpaste={(e) => {
+    if (readOnly) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
     e.preventDefault();
     e.stopPropagation();
     const text = e.clipboardData?.getData('text/plain') ?? '';
@@ -78,7 +107,7 @@
     flex: 1;
     overflow-y: auto;
     min-height: 192px;
-    font-family: monospace;
+    font-family: var(--font-mono);
     font-size: var(--mono-text-sm);
     line-height: 1.5;
     word-break: break-word;
@@ -95,5 +124,10 @@
 
   .code-editor.editor-compact {
     max-height: 192px;
+  }
+
+  .code-editor-readonly {
+    cursor: default;
+    user-select: text;
   }
 </style>

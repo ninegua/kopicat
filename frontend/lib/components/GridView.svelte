@@ -605,6 +605,12 @@
     min-height: 100vh;
     flex-shrink: 0;
     height: auto;
+    --card-pad: var(--space-sm);
+    --card-radius: var(--radius-md);
+    padding-top: 0;
+    border-top: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
   }
 
   .clip-box-maximized .clip-box-content {
@@ -644,7 +650,7 @@
   }
 
   .clip-preview {
-    font-family: monospace;
+    font-family: var(--font-mono);
     font-size: var(--mono-text-xs);
     color: var(--text-primary);
     line-height: 1.4;
