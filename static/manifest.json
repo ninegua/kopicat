@@ -6,7 +6,7 @@
   "display": "standalone",
   "background_color": "#F4ECD0",
   "theme_color": "#F4ECD0",
-  "orientation": "any",
+  "orientation": "portrait",
   "categories": ["utilities"],
   "share_target": {
     "action": "/?share=1",

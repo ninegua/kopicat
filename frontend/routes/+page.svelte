@@ -62,7 +62,7 @@
     name="description"
     content="Secure clipboard sharing via simple links. Your data is encrypted client-side before being transported."
   />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 
   <meta property="og:title" content="KopiCat - Share securely" />
   <meta property="og:description" content="Clipboard sharing via simple links." />

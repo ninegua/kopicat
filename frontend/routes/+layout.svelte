@@ -2,6 +2,10 @@
   import { onMount } from 'svelte';
 
   onMount(() => {
+    if ('orientation' in screen && 'lock' in screen.orientation) {
+      screen.orientation.lock('portrait').catch(() => {});
+    }
+
     if (import.meta.env.DEV) return;
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
@@ -21,7 +25,7 @@
 
 <svelte:head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 </svelte:head>
 
 <slot />
