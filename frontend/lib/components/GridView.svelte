@@ -627,7 +627,6 @@
                   <CodeEditor
                     bind:value={editingText}
                     oninput={(code) => {
-                      console.log('edits');
                       edits.add(clip.id);
                       updateLocalClip(clip.id, { text: code }, 'scratch');
                     }}

@@ -15,7 +15,6 @@
   let previousPath: string | null = null;
 
   afterNavigate(({ from }) => {
-    console.log('previousPath', from);
     previousPath = from?.url.pathname || null;
   });
 

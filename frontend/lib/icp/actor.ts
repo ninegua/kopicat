@@ -102,8 +102,6 @@ export async function fetchClip(id: string): Promise<Clip | null> {
 
     const result = await actor.get_clip(id);
 
-    console.log('fetchClip', result);
-
     const clip = result.pop();
     if (clip) {
       return {
