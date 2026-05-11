@@ -57,6 +57,8 @@
   let saveFeedback = $state(false);
   let markdownMode = $state(false);
 
+  const isMobile = window.matchMedia('(max-width: 480px)');
+
   $effect(() => {
     if (!maximized) {
       markdownMode = false;
@@ -184,7 +186,64 @@
             <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
           </svg>
         </button>
-      {:else if showDelete}
+      {/if}
+      {#if showShare && !(maximized && isMobile)}
+        <button
+          class="icon-btn footer-icon-btn"
+          onclick={onShare}
+          aria-label="Share clip"
+          title="Share clip"
+        >
+          <svg
+            class="icon-md"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M22 2L11 13" />
+            <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+          </svg>
+        </button>
+      {/if}
+      {#if showSave}
+        <button
+          class="icon-btn footer-icon-btn"
+          class:footer-icon-btn-saved={saveFeedback}
+          onclick={handleSave}
+          aria-label="Add to collection"
+          title="Add to collection"
+        >
+          {#if saveFeedback}
+            <svg
+              class="icon-md"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          {:else}
+            <svg
+              class="icon-md"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+          {/if}
+        </button>
+      {/if}
+      {#if showDelete}
         <button
           class="icon-btn footer-icon-btn footer-icon-btn--delete"
           onclick={onDelete}
@@ -242,62 +301,6 @@
           </svg>
         {/if}
       </button>
-      {#if showShare}
-        <button
-          class="icon-btn footer-icon-btn"
-          onclick={onShare}
-          aria-label="Share clip"
-          title="Share clip"
-        >
-          <svg
-            class="icon-md"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M22 2L11 13" />
-            <path d="M22 2l-7 20-4-9-9-4 20-7z" />
-          </svg>
-        </button>
-      {/if}
-      {#if showSave && !isModified}
-        <button
-          class="icon-btn footer-icon-btn"
-          class:footer-icon-btn-saved={saveFeedback}
-          onclick={handleSave}
-          aria-label="Add to collection"
-          title="Add to collection"
-        >
-          {#if saveFeedback}
-            <svg
-              class="icon-md"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          {:else}
-            <svg
-              class="icon-md"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-            </svg>
-          {/if}
-        </button>
-      {/if}
       {#if showMaximize}
         <button
           class="icon-btn footer-icon-btn"
