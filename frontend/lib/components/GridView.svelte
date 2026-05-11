@@ -17,6 +17,7 @@
   import { fetchClip } from '$lib/api/client';
   import { decrypt } from '$lib/crypto';
   import CodeEditor from './CodeEditor.svelte';
+  import { marked } from 'marked';
 
   let {
     onChoose,
@@ -30,6 +31,7 @@
 
   let copiedId = $state<string | null>(null);
   let maximizedClip = $state<string | null>(null);
+  let markdownModeClip = $state<string | null>(null);
   let pendingDeletes = $state<{ id: string; text: string; timer: ReturnType<typeof setTimeout> }[]>(
     [],
   );
@@ -338,8 +340,10 @@
   function handleToggleMaximize(clip: LocalClip) {
     if (maximizedClip === clip.id) {
       maximizedClip = null;
+      markdownModeClip = null;
     } else {
       maximizedClip = clip.id;
+      markdownModeClip = null;
     }
   }
 
@@ -349,6 +353,7 @@
     }
     if (maximizedClip === clip.id) {
       maximizedClip = null;
+      markdownModeClip = null;
     }
     const existing = pendingDeletes.find((d) => d.id === clip.id);
     if (existing) {
@@ -425,7 +430,7 @@
                     </div>
                   {:else if edits.has(clip.id)}
                     <div class="flex-row gap-xs">
-                      <span class="clip-save">Save changes?</span>
+                      <span class="clip-save">Save?</span>
                       <button
                         class="icon-btn footer-icon-btn footer-icon-btn--save"
                         aria-label="Save changes"
@@ -468,30 +473,59 @@
                     >
                   {/if}
                   <div class="flex-row gap-md">
-                    <button
-                      class="icon-btn footer-icon-btn footer-icon-btn--delete"
-                      aria-label="Delete clip"
-                      onclick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(clip);
-                      }}
-                    >
-                      <svg
-                        class="icon-md"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                    {#if maximizedClip === clip.id}
+                      <button
+                        class="icon-btn footer-icon-btn"
+                        class:footer-icon-btn--active={markdownModeClip === clip.id}
+                        aria-label={markdownModeClip === clip.id ? 'Edit clip' : 'Preview markdown'}
+                        onclick={(e) => {
+                          e.stopPropagation();
+                          if (markdownModeClip === clip.id) {
+                            markdownModeClip = null;
+                          } else {
+                            markdownModeClip = clip.id;
+                          }
+                        }}
                       >
-                        <path d="M3 6h18" />
-                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                        <line x1="10" y1="11" x2="10" y2="17" />
-                        <line x1="14" y1="11" x2="14" y2="17" />
-                      </svg>
-                    </button>
+                        <svg
+                          class="icon-md"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                        </svg>
+                      </button>
+                    {:else}
+                      <button
+                        class="icon-btn footer-icon-btn footer-icon-btn--delete"
+                        aria-label="Delete clip"
+                        onclick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(clip);
+                        }}
+                      >
+                        <svg
+                          class="icon-md"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M3 6h18" />
+                          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                          <line x1="10" y1="11" x2="10" y2="17" />
+                          <line x1="14" y1="11" x2="14" y2="17" />
+                        </svg>
+                      </button>
+                    {/if}
                     <button
                       class="icon-btn footer-icon-btn"
                       class:footer-icon-btn-copied={copiedId === clip.id}
@@ -635,6 +669,10 @@
                         <canvas id="qr-{clip.id}" class="qr-canvas"></canvas>
                       {/if}
                     </div>
+                  </div>
+                {:else if maximizedClip === clip.id && markdownModeClip === clip.id}
+                  <div class="markdown-preview">
+                    {@html marked.parse(editingText)}
                   </div>
                 {:else}
                   <CodeEditor
@@ -925,6 +963,97 @@
   .footer-icon-btn--delete:hover {
     color: var(--error);
     background: var(--error-bg);
+  }
+
+  .footer-icon-btn--active {
+    color: var(--accent);
+    background: var(--accent-bg);
+  }
+
+  .markdown-preview {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 192px;
+    max-width: 800px;
+    margin: 0 auto;
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    color: var(--text-primary);
+    padding: var(--space-xs) 0;
+  }
+
+  .markdown-preview :global(h1),
+  .markdown-preview :global(h2),
+  .markdown-preview :global(h3),
+  .markdown-preview :global(h4),
+  .markdown-preview :global(h5),
+  .markdown-preview :global(h6) {
+    margin: var(--space-sm) 0;
+    font-weight: 600;
+  }
+
+  .markdown-preview :global(p) {
+    margin: var(--space-xs) 0;
+  }
+
+  .markdown-preview :global(ul),
+  .markdown-preview :global(ol) {
+    margin: var(--space-xs) 0;
+    padding-left: var(--space-md);
+  }
+
+  .markdown-preview :global(code) {
+    background: var(--bg-primary);
+    padding: 2px 4px;
+    border-radius: var(--radius-sm);
+    font-family: monospace;
+    font-size: var(--mono-text-sm);
+  }
+
+  .markdown-preview :global(pre) {
+    background: var(--bg-primary);
+    padding: var(--space-sm);
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+  }
+
+  .markdown-preview :global(pre code) {
+    background: transparent;
+    padding: 0;
+  }
+
+  .markdown-preview :global(blockquote) {
+    border-left: 3px solid var(--border-color);
+    margin: var(--space-xs) 0;
+    padding-left: var(--space-sm);
+    color: var(--text-muted);
+  }
+
+  .markdown-preview :global(a) {
+    color: var(--accent);
+  }
+
+  .markdown-preview :global(hr) {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: var(--space-sm) 0;
+  }
+
+  .markdown-preview :global(table) {
+    border-collapse: collapse;
+    width: 100%;
+    margin: var(--space-sm) 0;
+  }
+
+  .markdown-preview :global(th),
+  .markdown-preview :global(td) {
+    border: 1px solid var(--border-color);
+    padding: var(--space-xs);
+    text-align: left;
+  }
+
+  .markdown-preview :global(th) {
+    background: var(--bg-secondary);
   }
 
   .footer-icon-btn--save {

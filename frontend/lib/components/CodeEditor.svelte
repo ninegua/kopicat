@@ -65,6 +65,12 @@
   onkeydown={(e) => {
     e.stopPropagation();
     onkeydown?.(e);
+  }}
+  onpaste={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const text = e.clipboardData?.getData('text/plain') ?? '';
+    document.execCommand('insertText', false, text);
   }}></pre>
 
 <style>

@@ -271,7 +271,7 @@ describe('GridView focusClipId prop', () => {
     });
 
     // Initially no "Save changes?" prompt
-    expect(screen.queryByText('Save changes?')).not.toBeInTheDocument();
+    expect(screen.queryByText('Save?')).not.toBeInTheDocument();
 
     // Simulate typing in the CodeJar editor via keyup
     const pre = container.querySelector<HTMLElement>('pre.code-editor');
@@ -284,7 +284,7 @@ describe('GridView focusClipId prop', () => {
 
     // Wait for modification state to appear
     await waitFor(() => {
-      expect(screen.getByText('Save changes?')).toBeInTheDocument();
+      expect(screen.getByText('Save?')).toBeInTheDocument();
     });
 
     // Click the undo button
@@ -292,9 +292,9 @@ describe('GridView focusClipId prop', () => {
     expect(undoBtn).toBeInTheDocument();
     await fireEvent.click(undoBtn);
 
-    // The "Save changes?" prompt should disappear
+    // The "Save?" prompt should disappear
     await waitFor(() => {
-      expect(screen.queryByText('Save changes?')).not.toBeInTheDocument();
+      expect(screen.queryByText('Save?')).not.toBeInTheDocument();
     });
 
     // And the original text should be restored in the editor
