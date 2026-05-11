@@ -117,7 +117,7 @@
         </button>
       </div>
     {/if}
-    <div>
+    <div class="clip-count-container">
       {#if linkMode !== 'hide' && $headerClipCount.total > 0}
         {#if linkMode === 'link'}
           <a href="/list" class="clip-count clip-count--link">
@@ -135,6 +135,7 @@
         {/if}
       {/if}
     </div>
+    {#if listMode}
       <div class="menu-wrapper">
         <button
           type="button"
@@ -151,15 +152,24 @@
         {#if menuOpen}
           <nav class="menu-dropdown" aria-label="Main menu">
             <a href="/" class="menu-item" onclick={() => (menuOpen = false)}>
-              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                <polyline points="9 22 9 12 15 12 15 22"/>
+              <svg
+                class="icon-sm"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
               </svg>
               <span>Home</span>
             </a>
           </nav>
         {/if}
       </div>
+    {/if}
   </div>
 </header>
 
@@ -221,6 +231,13 @@
     border-radius: 4px;
   }
 
+  .clip-count-container {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+  }
+
   .clip-count {
     flex-direction: column;
     align-items: flex-end;
@@ -235,6 +252,8 @@
     cursor: pointer;
     padding: 0;
     transition: color 0.15s;
+    text-align: right;
+    flex: 1;
   }
 
   .clip-count--link:hover {
@@ -249,6 +268,7 @@
     display: flex;
     align-items: flex-end;
     gap: var(--space-sm);
+    width: var(--icon-lg);
   }
 
   .receive-btn {
