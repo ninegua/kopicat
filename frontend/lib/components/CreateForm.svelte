@@ -153,8 +153,7 @@
   {#if displayError}
     <div class="error-banner">
       <svg
-        width="16"
-        height="16"
+        class="icon-sm"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -184,9 +183,7 @@
         />
         <span class:burn-active={burnAfterRead}>Burn after read</span>
         <svg
-          class="fire-icon"
-          width="14"
-          height="14"
+          class="fire-icon icon-xs"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -242,11 +239,10 @@
 </div>
 
 {#if hasLocalClips}
-  <button type="button" class="browse-clips-btn" onclick={onBrowseClips}>
+   <button type="button" class="browse-clips-btn" onclick={onBrowseClips}>
     {#if enableBrowse}
       <svg
-        width="16"
-        height="16"
+        class="icon-sm"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -260,8 +256,7 @@
       Or choose from saved clips
     {:else}
       <svg
-        width="16"
-        height="16"
+        class="icon-sm"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -374,7 +369,7 @@
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     color: var(--text-primary);
-    font-size: var(--text-md);
+    font-size: var(--text-sm);
     cursor: pointer;
     outline: none;
     transition:

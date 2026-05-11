@@ -85,8 +85,7 @@
     <div class="card-header">
       <div class="idle-icon">
         <svg
-          width="32"
-          height="32"
+          class="icon-lg"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -116,8 +115,7 @@
         }}
       >
         <svg
-          width="16"
-          height="16"
+          class="icon-sm"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"

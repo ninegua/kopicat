@@ -128,10 +128,13 @@
     --z-modal: 1000;
 
     /* Icon sizes */
-    --icon-sm: 16px;
-    --icon-md: 20px;
+    --icon-xs: 14px;
+    --icon-sm: 20px;
+    --icon-md-sm: 24px;
+    --icon-md: 24px;
     --icon-lg: 32px;
     --icon-xl: 64px;
+    --icon-spinner: 40px;
 
     /* Layout */
     --content-max-width: 480px;
@@ -307,7 +310,7 @@
     flex: 1;
     align-items: center;
     justify-content: center;
-    gap: var(--space-sm);
+    gap: var(--space-xs);
     transition: all var(--duration-base);
     box-shadow: var(--shadow-accent);
   }
@@ -339,7 +342,7 @@
     flex: 1;
     align-items: center;
     justify-content: center;
-    gap: var(--space-sm);
+    gap: var(--space-xs);
     transition: all var(--duration-base);
     box-shadow: var(--shadow-accent);
   }
@@ -532,5 +535,36 @@
   :global(.modal-content) {
     width: 100%;
     max-width: var(--modal-max-width);
+  }
+
+  /* Icon size overrides using CSS variables */
+  :global(.icon-md) {
+    width: var(--icon-md) !important;
+    height: var(--icon-md) !important;
+  }
+
+  :global(.icon-sm) {
+    width: var(--icon-sm) !important;
+    height: var(--icon-sm) !important;
+  }
+
+  :global(.icon-xs) {
+    width: var(--icon-xs) !important;
+    height: var(--icon-xs) !important;
+  }
+
+  :global(.icon-md-sm) {
+    width: var(--icon-md-sm) !important;
+    height: var(--icon-md-sm) !important;
+  }
+
+  :global(.icon-lg) {
+    width: var(--icon-lg) !important;
+    height: var(--icon-lg) !important;
+  }
+
+  :global(.icon-xl) {
+    width: var(--icon-xl) !important;
+    height: var(--icon-xl) !important;
   }
 </style>

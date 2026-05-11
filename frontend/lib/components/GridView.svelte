@@ -408,7 +408,7 @@
                   {#if clip.receiving}
                     <div class="clip-time clip-time--receiving">
                       {receivingStatus(clip)}
-                      <span class="clip-id">({clip.id})</span>
+                      <!-- span class="clip-id">({clip.id})</span -->
                     </div>
                   {:else if edits.has(clip.id)}
                     <div class="flex-row gap-xs">
@@ -419,8 +419,7 @@
                         onclick={() => handleSave(clip.id)}
                       >
                         <svg
-                          width="20"
-                          height="20"
+                          class="icon-md"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
@@ -437,8 +436,7 @@
                         onclick={() => handleCancel(clip.id)}
                       >
                         <svg
-                          width="20"
-                          height="20"
+                          class="icon-md"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
@@ -464,10 +462,9 @@
                         e.stopPropagation();
                         handleDelete(clip);
                       }}
-                    >
+                     >
                       <svg
-                        width="20"
-                        height="20"
+                        class="icon-md"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -496,11 +493,9 @@
                       }}
                     >
                       {#if copiedId === clip.id}
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          class="color-success"
+                         <svg
+                           class="icon-md color-success"
+                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
                           stroke-width="2.5"
@@ -511,8 +506,7 @@
                         </svg>
                       {:else}
                         <svg
-                          width="20"
-                          height="20"
+                          class="icon-md"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
@@ -535,8 +529,7 @@
                         }}
                       >
                         <svg
-                          width="20"
-                          height="20"
+                          class="icon-md"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
@@ -559,8 +552,7 @@
                     >
                       {#if maximizedClip === clip.id}
                         <svg
-                          width="20"
-                          height="20"
+                          class="icon-md"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
@@ -575,8 +567,7 @@
                         </svg>
                       {:else}
                         <svg
-                          width="20"
-                          height="20"
+                          class="icon-md"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
@@ -668,9 +659,7 @@
     {#each [...pendingDeletes].reverse() as pendingDelete}
       <button type="button" class="snackbar" onclick={() => handleRestoreById(pendingDelete.id)}>
         <svg
-          class="snackbar-icon"
-          width="16"
-          height="16"
+          class="snackbar-icon icon-sm"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -729,7 +718,7 @@
   .clips-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-auto-rows: 120px;
+    grid-auto-rows: 9rem;
     gap: var(--space-sm);
     width: 100%;
   }

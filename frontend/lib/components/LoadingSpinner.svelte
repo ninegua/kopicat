@@ -31,8 +31,8 @@
 
   .spinner-ring {
     position: relative;
-    width: 40px;
-    height: 40px;
+    width: var(--icon-spinner);
+    height: var(--icon-spinner);
   }
 
   .spinner-track {
