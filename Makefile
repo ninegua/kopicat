@@ -21,7 +21,7 @@ ASSETS=\
 	$(ASSETS_DIR)/favicon-32x32.png \
 	$(ASSETS_DIR)/apple-touch-icon.png
 
-frontend: assets
+frontend: | assets
 	pnpm run build
 
 assets: $(ASSETS)
