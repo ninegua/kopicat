@@ -516,6 +516,7 @@
     align-items: center;
     justify-content: center;
     transition: all var(--duration-base);
+    user-select: none;
   }
 
   :global(.icon-btn:hover) {

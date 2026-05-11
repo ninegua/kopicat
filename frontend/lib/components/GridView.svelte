@@ -475,8 +475,8 @@
                   <div class="flex-row gap-md">
                     {#if maximizedClip === clip.id}
                       <button
-                        class="icon-btn footer-icon-btn"
-                        class:footer-icon-btn--active={markdownModeClip === clip.id}
+                        class="icon-btn footer-icon-btn footer-icon-btn--markdown"
+                        class:footer-icon-btn--markdown-active={markdownModeClip === clip.id}
                         aria-label={markdownModeClip === clip.id ? 'Edit clip' : 'Preview markdown'}
                         onclick={(e) => {
                           e.stopPropagation();
@@ -965,9 +965,16 @@
     background: var(--error-bg);
   }
 
-  .footer-icon-btn--active {
-    color: var(--accent);
-    background: var(--accent-bg);
+  .footer-icon-btn--markdown {
+    color: var(--text-muted);
+  }
+
+  .footer-icon-btn--markdown-active {
+    color: var(--accent-amber);
+  }
+
+  .footer-icon-btn--markdown:hover {
+    background: var(--accent-glow);
   }
 
   .markdown-preview {
