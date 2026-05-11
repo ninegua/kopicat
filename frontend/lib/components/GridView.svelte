@@ -133,8 +133,9 @@
     }
   });
 
-  // Fill QR code canvas with clip.text if focusClip is receiving (whenever focusClip changes).
+  // Fill QR code canvas with clip.text if focusClip is receiving (whenever focusClip or maximizedClip changes).
   $effect(() => {
+    const maximized = maximizedClip;
     const clip = getClips().find((c) => c.id === focusClip);
     if (clip?.receiving && clip.text) {
       const canvas = document.getElementById(`qr-${clip.id}`) as HTMLCanvasElement | null;
@@ -373,6 +374,11 @@
     }
   }
 
+  function handleCopied(clipId: string) {
+    copiedId = clipId;
+    setTimeout(() => (copiedId = null), 1500);
+  }
+
   function handleSave(clipId: string) {
     let clip = getLocalClip(clipId, 'scratch');
     if (clip !== undefined) {
@@ -418,44 +424,73 @@
             {#if focusClip === clip.id}
               <div class="clip-box-content">
                 {#if clip.receiving}
-                  <div class="qr-view-container">
-                    <div class="qr-view">
-                      <div class="flex-col-center gap-sm">
-                        {#if matchBaseUrl(clip.text)}
-                          <span class="qr-header"
-                            >Ask sender to scan<br /><small class="color-muted">or visit link</small
-                            ></span
-                          >
-                          <button
-                            type="button"
-                            class="btn-primary qr-url-button"
-                            class:btn-primary--copied={copiedId == clip.id}
-                            onclick={(e) => {
-                              e.stopPropagation();
-                              navigator.clipboard.writeText(clip.text);
-                              copiedId = clip.id;
-                              setTimeout(() => {
-                                copiedId = null;
-                              }, 1500);
-                            }}>{clip.text}</button
-                          >
-                        {:else}
-                          <span class="error-banner qr-header">{clip.text}</span>
-                          <button
-                            type="button"
-                            class="btn-primary qr-url-button"
-                            onclick={(e) => {
-                              e.stopPropagation();
-                              handleSendAgain(clip);
-                            }}>Try again with a new code?</button
-                          >
+                  <ClipDisplay
+                    bind:text={editingText}
+                    lastModified={clip.last_modified}
+                    savedAt={clip.saved_at}
+                    showDelete={true}
+                    showShare={!!onShare && !clip.receiving}
+                    showMaximize={true}
+                    maximized={maximizedClip === clip.id}
+                    onDelete={() => handleDelete(clip)}
+                    onShare={() => onShare?.(clip)}
+                    onToggleMaximize={() => handleToggleMaximize(clip)}
+                    onCopy={() => handleCopied(clip.id)}
+                  >
+                    <div class="qr-view-container">
+                      <div class="qr-view" class:qr-view--maximized={maximizedClip === clip.id}>
+                        <div class="flex-col-center gap-sm">
+                          {#if matchBaseUrl(clip.text)}
+                            {#if maximizedClip === clip.id}
+                              <span class="qr-header">Ask sender to scan</span>
+                              <canvas id="qr-{clip.id}" class="qr-canvas qr-canvas--maximized"
+                              ></canvas>
+                              <small class="color-muted">or visit link</small>
+                              <button
+                                type="button"
+                                class="btn-primary qr-url-button"
+                                class:btn-primary--copied={copiedId == clip.id}
+                                onclick={(e) => {
+                                  e.stopPropagation();
+                                  navigator.clipboard.writeText(clip.text);
+                                  handleCopied(clip.id);
+                                }}>{clip.text}</button
+                              >
+                            {:else}
+                              <span class="qr-header"
+                                >Ask sender to scan<br /><small class="color-muted"
+                                  >or visit link</small
+                                ></span
+                              >
+                              <button
+                                type="button"
+                                class="btn-primary qr-url-button"
+                                class:btn-primary--copied={copiedId == clip.id}
+                                onclick={(e) => {
+                                  e.stopPropagation();
+                                  navigator.clipboard.writeText(clip.text);
+                                  handleCopied(clip.id);
+                                }}>{clip.text}</button
+                              >
+                            {/if}
+                          {:else}
+                            <span class="error-banner qr-header">{clip.text}</span>
+                            <button
+                              type="button"
+                              class="btn-primary qr-url-button"
+                              onclick={(e) => {
+                                e.stopPropagation();
+                                handleSendAgain(clip);
+                              }}>Try again with a new code?</button
+                            >
+                          {/if}
+                        </div>
+                        {#if matchBaseUrl(clip.text) && maximizedClip !== clip.id}
+                          <canvas id="qr-{clip.id}" class="qr-canvas"></canvas>
                         {/if}
                       </div>
-                      {#if matchBaseUrl(clip.text)}
-                        <canvas id="qr-{clip.id}" class="qr-canvas"></canvas>
-                      {/if}
                     </div>
-                  </div>
+                  </ClipDisplay>
                 {:else}
                   <ClipDisplay
                     bind:text={editingText}
@@ -697,12 +732,23 @@
     max-width: 400px;
   }
 
+  .qr-view--maximized {
+    flex-direction: column;
+  }
+
   .qr-canvas {
     flex: 1;
     border-radius: var(--radius-md);
     max-width: 150px;
     max-height: 150px;
     object-fit: contain;
+  }
+
+  .qr-canvas--maximized {
+    flex: none;
+    max-width: 220px;
+    max-height: 220px;
+    margin: var(--space-sm) 0;
   }
 
   .qr-header {

@@ -27,6 +27,8 @@
     onCopy?: () => void;
     onCopyError?: (msg: string) => void;
     onToggleMaximize?: () => void;
+
+    children?: import('svelte').Snippet;
   }
 
   let {
@@ -51,6 +53,7 @@
     onCopy,
     onCopyError,
     onToggleMaximize,
+    children,
   }: Props = $props();
 
   let copyFeedback = $state(false);
@@ -362,7 +365,9 @@
     </div>
   {/if}
   <div class="clip-display-body">
-    {#if showEdit && !markdownMode}
+    {#if children}
+      {@render children()}
+    {:else if showEdit && !markdownMode}
       <CodeEditor bind:value={text} oninput={onTextChange} />
     {:else if markdownMode && showMarkdown}
       <div class="markdown-preview">
