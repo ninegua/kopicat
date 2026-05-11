@@ -239,7 +239,7 @@
 </div>
 
 {#if hasLocalClips}
-   <button type="button" class="browse-clips-btn" onclick={onBrowseClips}>
+  <button type="button" class="browse-clips-btn" onclick={onBrowseClips}>
     {#if enableBrowse}
       <svg
         class="icon-sm"

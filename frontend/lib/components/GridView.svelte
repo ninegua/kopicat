@@ -462,7 +462,7 @@
                         e.stopPropagation();
                         handleDelete(clip);
                       }}
-                     >
+                    >
                       <svg
                         class="icon-md"
                         viewBox="0 0 24 24"
@@ -493,9 +493,9 @@
                       }}
                     >
                       {#if copiedId === clip.id}
-                         <svg
-                           class="icon-md color-success"
-                           viewBox="0 0 24 24"
+                        <svg
+                          class="icon-md color-success"
+                          viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
                           stroke-width="2.5"
