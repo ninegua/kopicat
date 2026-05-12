@@ -79,6 +79,8 @@
       clipState.update((s) => ({
         ...s,
         decryptedText: text,
+        clipPass: null,
+        clipId: null,
       }));
       error = null;
     } catch {
