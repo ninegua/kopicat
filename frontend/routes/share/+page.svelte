@@ -113,7 +113,8 @@
 
     clipState.update((s) => ({
       ...s,
-      clipId,
+      clipId: null,
+      clipPass: null,
       decryptedText: text,
     }));
     shareState.set({ prefillText: null });
