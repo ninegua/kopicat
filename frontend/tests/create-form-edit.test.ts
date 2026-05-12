@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/svelte';
-import { clipState, modalState } from '$lib/api/store';
+import { clipState, modalState, shareState } from '$lib/api/store';
 import CreateForm from '$lib/components/CreateForm.svelte';
 
 // ---------------------------------------------------------------------------
@@ -45,9 +45,9 @@ describe('CreateForm share mode - text prefill', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      prefillText: 'Shared clip content',
       localClips: [],
     });
+    shareState.set({ prefillText: 'Shared clip content' });
   });
 
   afterEach(() => {
@@ -56,9 +56,9 @@ describe('CreateForm share mode - text prefill', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      prefillText: null,
       localClips: [],
     });
+    shareState.set({ prefillText: null });
   });
 
   it('pre-fills the textarea with the shared text', async () => {
@@ -103,9 +103,9 @@ describe('CreateForm share mode - button text', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      prefillText: null,
       localClips: [],
     });
+    shareState.set({ prefillText: null });
   });
 
   afterEach(() => {
@@ -114,9 +114,9 @@ describe('CreateForm share mode - button text', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      prefillText: null,
       localClips: [],
     });
+    shareState.set({ prefillText: null });
   });
 
   it('shows "Share" button text when share is enabled', async () => {
@@ -164,9 +164,9 @@ describe('CreateForm share mode - burn after read', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      prefillText: null,
       localClips: [],
     });
+    shareState.set({ prefillText: null });
   });
 
   afterEach(() => {
@@ -175,9 +175,9 @@ describe('CreateForm share mode - burn after read', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      prefillText: null,
       localClips: [],
     });
+    shareState.set({ prefillText: null });
   });
 
   it('shows burn-after-read checkbox by default', async () => {
@@ -209,9 +209,9 @@ describe('CreateForm share mode - TTL selector', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      prefillText: null,
       localClips: [],
     });
+    shareState.set({ prefillText: null });
   });
 
   afterEach(() => {
@@ -220,9 +220,9 @@ describe('CreateForm share mode - TTL selector', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      prefillText: null,
       localClips: [],
     });
+    shareState.set({ prefillText: null });
   });
 
   it('shows TTL selector when share message is enabled', async () => {
@@ -252,9 +252,9 @@ describe('CreateForm share mode - button disabled', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      prefillText: null,
       localClips: [],
     });
+    shareState.set({ prefillText: null });
   });
 
   afterEach(() => {
@@ -263,9 +263,9 @@ describe('CreateForm share mode - button disabled', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      prefillText: null,
       localClips: [],
     });
+    shareState.set({ prefillText: null });
   });
 
   it('disables the create button when loading', async () => {
@@ -286,9 +286,9 @@ describe('CreateForm share mode - error handling', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      prefillText: null,
       localClips: [],
     });
+    shareState.set({ prefillText: null });
   });
 
   afterEach(() => {
@@ -297,9 +297,9 @@ describe('CreateForm share mode - error handling', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      prefillText: null,
       localClips: [],
     });
+    shareState.set({ prefillText: null });
   });
 
   it('shows validation error when Share is clicked with empty text', async () => {
@@ -350,7 +350,7 @@ describe('CreateForm share mode - error handling', () => {
     expect(screen.getByText('Please enter some text to share')).toBeInTheDocument();
 
     // Simulate prefill (e.g., from chooser or clipboard paste)
-    clipState.update((s) => ({ ...s, prefillText: 'Filled by chooser' }));
+    shareState.set({ prefillText: 'Filled by chooser' });
 
     await waitFor(() => {
       expect(screen.queryByText('Please enter some text to share')).not.toBeInTheDocument();
@@ -373,9 +373,9 @@ describe('CreateForm share mode - local copy checkbox', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      prefillText: null,
       localClips: [],
     });
+    shareState.set({ prefillText: null });
   });
 
   afterEach(() => {
@@ -384,9 +384,9 @@ describe('CreateForm share mode - local copy checkbox', () => {
       clipId: null,
       decryptedText: null,
       clip: null,
-      prefillText: null,
       localClips: [],
     });
+    shareState.set({ prefillText: null });
   });
 
   it('shows "Keep a local copy" checkbox', async () => {

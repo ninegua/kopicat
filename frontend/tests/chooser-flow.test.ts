@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/svelte';
 import { tick } from 'svelte';
-import { clipState } from '$lib/api/store';
+import { clipState, shareState } from '$lib/api/store';
 
 import GridView from '../lib/components/GridView.svelte';
 import CreateForm from '../lib/components/CreateForm.svelte';
@@ -109,9 +109,9 @@ describe('CreateForm browse saved clips button', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      prefillText: null,
       clipPass: null,
     });
+    shareState.set({ prefillText: null });
   });
 
   afterEach(() => {
@@ -119,9 +119,9 @@ describe('CreateForm browse saved clips button', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      prefillText: null,
       clipPass: null,
     });
+    shareState.set({ prefillText: null });
   });
 
   it('shows "Or choose from saved clips" when local clips exist and onBrowseClips is provided', async () => {
@@ -177,9 +177,9 @@ describe('Edit page chooser workflow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      prefillText: null,
       clipPass: null,
     });
+    shareState.set({ prefillText: null });
   });
 
   afterEach(() => {
@@ -187,9 +187,9 @@ describe('Edit page chooser workflow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      prefillText: null,
       clipPass: null,
     });
+    shareState.set({ prefillText: null });
   });
 
   it('fills the editor with chosen clip text after chooser mode switches back', async () => {

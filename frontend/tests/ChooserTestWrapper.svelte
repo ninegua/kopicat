@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { clipState } from '$lib/api/store';
+  import { clipState, shareState } from '$lib/api/store';
   import CreateForm from '$lib/components/CreateForm.svelte';
   import GridView from '$lib/components/GridView.svelte';
 
@@ -20,7 +20,7 @@
     onChoose={(clip) => {
       prefillText = clip.text;
       chooserMode = false;
-      clipState.update((s) => ({ ...s, prefillText: clip.text }));
+      shareState.set({ prefillText: clip.text });
     }}
   />
 {:else}

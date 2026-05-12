@@ -1,17 +1,14 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
-  import { clipState, modalState } from '$lib/api/store';
+  import { clipState, modalState, shareState } from '$lib/api/store';
   import Header from '$lib/components/Header.svelte';
   import IdleView from '$lib/components/IdleView.svelte';
   import Footer from '$lib/components/Footer.svelte';
 
   function handleReset() {
     modalState.set({ showModal: null, shareUrl: null, successMessage: null });
-    clipState.update((s) => ({
-      ...s,
-      prefillText: null,
-    }));
+    shareState.set({ prefillText: null });
   }
 
   function initFromUrl() {
@@ -49,7 +46,7 @@
     }
 
     if (prefillText !== null) {
-      clipState.update((s) => ({ ...s, prefillText }));
+      shareState.set({ prefillText });
     }
   }
 

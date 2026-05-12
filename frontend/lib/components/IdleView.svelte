@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { clipState } from '$lib/api/store';
+  import { clipState, shareState } from '$lib/api/store';
   import { newReceivingClip } from '$lib/api/local-store';
 
   import { onMount, onDestroy } from 'svelte';
@@ -25,10 +25,7 @@
   }
 
   async function handlePaste(text: string) {
-    clipState.update((s) => ({
-      ...s,
-      prefillText: text,
-    }));
+    shareState.set({ prefillText: text });
     handleBoxClick();
   }
 

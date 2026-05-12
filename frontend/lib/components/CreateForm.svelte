@@ -1,7 +1,7 @@
 <script lang="ts">
   import { computePosition, flip, offset, shift } from '@floating-ui/dom';
   import { generatePassword } from '$lib/crypto';
-  import { clipState } from '$lib/api/store';
+  import { clipState, shareState } from '$lib/api/store';
   import { getLocalClips } from '$lib/api/local-store';
   import CodeEditor from './CodeEditor.svelte';
 
@@ -55,7 +55,7 @@
   let appliedPrefill = $state<string | null>(null);
 
   $effect(() => {
-    const p = $clipState.prefillText;
+    const p = $shareState.prefillText;
     if (p && p !== appliedPrefill) {
       text = p;
       appliedPrefill = p;

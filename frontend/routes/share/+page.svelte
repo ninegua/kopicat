@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto, afterNavigate } from '$app/navigation';
   import { onMount } from 'svelte';
-  import { clipState, modalState } from '$lib/api/store';
+  import { clipState, modalState, shareState } from '$lib/api/store';
   import { createClip } from '$lib/api/client';
   import { getLocalClips, addLocalClip, updateLocalClip, getLocalClip } from '$lib/api/local-store';
   import { encrypt } from '$lib/crypto';
@@ -36,7 +36,7 @@
 
   function initFromUrl() {
     serverError = null;
-    let prefillText: string | null = $clipState.prefillText;
+    let prefillText: string | null = $shareState.prefillText;
 
     const url = new URL(window.location.href);
     fromClipId = url.searchParams.get('from') || null;
@@ -54,14 +54,13 @@
       }
     }
 
-    // Use update here because clipId may be passed in from clipState.
-    clipState.update((s) => ({ ...s, prefillText: prefillText || null }));
+    shareState.set({ prefillText: prefillText || null });
   }
 
   onMount(initFromUrl);
 
   function handleChoose(clip: LocalClip) {
-    clipState.update((s) => ({ ...s, prefillText: clip.text }));
+    shareState.set({ prefillText: clip.text });
     chooserMode = false;
     // Remove the chooser parameter from the URL now that selection is done.
     const url = new URL(window.location.href);
@@ -117,8 +116,8 @@
       ...s,
       clipId,
       decryptedText: text,
-      prefillText: null,
     }));
+    shareState.set({ prefillText: null });
     loading = false;
 
     if (sendMode) {

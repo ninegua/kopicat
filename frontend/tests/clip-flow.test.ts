@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/svelte';
 import { tick } from 'svelte';
-import { clipState, modalState } from '$lib/api/store';
+import { clipState, modalState, shareState } from '$lib/api/store';
 import { get } from 'svelte/store';
 import { encrypt } from '$lib/crypto';
 import { generateClipId } from '$lib/words';
@@ -60,8 +60,8 @@ describe('Clip creation flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      prefillText: null,
     });
+    shareState.set({ prefillText: null });
 
     render(IdleView, { props: { onPaste: vi.fn() } });
 
@@ -77,8 +77,8 @@ describe('Clip creation flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      prefillText: 'Test paste content',
     });
+    shareState.set({ prefillText: 'Test paste content' });
 
     const { container } = render(CreateForm, { props: { onCreate: vi.fn() } });
 
@@ -100,8 +100,8 @@ describe('Clip creation flow', () => {
       clipState.set({
         clipId,
         decryptedText: testText,
-        prefillText: null,
       });
+      shareState.set({ prefillText: null });
 
       modalState.set({ showModal: 'share', shareUrl: `http://localhost/?${clipId}#testpw` });
     });
@@ -109,8 +109,8 @@ describe('Clip creation flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      prefillText: testText,
     });
+    shareState.set({ prefillText: testText });
 
     const { container } = render(CreateForm, {
       props: { onCreate },
@@ -142,8 +142,8 @@ describe('Clip creation flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      prefillText: '',
     });
+    shareState.set({ prefillText: '' });
 
     render(CreateForm, { props: { onCreate: vi.fn() } });
 
@@ -171,8 +171,8 @@ describe('Clip viewing flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
-      prefillText: null,
     });
+    shareState.set({ prefillText: null });
 
     render(DecryptForm, {
       props: {
@@ -220,8 +220,8 @@ describe('Clip viewing flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
-      prefillText: null,
     });
+    shareState.set({ prefillText: null });
 
     const { container } = render(DecryptForm, {
       props: {
@@ -275,8 +275,8 @@ describe('Clip viewing flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
-      prefillText: null,
     });
+    shareState.set({ prefillText: null });
 
     const { container } = render(DecryptForm, {
       props: {
@@ -317,8 +317,8 @@ describe('Clip viewing flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
-      prefillText: null,
     });
+    shareState.set({ prefillText: null });
 
     render(DecryptForm, {
       props: {
@@ -523,15 +523,15 @@ describe('Burn-after-read flow', () => {
       clipState.set({
         clipId,
         decryptedText: testText,
-        prefillText: null,
       });
+      shareState.set({ prefillText: null });
     });
 
     clipState.set({
       clipId: null,
       decryptedText: null,
-      prefillText: testText,
     });
+    shareState.set({ prefillText: testText });
 
     const { container } = render(CreateForm, {
       props: { onCreate, loading: false },
@@ -576,8 +576,8 @@ describe('Burn-after-read flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
-      prefillText: null,
     });
+    shareState.set({ prefillText: null });
 
     render(DecryptForm, {
       props: {
@@ -605,8 +605,8 @@ describe('Burn-after-read flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
-      prefillText: null,
     });
+    shareState.set({ prefillText: null });
 
     render(DecryptForm, {
       props: { onDecrypt: vi.fn(), password: '', clip: null, error: null, loading: false },
@@ -646,8 +646,8 @@ describe('ResultView save local copy', () => {
         burn_after_read: false,
       },
       decryptedText: testText,
-      prefillText: null,
     }));
+    shareState.set({ prefillText: null });
 
     const savedData = {
       id: null as string | null,
@@ -696,8 +696,8 @@ describe('ResultView save local copy', () => {
         burn_after_read: false,
       },
       decryptedText: testText,
-      prefillText: null,
     }));
+    shareState.set({ prefillText: null });
 
     const onSave = vi.fn();
 
@@ -739,8 +739,8 @@ describe('ResultView save local copy', () => {
         burn_after_read: false,
       },
       decryptedText: testText,
-      prefillText: null,
     }));
+    shareState.set({ prefillText: null });
 
     const onSave = (savedClipId: string, savedText: string) => {
       const now = Date.now();
@@ -783,8 +783,8 @@ describe('ResultView save local copy', () => {
       ...s,
       clipId,
       decryptedText: testText,
-      prefillText: null,
     }));
+    shareState.set({ prefillText: null });
 
     const onSave = vi.fn();
 

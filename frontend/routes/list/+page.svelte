@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { clipState, modalState } from '$lib/api/store';
+  import { clipState, modalState, shareState } from '$lib/api/store';
   import { generateClipId } from '$lib/words';
   import { addLocalClip, newReceivingClip } from '$lib/api/local-store';
   import Header from '$lib/components/Header.svelte';
@@ -13,10 +13,7 @@
 
   function handleDismiss() {
     modalState.set({ showModal: null, shareUrl: null, successMessage: null });
-    clipState.update((s) => ({
-      ...s,
-      prefillText: null,
-    }));
+    shareState.set({ prefillText: null });
   }
 
   function handleAddNew() {

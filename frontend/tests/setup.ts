@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { afterAll, afterEach, beforeAll, vi } from 'vitest';
-import { clipState, modalState } from '$lib/api/store';
+import { clipState, modalState, shareState } from '$lib/api/store';
 import { __resetLocalStore } from '$lib/api/local-store';
 import type { Clip } from '$lib/icp/types';
 
@@ -214,9 +214,9 @@ afterEach(() => {
   clipState.set({
     clipId: null,
     decryptedText: null,
-    prefillText: null,
     clipPass: null,
   });
+  shareState.set({ prefillText: null });
   modalState.set({
     showModal: null,
     shareUrl: null,
