@@ -46,7 +46,7 @@
     if (count.unsaved > 0) {
       badge = (badge ? badge + ', ' : '') + `${count.unsaved} unsaved`;
     }
-    return { main, badge };
+    return { main, badge: badge ? `(${badge})` : '' };
   }
 
   $effect(() => {
@@ -141,7 +141,7 @@
         {:else}
           <span class="clip-count">
             <span>{formatClipCountText($headerClipCount).main}</span>
-            <span class="clip-count-badge">({formatClipCountText($headerClipCount).badge})</span>
+            <span class="clip-count-badge">{formatClipCountText($headerClipCount).badge}</span>
           </span>
         {/if}
       {/if}

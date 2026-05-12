@@ -20,8 +20,7 @@
 
   // Pop the navigation history if possible.
   export function smartBack(target: string) {
-    if (previousPath && window) {
-      // If we have an internal path tracked, use the browser back
+    if (window && previousPath && previousPath.split('?')[0] == target.split('?')[0]) {
       window.history.back();
     } else {
       goto(target);
@@ -164,9 +163,7 @@
   {#if chooserMode}
     <GridView onChoose={handleChoose} />
     <div class="chooser-fixed">
-      <button class="btn-primary" type="button" onclick={handleBackFromChooser}>
-        Cancel
-      </button>
+      <button class="btn-primary" type="button" onclick={handleBackFromChooser}>Cancel</button>
     </div>
   {:else}
     <CreateForm
