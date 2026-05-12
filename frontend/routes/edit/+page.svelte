@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto, afterNavigate } from '$app/navigation';
   import { onMount } from 'svelte';
-  import { clipState, modalState, stateInitial } from '$lib/api/store';
+  import { clipState, modalState } from '$lib/api/store';
   import { createClip } from '$lib/api/client';
   import { getLocalClips, addLocalClip, updateLocalClip, getLocalClip } from '$lib/api/local-store';
   import { encrypt } from '$lib/crypto';

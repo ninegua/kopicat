@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
-  import { clipState, modalState, stateInitial } from '$lib/api/store';
+  import { clipState, modalState } from '$lib/api/store';
   import Header from '$lib/components/Header.svelte';
   import IdleView from '$lib/components/IdleView.svelte';
   import Footer from '$lib/components/Footer.svelte';
@@ -48,7 +48,7 @@
       }
     }
 
-    clipState.set({ ...stateInitial, prefillText });
+    clipState.update((s) => ({ ...s, prefillText }));
   }
 
   onMount(() => {

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
-  import { clipState, stateInitial } from '$lib/api/store';
+  import { clipState } from '$lib/api/store';
   import type { Clip } from '$lib/api/client';
   import { fetchClip } from '$lib/api/client';
   import { decrypt } from '$lib/crypto';
@@ -47,7 +47,7 @@
 
     if (clipId) {
       error = null;
-      clipState.set({ ...stateInitial, clipId, prefillText });
+      clipState.update((s) => ({ ...s, clipId, prefillText }));
       loading = true;
 
       void (async () => {

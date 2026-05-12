@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { clipState, stateInitial } from '$lib/api/store';
+  import { clipState } from '$lib/api/store';
   import { onMount } from 'svelte';
   import Header from '$lib/components/Header.svelte';
   import IdleView from '$lib/components/IdleView.svelte';
@@ -17,7 +17,7 @@
     if (rawQuery && clipIdPattern.test(rawQuery)) {
       sendClipId = rawQuery;
       sendPass = hash || null;
-      clipState.set({ ...stateInitial, clipId: rawQuery, clipPass: sendPass });
+      clipState.update((s) => ({ ...s, clipId: rawQuery, clipPass: sendPass }));
     }
   }
   onMount(() => {
