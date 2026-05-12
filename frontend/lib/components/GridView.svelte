@@ -110,9 +110,6 @@
     const viewTop = window.scrollY + gridTop;
     const viewBottom = window.scrollY + window.innerHeight;
 
-    // Available visible height below the header.
-    const availableHeight = window.innerHeight - HEADER_HEIGHT;
-
     // Calculate minimum scroll adjustment.
     let scrollTarget = window.scrollY;
     if (clipTop < viewTop || clipBottom > viewBottom) {

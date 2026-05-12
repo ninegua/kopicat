@@ -86,3 +86,5 @@
 <main class="app-main">
   <IdleView />
 </main>
+
+<Footer />

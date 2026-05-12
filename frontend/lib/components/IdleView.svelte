@@ -95,7 +95,7 @@
         </svg>
       </div>
       <p class="card-title">
-        Send{#if mode == 'send'}&nbsp;to{:else}{/if}
+        Ready to share?{#if mode == 'send'}&nbsp;to{:else}{/if}
       </p>
       <p class="target-clip">{targetClip}&nbsp;</p>
     </div>

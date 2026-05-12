@@ -209,11 +209,7 @@
               View
             </button>
           {:else}
-            <button
-              class="btn-primary"
-              class:btn-primary--copied={copied}
-              onclick={handleCopy}
-            >
+            <button class="btn-primary" class:btn-primary--copied={copied} onclick={handleCopy}>
               <svg
                 class="icon-sm"
                 viewBox="0 0 24 24"
