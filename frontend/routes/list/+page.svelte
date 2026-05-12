@@ -33,7 +33,7 @@
   }
 
   function handleShare(clip: { id: string }) {
-    goto(`/edit?from=${clip.id}`);
+    goto(`/share?from=${clip.id}`);
   }
 </script>
 

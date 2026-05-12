@@ -12,9 +12,9 @@
   function handleChooseClick(e: MouseEvent) {
     e.stopPropagation();
     if (targetClip) {
-      goto(`/edit?chooser=true&send=${targetClip}`);
+      goto(`/share?chooser=true&send=${targetClip}`);
     } else {
-      goto('/edit?chooser=true');
+      goto('/share?chooser=true');
     }
   }
 
@@ -45,9 +45,9 @@
 
   function handleBoxClick() {
     if (targetClip) {
-      goto(`/edit?send=${targetClip}`);
+      goto(`/share?send=${targetClip}`);
     } else {
-      goto('/edit');
+      goto('/share');
     }
   }
 

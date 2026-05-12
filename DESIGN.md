@@ -124,8 +124,8 @@ type Stats = {
 | Route | Purpose | State |
 |---|---|---|
 | `/` | Home / Idle | Shows IdleView (paste target or manual input entry point) |
-| `/edit` | Create or Edit a clip | CreateForm with text, password, TTL, burn-after-read options |
-| `/edit?send=xxx` | Send to a receiving clip | CreateForm prefilled for sending to a specific receiving clip ID |
+| `/share` | Create or Edit a clip | CreateForm with text, password, TTL, burn-after-read options |
+| `/share?send=xxx` | Send to a receiving clip | CreateForm prefilled for sending to a specific receiving clip ID |
 | `/view?clip=xxx#password` | View a shared clip | DecryptForm → ResultView (auto-decrypts if password in hash) |
 | `/list` | Saved clips gallery | GridView showing locally saved clips |
 | `/send?clipId#password` | Show a receiving clip | IdleView in send mode — displays QR code and URL for sender to scan |
@@ -144,7 +144,7 @@ The app has four entry points, each initializing different state:
 ```
 Home (/) ──▶ Paste text or tap to input
                         │
-                        │ Edit (/edit)
+                        │ Edit (/share)
                         │
                         ▼
               Fill: text, TTL, burn-after-read, keep local
@@ -261,7 +261,7 @@ Sender opens /send?clipId#password
         Sender pastes text (Ctrl+V, clipboard, or click)
                 │
                 ▼
-        Redirect to /edit?send=clipId
+        Redirect to /share?send=clipId
                 │
                 ▼
         CreateForm with prefill text
@@ -274,7 +274,7 @@ Sender opens /send?clipId#password
 
 - The `/send` page is the sender's entry point for delivering to a specific receiving clip
 - IdleView shows "Send to {clipId}" and accepts paste/clipboard input
-- After input, the sender is redirected to `/edit?send=clipId` to review and share
+- After input, the sender is redirected to `/share?send=clipId` to review and share
 - The clip is encrypted and uploaded with the exact ID from the receiving URL
 - The receiver's polling loop picks it up, decrypts it, and updates local storage
 
@@ -288,7 +288,7 @@ List (/list) ──▶ GridView of locally saved clips
                     │
                     ├───▶ Maximize to full screen ───▶ Edit or Preview
                     │
-                    ├───▶ Share button ───────▶ /edit?from=xxx
+                    ├───▶ Share button ───────▶ /share?from=xxx
                     │                                │
                     │                                ▼
                     │                          Fill/modify text, password, TTL
@@ -306,7 +306,7 @@ List (/list) ──▶ GridView of locally saved clips
 - Saved clips are stored in `localStorage` under the key `copycat_clips` (separate from canister)
 - In-place editing uses a scratchpad (`purpose: 'scratch'`) so changes aren't persisted until explicitly saved
 - Modified clips show a visual pulse indicator
-- Share a saved clip: redirects to `/edit?from=clipId` with text prefilled
+- Share a saved clip: redirects to `/share?from=clipId` with text prefilled
 - Delete shows a snackbar with a 5-second undo timer
 - New clip button creates a blank scratch clip on `/list`
 - New receive button generates a receiving clip (`receiving: true`) and focuses it in the grid
@@ -318,10 +318,10 @@ List (/list) ──▶ GridView of locally saved clips
 | `/` | Home — idle / paste target |
 | `/?clipId#password` | Shared clip (legacy) — server hook redirects to `/view?clip=...` |
 | `/?share=1&text=...&url=...` | Web Share Target delivery |
-| `/edit` | Share/create a new clip |
-| `/edit?from=xxx` | Share existing saved clip (prefilled) |
-| `/edit?send=xxx` | Send to a specific receiving clip ID |
-| `/edit?chooser=true` | Browse saved clips to choose one |
+| `/share` | Share/create a new clip |
+| `/share?from=xxx` | Share existing saved clip (prefilled) |
+| `/share?send=xxx` | Send to a specific receiving clip ID |
+| `/share?chooser=true` | Browse saved clips to choose one |
 | `/view?clip=xxx#password` | View shared clip |
 | `/list` | Gallery of saved clips |
 | `/list?clip=xxx` | Gallery with a specific clip focused |
