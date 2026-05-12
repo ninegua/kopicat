@@ -8,13 +8,6 @@ export interface ModalState {
   successMessage: string | null;
 }
 
-export interface ClipState {
-  clipId: string | null;
-  decryptedText: string | null;
-  prefillText: string | null;
-  clipPass: string | null;
-}
-
 const modalInitial: ModalState = {
   showModal: null,
   shareUrl: null,
@@ -23,14 +16,30 @@ const modalInitial: ModalState = {
 
 export const modalState = writable<ModalState>(modalInitial);
 
+export interface ClipState {
+  clipId: string | null;
+  decryptedText: string | null;
+  clipPass: string | null;
+}
+
 export const stateInitial: ClipState = {
   clipId: null,
   decryptedText: null,
-  prefillText: null,
   clipPass: null,
 };
 
 export const clipState = writable<ClipState>(stateInitial);
+
+// Session state for /share page.
+export interface ShareState {
+  prefillText: string | null;
+}
+
+export const shareInitial: ShareState = {
+  prefillText: null,
+};
+
+export const shareState = writable<ShareState>(shareInitial);
 
 export interface HeaderClipCount {
   total: number;
