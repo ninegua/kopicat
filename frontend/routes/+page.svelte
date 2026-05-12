@@ -1,15 +1,11 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
-  import { clipState, modalState, shareState } from '$lib/api/store';
+  import { newReceivingClip } from '$lib/api/local-store';
+  import { shareState } from '$lib/api/store';
   import Header from '$lib/components/Header.svelte';
   import IdleView from '$lib/components/IdleView.svelte';
   import Footer from '$lib/components/Footer.svelte';
-
-  function handleReset() {
-    modalState.set({ showModal: null, shareUrl: null, successMessage: null });
-    shareState.set({ prefillText: null });
-  }
 
   function initFromUrl() {
     const rawQuery = window.location.search.slice(1);
@@ -53,6 +49,11 @@
   onMount(() => {
     initFromUrl();
   });
+
+  function addReceiveClip() {
+    const clip = newReceivingClip(location.origin);
+    goto(`/list?clip=${clip.id}`);
+  }
 </script>
 
 <svelte:head>
@@ -81,10 +82,19 @@
   <meta name="twitter:image" content="https://kopicat.cc/kopicat-192x192.png" />
 </svelte:head>
 
-<Header onReset={handleReset} />
+<Header />
 
 <main class="app-main">
-  <IdleView />
+  <IdleView
+    onPaste={(text) => {
+      shareState.set({ prefillText: text });
+      goto('/share');
+    }}
+    onChoose={() => {
+      goto('/share?chooser=true');
+    }}
+    onReceive={addReceiveClip}
+  />
 </main>
 
 <Footer />

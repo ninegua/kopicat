@@ -30,6 +30,22 @@ export const stateInitial: ClipState = {
 
 export const clipState = writable<ClipState>(stateInitial);
 
+export interface SendState {
+  clipId: string | null;
+  clipPass: string | null;
+}
+
+export const sendInitial: SendState = {
+  clipId: null,
+  clipPass: null,
+};
+
+export const sendState = writable<SendState>(stateInitial);
+
+export const resetSendState = () => {
+  sendState.set(sendInitial);
+};
+
 // Session state for /share page.
 export interface ShareState {
   prefillText: string | null;
@@ -41,6 +57,10 @@ export const shareInitial: ShareState = {
 
 export const shareState = writable<ShareState>(shareInitial);
 
+export const resetShareState = () => {
+  shareState.set(shareInitial);
+};
+
 export interface HeaderClipCount {
   total: number;
   unsaved: number;
@@ -48,3 +68,9 @@ export interface HeaderClipCount {
 }
 
 export const headerClipCount = writable<HeaderClipCount>({ total: 0, unsaved: 0, receiving: 0 });
+
+export const resetAllStates = () => {
+  modalState.set(modalInitial);
+  shareState.set(shareInitial);
+  sendState.set(sendInitial);
+};

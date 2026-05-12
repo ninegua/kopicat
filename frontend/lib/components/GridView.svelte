@@ -251,7 +251,6 @@
     }
     try {
       const decryptedText = await decrypt(remoteClip.blob, password);
-
       const now = Date.now();
       updateClip(clip.id, { text: decryptedText, last_modified: now, receiving: false });
     } catch (e) {

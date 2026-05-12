@@ -1,10 +1,16 @@
 <script lang="ts">
   import { goto, afterNavigate } from '$app/navigation';
-  import { onMount } from 'svelte';
-  import { clipState, modalState, shareState } from '$lib/api/store';
+  import { onMount, onDestroy } from 'svelte';
+  import {
+    sendState,
+    resetSendState,
+    modalState,
+    shareState,
+    resetShareState,
+  } from '$lib/api/store';
   import { createClip } from '$lib/api/client';
   import { getLocalClips, addLocalClip, updateLocalClip, getLocalClip } from '$lib/api/local-store';
-  import { encrypt } from '$lib/crypto';
+  import { encrypt, generatePassword } from '$lib/crypto';
   import { generateClipId } from '$lib/words';
   import Header from '$lib/components/Header.svelte';
   import CreateForm from '$lib/components/CreateForm.svelte';
@@ -18,20 +24,25 @@
     previousPath = from?.url.pathname || null;
   });
 
-  // Pop the navigation history if possible.
-  export function smartBack(target: string) {
-    if (window && previousPath && previousPath.split('?')[0] == target.split('?')[0]) {
-      window.history.back();
-    } else {
-      goto(target);
-    }
-  }
-
   let serverError = $state<string | null>(null);
   let loading = $state(false);
   let sendMode = $state(false);
   let chooserMode = $state(false);
   let fromClipId = $state<string | null>(null);
+
+  // Pop the navigation history if possible.
+  export function smartBack(target: string) {
+    if (
+      window &&
+      previousPath &&
+      previousPath.split('?')[0] == target.split('?')[0] &&
+      fromClipId
+    ) {
+      window.history.back();
+    } else {
+      goto(target);
+    }
+  }
 
   function initFromUrl() {
     serverError = null;
@@ -40,7 +51,7 @@
     const url = new URL(window.location.href);
     fromClipId = url.searchParams.get('from') || null;
     const isSend = url.searchParams.get('send');
-    if (isSend) {
+    if ($sendState.clipId) {
       sendMode = true;
     }
     if (url.searchParams.get('chooser') === 'true') {
@@ -58,6 +69,9 @@
 
   onMount(initFromUrl);
 
+  // Always clear sendState when leaving page.
+  onDestroy(resetSendState);
+
   function handleChoose(clip: LocalClip) {
     shareState.set({ prefillText: clip.text });
     chooserMode = false;
@@ -70,17 +84,27 @@
 
   async function handleCreate(
     text: string,
-    pw: string,
     ttl: number,
     burn_after_read: boolean,
     save_local: boolean,
   ) {
     serverError = null;
     loading = true;
+
+    // use the sending clip id if it is already set; otherwise generate one.
+    let clipId = $sendState.clipId;
+    if (!clipId) {
+      clipId = generateClipId();
+    }
+
+    // use the sending password if it is already set; otherwise generate one.
+    let pw = $sendState.clipPass;
+    if (!pw) {
+      pw = generatePassword(11);
+    }
     const encryptedBlob = await encrypt(text, pw);
 
     const url = new URL(window.location.href);
-    const clipId = url.searchParams.get('send') ?? generateClipId();
     const expires_after = ttl === 0 ? undefined : ttl;
 
     const result = await createClip({
@@ -111,13 +135,7 @@
       addLocalClip(newClip);
     }
 
-    clipState.update((s) => ({
-      ...s,
-      clipId: null,
-      clipPass: null,
-      decryptedText: text,
-    }));
-    shareState.set({ prefillText: null });
+    resetShareState();
     loading = false;
 
     if (sendMode) {
@@ -126,7 +144,7 @@
         shareUrl: null,
         successMessage: 'Clip has been sent. Ask the receiver to check.',
       });
-      goto('/list');
+      goto('/list', { replaceState: true });
     } else {
       modalState.set({ showModal: 'share', shareUrl, successMessage: null });
       smartBack(`/list?clip=${fromClipId ?? clipId}`);
@@ -158,7 +176,7 @@
   />
 </svelte:head>
 
-<Header linkMode={chooserMode || fromClipId ? 'hide' : 'link'} />
+<Header linkMode="hide" />
 
 <main class="app-main">
   {#if chooserMode}

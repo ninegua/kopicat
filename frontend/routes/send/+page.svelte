@@ -1,12 +1,12 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { clipState } from '$lib/api/store';
+  import { sendState, shareState } from '$lib/api/store';
   import { onMount } from 'svelte';
   import Header from '$lib/components/Header.svelte';
   import IdleView from '$lib/components/IdleView.svelte';
   import Footer from '$lib/components/Footer.svelte';
 
-  let sendClipId: string | null = null;
+  let sendClipId = $state<string>('');
   let sendPass: string | null = null;
 
   function initFromUrl() {
@@ -17,7 +17,6 @@
     if (rawQuery && clipIdPattern.test(rawQuery)) {
       sendClipId = rawQuery;
       sendPass = hash || null;
-      clipState.update((s) => ({ ...s, clipId: rawQuery, clipPass: sendPass }));
     }
   }
   onMount(() => {
@@ -45,7 +44,19 @@
 <Header linkMode="hide" />
 
 <main class="app-main">
-  <IdleView mode="send" />
+  <IdleView
+    mode="send"
+    bind:sendClipId
+    onPaste={(text) => {
+      shareState.set({ prefillText: text });
+      sendState.set({ clipId: sendClipId, clipPass: sendPass });
+      goto('/share');
+    }}
+    onChoose={() => {
+      sendState.set({ clipId: sendClipId, clipPass: sendPass });
+      goto('/share?chooser=true');
+    }}
+  />
 </main>
 
 <Footer />

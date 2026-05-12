@@ -1,15 +1,18 @@
 <script lang="ts">
-  import { headerClipCount, type HeaderClipCount, modalState } from '$lib/api/store';
+  import {
+    resetAllStates,
+    headerClipCount,
+    type HeaderClipCount,
+    modalState,
+  } from '$lib/api/store';
   import { getLocalClips } from '$lib/api/local-store';
 
   let {
-    onReset,
     linkMode = 'link',
     listMode = false,
     onAddNew,
     onReceive,
   }: {
-    onReset?: () => void;
     linkMode?: 'link' | 'show' | 'hide';
     listMode?: boolean;
     onAddNew?: () => void;
@@ -19,6 +22,11 @@
   let animateAdd = $state(false);
   let animateReceive = $state(false);
   let menuOpen = $state(false);
+
+  // Clicking logo resets all session states.
+  function onReset() {
+    resetAllStates();
+  }
 
   function handleAddNew() {
     animateAdd = true;

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { clipState, modalState, shareState } from '$lib/api/store';
+  import { modalState, shareState } from '$lib/api/store';
   import { generateClipId } from '$lib/words';
   import { addLocalClip, newReceivingClip } from '$lib/api/local-store';
   import Header from '$lib/components/Header.svelte';
@@ -43,13 +43,7 @@
   />
 </svelte:head>
 
-<Header
-  onReset={() => goto('/')}
-  linkMode="show"
-  listMode
-  onAddNew={handleAddNew}
-  onReceive={handleReceive}
-/>
+<Header linkMode="show" listMode onAddNew={handleAddNew} onReceive={handleReceive} />
 
 <main class="app-main">
   {#if $modalState.showModal === 'share' && $modalState.shareUrl}

@@ -1,51 +1,50 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { clipState, shareState } from '$lib/api/store';
-  import { newReceivingClip } from '$lib/api/local-store';
+  import { shareState } from '$lib/api/store';
 
   import { onMount, onDestroy } from 'svelte';
 
-  let { mode }: { mode?: 'send' | 'default' } = $props();
-
-  let targetClip = $derived($clipState.clipId ?? '');
+  let {
+    mode,
+    sendClipId = $bindable(),
+    onPaste,
+    onChoose,
+    onReceive,
+  }: {
+    mode?: 'send' | 'default';
+    sendClipId: string;
+    onPaste: (text: string) => void;
+    onChoose: () => void;
+    onReceive?: () => void;
+  } = $props();
 
   function handleChooseClick(e: MouseEvent) {
     e.stopPropagation();
-    if (targetClip) {
-      goto(`/share?chooser=true&send=${targetClip}`);
-    } else {
-      goto('/share?chooser=true');
-    }
+    onChoose();
   }
 
   function handleReceiveClick(e: MouseEvent) {
     e.stopPropagation();
-    const clip = newReceivingClip(location.origin);
-    goto(`/list?clip=${clip.id}`);
+    if (onReceive) {
+      onReceive();
+    }
   }
 
-  async function handlePaste(text: string) {
-    shareState.set({ prefillText: text });
-    handleBoxClick();
-  }
-
-  async function copyFromClipboard() {
+  async function copyFromClipboard(e: MouseEvent) {
+    e.stopPropagation();
     try {
       const text = await navigator.clipboard.readText();
       if (text) {
-        handlePaste(text);
+        onPaste(text);
       }
     } catch {
       // Error is handled by parent component or displayed inline
     }
   }
 
-  function handleBoxClick() {
-    if (targetClip) {
-      goto(`/share?send=${targetClip}`);
-    } else {
-      goto('/share');
-    }
+  function handleCardClick(e: MouseEvent) {
+    e.stopPropagation();
+    onPaste('');
   }
 
   function handlePasteEvent(e: ClipboardEvent) {
@@ -60,7 +59,7 @@
     e.preventDefault();
     const text = e.clipboardData?.getData('text/plain');
     if (text) {
-      handlePaste(text);
+      onPaste(text);
     }
   }
 
@@ -77,7 +76,7 @@
   });
 </script>
 
-<div class="card" role="presentation" onclick={handleBoxClick}>
+<div class="card" role="presentation" onclick={handleCardClick}>
   <div class="idle-inner">
     <div class="card-header">
       <div class="idle-icon">
@@ -95,22 +94,15 @@
         </svg>
       </div>
       <p class="card-title">
-        Ready to share?{#if mode == 'send'}&nbsp;to{:else}{/if}
+        {#if mode == 'send'}Sending to{:else}Ready to share?{/if}
       </p>
-      <p class="target-clip">{targetClip}&nbsp;</p>
+      <p class="target-clip">{sendClipId}&nbsp;</p>
     </div>
     <div class="idle-actions">
       <div class="idle-keyboard">
         <span>Press <kbd>Ctrl+V</kbd> or <kbd>⌘+V</kbd> to</span>
       </div>
-      <button
-        type="button"
-        class="btn-secondary"
-        onclick={(e) => {
-          e.stopPropagation();
-          copyFromClipboard();
-        }}
-      >
+      <button type="button" class="btn-secondary" onclick={copyFromClipboard}>
         <svg
           class="icon-sm"
           viewBox="0 0 24 24"

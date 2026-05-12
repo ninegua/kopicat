@@ -411,7 +411,7 @@ describe('CreateForm share mode - local copy checkbox', () => {
     await waitFor(() => {
       expect(onCreate).toHaveBeenCalled();
       const args = onCreate.mock.calls[0] as any[];
-      expect(args[4]).toBe(true); // save_local
+      expect(args[3]).toBe(true); // save_local
     });
   });
 });

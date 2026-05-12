@@ -1,7 +1,6 @@
 <script lang="ts">
   import { computePosition, flip, offset, shift } from '@floating-ui/dom';
-  import { generatePassword } from '$lib/crypto';
-  import { clipState, shareState } from '$lib/api/store';
+  import { shareState } from '$lib/api/store';
   import { getLocalClips } from '$lib/api/local-store';
   import CodeEditor from './CodeEditor.svelte';
 
@@ -15,7 +14,6 @@
   }: {
     onCreate: (
       text: string,
-      password: string,
       ttl: number,
       burn_after_read: boolean,
       save_local: boolean,
@@ -70,7 +68,6 @@
     }
   });
 
-  let password = $clipState.clipPass;
   let selectedTTL = $state(3600);
   let ttlOpen = $state(false);
   let ttlButton: HTMLButtonElement | undefined = $state();
@@ -134,7 +131,7 @@
     }
     validationError = null;
     onClearServerError?.();
-    await onCreate(text, password || generatePassword(11), selectedTTL, burnAfterRead, saveLocal);
+    await onCreate(text, selectedTTL, burnAfterRead, saveLocal);
   }
 
   const charCount = $derived(text.length);
