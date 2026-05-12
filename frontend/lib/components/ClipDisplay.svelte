@@ -63,7 +63,9 @@
   const isMobile = window.matchMedia('(max-width: 480px)');
 
   $effect(() => {
-    if (!maximized) {
+    if (maximized) {
+      markdownMode = true;
+    } else {
       markdownMode = false;
     }
   });
@@ -176,10 +178,10 @@
       {#if maximized && showMarkdown}
         <button
           class="icon-btn footer-icon-btn footer-icon-btn--markdown color-muted"
-          class:footer-icon-btn--markdown-active={markdownMode}
+          class:footer-icon-btn--markdown-active={!markdownMode}
           onclick={() => (markdownMode = !markdownMode)}
-          aria-label={markdownMode ? 'Preview off' : 'Preview on'}
-          title={markdownMode ? 'Preview off' : 'Preview on'}
+          aria-label={markdownMode ? 'Edit off' : 'Edit on'}
+          title={markdownMode ? 'Edit off' : 'Edit on'}
         >
           <svg
             class="icon-md"
@@ -190,8 +192,8 @@
             stroke-linecap="round"
             stroke-linejoin="round"
           >
-            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
           </svg>
         </button>
       {/if}

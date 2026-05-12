@@ -12,7 +12,7 @@
     onReceive,
   }: {
     mode?: 'send' | 'default';
-    sendClipId: string;
+    sendClipId?: string;
     onPaste: (text: string) => void;
     onChoose: () => void;
     onReceive?: () => void;
