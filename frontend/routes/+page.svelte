@@ -48,7 +48,9 @@
       }
     }
 
-    clipState.update((s) => ({ ...s, prefillText }));
+    if (prefillText !== null) {
+      clipState.update((s) => ({ ...s, prefillText }));
+    }
   }
 
   onMount(() => {
