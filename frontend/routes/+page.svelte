@@ -87,16 +87,3 @@
 <main class="app-main">
   <IdleView />
 </main>
-
-<Footer />
-
-<style>
-  .app-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: var(--space-md);
-    padding-bottom: var(--space-xl);
-  }
-</style>

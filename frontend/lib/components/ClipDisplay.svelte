@@ -162,7 +162,12 @@
           </button>
         {:else}
           <span class="clip-time"
-            >Last modified {formatTimeAgo(lastModified ?? savedAt ?? Date.now())}</span
+            >{#if lastModified}
+              Last modified
+            {:else if savedAt}
+              Created
+            {/if}
+            {formatTimeAgo(lastModified ?? savedAt ?? Date.now())}</span
           >
         {/if}
       </div>

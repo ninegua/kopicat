@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { headerClipCount } from '$lib/api/store';
+  import { headerClipCount, type HeaderClipCount } from '$lib/api/store';
   import { getLocalClips } from '$lib/api/local-store';
 
   let {
@@ -36,10 +36,25 @@
     return n === 1 ? 'clip' : 'clips';
   }
 
+  function formatClipCountText(count: HeaderClipCount): { main: string; badge: string } {
+    const word = clipWord(count.total);
+    const main = `${count.total} ${word}`;
+    let badge = '';
+    if (count.receiving > 0) {
+      badge = `${count.receiving} receiving`;
+    }
+    if (count.unsaved > 0) {
+      badge = (badge ? badge + ', ' : '') + `${count.unsaved} unsaved`;
+    }
+    return { main, badge };
+  }
+
   $effect(() => {
     function update() {
-      const clips = getLocalClips().filter((c) => !c.receiving);
-      headerClipCount.update((c) => ({ ...c, total: clips.length }));
+      const clips = getLocalClips();
+      const saved = clips.filter((c) => !c.receiving);
+      const receiving = clips.filter((c) => c.receiving);
+      headerClipCount.update((c) => ({ ...c, total: saved.length, receiving: receiving.length }));
     }
     update();
     function onStorage(e: StorageEvent) {
@@ -121,16 +136,12 @@
       {#if linkMode !== 'hide' && $headerClipCount.total > 0}
         {#if linkMode === 'link'}
           <a href="/list" class="clip-count clip-count--link">
-            <span>{$headerClipCount.total} {clipWord($headerClipCount.total)} on device</span>
+            <span>{formatClipCountText($headerClipCount).main} on device</span>
           </a>
         {:else}
           <span class="clip-count">
-            <span>{$headerClipCount.total} {clipWord($headerClipCount.total)}</span>
-            {#if $headerClipCount.unsaved > 0}
-              <span class="unsaved-count">({$headerClipCount.unsaved} unsaved)</span>
-            {:else}
-              <span>on device</span>
-            {/if}
+            <span>{formatClipCountText($headerClipCount).main}</span>
+            <span class="clip-count-badge">({formatClipCountText($headerClipCount).badge})</span>
           </span>
         {/if}
       {/if}
@@ -194,19 +205,20 @@
     background: linear-gradient(180deg, rgba(232, 223, 192, 0.85), rgba(244, 236, 208, 0.85));
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    padding: var(--space-md) 0;
   }
 
   .header-inner {
     max-width: var(--header-max-width);
     margin: 0 auto;
-    padding: var(--space-md);
+    padding: 0 var(--space-md);
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
     gap: var(--space-md);
     &.header--list {
       max-width: var(--grid-max-width);
-      padding: var(--space-sm) var(--space-xs) 0 var(--space-xs);
+      padding: 0 var(--space-xs) 0 var(--space-xs);
     }
   }
 
@@ -260,15 +272,15 @@
     color: var(--accent);
   }
 
-  .unsaved-count {
+  .clip-count-badge {
     color: var(--accent-amber);
+    font-size: var(--text-xs);
   }
 
   .header-actions {
     display: flex;
     align-items: flex-end;
     gap: var(--space-sm);
-    width: var(--icon-lg);
   }
 
   .receive-btn {

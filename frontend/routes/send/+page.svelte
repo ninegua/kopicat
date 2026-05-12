@@ -42,21 +42,10 @@
   <meta name="twitter:image" content="https://kopicat.cc/kopicat-192x192.png" />
 </svelte:head>
 
-<Header linkMode="show" />
+<Header linkMode="hide" />
 
 <main class="app-main">
   <IdleView mode="send" />
 </main>
 
 <Footer />
-
-<style>
-  .app-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: var(--space-md);
-    padding-bottom: var(--space-xl);
-  }
-</style>

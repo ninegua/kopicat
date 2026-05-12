@@ -212,6 +212,9 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    padding-top: var(--space-sm);
+    padding-bottom: var(--space-md);
   }
 
   /* --- Card --- */
@@ -273,29 +276,6 @@
     overflow-y: auto;
     padding-bottom: var(--space-md);
     margin-bottom: var(--space-sm);
-  }
-
-  :global(.card-textarea) {
-    width: 100%;
-    min-height: 192px;
-    padding: 0;
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    color: var(--text-primary);
-    font-family: var(--font-mono);
-    font-size: var(--mono-text-sm);
-    line-height: 1.5;
-    resize: none;
-    outline: none;
-  }
-
-  :global(.card-textarea:focus) {
-    box-shadow: none;
-  }
-
-  :global(.card-textarea::placeholder) {
-    color: var(--text-muted);
   }
 
   /* --- Buttons --- */

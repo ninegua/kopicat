@@ -60,12 +60,6 @@
     }
   }
 
-  function getClipsLength(): number {
-    const deleted = pendingDeletes.length;
-    const filtered = onChoose ? clips.filter((c) => !c.receiving) : clips;
-    return filtered.length - deleted;
-  }
-
   function updateClip(id: string, updates: Partial<LocalClip>) {
     let updated = updateLocalClip(id, updates);
     if (updated) {
@@ -127,7 +121,11 @@
   });
 
   $effect(() => {
-    headerClipCount.set({ total: getClipsLength(), unsaved: unsavedCount });
+    const clips = getClips();
+    const total = clips.filter((c) => !c.receiving).length;
+    const unsaved = clips.filter((c) => edits.has(c.id)).length;
+    const receiving = clips.filter((c) => c.receiving).length;
+    headerClipCount.set({ total, unsaved, receiving });
   });
 
   const displayClips = $derived.by(() => {
@@ -418,7 +416,7 @@
 
 <div class="grid-wrapper" class:grid-maximized={maximizedClip !== null}>
   <div class="grid-container" class:grid-maximized={maximizedClip !== null}>
-    {#if getClipsLength() === 0}
+    {#if clips.length == pendingDeletes.length}
       <div class="empty-state">
         <p>No clips yet. Create one to get started.</p>
       </div>
@@ -447,7 +445,6 @@
                 {#if clip.receiving}
                   <ClipDisplay
                     bind:text={editingText}
-                    lastModified={clip.last_modified}
                     savedAt={clip.saved_at}
                     showDelete={true}
                     showShare={!!onShare && !clip.receiving}

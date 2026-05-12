@@ -108,7 +108,7 @@
   .code-editor {
     flex: 1;
     overflow-y: auto;
-    min-height: 192px;
+    min-height: 196px;
     font-family: var(--font-mono);
     font-size: var(--mono-text-sm);
     line-height: 1.5;
