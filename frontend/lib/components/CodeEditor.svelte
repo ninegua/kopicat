@@ -40,6 +40,8 @@
         jar.destroy();
         jar = undefined;
       }
+      // Read-only: set contenteditable ourselves (CodeJar won't manage it)
+      editorEl.setAttribute('contenteditable', 'false');
       // Populate with value first, then highlight
       editorEl.textContent = value;
       highlight(editorEl);
@@ -47,9 +49,25 @@
     }
 
     if (!jar) {
+      editorEl.setAttribute('contenteditable', 'true');
       import('codejar').then(({ CodeJar }) => {
         if (!editorEl || readOnly) return;
+        // Force CodeJar into legacy mode (contenteditable="true") in all
+        // browsers.  In its "plaintext-only" mode CodeJar skips its own
+        // Enter-key handling and relies on the browser default, but the
+        // subsequent highlight → innerHTML round-trip destroys newline
+        // characters in Chrome.  Legacy mode makes CodeJar handle Enter
+        // itself (inserting \n via execCommand) and works consistently
+        // across Chrome, Firefox, and Safari.
+        const origSetAttribute = editorEl!.setAttribute.bind(editorEl);
+        editorEl!.setAttribute = (name: string, value: string) => {
+          if (name === 'contenteditable' && value === 'plaintext-only') {
+            return origSetAttribute(name, 'true');
+          }
+          return origSetAttribute(name, value);
+        };
         jar = CodeJar(editorEl!, highlight, { tab: '  ', addClosing: false });
+        editorEl!.setAttribute = origSetAttribute;
         jar.updateCode(value);
         jar.onUpdate((code: string) => {
           if (syncing) return;
@@ -91,7 +109,6 @@
   class="code-editor {className}"
   class:code-editor-readonly={readOnly}
   bind:this={editorEl}
-  contenteditable={!readOnly}
   onkeydown={(e) => {
     e.stopPropagation();
     onkeydown?.(e);
