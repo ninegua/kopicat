@@ -71,6 +71,66 @@
   let focusMaximized = $state(false);
   let maximizedClip = $derived(focusMaximized ? focusClip : null);
 
+  // Grid layout constants (must match CSS)
+  const ROW_HEIGHT = 145; // grid-auto-rows: 145px
+  const GAP = 8; // gap: var(--space-sm) = 0.5rem = 8px
+  const HEADER_HEIGHT = 64; // sticky header.
+  const MAIN_PADDING_TOP = 8; // .app-main padding-top: var(--space-sm) = 0.5rem = 8px
+
+  // Auto-scroll to ensure the focused clip is fully visible below the sticky header.
+  $effect(() => {
+    const id = focusClip;
+    if (id === null || focusMaximized) return;
+
+    const clips = rearrange(displayClips);
+    const focusIndex = clips.findIndex((c) => c.id === id);
+    if (focusIndex < 0) return;
+
+    const isMobile = window.matchMedia('(max-width: 480px)').matches;
+    const cols = isMobile ? 2 : 3;
+
+    // Calculate which grid row the focused clip starts on.
+    // Each clip before the focused one occupies 1 cell.
+    // The focused clip occupies 2 columns, so it starts at row = floor(focusIndex / cols).
+    const focusRow = Math.floor(focusIndex / cols);
+
+    // The focused clip spans 2 rows, so its height = 2 * ROW_HEIGHT + GAP (the gap between the two rows it spans).
+    const focusedClipHeight = 2 * ROW_HEIGHT + GAP;
+
+    // Top of the grid relative to the document top.
+    const gridTop = HEADER_HEIGHT + MAIN_PADDING_TOP;
+
+    // Top of the focused clip relative to the document top.
+    const clipTop = gridTop + focusRow * (ROW_HEIGHT + GAP);
+
+    // Bottom of the focused clip relative to the document top.
+    const clipBottom = clipTop + focusedClipHeight;
+
+    // How much is scrolled == how much is blocked by header.
+    const viewTop = window.scrollY + gridTop;
+    const viewBottom = window.scrollY + window.innerHeight;
+
+    // Available visible height below the header.
+    const availableHeight = window.innerHeight - HEADER_HEIGHT;
+
+    // Calculate minimum scroll adjustment.
+    let scrollTarget = window.scrollY;
+    if (clipTop < viewTop || clipBottom > viewBottom) {
+      // Clip is not fully visible. Scroll so its top aligns just below the header.
+      // If the clip is taller than the available viewport, this still shows as much
+      // of the top as possible.
+      scrollTarget = clipTop - viewTop + window.scrollY - 5;
+      // If the clip fits in the viewport and only its bottom is cut off,
+      // scroll the minimum amount (show bottom at viewport edge) to reduce motion.
+      if (clipTop >= viewTop) {
+        scrollTarget = clipBottom - viewBottom + window.scrollY + 5;
+      }
+    }
+    if (scrollTarget !== window.scrollY) {
+      window.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'instant' });
+    }
+  });
+
   // Initialize state from URL or prop.
   $effect(() => {
     if (focusClipId !== undefined && focusClipId !== null) {
@@ -617,7 +677,7 @@
   .clips-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-auto-rows: 9rem;
+    grid-auto-rows: 145px;
     gap: var(--space-sm);
     width: 100%;
   }
