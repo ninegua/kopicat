@@ -7,6 +7,7 @@
   import GridView from '$lib/components/GridView.svelte';
   import ShareCard from '$lib/components/ShareCard.svelte';
   import SuccessCard from '$lib/components/SuccessCard.svelte';
+  import ScanQR from '$lib/components/ScanQR.svelte';
   import Footer from '$lib/components/Footer.svelte';
 
   let focusClipId = $state<string | null>(null);
@@ -59,6 +60,9 @@
       onDismiss={() => modalState.set({ showModal: null, shareUrl: null, successMessage: null })}
       onDone={handleDismiss}
     />
+  {/if}
+  {#if $modalState.showModal === 'scanQR'}
+    <ScanQR onDismiss={handleDismiss} />
   {/if}
   <GridView {focusClipId} onShare={handleShare} />
 </main>

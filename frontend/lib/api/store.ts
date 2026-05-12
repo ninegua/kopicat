@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 
-export type ModalType = 'share' | 'success' | null;
+export type ModalType = 'share' | 'success' | 'scanQR' | null;
 
 export interface ModalState {
   showModal: ModalType;
