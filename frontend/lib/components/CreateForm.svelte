@@ -52,13 +52,14 @@
   }
 
   let text = $state('');
+  let appliedPrefill = $state<string | null>(null);
 
   $effect(() => {
     const p = $clipState.prefillText;
-    if (p) {
+    if (p && p !== appliedPrefill) {
       text = p;
+      appliedPrefill = p;
       validationError = null;
-      clipState.update((s) => ({ ...s, prefillText: null }));
     }
   });
 
