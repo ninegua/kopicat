@@ -63,6 +63,11 @@
   function handleChoose(clip: LocalClip) {
     clipState.update((s) => ({ ...s, prefillText: clip.text }));
     chooserMode = false;
+    // Remove the chooser parameter from the URL now that selection is done.
+    const url = new URL(window.location.href);
+    url.searchParams.delete('chooser');
+    if (url.search) goto(`${url.pathname}${url.search}`, { replaceState: true });
+    else goto(url.pathname, { replaceState: true });
   }
 
   async function handleCreate(
