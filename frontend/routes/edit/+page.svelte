@@ -141,6 +141,14 @@
       chooserMode = true;
     }
   }
+
+  function handleBackFromChooser() {
+    chooserMode = false;
+    const url = new URL(window.location.href);
+    url.searchParams.delete('chooser');
+    if (url.search) goto(`${url.pathname}${url.search}`, { replaceState: true });
+    else goto(url.pathname, { replaceState: true });
+  }
 </script>
 
 <svelte:head>
@@ -156,6 +164,11 @@
 <main class="app-main">
   {#if chooserMode}
     <GridView onChoose={handleChoose} />
+    <div class="chooser-fixed">
+      <button class="btn-primary" type="button" onclick={handleBackFromChooser}>
+        Cancel
+      </button>
+    </div>
   {:else}
     <CreateForm
       onCreate={handleCreate}
@@ -169,3 +182,27 @@
 </main>
 
 <Footer />
+
+<style>
+  :global(.chooser-fixed) {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+  }
+
+  :global(.chooser-fixed .btn-primary) {
+    min-width: 10rem;
+    flex: none;
+    opacity: 0.7;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  }
+
+  :global(.chooser-fixed .btn-secondary:hover) {
+    opacity: 1;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  }
+</style>
