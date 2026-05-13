@@ -2,13 +2,17 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   getLocalClips,
   addLocalClip,
+  addLocalClipCache,
   removeLocalClip,
+  removeLocalClipCache,
   updateLocalClip,
+  updateLocalClipCache,
   getLocalClip,
   getLocalClipDB,
   newReceivingClip,
   loadClipsDB,
   flushClipsDB,
+  commitToDB,
   __resetLocalStore,
 } from '$lib/api/local-store';
 import type { LocalClip } from '$lib/api/local-store';
@@ -363,6 +367,125 @@ describe('local-store (cache + IndexedDB)', () => {
       const result = await getLocalClipDB('db-receive');
       expect(result).not.toBeNull();
       expect(result!.receiving).toBe(true);
+    });
+  });
+
+  describe('individual DB commits', () => {
+    it('addLocalClip writes only the added clip to DB', async () => {
+      const clipA = makeClip({ id: 'only-add-a', text: 'A' });
+      const clipB = makeClip({ id: 'only-add-b', text: 'B' });
+
+      addLocalClipCache(clipA); // in cache + dirty, NOT committed
+      await addLocalClip(clipB); // should commit only B
+
+      expect(await getLocalClipDB('only-add-a')).toBeNull();
+      expect(await getLocalClipDB('only-add-b')).not.toBeNull();
+      expect((await getLocalClipDB('only-add-b'))!.text).toBe('B');
+    });
+
+    it('removeLocalClip deletes only the targeted clip from DB', async () => {
+      const clipA = makeClip({ id: 'only-rm-a', text: 'A' });
+      const clipB = makeClip({ id: 'only-rm-b', text: 'B' });
+
+      await addLocalClip(clipA);
+      await addLocalClip(clipB);
+
+      await removeLocalClip('only-rm-a');
+
+      expect(await getLocalClipDB('only-rm-a')).toBeNull();
+      expect(await getLocalClipDB('only-rm-b')).not.toBeNull();
+      expect((await getLocalClipDB('only-rm-b'))!.text).toBe('B');
+    });
+
+    it('updateLocalClip writes only the updated clip to DB', async () => {
+      const clipA = makeClip({ id: 'only-up-a', text: 'A' });
+      const clipB = makeClip({ id: 'only-up-b', text: 'B' });
+
+      await addLocalClip(clipA);
+      await addLocalClip(clipB);
+
+      await updateLocalClip('only-up-a', { text: 'A-modified' });
+
+      expect((await getLocalClipDB('only-up-a'))!.text).toBe('A-modified');
+      expect((await getLocalClipDB('only-up-b'))!.text).toBe('B');
+    });
+
+    it('newReceivingClip writes only the new clip to DB', async () => {
+      const clipA = makeClip({ id: 'only-rcv-a', text: 'A' });
+      await addLocalClip(clipA);
+
+      const receiving = await newReceivingClip('https://example.com');
+
+      expect(await getLocalClipDB('only-rcv-a')).not.toBeNull();
+      expect(await getLocalClipDB(receiving.id)).not.toBeNull();
+    });
+
+    it('newReceivingClip with replacing removes only the replaced clip from DB', async () => {
+      const clipA = makeClip({ id: 'only-replace-a', text: 'A' });
+      const clipB = makeClip({ id: 'only-replace-b', text: 'B' });
+      await addLocalClip(clipA);
+      await addLocalClip(clipB);
+
+      await newReceivingClip('https://example.com', 'only-replace-a');
+
+      expect(await getLocalClipDB('only-replace-a')).toBeNull();
+      expect(await getLocalClipDB('only-replace-b')).not.toBeNull();
+    });
+
+    it('commitToDB writes only the targeted dirty clip to DB', async () => {
+      const clipA = makeClip({ id: 'only-commit-a', text: 'A' });
+      const clipB = makeClip({ id: 'only-commit-b', text: 'B' });
+
+      await addLocalClip(clipA);
+      await addLocalClip(clipB);
+
+      updateLocalClipCache('only-commit-a', { text: 'A-modified' });
+      updateLocalClipCache('only-commit-b', { text: 'B-modified' });
+
+      await commitToDB('only-commit-a', null);
+
+      expect((await getLocalClipDB('only-commit-a'))!.text).toBe('A-modified');
+      expect((await getLocalClipDB('only-commit-b'))!.text).toBe('B');
+    });
+
+    it('commitToDB deletes only the targeted removed clip from DB', async () => {
+      const clipA = makeClip({ id: 'only-commit-rm-a', text: 'A' });
+      const clipB = makeClip({ id: 'only-commit-rm-b', text: 'B' });
+      const clipC = makeClip({ id: 'only-commit-rm-c', text: 'C' });
+
+      await addLocalClip(clipA);
+      await addLocalClip(clipB);
+      await addLocalClip(clipC);
+
+      removeLocalClipCache('only-commit-rm-a');
+      removeLocalClipCache('only-commit-rm-b');
+
+      await commitToDB('only-commit-rm-a', null);
+
+      expect(await getLocalClipDB('only-commit-rm-a')).toBeNull();
+      expect(await getLocalClipDB('only-commit-rm-b')).not.toBeNull();
+      expect(await getLocalClipDB('only-commit-rm-c')).not.toBeNull();
+    });
+
+    it('commitToDB with last_modified updates the targeted clip only', async () => {
+      const clipA = makeClip({ id: 'commit-lm-a', text: 'A', saved_at: 1000 });
+      const clipB = makeClip({ id: 'commit-lm-b', text: 'B', saved_at: 2000 });
+
+      await addLocalClip(clipA);
+      await addLocalClip(clipB);
+
+      updateLocalClipCache('commit-lm-a', { text: 'A-modified' });
+      updateLocalClipCache('commit-lm-b', { text: 'B-modified' });
+
+      const lm = 1234567890;
+      await commitToDB('commit-lm-a', lm);
+
+      const dbA = await getLocalClipDB('commit-lm-a');
+      const dbB = await getLocalClipDB('commit-lm-b');
+
+      expect(dbA!.text).toBe('A-modified');
+      expect(dbA!.last_modified).toBe(lm);
+      expect(dbB!.text).toBe('B');
     });
   });
 });
