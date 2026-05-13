@@ -38,8 +38,8 @@ Clipboard + Password ──▶ Decrypt(blob) ──▶ Plaintext
 
 - **Key Derivation**: Web Crypto API PBKDF2, 100k iterations, SHA-256
 - **Cipher**: AES-GCM-256 (authenticated encryption)
-- **Blob format** (base64 encoded): `salt(16 bytes) + iv(12 bytes) + ciphertext + auth_tag(16 bytes)`
-- Server stores only the base64 blob — it never sees plaintext
+- **Blob format**: `salt(16 bytes) + iv(12 bytes) + ciphertext + auth_tag(16 bytes)`
+- Server stores only the blob — it never sees plaintext
 
 ### Clipboard System
 

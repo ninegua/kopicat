@@ -61,7 +61,7 @@ vi.mock('$lib/icp/actor', () => {
     createClip: vi.fn(
       async (input: {
         id: string;
-        blob: string;
+        blob: Uint8Array;
         expires_after?: number;
         burn_after_read: boolean;
       }) => {

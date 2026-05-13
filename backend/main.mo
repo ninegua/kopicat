@@ -1,3 +1,4 @@
+import Blob "mo:core/Blob";
 import Int "mo:core/Int";
 import Map "mo:core/Map";
 import Nat "mo:core/Nat";
@@ -10,7 +11,7 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
 
   // Both created_at and expires_at are timestamp in seconds.
   type Clip = {
-    blob : Text;
+    blob : Blob;
     created_at : Int;
     expires_at : Int;
     burn_after_read : Bool;
@@ -28,7 +29,7 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
 
   type Input = {
     id : Text;
-    blob : Text;
+    blob : Blob;
     expires_after: ?Nat;
     burn_after_read : Bool;
   };
@@ -68,7 +69,7 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
       case (null) MAX_BLOB_BYTES;
       case (?{ max_blob_bytes }) max_blob_bytes;
     };
-    if (Text.size(blob) > max_bytes) {
+    if (Blob.size(blob) > max_bytes) {
       return #err("Blob cannot exceed " # Nat.toText(max_bytes) # " bytes.");
     };
 

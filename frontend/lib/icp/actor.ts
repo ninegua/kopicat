@@ -46,7 +46,7 @@ function getCanisterId(): Principal {
 interface CanisterActor {
   create_clip: (input: {
     id: string;
-    blob: string;
+    blob: Uint8Array;
     expires_after?: bigint | bigint[];
     burn_after_read: boolean;
   }) => Promise<{ ok?: string; err?: string }>;

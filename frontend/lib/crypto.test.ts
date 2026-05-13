@@ -48,8 +48,9 @@ describe('encrypt / decrypt roundtrip', () => {
     const password = 'TestPass1!';
     const text = 'Hello, World!';
     const encrypted = await encrypt(text, password);
-    expect(typeof encrypted).toBe('string');
-    expect(encrypted).not.toBe(text);
+    expect(encrypted).toBeInstanceOf(Uint8Array);
+    const encryptedStr = btoa(String.fromCharCode(...encrypted));
+    expect(encryptedStr).not.toBe(text);
     const decrypted = await decrypt(encrypted, password);
     expect(decrypted).toBe(text);
   });
@@ -100,8 +101,8 @@ describe('encrypt / decrypt roundtrip', () => {
 
   it('decrypting invalid blob throws', async () => {
     const password = 'TestPass1!';
-    await expect(decrypt('short', password)).rejects.toThrow(
-      'Invalid message: Base64 decoding error.',
+    await expect(decrypt(new Uint8Array([1, 2, 3]), password)).rejects.toThrow(
+      'Decryption failed.',
     );
   });
 });

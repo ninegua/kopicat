@@ -1,5 +1,5 @@
 export type Clip = {
-  blob: string;
+  blob: Uint8Array;
   created_at: number;
   expires_at: number;
   burn_after_read: boolean;
@@ -7,7 +7,7 @@ export type Clip = {
 
 export type ClipInput = {
   id: string;
-  blob: string;
+  blob: Uint8Array;
   expires_after?: number;
   burn_after_read: boolean;
 };

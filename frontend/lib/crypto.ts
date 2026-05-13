@@ -33,27 +33,7 @@ async function deriveCryptoKey(password: string, salt: Uint8Array): Promise<Cryp
   );
 }
 
-function toBase64(bytes: Uint8Array): string {
-  const chunkSize = 0x8000; // 32768 — avoids stack overflow from huge spread
-  const chunks: string[] = [];
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    chunks.push(String.fromCharCode(...bytes.subarray(i, i + chunkSize)));
-  }
-  return btoa(chunks.join(''));
-}
-
-function fromBase64(b64: string): Uint8Array {
-  try {
-    const binary = atob(b64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    return bytes;
-  } catch {
-    throw new Error('Invalid message: Base64 decoding error.');
-  }
-}
-
-export async function encrypt(text: string, password: string): Promise<string> {
+export async function encrypt(text: string, password: string): Promise<Uint8Array> {
   const salt = crypto.getRandomValues(new Uint8Array(SALT_BYTES));
   const iv = crypto.getRandomValues(new Uint8Array(IV_BYTES));
 
@@ -67,12 +47,10 @@ export async function encrypt(text: string, password: string): Promise<string> {
   blob.set(iv, SALT_BYTES);
   blob.set(new Uint8Array(ciphertext), SALT_BYTES + IV_BYTES);
 
-  return toBase64(blob);
+  return blob;
 }
 
-export async function decrypt(blobB64: string, password: string): Promise<string> {
-  const blob = fromBase64(blobB64);
-
+export async function decrypt(blob: Uint8Array, password: string): Promise<string> {
   if (blob.length < SALT_BYTES + IV_BYTES) {
     throw new Error('Decryption failed.');
   }
