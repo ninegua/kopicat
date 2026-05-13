@@ -19,7 +19,7 @@
 
   async function handleAddNew() {
     const id = generateClipId();
-    await addLocalClipCache({ id, text: '', saved_at: Date.now() });
+    addLocalClipCache({ id, text: '', saved_at: Date.now() });
     window.dispatchEvent(new StorageEvent('storage', { key: 'copycat_clips' }));
     focusClipId = id;
   }

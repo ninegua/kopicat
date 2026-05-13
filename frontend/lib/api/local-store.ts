@@ -58,7 +58,8 @@ async function migrateFromLocalStorage(db: IDBDatabase): Promise<void> {
   try {
     legacyClips = JSON.parse(raw) as LocalClip[];
     if (!Array.isArray(legacyClips)) return;
-  } catch {
+  } catch (err) {
+    console.error('migrateFromLocalStorage', err);
     return;
   }
 
@@ -126,15 +127,16 @@ export async function loadClipsDB(): Promise<void> {
     cache = new Map(clips.map((c) => [c.id, c]));
     dirty.clear();
     removed.clear();
-  } catch {
+  } catch (err) {
+    console.error('loadClipsDB', err);
     cache = new Map();
     dirty.clear();
     removed.clear();
   }
 }
 
-/** Write changed cache entries to IndexedDB. */
-export async function flushClipsDB(): Promise<void> {
+// Write changed cache entries in the given dirty and removed sets, without changing global state
+async function commitDBChanges(dirty: Set<string>, removed: Set<string>): Promise<boolean> {
   if (!isBrowser()) return;
   if (dirty.size === 0 && removed.size === 0) return;
 
@@ -156,13 +158,20 @@ export async function flushClipsDB(): Promise<void> {
       }
 
       transaction.oncomplete = () => resolve();
-      transaction.onerror = (e) => reject(new Error('IndexedDB flush failed', { cause: e }));
+      transaction.onerror = (e) => reject(new Error('IndexedDB commit failed', { cause: e }));
     });
+    return true;
+  } catch (err) {
+    console.error('commitDBChanges', err);
+    return false;
+  }
+}
 
+/** Write changed cache entries to IndexedDB. */
+export async function flushClipsDB(): Promise<void> {
+  if (await commitDBChanges(dirty, removed)) {
     removed.clear();
     dirty.clear();
-  } catch (err) {
-    console.error('Failed to flush clips to IndexedDB:', err);
   }
 }
 
@@ -192,17 +201,26 @@ export function addLocalClipCache(clip: LocalClip): LocalClip[] {
 
 export async function addLocalClip(clip: LocalClip): Promise<LocalClip[]> {
   let clips = addLocalClipCache(clip);
-  await flushClipsDB();
+  if (await commitDBChanges(new Set([clip.id]), new Set([]))) {
+    dirty.delete(clip.id);
+    removed.delete(clip.id);
+  }
   return clips;
 }
 
-export async function removeLocalClip(id: string): Promise<void> {
+export function removeLocalClipCache(id: string): void {
   if (cache.has(id)) {
     cache.delete(id);
     dirty.delete(id);
     removed.add(id);
   }
-  await flushClipsDB();
+}
+
+export async function removeLocalClip(id: string): Promise<void> {
+  removeLocalClipCache(id);
+  if (await commitDBChanges(new Set([]), new Set([id]))) {
+    removed.delete(id);
+  }
 }
 
 export function updateLocalClipCache(id: string, updates: Partial<LocalClip>): LocalClip | null {
@@ -224,7 +242,12 @@ export async function updateLocalClip(
   updates: Partial<LocalClip>,
 ): Promise<LocalClip | null> {
   let clip = updateLocalClipCache(id, updates);
-  await flushClipsDB();
+  if (clip) {
+    if (await commitDBChanges(new Set([clip.id]), new Set([]))) {
+      dirty.delete(clip.id);
+      removed.delete(clip.id);
+    }
+  }
   return clip;
 }
 
@@ -235,6 +258,21 @@ export async function invalidateCache(id: string): Promise<void> {
   let clip = await getLocalClipDB(id);
   if (clip) {
     cache.set(id, clip);
+  }
+}
+
+export async function commitToDB(id: string): Promise<void> {
+  // Note that removed and dirty are always disjoint.
+  if (removed.has(id)) {
+    if (await commitDBChanges(new Set([id]), new Set())) {
+      removed.delete(id);
+    }
+  }
+  if (dirty.has(id)) {
+    if (await commitDBChanges(new Set([id]), new Set())) {
+      await commitDBChanges(new Set(), Set([id]));
+      dirty.delete(id);
+    }
   }
 }
 
@@ -255,7 +293,8 @@ export async function getLocalClipDB(id: string): Promise<LocalClip | null> {
       return null;
     }
     return { ...clip, receiving: clip.receiving ?? false };
-  } catch {
+  } catch (err) {
+    console.error('getLocalClipDB', err);
     return null;
   }
 }
@@ -278,14 +317,15 @@ export async function newReceivingClip(
     const url = `${origin}/send?${id}#${pw}`;
     if (!cache.has(id)) {
       const clip = { id, text: url, saved_at: Date.now(), receiving: true };
-      if (replacing && cache.has(replacing)) {
-        cache.delete(replacing);
-        dirty.delete(replacing);
-        removed.add(replacing);
-      }
       cache.set(id, clip);
-      dirty.add(id);
-      await flushClipsDB();
+      if (await commitDBChanges(new Set([id]), new Set(replacing ? [replacing] : []))) {
+        dirty.delete(id);
+        if (replacing) {
+          cache.delete(replacing);
+          dirty.delete(replacing);
+          removed.delete(replacing);
+        }
+      }
       return clip;
     }
   }

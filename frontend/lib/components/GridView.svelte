@@ -9,7 +9,7 @@
   import {
     getLocalClip,
     getLocalClips,
-    flushClipsDB,
+    commitToDB,
     newReceivingClip,
     removeLocalClip,
     updateLocalClip,
@@ -489,7 +489,7 @@
   function handleSave(clipId: string) {
     const now = Date.now();
     edits.delete(clipId);
-    flushClipsDB();
+    commitToDB(clipId);
   }
 
   async function handleCancel(clipId: string) {
