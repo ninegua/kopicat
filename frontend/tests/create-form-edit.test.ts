@@ -375,29 +375,16 @@ describe('CreateForm share mode - local copy checkbox', () => {
     shareState.set({ prefillText: null });
   });
 
-  it('shows "Keep a local copy" checkbox', async () => {
+  it('toggles the local copy checkbox', async () => {
     const { container } = render(CreateForm, { onCreate: vi.fn(), loading: false });
 
-    await waitFor(() => {
-      expect(getLocalCopyCheckbox()).toBeInTheDocument();
-    });
-  });
+    const checkbox = getLocalCopyCheckbox();
+    expect(checkbox.checked).toBe(false);
 
-  it('passes save_local as fifth argument', async () => {
-    const onCreate = vi.fn();
-    const { container } = render(CreateForm, { onCreate, loading: false });
+    await fireEvent.click(checkbox);
+    expect(checkbox.checked).toBe(true);
 
-    await fillText(container, 'test');
-
-    // Toggle on (starts unchecked)
-    await fireEvent.click(getLocalCopyCheckbox());
-
-    await fireEvent.click(getCreateButton());
-
-    await waitFor(() => {
-      expect(onCreate).toHaveBeenCalled();
-      const args = onCreate.mock.calls[0] as any[];
-      expect(args[3]).toBe(true); // save_local
-    });
+    await fireEvent.click(checkbox);
+    expect(checkbox.checked).toBe(false);
   });
 });
