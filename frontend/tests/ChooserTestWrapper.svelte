@@ -1,5 +1,6 @@
 <script lang="ts">
   import { clipState, shareState } from '$lib/api/store';
+  import { getLocalClip } from '$lib/api/local-store';
   import CreateForm from '$lib/components/CreateForm.svelte';
   import GridView from '$lib/components/GridView.svelte';
 
@@ -17,10 +18,12 @@
 
 {#if chooserMode}
   <GridView
-    onChoose={(clip) => {
-      prefillText = clip.text;
+    onChoose={(clipId) => {
+      const clip = getLocalClip(clipId);
+      const text = clip?.text ?? '';
+      prefillText = text;
       chooserMode = false;
-      shareState.set({ prefillText: clip.text });
+      shareState.set({ prefillText: text });
     }}
   />
 {:else}

@@ -47,9 +47,8 @@ describe('GridView chooser mode', () => {
     await fireEvent.click(clipBox!);
 
     expect(onChoose).toHaveBeenCalledOnce();
-    const chosenClip = onChoose.mock.calls[0][0];
-    expect(chosenClip.id).toBe('choose-clip-1');
-    expect(chosenClip.text).toBe(testText);
+    const chosenClipId = onChoose.mock.calls[0][0];
+    expect(chosenClipId).toBe('choose-clip-1');
   });
 
   it('does not expand the clip when onChoose is provided', async () => {
