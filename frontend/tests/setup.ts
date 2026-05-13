@@ -141,6 +141,32 @@ Element.prototype.getAnimations = function () {
 };
 
 // ---------------------------------------------------------------------------
+// Mock navigator.clipboard (not supported by jsdom)
+// ---------------------------------------------------------------------------
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(navigator as any).clipboard = {
+  readText: () => Promise.reject(new Error('Clipboard API not available')),
+  writeText: () => Promise.resolve(),
+};
+
+// ---------------------------------------------------------------------------
+// Mock ClipboardEvent (not supported by jsdom)
+// ---------------------------------------------------------------------------
+
+class ClipboardEventMock extends Event {
+  clipboardData: DataTransfer;
+
+  constructor(type: string, init?: { clipboardData?: DataTransfer }) {
+    super(type, init);
+    this.clipboardData = init?.clipboardData || (new DataTransfer() as unknown as DataTransfer);
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(globalThis as any).ClipboardEvent = ClipboardEventMock;
+
+// ---------------------------------------------------------------------------
 // Mock ResizeObserver (not supported by jsdom)
 // ---------------------------------------------------------------------------
 

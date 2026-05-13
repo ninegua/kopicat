@@ -1,0 +1,45 @@
+# AGENTS.md — Copycat (KopiCat)
+
+## Project
+Motoko/ICP single-canister app. **Uses `icp` CLI, not `dfx`.**
+
+## Reality check vs DESIGN.md
+DESIGN.md describes an aspirational clip-storage system with encryption and clip CRUD. **The actual `backend.mo` is a basic `mo:server` + `mo:assets` shim with no clip logic.** Trust the code over DESIGN.md.
+
+## Build
+```
+make backend        # Builds build/copycat.wasm + .did (uses vessel + moc 1.5.0)
+pnpm build          # Builds frontend into dist/
+pnpm check          # svelte-check
+pnpm test           # Runs vitest tests
+```
+
+## Key files
+- `canister/main.mo` — single `persistent actor` canister (mo:server + mo:assets)
+- `frontend/` — frontend (SvelteKit)
+- `vessel.dhall` — dependency list + compiler version (also has base, http-parser, json, mutable-queue, motoko-sha, encoding beyond what DESIGN.md lists)
+- `package.json` — frontend deps (svelte 5 toolchain, @icp-sdk/core, vite 8)
+- `Makefile` — vessel + moc orchestration. Reads compiler from vessel.dhall
+- `svelte.config.js` — SvelteKit config with static adapter
+- `vite.config.js` — Vite config with SvelteKit plugin
+
+## Deployment
+```
+icp deploy          # Deploys backend canister
+icp sync            # Syncs frontend assets from dist/ to the backend canister
+```
+
+No `icp.yaml` or `dfx.json` present.
+
+## Skills
+`load` skills from `.agents/skills/` for domain-specific guidance:
+- **motoko** — Motoko pitfalls, stable types, mo:core standard library
+- **stable-memory** — persisting state across canister upgrades
+- **certified-variables** — certified data API, certificate validation
+- **canhelp** — querying canister interfaces by canister ID
+
+## Gotchas
+- Frontend is a Svelte 5 + SvelteKit 2 mockup (`src/routes/+page.svelte`) — no actual clip logic yet
+- Tests use vitest with happy-dom environment (`src/lib/crypto.test.ts`)
+- Always use `pnpm`, never `npm`
+- `persistent actor` auto-persists all `let`/`var` declarations; use `transient` for non-persistent state
