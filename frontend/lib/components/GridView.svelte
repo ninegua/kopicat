@@ -64,6 +64,9 @@
     let updated = updateLocalClip(id, updates);
     if (updated) {
       clips = clips.map((c) => (c.id === id ? updated : c));
+      if (id == focusClip) {
+        editingText = updated.text;
+      }
     }
   }
 
@@ -202,7 +205,7 @@
   $effect(() => {
     if (focusClip !== null) {
       let clip = getLocalClip(focusClip, 'scratch') ?? getLocalClip(focusClip);
-      if (clip !== undefined) {
+      if (clip !== undefined && !clip.receiving) {
         editingText = clip.text;
       }
     }

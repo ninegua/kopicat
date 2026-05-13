@@ -53,17 +53,15 @@
 </script>
 
 {#if readOnly}
-  <pre
-    class="code-editor code-editor-readonly {className}"
-    aria-readonly="true"
-  ><code class="language-markdown">{@html highlighted}</code></pre>
+  <pre class="code-editor code-editor-readonly {className}" aria-readonly="true"><code
+      class="language-markdown">{@html highlighted}</code
+    ></pre>
 {:else}
   <div class="code-editor-wrapper {className}">
     <div class="code-editor-stack">
-      <pre
-        class="code-editor code-editor-highlight"
-        aria-hidden="true"
-      ><code class="language-markdown">{@html highlighted}</code></pre>
+      <pre class="code-editor code-editor-highlight" aria-hidden="true"><code
+          class="language-markdown">{@html highlighted}</code
+        ></pre>
       <!-- svelte-ignore a11y_autofocus -->
       <textarea
         class="code-editor code-editor-input"
