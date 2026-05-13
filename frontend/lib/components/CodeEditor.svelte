@@ -138,6 +138,7 @@
     overflow: hidden;
     field-sizing: content;
     -webkit-text-fill-color: transparent;
+    min-height: 120px;
   }
 
   .code-editor-input::selection {
