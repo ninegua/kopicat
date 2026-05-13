@@ -82,7 +82,10 @@ async function migrateFromLocalStorage(db: IDBDatabase): Promise<void> {
     for (const clip of toInsert) {
       store.put({ ...clip, receiving: clip.receiving ?? false });
     }
-    tx.oncomplete = () => resolve();
+    tx.oncomplete = () => {
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+      resolve();
+    };
     tx.onerror = () => reject(new Error('IndexedDB migration write failed'));
   });
 }
