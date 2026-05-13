@@ -280,11 +280,13 @@ export function __resetLocalStore(): void {
   dirty.clear();
   removed.clear();
   if (dbReady) {
-    dbReady.then((db) => {
-      try {
-        db.close();
-      } catch {}
-    }).catch(() => {});
+    dbReady
+      .then((db) => {
+        try {
+          db.close();
+        } catch {}
+      })
+      .catch(() => {});
   }
   dbReady = null;
 }

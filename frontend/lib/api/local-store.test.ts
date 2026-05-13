@@ -190,7 +190,11 @@ describe('local-store (cache + IndexedDB)', () => {
       const clip = makeClip({ id: 'scratch-update', text: 'original' });
       await addLocalClip(clip, 'scratch');
 
-      const updated = await updateLocalClip('scratch-update', { text: 'scratch-modified' }, 'scratch');
+      const updated = await updateLocalClip(
+        'scratch-update',
+        { text: 'scratch-modified' },
+        'scratch',
+      );
       expect(updated).not.toBeNull();
       expect(updated!.text).toBe('scratch-modified');
       expect(isOnScratchpad('scratch-update')).toBe(true);
