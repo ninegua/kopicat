@@ -136,7 +136,7 @@ export async function loadClipsDB(): Promise<void> {
 }
 
 // Write changed cache entries in the given dirty and removed sets, without changing global state
-async function commitDBChanges(dirty: Set<string>, removed: Set<string>): Promise<boolean> {
+export async function commitDBChanges(dirty: Set<string>, removed: Set<string>): Promise<boolean> {
   if (!isBrowser()) return;
   if (dirty.size === 0 && removed.size === 0) return;
 
@@ -272,8 +272,8 @@ export async function commitToDB(id: string, last_modified: number | null): Prom
     }
   }
   if (last_modified) {
-    clip = cache.get(id);
-    clip.last_modified = last_modified;
+    const clip = cache.get(id);
+    if (clip) clip.last_modified = last_modified;
   }
   if (dirty.has(id)) {
     if (await commitDBChanges(new Set([id]), new Set())) {
