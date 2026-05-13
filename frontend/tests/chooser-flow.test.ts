@@ -221,8 +221,8 @@ describe('Edit page chooser workflow', () => {
 
     // Should switch back to CreateForm with the text prefilled
     await waitFor(() => {
-      const pre = container.querySelector<HTMLElement>('pre.code-editor');
-      expect(pre?.textContent).toBe(testText);
+      const textarea = container.querySelector<HTMLTextAreaElement>('textarea.code-editor-input');
+      expect(textarea?.value).toBe(testText);
     });
 
     // Ensure the chooser button is still present after returning
@@ -272,14 +272,11 @@ describe('GridView focusClipId prop', () => {
     // Initially no "Save changes?" prompt
     expect(screen.queryByText('Save?')).not.toBeInTheDocument();
 
-    // Simulate typing in the CodeJar editor via keyup
-    const pre = container.querySelector<HTMLElement>('pre.code-editor');
-    expect(pre).not.toBeNull();
+    // Simulate typing in the textarea editor
+    const textarea = container.querySelector<HTMLTextAreaElement>('textarea.code-editor-input');
+    expect(textarea).not.toBeNull();
 
-    pre!.textContent = 'Modified text';
-    // Fire keyup without keydown; codejar's prev starts undefined,
-    // so prev !== toString() will be true, triggering onUpdate.
-    await fireEvent.keyUp(pre!, { key: 'a', code: 'KeyA' });
+    await fireEvent.input(textarea!, { target: { value: 'Modified text' } });
 
     // Wait for modification state to appear
     await waitFor(() => {
@@ -298,8 +295,8 @@ describe('GridView focusClipId prop', () => {
 
     // And the original text should be restored in the editor
     await waitFor(() => {
-      const editor = container.querySelector<HTMLElement>('pre.code-editor');
-      expect(editor?.textContent).toBe(testText);
+      const editor = container.querySelector<HTMLTextAreaElement>('textarea.code-editor-input');
+      expect(editor?.value).toBe(testText);
     });
   });
 });

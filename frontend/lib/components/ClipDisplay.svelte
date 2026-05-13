@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { marked } from 'marked';
+  import { micromark } from 'micromark';
+  import { gfm, gfmHtml } from 'micromark-extension-gfm';
   import CodeEditor from './CodeEditor.svelte';
 
   interface Props {
@@ -378,7 +379,7 @@
       <CodeEditor bind:value={text} oninput={onTextChange} />
     {:else if markdownMode && showMarkdown}
       <div class="markdown-preview">
-        {@html marked.parse(text)}
+        {@html micromark(text, { extensions: [gfm()], htmlExtensions: [gfmHtml()] })}
       </div>
     {:else}
       <CodeEditor bind:value={text} readOnly />

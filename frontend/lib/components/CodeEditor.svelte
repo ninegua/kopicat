@@ -1,9 +1,7 @@
 <script lang="ts">
   import '$lib/styles/highlight.css';
-  import hljs from 'highlight.js/lib/core';
-  import markdown from 'highlight.js/lib/languages/markdown';
-
-  hljs.registerLanguage('markdown', markdown);
+  import Prism from 'prismjs';
+  import 'prismjs/components/prism-markdown';
 
   interface Props {
     value: string;
@@ -21,132 +19,142 @@
     readOnly = false,
   }: Props = $props();
 
-  let editorEl: HTMLElement | undefined = $state();
-  let jar: any = $state();
-  let syncing = false;
+  let highlighted = $derived(highlightCode(value || ''));
 
-  function highlight(el: HTMLElement) {
-    const code = el.textContent || '';
-    const result = hljs.highlight(code, { language: 'markdown' });
-    el.innerHTML = result.value;
+  function highlightCode(code: string): string {
+    if (!code) return '';
+    return Prism.highlight(code, Prism.languages.markdown, 'markdown');
   }
 
-  $effect(() => {
-    if (!editorEl) return;
+  function handleInput(e: Event) {
+    const textarea = e.target as HTMLTextAreaElement;
+    value = textarea.value;
+    oninput?.(textarea.value);
+  }
 
-    if (readOnly) {
-      // Clean up any existing CodeJar instance
-      if (jar) {
-        jar.destroy();
-        jar = undefined;
-      }
-      // Read-only: set contenteditable ourselves (CodeJar won't manage it)
-      editorEl.setAttribute('contenteditable', 'false');
-      // Populate with value first, then highlight
-      editorEl.textContent = value;
-      highlight(editorEl);
-      return;
+  function handleKeydown(e: KeyboardEvent) {
+    e.stopPropagation();
+
+    // Handle tab insertion
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const textarea = e.target as HTMLTextAreaElement;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const tab = '  ';
+      textarea.value = textarea.value.substring(0, start) + tab + textarea.value.substring(end);
+      textarea.selectionStart = textarea.selectionEnd = start + tab.length;
+      value = textarea.value;
+      oninput?.(textarea.value);
     }
 
-    if (!jar) {
-      editorEl.setAttribute('contenteditable', 'true');
-      import('codejar').then(({ CodeJar }) => {
-        if (!editorEl || readOnly) return;
-        // Force CodeJar into legacy mode (contenteditable="true") in all
-        // browsers.  In its "plaintext-only" mode CodeJar skips its own
-        // Enter-key handling and relies on the browser default, but the
-        // subsequent highlight → innerHTML round-trip destroys newline
-        // characters in Chrome.  Legacy mode makes CodeJar handle Enter
-        // itself (inserting \n via execCommand) and works consistently
-        // across Chrome, Firefox, and Safari.
-        const origSetAttribute = editorEl!.setAttribute.bind(editorEl);
-        editorEl!.setAttribute = (name: string, value: string) => {
-          if (name === 'contenteditable' && value === 'plaintext-only') {
-            return origSetAttribute(name, 'true');
-          }
-          return origSetAttribute(name, value);
-        };
-        jar = CodeJar(editorEl!, highlight, { tab: '  ', addClosing: false });
-        editorEl!.setAttribute = origSetAttribute;
-        jar.updateCode(value);
-        jar.onUpdate((code: string) => {
-          if (syncing) return;
-          if (code !== value) {
-            value = code;
-            oninput?.(code);
-          }
-        });
-      });
-    }
-
-    return () => {
-      if (jar) {
-        jar.destroy();
-        jar = undefined;
-      }
-    };
-  });
-
-  // Sync external value changes into the editor
-  $effect(() => {
-    if (readOnly) {
-      if (editorEl) {
-        editorEl.textContent = value;
-        highlight(editorEl);
-      }
-      return;
-    }
-    if (jar && value !== jar.toString()) {
-      syncing = true;
-      jar.updateCode(value);
-      syncing = false;
-    }
-  });
+    onkeydown?.(e);
+  }
 </script>
 
-<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-<pre
-  class="code-editor {className}"
-  class:code-editor-readonly={readOnly}
-  bind:this={editorEl}
-  onkeydown={(e) => {
-    e.stopPropagation();
-    onkeydown?.(e);
-  }}
-  onpaste={(e) => {
-    if (readOnly) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-  }}></pre>
+{#if readOnly}
+  <pre
+    class="code-editor code-editor-readonly {className}"
+    aria-readonly="true"
+  ><code class="language-markdown">{@html highlighted}</code></pre>
+{:else}
+  <div class="code-editor-wrapper {className}">
+    <div class="code-editor-stack">
+      <pre
+        class="code-editor code-editor-highlight"
+        aria-hidden="true"
+      ><code class="language-markdown">{@html highlighted}</code></pre>
+      <!-- svelte-ignore a11y_autofocus -->
+      <textarea
+        class="code-editor code-editor-input"
+        {value}
+        oninput={handleInput}
+        onkeydown={handleKeydown}
+        spellcheck="false"
+        autocomplete="off"
+        autocapitalize="off"
+      ></textarea>
+    </div>
+  </div>
+{/if}
 
 <style>
-  .code-editor {
+  .code-editor-wrapper {
     flex: 1;
     overflow-y: auto;
     min-height: 196px;
-    font-family: var(--font-mono);
-    font-size: var(--mono-text-sm);
-    line-height: 1.5;
-    word-break: break-word;
-    margin: 0;
-    padding: 0;
-    background: transparent;
-    color: var(--text-primary);
-    border: none;
-    outline: none;
-    width: 100%;
-    white-space: pre-wrap;
-    border-radius: var(--radius-sm);
   }
 
-  .code-editor.editor-compact {
+  .code-editor-wrapper.editor-compact {
     max-height: 192px;
   }
 
+  .code-editor-stack {
+    display: grid;
+    min-height: 100%;
+  }
+
+  .code-editor-stack > * {
+    grid-area: 1 / 1 / 2 / 2;
+  }
+
+  .code-editor {
+    font-family: var(--font-mono);
+    font-size: var(--mono-text-sm);
+    line-height: 1.5;
+    letter-spacing: normal;
+    word-spacing: normal;
+    tab-size: 2;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text-primary);
+    outline: none;
+    width: 100%;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    word-break: normal;
+    border-radius: var(--radius-sm);
+  }
+
+  .code-editor-highlight {
+    pointer-events: none;
+  }
+
+  .code-editor-highlight code {
+    display: block;
+    font: inherit;
+    letter-spacing: inherit;
+    word-spacing: inherit;
+    tab-size: inherit;
+    white-space: inherit;
+    overflow-wrap: inherit;
+    word-break: inherit;
+  }
+
+  .code-editor-input {
+    resize: none;
+    color: transparent;
+    caret-color: var(--text-primary);
+    overflow: hidden;
+    field-sizing: content;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .code-editor-input::selection {
+    background: rgba(100, 100, 100, 0.3);
+  }
+
   .code-editor-readonly {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 196px;
     cursor: default;
     user-select: text;
+  }
+
+  .code-editor-readonly.editor-compact {
+    max-height: 192px;
   }
 </style>

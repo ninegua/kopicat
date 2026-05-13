@@ -1,82 +1,88 @@
-/* Custom highlight.js tokens for warm cream/parchment background */
-.hljs {
+/* Custom Prism theme for markdown — warm cream/parchment palette */
+
+code[class*='language-'],
+pre[class*='language-'] {
   background: transparent;
   padding: 0;
   color: var(--text-primary);
 }
 
 /* Headings — bold, deep brown */
-.hljs-section {
+.token.title .token.important {
   color: #3d1e04;
   font-weight: 700;
 }
 
 /* Bold/Strong — dark warm brown */
-.hljs-strong {
+.token.bold {
   color: #4a2510;
   font-weight: 700;
 }
 
 /* Italic/Emphasis — muted plum */
-.hljs-emphasis {
+.token.italic {
   color: #7a3e6d;
   font-style: italic;
 }
 
 /* Links and URLs — rich teal */
-.hljs-link,
-.hljs-attr {
+.token.url,
+.token.url-reference .token.string {
   color: #1a7a6c;
 }
 
 /* Inline code / code spans — warm amber */
-.hljs-code {
+.token.code,
+.token.code-snippet {
   color: #9a5c10;
 }
 
-/* Code blocks — amber with subtle background */
-.hljs-code,
-.hljs-keyword {
+/* Code blocks — amber */
+.token.code.keyword {
   color: #9a5c10;
 }
 
 /* Bullets, list markers, punctuation — gold accent */
-.hljs-bullet {
+.token.list.punctuation {
   color: #b07d20;
   font-weight: 600;
 }
 
 /* Blockquote — softer brown */
-.hljs-quote {
+.token.blockquote {
   color: #7a5a3a;
   font-style: italic;
 }
 
 /* Strings (link titles, etc.) — deep forest green */
-.hljs-string {
+.token.string {
   color: #2a6e3f;
 }
 
 /* Template variables, symbols — burnt sienna */
-.hljs-symbol,
-.hljs-template-variable {
+.token.variable,
+.token.symbol {
   color: #b84c28;
 }
 
 /* Comments / HTML comments — muted tan */
-.hljs-comment {
+.token.comment {
   color: #9a8060;
   font-style: italic;
 }
 
 /* Tags (HTML in markdown) — dusty red */
-.hljs-tag,
-.hljs-name {
+.token.tag,
+.token.tag .token.punctuation {
   color: #a83832;
 }
 
 /* Horizontal rules, delimiters */
-.hljs-meta,
-.hljs-selector-tag {
+.token.hr {
+  color: #8e6e4e;
+}
+
+/* Punctuation (general markdown syntax chars) */
+.token.punctuation {
   color: #8e6e4e;
 }
