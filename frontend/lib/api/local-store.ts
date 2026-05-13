@@ -270,7 +270,7 @@ export async function commitToDB(id: string): Promise<void> {
   }
   if (dirty.has(id)) {
     if (await commitDBChanges(new Set([id]), new Set())) {
-      await commitDBChanges(new Set(), Set([id]));
+      await commitDBChanges(new Set(), new Set([id]));
       dirty.delete(id);
     }
   }
