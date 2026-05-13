@@ -332,26 +332,25 @@ describe('local-store (cache + IndexedDB)', () => {
       expect(getLocalClips()).toEqual([]);
     });
 
-    it('reverts unsaved cache changes when called again', async () => {
+    it('persists all changes immediately via auto-flush', async () => {
       // Start from a known persisted state
       const clip = makeClip({ id: 'revert-test', text: 'original' });
-      addLocalClip(clip);
-      await flushClipsDB();
+      await addLocalClip(clip);
       expect(getLocalClips()).toHaveLength(1);
 
-      // Mutate cache without flushing
-      updateLocalClip('revert-test', { text: 'modified' });
-      addLocalClip(makeClip({ id: 'revert-new', text: 'new' }));
-      removeLocalClip('revert-test');
+      // Mutate cache — changes are auto-flushed
+      await updateLocalClip('revert-test', { text: 'modified' });
+      await addLocalClip(makeClip({ id: 'revert-new', text: 'new' }));
+      await removeLocalClip('revert-test');
       expect(getLocalClips()).toHaveLength(1);
       expect(getLocalClips()[0].id).toBe('revert-new');
 
-      // Reload from DB — unsaved changes are lost
+      // Reload from DB — changes are already persisted
       await loadClipsDB();
       const clips = getLocalClips();
       expect(clips).toHaveLength(1);
-      expect(clips[0].id).toBe('revert-test');
-      expect(clips[0].text).toBe('original');
+      expect(clips[0].id).toBe('revert-new');
+      expect(clips[0].text).toBe('new');
     });
   });
 

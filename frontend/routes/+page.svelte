@@ -50,8 +50,8 @@
     initFromUrl();
   });
 
-  function addReceiveClip() {
-    const clip = newReceivingClip(location.origin);
+  async function addReceiveClip() {
+    const clip = await newReceivingClip(location.origin);
     goto(`/list?clip=${clip.id}`);
   }
 </script>

@@ -9,7 +9,7 @@
     resetShareState,
   } from '$lib/api/store';
   import { createClip } from '$lib/api/client';
-  import { addLocalClip, updateLocalClip, getLocalClip } from '$lib/api/local-store';
+  import { addLocalClip, getLocalClip } from '$lib/api/local-store';
   import { encrypt, generatePassword } from '$lib/crypto';
   import { generateClipId } from '$lib/words';
   import Header from '$lib/components/Header.svelte';
@@ -133,7 +133,7 @@
       saved_at: now,
     };
     if (save_local) {
-      addLocalClip(newClip);
+      await addLocalClip(newClip);
     }
 
     resetShareState();

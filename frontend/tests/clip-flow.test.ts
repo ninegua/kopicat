@@ -60,10 +60,11 @@ describe('Clip creation flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
 
-    render(IdleView, { props: { onPaste: vi.fn() } });
+    render(IdleView, { props: { onPaste: vi.fn(), onChoose: () => {} } });
 
     expect(screen.getByRole('button', { name: 'Copy from clipboard' })).toBeInTheDocument();
     expect(screen.getByText(/Share/i)).toBeInTheDocument();
@@ -77,10 +78,11 @@ describe('Clip creation flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
+      clipPass: null,
     });
     shareState.set({ prefillText: 'Test paste content' });
 
-    const { container } = render(CreateForm, { props: { onCreate: vi.fn() } });
+    const { container } = render(CreateForm, { props: { onCreate: vi.fn(), loading: false } });
 
     await waitFor(() => {
       expect(container.querySelector('pre.code-editor')).toBeInTheDocument();
@@ -100,20 +102,22 @@ describe('Clip creation flow', () => {
       clipState.set({
         clipId,
         decryptedText: testText,
+        clipPass: null,
       });
       shareState.set({ prefillText: null });
 
-      modalState.set({ showModal: 'share', shareUrl: `http://localhost/?${clipId}#testpw` });
+      modalState.set({ showModal: 'share', shareUrl: `http://localhost/?${clipId}#testpw`, successMessage: null });
     });
 
     clipState.set({
       clipId: null,
       decryptedText: null,
+      clipPass: null,
     });
     shareState.set({ prefillText: testText });
 
     const { container } = render(CreateForm, {
-      props: { onCreate },
+      props: { onCreate, loading: false },
     });
     await fillText(container, testText);
 
@@ -142,10 +146,11 @@ describe('Clip creation flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
+      clipPass: null,
     });
     shareState.set({ prefillText: '' });
 
-    render(CreateForm, { props: { onCreate: vi.fn() } });
+    render(CreateForm, { props: { onCreate: vi.fn(), loading: false } });
 
     const createBtn = getCreateButton();
     await fireEvent.click(createBtn);
@@ -171,6 +176,7 @@ describe('Clip viewing flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
 
@@ -180,6 +186,7 @@ describe('Clip viewing flow', () => {
         password: '',
         onDecrypt: vi.fn(),
         error: null,
+        loading: false,
       },
     });
 
@@ -220,6 +227,7 @@ describe('Clip viewing flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
 
@@ -229,6 +237,7 @@ describe('Clip viewing flow', () => {
         onDecrypt,
         error: null,
         password: '',
+        loading: false,
       },
     });
 
@@ -275,6 +284,7 @@ describe('Clip viewing flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
 
@@ -284,6 +294,7 @@ describe('Clip viewing flow', () => {
         onDecrypt,
         error: 'Failed to decrypt. The password may be incorrect.',
         password: 'wrongPassword',
+        loading: false,
       },
     });
 
@@ -317,6 +328,7 @@ describe('Clip viewing flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
 
@@ -326,6 +338,7 @@ describe('Clip viewing flow', () => {
         onDecrypt,
         error: null,
         password,
+        loading: false,
       },
     });
 
@@ -527,6 +540,7 @@ describe('Burn-after-read flow', () => {
       clipState.set({
         clipId,
         decryptedText: testText,
+        clipPass: null,
       });
       shareState.set({ prefillText: null });
     });
@@ -534,6 +548,7 @@ describe('Burn-after-read flow', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
+      clipPass: null,
     });
     shareState.set({ prefillText: testText });
 
@@ -580,6 +595,7 @@ describe('Burn-after-read flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
 
@@ -589,6 +605,7 @@ describe('Burn-after-read flow', () => {
         onDecrypt,
         error: null,
         password: '',
+        loading: false,
       },
     });
 
@@ -609,6 +626,7 @@ describe('Burn-after-read flow', () => {
     clipState.set({
       clipId,
       decryptedText: null,
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
 
@@ -658,16 +676,17 @@ describe('ResultView save local copy', () => {
       text: null as string | null,
       blob: null as string | null,
     };
-    const onSave = (savedClipId: string, savedText: string, savedBlob: string) => {
+    const onSave = (savedClipId: string, savedText: string) => {
       savedData.id = savedClipId;
       savedData.text = savedText;
-      savedData.blob = savedBlob;
     };
 
     render(ResultView, {
       props: {
         onDismiss: () => {},
         onSave,
+        clip: { blob: new Uint8Array(), created_at: Date.now(), expires_at: 0, burn_after_read: false },
+        error: null,
       },
     });
 
@@ -709,6 +728,8 @@ describe('ResultView save local copy', () => {
       props: {
         onDismiss: () => {},
         onSave,
+        clip: { blob: new Uint8Array(), created_at: Date.now(), expires_at: 0, burn_after_read: false },
+        error: null,
       },
     });
 
@@ -762,6 +783,8 @@ describe('ResultView save local copy', () => {
       props: {
         onDismiss: () => {},
         onSave,
+        clip: { blob: new Uint8Array(), created_at: Date.now(), expires_at: 0, burn_after_read: false },
+        error: null,
       },
     });
 
@@ -804,6 +827,7 @@ describe('ResultView save local copy', () => {
         },
         onDismiss: () => {},
         onSave,
+        error: null,
       },
     });
 

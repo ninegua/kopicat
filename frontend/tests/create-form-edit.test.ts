@@ -44,8 +44,7 @@ describe('CreateForm share mode - text prefill', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      clip: null,
-      localClips: [],
+      clipPass: null,
     });
     shareState.set({ prefillText: 'Shared clip content' });
   });
@@ -55,8 +54,7 @@ describe('CreateForm share mode - text prefill', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      clip: null,
-      localClips: [],
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
   });
@@ -102,8 +100,7 @@ describe('CreateForm share mode - button text', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      clip: null,
-      localClips: [],
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
   });
@@ -113,8 +110,7 @@ describe('CreateForm share mode - button text', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      clip: null,
-      localClips: [],
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
   });
@@ -163,8 +159,7 @@ describe('CreateForm share mode - burn after read', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      clip: null,
-      localClips: [],
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
   });
@@ -174,8 +169,7 @@ describe('CreateForm share mode - burn after read', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      clip: null,
-      localClips: [],
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
   });
@@ -208,8 +202,7 @@ describe('CreateForm share mode - TTL selector', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      clip: null,
-      localClips: [],
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
   });
@@ -219,8 +212,7 @@ describe('CreateForm share mode - TTL selector', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      clip: null,
-      localClips: [],
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
   });
@@ -251,8 +243,7 @@ describe('CreateForm share mode - button disabled', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      clip: null,
-      localClips: [],
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
   });
@@ -262,8 +253,7 @@ describe('CreateForm share mode - button disabled', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      clip: null,
-      localClips: [],
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
   });
@@ -285,8 +275,7 @@ describe('CreateForm share mode - error handling', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      clip: null,
-      localClips: [],
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
   });
@@ -296,8 +285,7 @@ describe('CreateForm share mode - error handling', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      clip: null,
-      localClips: [],
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
   });
@@ -372,8 +360,7 @@ describe('CreateForm share mode - local copy checkbox', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      clip: null,
-      localClips: [],
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
   });
@@ -383,8 +370,7 @@ describe('CreateForm share mode - local copy checkbox', () => {
     clipState.set({
       clipId: null,
       decryptedText: null,
-      clip: null,
-      localClips: [],
+      clipPass: null,
     });
     shareState.set({ prefillText: null });
   });

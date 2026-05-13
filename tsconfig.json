@@ -10,5 +10,14 @@
 		"sourceMap": true,
 		"strict": true,
 		"moduleResolution": "bundler"
-	}
+	},
+	"include": [
+		"frontend/tests/**/*.js",
+		"frontend/tests/**/*.ts",
+		"frontend/tests/**/*.svelte",
+		"frontend/lib/**/*.test.js",
+		"frontend/lib/**/*.test.ts",
+		"frontend/lib/**/*.test.svelte",
+		"frontend/**/*.d.ts"
+	]
 }

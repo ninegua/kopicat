@@ -17,15 +17,15 @@
     shareState.set({ prefillText: null });
   }
 
-  function handleAddNew() {
+  async function handleAddNew() {
     const id = generateClipId();
-    addLocalClip({ id, text: '', saved_at: Date.now() }, 'scratch');
+    await addLocalClip({ id, text: '', saved_at: Date.now() }, 'scratch');
     window.dispatchEvent(new StorageEvent('storage', { key: 'copycat_clips' }));
     focusClipId = id;
   }
 
-  function handleReceive() {
-    const clip = newReceivingClip(location.origin);
+  async function handleReceive() {
+    const clip = await newReceivingClip(location.origin);
     window.dispatchEvent(new StorageEvent('storage', { key: 'copycat_clips' }));
     focusClipId = clip.id;
   }

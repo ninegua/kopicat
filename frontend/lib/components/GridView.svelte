@@ -13,7 +13,6 @@
     removeLocalClip,
     updateLocalClip,
     isOnScratchpad,
-    flushClipsDB,
   } from '$lib/api/local-store';
   import { fetchClip } from '$lib/api/client';
   import { decrypt } from '$lib/crypto';
@@ -62,14 +61,13 @@
     }
   }
 
-  function updateClip(id: string, updates: Partial<LocalClip>) {
-    let updated = updateLocalClip(id, updates);
+  async function updateClip(id: string, updates: Partial<LocalClip>) {
+    let updated = await updateLocalClip(id, updates);
     if (updated) {
       clips = clips.map((c) => (c.id === id ? updated : c));
       if (id == focusClip) {
         editingText = updated.text;
       }
-      flushClipsDB();
     }
   }
 
@@ -391,8 +389,7 @@
     if (index >= 0) {
       clips.splice(index, 1);
       await delay(500);
-      const newClip = newReceivingClip(location.origin, clip.id);
-      flushClipsDB();
+      const newClip = await newReceivingClip(location.origin, clip.id);
       clips.splice(index, 0, newClip);
       focusClip = newClip.id;
     }
@@ -449,9 +446,8 @@
       clearTimeout(existing.timer);
       pendingDeletes = pendingDeletes.filter((d) => d.id !== clip.id);
     }
-    function deleteIt() {
-      removeLocalClip(clip.id);
-      flushClipsDB();
+    async function deleteIt() {
+      await removeLocalClip(clip.id);
       clips = clips.filter((c) => c.id !== clip.id);
       pendingDeletes = pendingDeletes.filter((d) => d.id !== clip.id);
       deleteProgress = Object.fromEntries(
@@ -496,9 +492,9 @@
     }
   }
 
-  function handleCancel(clipId: string) {
+  async function handleCancel(clipId: string) {
     edits.delete(clipId);
-    removeLocalClip(clipId, 'scratch');
+    await removeLocalClip(clipId, 'scratch');
     editingText = getLocalClip(clipId)?.text ?? '';
   }
 </script>

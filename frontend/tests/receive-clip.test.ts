@@ -20,7 +20,7 @@ import GridView from '../lib/components/GridView.svelte';
 // Helpers
 // ---------------------------------------------------------------------------
 
-function addEncryptedClipToStore(clipId: string, blob: string) {
+function addEncryptedClipToStore(clipId: string, blob: Uint8Array) {
   const now = Math.floor(Date.now() / 1000);
   clipStore.set(clipId, {
     blob,
@@ -39,8 +39,8 @@ describe('newReceivingClip', () => {
     localStorage.clear();
   });
 
-  it('creates a clip with receiving flag set to true', () => {
-    const { id, text } = newReceivingClip('http://localhost');
+  it('creates a clip with receiving flag set to true', async () => {
+    const { id, text } = await newReceivingClip('http://localhost');
     const clip = getLocalClip(id);
 
     expect(clip).toBeDefined();
@@ -48,29 +48,29 @@ describe('newReceivingClip', () => {
     expect(clip!.text).toBe(text);
   });
 
-  it('generates a URL with the correct format', () => {
-    const { text } = newReceivingClip('http://localhost');
+  it('generates a URL with the correct format', async () => {
+    const { text } = await newReceivingClip('http://localhost');
 
     expect(text).toMatch(/^https?:\/\/[^#]+\/send\?[^#]+#.+$/);
   });
 
-  it('generates unique clip IDs on each call', () => {
+  it('generates unique clip IDs on each call', async () => {
     const ids = new Set<string>();
     for (let i = 0; i < 20; i++) {
-      const { id } = newReceivingClip('http://localhost');
+      const { id } = await newReceivingClip('http://localhost');
       ids.add(id);
     }
     expect(ids.size).toBe(20);
   });
 
-  it('stores the clip in localStorage', () => {
-    const { id } = newReceivingClip('http://localhost');
+  it('stores the clip in localStorage', async () => {
+    const { id } = await newReceivingClip('http://localhost');
     const clips = getLocalClips();
     expect(clips.find((c) => c.id === id)).toBeDefined();
   });
 
-  it('generates a unique password per clip', () => {
-    const { id, text } = newReceivingClip('http://localhost');
+  it('generates a unique password per clip', async () => {
+    const { id, text } = await newReceivingClip('http://localhost');
     const password = text.slice(text.indexOf('#') + 1);
     expect(password.length).toBeGreaterThan(0);
 
@@ -78,7 +78,7 @@ describe('newReceivingClip', () => {
     const passwords = new Set<string>();
     localStorage.clear();
     for (let i = 0; i < 10; i++) {
-      const { text: t } = newReceivingClip('http://localhost');
+      const { text: t } = await newReceivingClip('http://localhost');
       passwords.add(t.slice(t.indexOf('#') + 1));
     }
     expect(passwords.size).toBe(10);
@@ -92,7 +92,6 @@ describe('newReceivingClip', () => {
 describe('pollReceivingClip — successful receive', () => {
   beforeEach(() => {
     localStorage.clear();
-    clipState.update((s) => ({ ...s, localClips: [] }));
     clipStore.clear();
   });
 
@@ -111,7 +110,6 @@ describe('pollReceivingClip — successful receive', () => {
     addEncryptedClipToStore(clipId, encryptedBlob);
 
     // Create receiving clip in localStorage AND store
-    newReceivingClip('http://localhost');
     // Override the generated clip with our desired clipId
     const url = `http://localhost/send?${clipId}#${password}`;
     localStorage.setItem(
@@ -141,7 +139,6 @@ describe('pollReceivingClip — successful receive', () => {
 
     addEncryptedClipToStore(clipId, encryptedBlob);
 
-    newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${password}`;
     localStorage.setItem(
       'copycat_clips',
@@ -169,7 +166,6 @@ describe('pollReceivingClip — successful receive', () => {
 
     addEncryptedClipToStore(clipId, encryptedBlob);
 
-    newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${password}`;
     localStorage.setItem(
       'copycat_clips',
@@ -208,7 +204,6 @@ describe('pollReceivingClip — successful receive', () => {
     addEncryptedClipToStore(clipId, encryptedBlob);
 
     const beforeCreate = Date.now();
-    newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${password}`;
     localStorage.setItem(
       'copycat_clips',
@@ -234,7 +229,6 @@ describe('pollReceivingClip — successful receive', () => {
 
     addEncryptedClipToStore(clipId, encryptedBlob);
 
-    newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${password}`;
     localStorage.setItem(
       'copycat_clips',
@@ -259,7 +253,7 @@ describe('pollReceivingClip — successful receive', () => {
 describe('pollReceivingClip — decryption failure', () => {
   beforeEach(() => {
     localStorage.clear();
-    clipState.update((s) => ({ ...s, localClips: [] }));
+    // localClips removed from ClipState
     clipStore.clear();
   });
 
@@ -278,7 +272,6 @@ describe('pollReceivingClip — decryption failure', () => {
 
     addEncryptedClipToStore(clipId, encryptedBlob);
 
-    newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${wrongPassword}`;
     localStorage.setItem(
       'copycat_clips',
@@ -308,7 +301,6 @@ describe('pollReceivingClip — decryption failure', () => {
 
     addEncryptedClipToStore(clipId, encryptedBlob);
 
-    newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${wrongPassword}`;
     localStorage.setItem(
       'copycat_clips',
@@ -336,7 +328,6 @@ describe('pollReceivingClip — decryption failure', () => {
 
     addEncryptedClipToStore(clipId, encryptedBlob);
 
-    newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${wrongPassword}`;
     localStorage.setItem(
       'copycat_clips',
@@ -369,7 +360,6 @@ describe('pollReceivingClip — decryption failure', () => {
     addEncryptedClipToStore(clipId, encryptedBlob);
 
     const originalSavedAt = 1000000;
-    newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${wrongPassword}`;
     localStorage.setItem(
       'copycat_clips',
@@ -396,7 +386,6 @@ describe('pollReceivingClip — decryption failure', () => {
 
     addEncryptedClipToStore(clipId, encryptedBlob);
 
-    newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${wrongPassword}`;
     localStorage.setItem(
       'copycat_clips',
@@ -425,7 +414,7 @@ describe('pollReceivingClip — decryption failure', () => {
 describe('pollReceivingClip — remote clip not found', () => {
   beforeEach(() => {
     localStorage.clear();
-    clipState.update((s) => ({ ...s, localClips: [] }));
+    // localClips removed from ClipState
     clipStore.clear();
   });
 
@@ -439,7 +428,6 @@ describe('pollReceivingClip — remote clip not found', () => {
     const password = 'recv404Pw';
 
     // Don't add any clip to the MSW store — simulates 404
-    newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${password}`;
     localStorage.setItem(
       'copycat_clips',
@@ -464,7 +452,6 @@ describe('pollReceivingClip — remote clip not found', () => {
     const clipId = generateClipId();
     const password = 'recv404Status';
 
-    newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${password}`;
     localStorage.setItem(
       'copycat_clips',
@@ -487,7 +474,6 @@ describe('pollReceivingClip — remote clip not found', () => {
     const clipId = generateClipId();
     const password = 'recv404Qr';
 
-    newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${password}`;
     localStorage.setItem(
       'copycat_clips',
@@ -520,7 +506,7 @@ describe('pollReceivingClip — remote clip not found', () => {
 describe('pollReceivingClip — try again flow', () => {
   beforeEach(() => {
     localStorage.clear();
-    clipState.update((s) => ({ ...s, localClips: [] }));
+    // localClips removed from ClipState
     clipStore.clear();
   });
 
@@ -539,7 +525,6 @@ describe('pollReceivingClip — try again flow', () => {
     addEncryptedClipToStore(clipId, encryptedBlob);
 
     // Create receiving clip with wrong password
-    newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${wrongPassword}`;
     localStorage.setItem(
       'copycat_clips',
@@ -547,12 +532,9 @@ describe('pollReceivingClip — try again flow', () => {
     );
     await loadClipsDB();
 
-    // Use fake timers from the start for timer-based operations
-    vi.useFakeTimers();
-
     render(GridView);
 
-    // Wait for decryption failure (async, doesn't use timers)
+    // Wait for polling to attempt fetch and fail (wrong password)
     await tick();
 
     await waitFor(() => {
@@ -560,7 +542,7 @@ describe('pollReceivingClip — try again flow', () => {
       expect(updatedClip).toBeDefined();
       expect(updatedClip!.receiving).toBe(true);
       expect(updatedClip!.text).not.toBe(url);
-    });
+    }, { timeout: 10000 });
 
     // Click to expand
     const clipBox = screen.getByText(/Failed to receive/).closest('.clip-box');
@@ -579,10 +561,9 @@ describe('pollReceivingClip — try again flow', () => {
     const tryAgainBtn = screen.getByText(/try again/i);
     tryAgainBtn.click();
 
-    await tick();
-
-    // Advance the 500ms delay in handleSendAgain
-    vi.advanceTimersByTime(500);
+    // After try again, the old clip is replaced with a new one (different ID)
+    // handleSendAgain has a 500ms delay before creating the new clip
+    await new Promise((resolve) => setTimeout(resolve, 700));
     await tick();
 
     // After try again, the old clip is replaced with a new one (different ID)
@@ -591,8 +572,6 @@ describe('pollReceivingClip — try again flow', () => {
     // A new receiving clip should exist
     const newClip = clips.find((c) => c.receiving === true);
     expect(newClip).toBeDefined();
-
-    vi.useRealTimers();
   });
 
   it('generates a new receiving clip with different ID and password', async () => {
@@ -604,16 +583,12 @@ describe('pollReceivingClip — try again flow', () => {
 
     addEncryptedClipToStore(clipId, encryptedBlob);
 
-    newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${wrongPassword}`;
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
     );
     await loadClipsDB();
-
-    // Use fake timers from the start for timer-based operations
-    vi.useFakeTimers();
 
     render(GridView);
 
@@ -624,7 +599,7 @@ describe('pollReceivingClip — try again flow', () => {
       expect(updatedClip).toBeDefined();
       expect(updatedClip!.receiving).toBe(true);
       expect(updatedClip!.text).not.toBe(url);
-    });
+    }, { timeout: 10000 });
 
     const clipBox = screen.getByText(/Failed to receive/).closest('.clip-box');
     await fireEvent.click(clipBox!);
@@ -637,10 +612,8 @@ describe('pollReceivingClip — try again flow', () => {
 
     const btn2 = screen.getByText(/try again/i);
     btn2.click();
-    await tick();
-
-    // Advance the 500ms delay in handleSendAgain
-    vi.advanceTimersByTime(500);
+    // handleSendAgain has a 500ms delay before creating the new clip
+    await new Promise((resolve) => setTimeout(resolve, 700));
     await tick();
 
     const clips = getLocalClips();
@@ -652,8 +625,6 @@ describe('pollReceivingClip — try again flow', () => {
     const newPw = newClip!.text.slice(newClip!.text.indexOf('#') + 1);
     const oldPw = url.slice(url.indexOf('#') + 1);
     expect(newPw).not.toBe(oldPw);
-
-    vi.useRealTimers();
   });
 
   it('regenerates a new receiving clip after clicking "try again"', async () => {
@@ -665,16 +636,12 @@ describe('pollReceivingClip — try again flow', () => {
 
     addEncryptedClipToStore(clipId, encryptedBlob);
 
-    newReceivingClip('http://localhost');
     const url = `http://localhost/send?${clipId}#${wrongPassword}`;
     localStorage.setItem(
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
     );
     await loadClipsDB();
-
-    // Use fake timers from the start for timer-based operations
-    vi.useFakeTimers();
 
     render(GridView);
 
@@ -685,7 +652,7 @@ describe('pollReceivingClip — try again flow', () => {
       expect(updatedClip).toBeDefined();
       expect(updatedClip!.receiving).toBe(true);
       expect(updatedClip!.text).not.toBe(url);
-    });
+    }, { timeout: 10000 });
 
     const clipBox = screen.getByText(/Failed to receive/).closest('.clip-box');
     await fireEvent.click(clipBox!);
@@ -698,10 +665,8 @@ describe('pollReceivingClip — try again flow', () => {
 
     const navBtn = screen.getByText(/try again/i);
     navBtn.click();
-    await tick();
-
-    // Advance the 500ms delay in handleSendAgain
-    vi.advanceTimersByTime(500);
+    // handleSendAgain has a 500ms delay before creating the new clip
+    await new Promise((resolve) => setTimeout(resolve, 700));
     await tick();
 
     // Old clip should be replaced with a new one
@@ -709,8 +674,6 @@ describe('pollReceivingClip — try again flow', () => {
     const newClip = clips.find((c) => c.id !== clipId && c.receiving === true);
     expect(newClip).toBeDefined();
     expect(newClip!.id).not.toBe(clipId);
-
-    vi.useRealTimers();
   });
 });
 
@@ -721,7 +684,7 @@ describe('pollReceivingClip — try again flow', () => {
 describe('pollReceivingClip — multiple receiving clips', () => {
   beforeEach(() => {
     localStorage.clear();
-    clipState.update((s) => ({ ...s, localClips: [] }));
+    // localClips removed from ClipState
     clipStore.clear();
   });
 
@@ -856,20 +819,20 @@ describe('updateLocalClip — receiving clip updates', () => {
     localStorage.clear();
   });
 
-  it('updates text and removes receiving flag', () => {
-    const { id } = newReceivingClip('http://localhost');
+  it('updates text and removes receiving flag', async () => {
+    const { id } = await newReceivingClip('http://localhost');
 
-    updateLocalClip(id, { text: 'Decrypted content', receiving: false });
+    await updateLocalClip(id, { text: 'Decrypted content', receiving: false });
 
     const updated = getLocalClip(id);
     expect(updated?.text).toBe('Decrypted content');
     expect(updated?.receiving).toBe(false);
   });
 
-  it('updates text to error message on decryption failure', () => {
-    const { id } = newReceivingClip('http://localhost');
+  it('updates text to error message on decryption failure', async () => {
+    const { id } = await newReceivingClip('http://localhost');
 
-    updateLocalClip(id, { text: 'Failed to decrypt. The password may be incorrect.' });
+    await updateLocalClip(id, { text: 'Failed to decrypt. The password may be incorrect.' });
 
     const updated = getLocalClip(id);
     expect(updated?.text).toBe('Failed to decrypt. The password may be incorrect.');
@@ -877,10 +840,10 @@ describe('updateLocalClip — receiving clip updates', () => {
     expect(updated?.receiving).toBe(true);
   });
 
-  it('preserves receiving flag when only text is updated on failure', () => {
-    const { id } = newReceivingClip('http://localhost');
+  it('preserves receiving flag when only text is updated on failure', async () => {
+    const { id } = await newReceivingClip('http://localhost');
 
-    updateLocalClip(id, { text: 'Decryption error' });
+    await updateLocalClip(id, { text: 'Decryption error' });
 
     const updated = getLocalClip(id);
     expect(updated?.text).toBe('Decryption error');
@@ -895,20 +858,20 @@ describe('updateLocalClip — receiving clip updates', () => {
 describe('receiving clip URL validation', () => {
   beforeEach(() => {
     localStorage.clear();
-    clipState.update((s) => ({ ...s, localClips: [] }));
+    // localClips removed from ClipState
   });
 
-  it('treats valid receiving URL as having a base URL', () => {
-    const { id } = newReceivingClip('http://localhost');
+  it('treats valid receiving URL as having a base URL', async () => {
+    const { id } = await newReceivingClip('http://localhost');
     const clip = getLocalClip(id);
     // matchBaseUrl pattern: /^https?:\/\/[^#]+/
     expect(clip!.text).toMatch(/^https?:\/\/[^#]+\/send\?[^#]+#.+$/);
   });
 
-  it('treats error message as NOT having a base URL', () => {
-    const { id } = newReceivingClip('http://localhost');
+  it('treats error message as NOT having a base URL', async () => {
+    const { id } = await newReceivingClip('http://localhost');
 
-    updateLocalClip(id, { text: 'Failed to decrypt. The password may be incorrect.' });
+    await updateLocalClip(id, { text: 'Failed to decrypt. The password may be incorrect.' });
 
     const clip = getLocalClip(id);
     // Error messages should NOT match the receiving URL pattern

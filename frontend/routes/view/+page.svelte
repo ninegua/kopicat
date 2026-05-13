@@ -96,11 +96,11 @@
     goto('/');
   }
 
-  function handleSave(_clipId: string, text: string) {
+  async function handleSave(_clipId: string, text: string) {
     const now = Date.now();
     const newClipId = generateClipId();
     const newClip = { id: newClipId, text, saved_at: now };
-    addLocalClip(newClip);
+    await addLocalClip(newClip);
     window.dispatchEvent(new StorageEvent('storage', { key: 'copycat_clips' }));
   }
 

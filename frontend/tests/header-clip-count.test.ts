@@ -10,14 +10,14 @@ describe('Header clip count', () => {
   beforeEach(() => {
     localStorage.clear();
     __resetLocalStore();
-    headerClipCount.set({ total: 0, unsaved: 0 });
+    headerClipCount.set({ total: 0, unsaved: 0, receiving: 0 });
   });
 
   afterEach(() => {
     cleanup();
     localStorage.clear();
     __resetLocalStore();
-    headerClipCount.set({ total: 0, unsaved: 0 });
+    headerClipCount.set({ total: 0, unsaved: 0, receiving: 0 });
     vi.clearAllMocks();
   });
 
@@ -116,14 +116,14 @@ describe('Header add new button', () => {
   beforeEach(() => {
     localStorage.clear();
     __resetLocalStore();
-    headerClipCount.set({ total: 0, unsaved: 0 });
+    headerClipCount.set({ total: 0, unsaved: 0, receiving: 0 });
   });
 
   afterEach(() => {
     cleanup();
     localStorage.clear();
     __resetLocalStore();
-    headerClipCount.set({ total: 0, unsaved: 0 });
+    headerClipCount.set({ total: 0, unsaved: 0, receiving: 0 });
     vi.clearAllMocks();
   });
 

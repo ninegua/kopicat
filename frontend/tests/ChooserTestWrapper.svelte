@@ -28,7 +28,7 @@
   />
 {:else}
   <CreateForm
-    onCreate={() => {}}
+    onCreate={async () => {}}
     loading={false}
     enableBrowse={true}
     onBrowseClips={() => {

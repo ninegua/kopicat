@@ -176,7 +176,7 @@ export function getLocalClips(): LocalClip[] {
   return getSortedClips();
 }
 
-export function addLocalClip(clip: LocalClip, purpose?: 'scratch'): LocalClip[] {
+export async function addLocalClip(clip: LocalClip, purpose?: 'scratch'): Promise<LocalClip[]> {
   const now = Date.now();
 
   if (purpose === 'scratch') {
@@ -196,10 +196,12 @@ export function addLocalClip(clip: LocalClip, purpose?: 'scratch'): LocalClip[] 
   scratchpad.delete(clip.id);
   removed.delete(clip.id);
 
+  await flushClipsDB();
+
   return getSortedClips();
 }
 
-export function removeLocalClip(id: string, purpose?: 'scratch'): void {
+export async function removeLocalClip(id: string, purpose?: 'scratch'): Promise<void> {
   scratchpad.delete(id);
   if (purpose === 'scratch') {
     return;
@@ -209,13 +211,14 @@ export function removeLocalClip(id: string, purpose?: 'scratch'): void {
     dirty.delete(id);
     removed.add(id);
   }
+  await flushClipsDB();
 }
 
-export function updateLocalClip(
+export async function updateLocalClip(
   id: string,
   updates: Partial<LocalClip>,
   purpose?: 'scratch',
-): LocalClip | null {
+): Promise<LocalClip | null> {
   if (purpose === 'scratch') {
     let clip = scratchpad.get(id);
     if (clip === undefined) {
@@ -243,6 +246,8 @@ export function updateLocalClip(
   scratchpad.delete(id);
   removed.delete(id);
 
+  await flushClipsDB();
+
   return updated;
 }
 
@@ -257,7 +262,7 @@ export function getLocalClip(id: string, purpose?: 'scratch'): LocalClip | undef
   return cache.get(id);
 }
 
-export function newReceivingClip(origin: string, replacing: string | null = null): LocalClip {
+export async function newReceivingClip(origin: string, replacing: string | null = null): Promise<LocalClip> {
   while (true) {
     const id = generateClipId();
     const pw = generatePassword(8);
@@ -271,6 +276,7 @@ export function newReceivingClip(origin: string, replacing: string | null = null
       }
       cache.set(id, clip);
       dirty.add(id);
+      await flushClipsDB();
       return clip;
     }
   }
