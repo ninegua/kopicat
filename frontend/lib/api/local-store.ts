@@ -14,8 +14,6 @@ const STORE_NAME = 'clips';
 
 // In-memory cache backed by a Map for O(1) lookups
 let cache: Map<string, LocalClip> = new Map();
-// Scratchpad for unsaved edits
-let scratchpad: Map<string, LocalClip> = new Map();
 // Track entries that need to be written to or deleted from IndexedDB
 let dirty: Set<string> = new Set();
 let removed: Set<string> = new Set();
@@ -176,14 +174,8 @@ export function getLocalClips(): LocalClip[] {
   return getSortedClips();
 }
 
-export async function addLocalClip(clip: LocalClip, purpose?: 'scratch'): Promise<LocalClip[]> {
+export function addLocalClipCache(clip: LocalClip): LocalClip[] {
   const now = Date.now();
-
-  if (purpose === 'scratch') {
-    const scratchClip = { ...clip, saved_at: clip.saved_at ?? now };
-    scratchpad.set(clip.id, scratchClip);
-    return getSortedClips();
-  }
 
   const exists = cache.get(clip.id);
   if (exists) {
@@ -193,19 +185,18 @@ export async function addLocalClip(clip: LocalClip, purpose?: 'scratch'): Promis
   }
 
   dirty.add(clip.id);
-  scratchpad.delete(clip.id);
   removed.delete(clip.id);
-
-  await flushClipsDB();
 
   return getSortedClips();
 }
 
-export async function removeLocalClip(id: string, purpose?: 'scratch'): Promise<void> {
-  scratchpad.delete(id);
-  if (purpose === 'scratch') {
-    return;
-  }
+export async function addLocalClip(clip: LocalClip): Promise<LocalClip[]> {
+  let clips = addLocalClipCache(clip);
+  await flushClipsDB();
+  return clips;
+}
+
+export async function removeLocalClip(id: string): Promise<void> {
   if (cache.has(id)) {
     cache.delete(id);
     dirty.delete(id);
@@ -214,28 +205,8 @@ export async function removeLocalClip(id: string, purpose?: 'scratch'): Promise<
   await flushClipsDB();
 }
 
-export async function updateLocalClip(
-  id: string,
-  updates: Partial<LocalClip>,
-  purpose?: 'scratch',
-): Promise<LocalClip | null> {
-  if (purpose === 'scratch') {
-    let clip = scratchpad.get(id);
-    if (clip === undefined) {
-      clip = cache.get(id);
-    }
-    if (clip === undefined) {
-      return null;
-    }
-    const updated = { ...clip, ...updates };
-    scratchpad.set(id, updated);
-    return updated;
-  }
-
+export function updateLocalClipCache(id: string, updates: Partial<LocalClip>): LocalClip | null {
   let clip = cache.get(id);
-  if (clip === undefined) {
-    clip = scratchpad.get(id);
-  }
   if (clip === undefined) {
     return null;
   }
@@ -243,22 +214,57 @@ export async function updateLocalClip(
   const updated = { ...clip, ...updates, last_modified: Date.now() };
   cache.set(id, updated);
   dirty.add(id);
-  scratchpad.delete(id);
   removed.delete(id);
-
-  await flushClipsDB();
 
   return updated;
 }
 
-export function isOnScratchpad(id: string): boolean {
-  return scratchpad.has(id);
+export async function updateLocalClip(
+  id: string,
+  updates: Partial<LocalClip>,
+): Promise<LocalClip | null> {
+  let clip = updateLocalClipCache(id, updates);
+  await flushClipsDB();
+  return clip;
 }
 
-export function getLocalClip(id: string, purpose?: 'scratch'): LocalClip | undefined {
-  if (purpose === 'scratch') {
-    return scratchpad.get(id);
+export async function invalidateCache(id: string): Promise<void> {
+  dirty.delete(id);
+  removed.delete(id);
+  cache.delete(id);
+  let clip = await getLocalClipDB(id);
+  if (clip) {
+    cache.set(id, clip);
   }
+}
+
+export async function getLocalClipDB(id: string): Promise<LocalClip | null> {
+  if (!isBrowser()) {
+    return null;
+  }
+  try {
+    const db = await getDb();
+    const clip = await new Promise<LocalClip | undefined>((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readonly');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.get(id);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(new Error('IndexedDB read failed'));
+    });
+    if (clip === undefined) {
+      return null;
+    }
+    return { ...clip, receiving: clip.receiving ?? false };
+  } catch {
+    return null;
+  }
+}
+
+export function isDirty(id: string): boolean {
+  return dirty.has(id);
+}
+
+export function getLocalClip(id: string): LocalClip | undefined {
   return cache.get(id);
 }
 
@@ -270,7 +276,7 @@ export async function newReceivingClip(
     const id = generateClipId();
     const pw = generatePassword(8);
     const url = `${origin}/send?${id}#${pw}`;
-    if (!cache.has(id) && !scratchpad.has(id)) {
+    if (!cache.has(id)) {
       const clip = { id, text: url, saved_at: Date.now(), receiving: true };
       if (replacing && cache.has(replacing)) {
         cache.delete(replacing);
@@ -285,10 +291,9 @@ export async function newReceivingClip(
   }
 }
 
-/** Reset internal cache and scratchpad. For tests only. */
+/** Reset internal cache. For tests only. */
 export function __resetLocalStore(): void {
   cache = new Map();
-  scratchpad.clear();
   dirty.clear();
   removed.clear();
   if (dbReady) {

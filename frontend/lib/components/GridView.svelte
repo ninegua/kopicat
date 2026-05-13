@@ -9,10 +9,13 @@
   import {
     getLocalClip,
     getLocalClips,
+    flushClipsDB,
     newReceivingClip,
     removeLocalClip,
     updateLocalClip,
-    isOnScratchpad,
+    updateLocalClipCache,
+    invalidateCache,
+    isDirty,
   } from '$lib/api/local-store';
   import { fetchClip } from '$lib/api/client';
   import { decrypt } from '$lib/crypto';
@@ -37,7 +40,7 @@
   let edits = $state<SvelteSet<string>>(
     new SvelteSet(
       getLocalClips()
-        .filter((clip) => isOnScratchpad(clip.id))
+        .filter((clip) => isDirty(clip.id))
         .map((clip) => clip.id),
     ),
   );
@@ -219,7 +222,7 @@
   // Sets editingText when focusClip changes.
   $effect(() => {
     if (focusClip !== null) {
-      let clip = getLocalClip(focusClip, 'scratch') ?? getLocalClip(focusClip);
+      let clip = getLocalClip(focusClip);
       if (clip !== undefined && !clip.receiving) {
         editingText = clip.text;
       }
@@ -484,17 +487,14 @@
   }
 
   function handleSave(clipId: string) {
-    let clip = getLocalClip(clipId, 'scratch');
-    if (clip !== undefined) {
-      const now = Date.now();
-      updateClip(clip.id, { text: clip.text, last_modified: now });
-      edits.delete(clipId);
-    }
+    const now = Date.now();
+    edits.delete(clipId);
+    flushClipsDB();
   }
 
   async function handleCancel(clipId: string) {
     edits.delete(clipId);
-    await removeLocalClip(clipId, 'scratch');
+    await invalidateCache(clipId);
     editingText = getLocalClip(clipId)?.text ?? '';
   }
 </script>
@@ -607,7 +607,7 @@
                     isModified={edits.has(clip.id)}
                     onTextChange={(code) => {
                       edits.add(clip.id);
-                      updateLocalClip(clip.id, { text: code }, 'scratch');
+                      updateLocalClipCache(clip.id, { text: code });
                     }}
                     onDelete={() => handleDelete(clip)}
                     onShare={() => onShare?.(clip.id)}
@@ -626,7 +626,7 @@
                   >
                 {/if}
                 <div class="clip-preview">
-                  {@html truncateLines(getLocalClip(clip.id, 'scratch')?.text ?? clip.text, 4)}
+                  {@html truncateLines(getLocalClip(clip.id)?.text ?? clip.text, 4)}
                 </div>
               </div>
             {/if}

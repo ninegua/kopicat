@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation';
   import { modalState, shareState } from '$lib/api/store';
   import { generateClipId } from '$lib/words';
-  import { addLocalClip, newReceivingClip } from '$lib/api/local-store';
+  import { addLocalClipCache, newReceivingClip } from '$lib/api/local-store';
   import Header from '$lib/components/Header.svelte';
   import GridView from '$lib/components/GridView.svelte';
   import ShareCard from '$lib/components/ShareCard.svelte';
@@ -19,7 +19,7 @@
 
   async function handleAddNew() {
     const id = generateClipId();
-    await addLocalClip({ id, text: '', saved_at: Date.now() }, 'scratch');
+    await addLocalClipCache({ id, text: '', saved_at: Date.now() });
     window.dispatchEvent(new StorageEvent('storage', { key: 'copycat_clips' }));
     focusClipId = id;
   }

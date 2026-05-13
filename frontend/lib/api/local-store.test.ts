@@ -4,8 +4,8 @@ import {
   addLocalClip,
   removeLocalClip,
   updateLocalClip,
-  isOnScratchpad,
   getLocalClip,
+  getLocalClipDB,
   newReceivingClip,
   loadClipsDB,
   flushClipsDB,
@@ -129,19 +129,6 @@ describe('local-store (cache + IndexedDB)', () => {
       expect(clips[0].text).toBe('updated');
       expect(clips[0].last_modified).toBeDefined();
     });
-
-    it('does not persist to IndexedDB when purpose is scratch', async () => {
-      const clip = makeClip({ id: 'scratch-clip', text: 'scratch' });
-      await addLocalClip(clip, 'scratch');
-
-      // Should not be in the main cache yet
-      const persistedClips = await getLocalClips();
-      expect(persistedClips).toHaveLength(0);
-
-      // But should be retrievable from scratchpad
-      expect(isOnScratchpad('scratch-clip')).toBe(true);
-      expect(await getLocalClip('scratch-clip', 'scratch')).toEqual(clip);
-    });
   });
 
   describe('removeLocalClip', () => {
@@ -151,14 +138,6 @@ describe('local-store (cache + IndexedDB)', () => {
       await removeLocalClip('remove-me');
 
       expect(await getLocalClips()).toHaveLength(0);
-    });
-
-    it('removes from scratchpad when purpose is scratch', async () => {
-      const clip = makeClip({ id: 'scratch-remove' });
-      await addLocalClip(clip, 'scratch');
-      await removeLocalClip('scratch-remove', 'scratch');
-
-      expect(isOnScratchpad('scratch-remove')).toBe(false);
     });
 
     it('does nothing when clip does not exist', async () => {
@@ -186,61 +165,18 @@ describe('local-store (cache + IndexedDB)', () => {
       expect(result).toBeNull();
     });
 
-    it('updates scratchpad clip', async () => {
-      const clip = makeClip({ id: 'scratch-update', text: 'original' });
-      await addLocalClip(clip, 'scratch');
-
-      const updated = await updateLocalClip(
-        'scratch-update',
-        { text: 'scratch-modified' },
-        'scratch',
-      );
-      expect(updated).not.toBeNull();
-      expect(updated!.text).toBe('scratch-modified');
-      expect(isOnScratchpad('scratch-update')).toBe(true);
-    });
-
-    it('updates persisted clip from scratchpad when scratch clip not found', async () => {
-      const clip = makeClip({ id: 'mixed-update', text: 'persisted' });
+    it('updates a clip that was added but not flushed yet', async () => {
+      const clip = makeClip({ id: 'unflushed-update', text: 'original' });
       await addLocalClip(clip);
 
-      const updated = await updateLocalClip('mixed-update', { text: 'via-scratch' }, 'scratch');
+      const updated = await updateLocalClip('unflushed-update', { text: 'modified' });
       expect(updated).not.toBeNull();
-      expect(updated!.text).toBe('via-scratch');
+      expect(updated!.text).toBe('modified');
     });
 
-    it('returns null for scratch update when neither scratch nor persisted clip exists', async () => {
-      const result = await updateLocalClip('nonexistent', { text: 'x' }, 'scratch');
+    it('returns null when clip does not exist', async () => {
+      const result = await updateLocalClip('nonexistent', { text: 'x' });
       expect(result).toBeNull();
-    });
-
-    it('persists after scratchpad update (scratchpad entry removed on persisted update)', async () => {
-      const clip = makeClip({ id: 'scratch-persist', text: 'scratch' });
-      await addLocalClip(clip, 'scratch');
-
-      await updateLocalClip('scratch-persist', { text: 'persisted' }, 'scratch');
-      expect(isOnScratchpad('scratch-persist')).toBe(true);
-
-      await updateLocalClip('scratch-persist', { text: 'persist-update' });
-      expect(isOnScratchpad('scratch-persist')).toBe(false);
-    });
-  });
-
-  describe('isOnScratchpad', () => {
-    it('returns true for scratchpad clip', async () => {
-      const clip = makeClip({ id: 'sp-1' });
-      await addLocalClip(clip, 'scratch');
-      expect(isOnScratchpad('sp-1')).toBe(true);
-    });
-
-    it('returns false for persisted clip', async () => {
-      const clip = makeClip({ id: 'sp-2' });
-      await addLocalClip(clip);
-      expect(isOnScratchpad('sp-2')).toBe(false);
-    });
-
-    it('returns false for non-existent clip', () => {
-      expect(isOnScratchpad('nonexistent')).toBe(false);
     });
   });
 
@@ -253,22 +189,14 @@ describe('local-store (cache + IndexedDB)', () => {
       expect(result!.text).toBe('persisted');
     });
 
-    it('gets a scratchpad clip when purpose is scratch', async () => {
-      const clip = makeClip({ id: 'get-scratch', text: 'scratch' });
-      await addLocalClip(clip, 'scratch');
-      const result = await getLocalClip('get-scratch', 'scratch');
-      expect(result).toEqual(clip);
-    });
-
     it('returns undefined for non-existent clip', async () => {
       expect(await getLocalClip('nonexistent')).toBeUndefined();
-      expect(await getLocalClip('nonexistent', 'scratch')).toBeUndefined();
     });
 
-    it('gets persisted clip when purpose is not scratch', async () => {
-      const clip = makeClip({ id: 'get-mixed', text: 'persisted' });
+    it('gets persisted clip', async () => {
+      const clip = makeClip({ id: 'get-persist-2', text: 'persisted' });
       await addLocalClip(clip);
-      const result = await getLocalClip('get-mixed');
+      const result = await getLocalClip('get-persist-2');
       expect(result!.text).toBe('persisted');
     });
   });
@@ -401,6 +329,40 @@ describe('local-store (cache + IndexedDB)', () => {
       await flushClipsDB();
       // Should not throw
       expect(getLocalClips()).toEqual([]);
+    });
+  });
+
+  describe('getLocalClipDB', () => {
+    it('reads a clip from IndexedDB', async () => {
+      const clip = makeClip({ id: 'db-read', text: 'from db' });
+      await addLocalClip(clip);
+      await flushClipsDB();
+
+      const result = await getLocalClipDB('db-read');
+      expect(result).not.toBeNull();
+      expect(result!.text).toBe('from db');
+      expect(result!.id).toBe('db-read');
+    });
+
+    it('returns null when clip does not exist in database', async () => {
+      const result = await getLocalClipDB('nonexistent-db');
+      expect(result).toBeNull();
+    });
+
+    it('returns null when IndexedDB is not available', async () => {
+      // In test environment (jsdom), indexedDB may not be available
+      const result = await getLocalClipDB('test');
+      expect(result).toBeNull();
+    });
+
+    it('reads clip with receiving flag set', async () => {
+      const clip = makeClip({ id: 'db-receive', text: 'receiving', receiving: true });
+      addLocalClip(clip);
+      await flushClipsDB();
+
+      const result = await getLocalClipDB('db-receive');
+      expect(result).not.toBeNull();
+      expect(result!.receiving).toBe(true);
     });
   });
 });

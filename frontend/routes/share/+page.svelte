@@ -58,7 +58,7 @@
       chooserMode = true;
     }
     if (fromClipId) {
-      const clip = getLocalClip(fromClipId, 'scratch') ?? getLocalClip(fromClipId);
+      const clip = getLocalClip(fromClipId);
       if (clip) {
         prefillText = clip.text;
       }
@@ -73,7 +73,7 @@
   onDestroy(resetSendState);
 
   function handleChoose(clipId: string) {
-    let clip = getLocalClip(clipId, 'scratch') ?? getLocalClip(clipId);
+    let clip = getLocalClip(clipId);
     shareState.set({ prefillText: clip?.text ?? '' });
     chooserMode = false;
     // Remove the chooser parameter from the URL now that selection is done.
