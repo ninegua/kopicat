@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { vi } from 'vitest';
 import {
   getLocalClips,
   addLocalClip,
@@ -25,215 +24,211 @@ function makeClip(overrides: Partial<LocalClip> = {}): LocalClip {
   };
 }
 
-function setStorage(key: string, value: unknown): void {
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem(key, JSON.stringify(value));
-  }
-}
+async function clearIndexedDB(): Promise<void> {
+  return new Promise<void>((resolve) => {
+    if (typeof indexedDB === 'undefined') {
+      resolve();
+      return;
+    }
 
-function getStorage(key: string): string | null {
-  if (typeof localStorage !== 'undefined') {
-    return localStorage.getItem(key);
-  }
-  return null;
-}
-
-function clearStorage(): void {
-  if (typeof localStorage !== 'undefined') {
-    localStorage.clear();
-  }
+    // Delete the entire database for a clean slate
+    const deleteReq = indexedDB.deleteDatabase('copycat');
+    deleteReq.onsuccess = () => resolve();
+    deleteReq.onerror = () => resolve();
+    deleteReq.onblocked = () => resolve();
+  });
 }
 
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('local-store', () => {
-  beforeEach(() => {
+describe('local-store (IndexedDB)', () => {
+  beforeEach(async () => {
     __resetLocalStore();
-    clearStorage();
+    await clearIndexedDB();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     __resetLocalStore();
-    clearStorage();
+    await clearIndexedDB();
   });
 
   describe('getLocalClips', () => {
-    it('returns empty array when no clips stored', () => {
-      expect(getLocalClips()).toEqual([]);
+    it('returns empty array when no clips stored', async () => {
+      expect(await getLocalClips()).toEqual([]);
     });
 
-    it('returns clips in reverse order of insertion', () => {
-      const clipA = makeClip({ id: 'a', text: 'A' });
-      const clipB = makeClip({ id: 'b', text: 'B' });
-      const clipC = makeClip({ id: 'c', text: 'C' });
+    it('returns clips sorted by saved_at descending', async () => {
+      const clipA = makeClip({ id: 'a', text: 'A', saved_at: 1000 });
+      const clipB = makeClip({ id: 'b', text: 'B', saved_at: 2000 });
+      const clipC = makeClip({ id: 'c', text: 'C', saved_at: 3000 });
 
-      addLocalClip(clipA);
-      addLocalClip(clipB);
-      addLocalClip(clipC);
+      await addLocalClip(clipA);
+      await addLocalClip(clipB);
+      await addLocalClip(clipC);
 
-      const clips = getLocalClips();
-      // Most recently added should be first (reverse)
+      const clips = await getLocalClips();
+      // Most recently saved should be first (descending by saved_at)
       expect(clips[0].id).toBe('c');
       expect(clips[1].id).toBe('b');
       expect(clips[2].id).toBe('a');
     });
 
-    it('handles corrupted localStorage data gracefully', () => {
-      setStorage('copycat_clips', 'not valid json');
-      expect(getLocalClips()).toEqual([]);
+    it('returns clips sorted by saved_at descending when timestamps differ', async () => {
+      const clipA = makeClip({ id: 'a', text: 'A', saved_at: 100 });
+      const clipB = makeClip({ id: 'b', text: 'B', saved_at: 300 });
+      const clipC = makeClip({ id: 'c', text: 'C', saved_at: 200 });
+
+      await addLocalClip(clipA);
+      await addLocalClip(clipB);
+      await addLocalClip(clipC);
+
+      const clips = await getLocalClips();
+      // Should be sorted by saved_at descending: B(300), C(200), A(100)
+      expect(clips[0].id).toBe('b');
+      expect(clips[1].id).toBe('c');
+      expect(clips[2].id).toBe('a');
     });
   });
 
   describe('addLocalClip', () => {
-    it('adds a new clip to storage', () => {
+    it('adds a new clip to IndexedDB', async () => {
       const clip = makeClip({ id: 'new-clip', text: 'hello' });
-      addLocalClip(clip);
+      await addLocalClip(clip);
 
-      const clips = getLocalClips();
+      const clips = await getLocalClips();
       expect(clips).toHaveLength(1);
       expect(clips[0].id).toBe('new-clip');
       expect(clips[0].text).toBe('hello');
     });
 
-    it('sets saved_at timestamp', () => {
+    it('sets saved_at timestamp', async () => {
       const before = Date.now();
       const clip = makeClip({ id: 'time-test', text: 't' });
-      addLocalClip(clip);
+      await addLocalClip(clip);
       const after = Date.now();
 
-      const clips = getLocalClips();
+      const clips = await getLocalClips();
       expect(clips[0].saved_at).toBeGreaterThanOrEqual(before);
       expect(clips[0].saved_at).toBeLessThanOrEqual(after);
     });
 
-    it('updates an existing clip instead of duplicating', () => {
+    it('updates an existing clip instead of duplicating', async () => {
       const original = makeClip({ id: 'dup', text: 'original' });
-      addLocalClip(original);
+      await addLocalClip(original);
 
       const updated = makeClip({ id: 'dup', text: 'updated' });
-      addLocalClip(updated);
+      await addLocalClip(updated);
 
-      const clips = getLocalClips();
+      const clips = await getLocalClips();
       expect(clips).toHaveLength(1);
       expect(clips[0].text).toBe('updated');
       expect(clips[0].last_modified).toBeDefined();
     });
 
-    it('does not persist to localStorage when purpose is scratch', () => {
+    it('does not persist to IndexedDB when purpose is scratch', async () => {
       const clip = makeClip({ id: 'scratch-clip', text: 'scratch' });
-      addLocalClip(clip, 'scratch');
+      await addLocalClip(clip, 'scratch');
 
-      // Should not be persisted to localStorage yet
-      const persistedClips = JSON.parse(getStorage('copycat_clips') || '[]');
+      // Should not be persisted to IndexedDB yet
+      const persistedClips = await getLocalClips();
       expect(persistedClips).toHaveLength(0);
 
       // But should be retrievable from scratchpad
       expect(isOnScratchpad('scratch-clip')).toBe(true);
-      expect(getLocalClip('scratch-clip', 'scratch')).toEqual(clip);
+      expect(await getLocalClip('scratch-clip', 'scratch')).toEqual(clip);
     });
   });
 
   describe('removeLocalClip', () => {
-    it('removes a persisted clip', () => {
+    it('removes a persisted clip', async () => {
       const clip = makeClip({ id: 'remove-me' });
-      addLocalClip(clip);
-      removeLocalClip('remove-me');
+      await addLocalClip(clip);
+      await removeLocalClip('remove-me');
 
-      expect(getLocalClips()).toHaveLength(0);
+      expect(await getLocalClips()).toHaveLength(0);
     });
 
-    it('removes from scratchpad when purpose is scratch', () => {
+    it('removes from scratchpad when purpose is scratch', async () => {
       const clip = makeClip({ id: 'scratch-remove' });
-      addLocalClip(clip, 'scratch');
-      removeLocalClip('scratch-remove', 'scratch');
+      await addLocalClip(clip, 'scratch');
+      await removeLocalClip('scratch-remove', 'scratch');
 
       expect(isOnScratchpad('scratch-remove')).toBe(false);
     });
 
-    it('does nothing when clip does not exist', () => {
+    it('does nothing when clip does not exist', async () => {
       const clip = makeClip({ id: 'exists-clip' });
-      addLocalClip(clip);
-      removeLocalClip('nonexistent');
+      await addLocalClip(clip);
+      await removeLocalClip('nonexistent');
 
-      expect(getLocalClips()).toHaveLength(1);
+      expect(await getLocalClips()).toHaveLength(1);
     });
   });
 
   describe('updateLocalClip', () => {
-    it('updates a persisted clip', () => {
+    it('updates a persisted clip', async () => {
       const clip = makeClip({ id: 'update-persist', text: 'original' });
-      addLocalClip(clip);
+      await addLocalClip(clip);
 
-      const updated = updateLocalClip('update-persist', { text: 'modified' });
+      const updated = await updateLocalClip('update-persist', { text: 'modified' });
       expect(updated).not.toBeNull();
       expect(updated!.text).toBe('modified');
       expect(updated!.last_modified).toBeDefined();
     });
 
-    it('returns null when clip does not exist', () => {
-      const result = updateLocalClip('nonexistent', { text: 'x' });
+    it('returns null when clip does not exist', async () => {
+      const result = await updateLocalClip('nonexistent', { text: 'x' });
       expect(result).toBeNull();
     });
 
-    it('updates scratchpad clip', () => {
+    it('updates scratchpad clip', async () => {
       const clip = makeClip({ id: 'scratch-update', text: 'original' });
-      addLocalClip(clip, 'scratch');
+      await addLocalClip(clip, 'scratch');
 
-      const updated = updateLocalClip('scratch-update', { text: 'scratch-modified' }, 'scratch');
+      const updated = await updateLocalClip('scratch-update', { text: 'scratch-modified' }, 'scratch');
       expect(updated).not.toBeNull();
       expect(updated!.text).toBe('scratch-modified');
       expect(isOnScratchpad('scratch-update')).toBe(true);
     });
 
-    it('updates persisted clip from scratchpad when scratch clip not found', () => {
-      // Add a clip to persisted storage
+    it('updates persisted clip from scratchpad when scratch clip not found', async () => {
       const clip = makeClip({ id: 'mixed-update', text: 'persisted' });
-      addLocalClip(clip);
+      await addLocalClip(clip);
 
-      // Try to update as scratch (should fall back to persisted since scratch version doesn't exist)
-      const updated = updateLocalClip('mixed-update', { text: 'via-scratch' }, 'scratch');
+      const updated = await updateLocalClip('mixed-update', { text: 'via-scratch' }, 'scratch');
       expect(updated).not.toBeNull();
       expect(updated!.text).toBe('via-scratch');
     });
 
-    it('returns null for scratch update when neither scratch nor persisted clip exists', () => {
-      const result = updateLocalClip('nonexistent', { text: 'x' }, 'scratch');
+    it('returns null for scratch update when neither scratch nor persisted clip exists', async () => {
+      const result = await updateLocalClip('nonexistent', { text: 'x' }, 'scratch');
       expect(result).toBeNull();
     });
 
-    it('persists after scratchpad update (scratchpad entry removed from scratch)', () => {
+    it('persists after scratchpad update (scratchpad entry removed on persisted update)', async () => {
       const clip = makeClip({ id: 'scratch-persist', text: 'scratch' });
-      addLocalClip(clip, 'scratch');
+      await addLocalClip(clip, 'scratch');
 
-      // Update via scratch
-      updateLocalClip('scratch-persist', { text: 'persisted' }, 'scratch');
-
-      // After update with purpose='scratch', the clip is still in scratchpad
-      // but if we update again via persisted, scratchpad entry should be removed
+      await updateLocalClip('scratch-persist', { text: 'persisted' }, 'scratch');
       expect(isOnScratchpad('scratch-persist')).toBe(true);
 
-      // Now update via persisted - scratchpad entry should be cleared
-      // Note: this tests the else branch where scratchpad.delete(id) is called
-      // We need the clip to exist in persisted first
-      updateLocalClip('scratch-persist', { text: 'persist-update' });
-
-      // After persisted update, scratchpad entry should be gone
+      await updateLocalClip('scratch-persist', { text: 'persist-update' });
       expect(isOnScratchpad('scratch-persist')).toBe(false);
     });
   });
 
   describe('isOnScratchpad', () => {
-    it('returns true for scratchpad clip', () => {
+    it('returns true for scratchpad clip', async () => {
       const clip = makeClip({ id: 'sp-1' });
-      addLocalClip(clip, 'scratch');
+      await addLocalClip(clip, 'scratch');
       expect(isOnScratchpad('sp-1')).toBe(true);
     });
 
-    it('returns false for persisted clip', () => {
+    it('returns false for persisted clip', async () => {
       const clip = makeClip({ id: 'sp-2' });
-      addLocalClip(clip);
+      await addLocalClip(clip);
       expect(isOnScratchpad('sp-2')).toBe(false);
     });
 
@@ -243,68 +238,66 @@ describe('local-store', () => {
   });
 
   describe('getLocalClip', () => {
-    it('gets a persisted clip', () => {
+    it('gets a persisted clip', async () => {
       const clip = makeClip({ id: 'get-persist', text: 'persisted' });
-      addLocalClip(clip);
-      const result = getLocalClip('get-persist');
+      await addLocalClip(clip);
+      const result = await getLocalClip('get-persist');
       expect(result).toBeDefined();
       expect(result!.text).toBe('persisted');
     });
 
-    it('gets a scratchpad clip when purpose is scratch', () => {
+    it('gets a scratchpad clip when purpose is scratch', async () => {
       const clip = makeClip({ id: 'get-scratch', text: 'scratch' });
-      addLocalClip(clip, 'scratch');
-      const result = getLocalClip('get-scratch', 'scratch');
+      await addLocalClip(clip, 'scratch');
+      const result = await getLocalClip('get-scratch', 'scratch');
       expect(result).toEqual(clip);
     });
 
-    it('returns undefined for non-existent clip', () => {
-      expect(getLocalClip('nonexistent')).toBeUndefined();
-      expect(getLocalClip('nonexistent', 'scratch')).toBeUndefined();
+    it('returns undefined for non-existent clip', async () => {
+      expect(await getLocalClip('nonexistent')).toBeUndefined();
+      expect(await getLocalClip('nonexistent', 'scratch')).toBeUndefined();
     });
 
-    it('gets persisted clip when purpose is not scratch', () => {
+    it('gets persisted clip when purpose is not scratch', async () => {
       const clip = makeClip({ id: 'get-mixed', text: 'persisted' });
-      addLocalClip(clip);
-      const result = getLocalClip('get-mixed');
+      await addLocalClip(clip);
+      const result = await getLocalClip('get-mixed');
       expect(result!.text).toBe('persisted');
     });
   });
 
   describe('newReceivingClip', () => {
-    it('creates a clip with receiving flag set', () => {
-      const clip = newReceivingClip('https://example.com');
+    it('creates a clip with receiving flag set', async () => {
+      const clip = await newReceivingClip('https://example.com');
       expect(clip).toBeDefined();
       expect(clip.receiving).toBe(true);
     });
 
-    it('sets text as a share URL', () => {
-      const clip = newReceivingClip('https://example.com');
+    it('sets text as a share URL', async () => {
+      const clip = await newReceivingClip('https://example.com');
       expect(clip.text).toMatch(/^https:\/\/example\.com\/send\?/);
       expect(clip.text).toContain('#');
     });
 
-    it('replaces an existing clip when replacing id is provided', () => {
+    it('replaces an existing clip when replacing id is provided', async () => {
       const original = makeClip({ id: 'replace-me', text: 'original' });
-      addLocalClip(original);
+      await addLocalClip(original);
 
-      const clip = newReceivingClip('https://example.com', 'replace-me');
-      // newReceivingClip generates a new ID but replaces the clip at the position of 'replacing'
+      const clip = await newReceivingClip('https://example.com', 'replace-me');
       expect(clip.receiving).toBe(true);
-      // Clip count should stay the same (one replaced, one added)
-      expect(getLocalClips()).toHaveLength(1);
+      expect(await getLocalClips()).toHaveLength(1);
     });
 
-    it('appends a new clip when no replacing id matches', () => {
-      const clip = newReceivingClip('https://example.com');
-      const clips = getLocalClips();
+    it('appends a new clip when no replacing id matches', async () => {
+      const clip = await newReceivingClip('https://example.com');
+      const clips = await getLocalClips();
       expect(clips).toHaveLength(1);
     });
 
-    it('generates unique clip IDs (no collision)', () => {
+    it('generates unique clip IDs (no collision)', async () => {
       const clips: LocalClip[] = [];
       for (let i = 0; i < 10; i++) {
-        clips.push(newReceivingClip('https://example.com'));
+        clips.push(await newReceivingClip('https://example.com'));
       }
       const ids = new Set(clips.map((c) => c.id));
       expect(ids.size).toBe(10);

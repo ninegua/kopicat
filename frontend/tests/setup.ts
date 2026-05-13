@@ -1,8 +1,20 @@
 import '@testing-library/jest-dom/vitest';
 import { afterAll, afterEach, beforeAll, vi } from 'vitest';
+import { IDBFactory, IDBKeyRange, indexedDB as fakeIndexedDB } from 'fake-indexeddb';
 import { clipState, modalState, shareState } from '$lib/api/store';
 import { __resetLocalStore } from '$lib/api/local-store';
 import type { Clip } from '$lib/icp/types';
+
+// ---------------------------------------------------------------------------
+// Mock: fake-indexeddb (replaces browser IndexedDB in jsdom tests)
+// ---------------------------------------------------------------------------
+
+// Replace the global indexedDB with the fake implementation
+if (typeof window !== 'undefined') {
+  (window as any).indexedDB = fakeIndexedDB;
+  (window as any).IDBKeyRange = IDBKeyRange;
+  (window as any).IDBFactory = IDBFactory;
+}
 
 // In-memory "backend" store shared across all requests
 export const clipStore = new Map<string, Clip>();
@@ -180,6 +192,28 @@ window.matchMedia = vi.fn().mockImplementation((query: string) => ({
 // Reset clip store + modal store between tests
 // ---------------------------------------------------------------------------
 
+function clearIndexedDB(): void {
+  if (typeof indexedDB !== 'undefined') {
+    const request = indexedDB.open('copycat', 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains('clips')) {
+        db.createObjectStore('clips', { keyPath: 'id' });
+      }
+    };
+    request.onsuccess = () => {
+      const db = request.result;
+      if (db.objectStoreNames.contains('clips')) {
+        const tx = db.transaction('clips', 'readwrite');
+        tx.objectStore('clips').clear();
+        tx.oncomplete = () => db.close();
+      } else {
+        db.close();
+      }
+    };
+  }
+}
+
 afterEach(() => {
   clipStore.clear();
   clipState.set({
@@ -194,6 +228,7 @@ afterEach(() => {
     successMessage: null,
   });
   __resetLocalStore();
+  clearIndexedDB();
 });
 
 // Reset mock function calls between tests
