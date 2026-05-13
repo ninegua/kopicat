@@ -7,6 +7,8 @@ import {
   isOnScratchpad,
   getLocalClip,
   newReceivingClip,
+  loadClipsDB,
+  flushClipsDB,
   __resetLocalStore,
 } from '$lib/api/local-store';
 import type { LocalClip } from '$lib/api/local-store';
@@ -43,10 +45,11 @@ async function clearIndexedDB(): Promise<void> {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('local-store (IndexedDB)', () => {
+describe('local-store (cache + IndexedDB)', () => {
   beforeEach(async () => {
     __resetLocalStore();
     await clearIndexedDB();
+    await loadClipsDB();
   });
 
   afterEach(async () => {
@@ -93,7 +96,7 @@ describe('local-store (IndexedDB)', () => {
   });
 
   describe('addLocalClip', () => {
-    it('adds a new clip to IndexedDB', async () => {
+    it('adds a new clip to the cache', async () => {
       const clip = makeClip({ id: 'new-clip', text: 'hello' });
       await addLocalClip(clip);
 
@@ -131,7 +134,7 @@ describe('local-store (IndexedDB)', () => {
       const clip = makeClip({ id: 'scratch-clip', text: 'scratch' });
       await addLocalClip(clip, 'scratch');
 
-      // Should not be persisted to IndexedDB yet
+      // Should not be in the main cache yet
       const persistedClips = await getLocalClips();
       expect(persistedClips).toHaveLength(0);
 
@@ -301,6 +304,100 @@ describe('local-store (IndexedDB)', () => {
       }
       const ids = new Set(clips.map((c) => c.id));
       expect(ids.size).toBe(10);
+    });
+  });
+
+  describe('loadClipsDB', () => {
+    it('loads persisted clips from IndexedDB into cache', async () => {
+      const clip = makeClip({ id: 'db-load', text: 'from db' });
+      addLocalClip(clip);
+      await flushClipsDB();
+
+      __resetLocalStore();
+      await loadClipsDB();
+
+      const clips = getLocalClips();
+      expect(clips).toHaveLength(1);
+      expect(clips[0].id).toBe('db-load');
+      expect(clips[0].text).toBe('from db');
+    });
+
+    it('returns empty cache when IndexedDB is empty', async () => {
+      __resetLocalStore();
+      await loadClipsDB();
+      expect(getLocalClips()).toEqual([]);
+    });
+
+    it('reverts unsaved cache changes when called again', async () => {
+      // Start from a known persisted state
+      const clip = makeClip({ id: 'revert-test', text: 'original' });
+      addLocalClip(clip);
+      await flushClipsDB();
+      expect(getLocalClips()).toHaveLength(1);
+
+      // Mutate cache without flushing
+      updateLocalClip('revert-test', { text: 'modified' });
+      addLocalClip(makeClip({ id: 'revert-new', text: 'new' }));
+      removeLocalClip('revert-test');
+      expect(getLocalClips()).toHaveLength(1);
+      expect(getLocalClips()[0].id).toBe('revert-new');
+
+      // Reload from DB — unsaved changes are lost
+      await loadClipsDB();
+      const clips = getLocalClips();
+      expect(clips).toHaveLength(1);
+      expect(clips[0].id).toBe('revert-test');
+      expect(clips[0].text).toBe('original');
+    });
+  });
+
+  describe('flushClipsDB', () => {
+    it('writes added clips to IndexedDB', async () => {
+      const clip = makeClip({ id: 'flush-add', text: 'flush' });
+      addLocalClip(clip);
+      await flushClipsDB();
+
+      __resetLocalStore();
+      await loadClipsDB();
+
+      const clips = getLocalClips();
+      expect(clips).toHaveLength(1);
+      expect(clips[0].text).toBe('flush');
+    });
+
+    it('writes updated clips to IndexedDB', async () => {
+      const clip = makeClip({ id: 'flush-update', text: 'original' });
+      addLocalClip(clip);
+      await flushClipsDB();
+
+      updateLocalClip('flush-update', { text: 'modified' });
+      await flushClipsDB();
+
+      __resetLocalStore();
+      await loadClipsDB();
+
+      const clips = getLocalClips();
+      expect(clips[0].text).toBe('modified');
+    });
+
+    it('deletes removed clips from IndexedDB', async () => {
+      const clip = makeClip({ id: 'flush-delete' });
+      addLocalClip(clip);
+      await flushClipsDB();
+
+      removeLocalClip('flush-delete');
+      await flushClipsDB();
+
+      __resetLocalStore();
+      await loadClipsDB();
+
+      expect(getLocalClips()).toHaveLength(0);
+    });
+
+    it('is a no-op when nothing is dirty or removed', async () => {
+      await flushClipsDB();
+      // Should not throw
+      expect(getLocalClips()).toEqual([]);
     });
   });
 });
