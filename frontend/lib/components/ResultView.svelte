@@ -21,10 +21,9 @@
   let maximized = $state(false);
 
   function saveClip() {
-    const clipId = $clipState.clipId;
     const text = $clipState.decryptedText;
-    if (!clipId || !text || !onSave) return;
-    onSave(clipId, text);
+    if (!text || !onSave) return;
+    onSave('', text);
   }
 </script>
 

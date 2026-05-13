@@ -674,7 +674,7 @@ describe('ResultView save local copy', () => {
     await fireEvent.click(saveIcon);
 
     // Verify onSave was called with correct data
-    expect(savedData.id).toBe(clipId);
+    expect(savedData.id).toBe('');
     expect(savedData.text).toBe(testText);
   });
 
@@ -742,8 +742,10 @@ describe('ResultView save local copy', () => {
     }));
     shareState.set({ prefillText: null });
 
-    const onSave = (savedClipId: string, savedText: string) => {
+    let savedClipId = '';
+    const onSave = (clipId: string, savedText: string) => {
       const now = Date.now();
+      savedClipId = generateClipId();
       const newClip = { id: savedClipId, text: savedText, saved_at: now };
       addLocalClip(newClip);
       clipState.update((s) => ({
@@ -764,10 +766,10 @@ describe('ResultView save local copy', () => {
 
     await fireEvent.click(saveIcon);
 
-    // Verify localStorage has the clip
+    // Verify localStorage has the clip with a generated ID
     const savedClips = getLocalClips();
     expect(savedClips.length).toBe(1);
-    expect(savedClips[0].id).toBe(clipId);
+    expect(savedClips[0].id).toBe(savedClipId);
     expect(savedClips[0].text).toBe(testText);
   });
 

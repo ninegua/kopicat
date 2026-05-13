@@ -6,6 +6,7 @@
   import { fetchClip } from '$lib/api/client';
   import { decrypt } from '$lib/crypto';
   import { addLocalClip, getLocalClip } from '$lib/api/local-store';
+  import { generateClipId } from '$lib/words';
   import Header from '$lib/components/Header.svelte';
   import DecryptForm from '$lib/components/DecryptForm.svelte';
   import ResultView from '$lib/components/ResultView.svelte';
@@ -95,9 +96,10 @@
     goto('/');
   }
 
-  function handleSave(clipId: string, text: string) {
+  function handleSave(_clipId: string, text: string) {
     const now = Date.now();
-    const newClip = { id: clipId, text, saved_at: now };
+    const newClipId = generateClipId();
+    const newClip = { id: newClipId, text, saved_at: now };
     addLocalClip(newClip);
     window.dispatchEvent(new StorageEvent('storage', { key: 'copycat_clips' }));
   }
