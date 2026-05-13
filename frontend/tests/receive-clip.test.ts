@@ -537,12 +537,15 @@ describe('pollReceivingClip — try again flow', () => {
     // Wait for polling to attempt fetch and fail (wrong password)
     await tick();
 
-    await waitFor(() => {
-      const updatedClip = getLocalClips().find((c) => c.id === clipId);
-      expect(updatedClip).toBeDefined();
-      expect(updatedClip!.receiving).toBe(true);
-      expect(updatedClip!.text).not.toBe(url);
-    }, { timeout: 10000 });
+    await waitFor(
+      () => {
+        const updatedClip = getLocalClips().find((c) => c.id === clipId);
+        expect(updatedClip).toBeDefined();
+        expect(updatedClip!.receiving).toBe(true);
+        expect(updatedClip!.text).not.toBe(url);
+      },
+      { timeout: 10000 },
+    );
 
     // Click to expand
     const clipBox = screen.getByText(/Failed to receive/).closest('.clip-box');
@@ -594,12 +597,15 @@ describe('pollReceivingClip — try again flow', () => {
 
     await tick();
 
-    await waitFor(() => {
-      const updatedClip = getLocalClips().find((c) => c.id === clipId);
-      expect(updatedClip).toBeDefined();
-      expect(updatedClip!.receiving).toBe(true);
-      expect(updatedClip!.text).not.toBe(url);
-    }, { timeout: 10000 });
+    await waitFor(
+      () => {
+        const updatedClip = getLocalClips().find((c) => c.id === clipId);
+        expect(updatedClip).toBeDefined();
+        expect(updatedClip!.receiving).toBe(true);
+        expect(updatedClip!.text).not.toBe(url);
+      },
+      { timeout: 10000 },
+    );
 
     const clipBox = screen.getByText(/Failed to receive/).closest('.clip-box');
     await fireEvent.click(clipBox!);
@@ -647,12 +653,15 @@ describe('pollReceivingClip — try again flow', () => {
 
     await tick();
 
-    await waitFor(() => {
-      const updatedClip = getLocalClips().find((c) => c.id === clipId);
-      expect(updatedClip).toBeDefined();
-      expect(updatedClip!.receiving).toBe(true);
-      expect(updatedClip!.text).not.toBe(url);
-    }, { timeout: 10000 });
+    await waitFor(
+      () => {
+        const updatedClip = getLocalClips().find((c) => c.id === clipId);
+        expect(updatedClip).toBeDefined();
+        expect(updatedClip!.receiving).toBe(true);
+        expect(updatedClip!.text).not.toBe(url);
+      },
+      { timeout: 10000 },
+    );
 
     const clipBox = screen.getByText(/Failed to receive/).closest('.clip-box');
     await fireEvent.click(clipBox!);

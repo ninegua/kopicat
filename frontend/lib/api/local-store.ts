@@ -262,7 +262,10 @@ export function getLocalClip(id: string, purpose?: 'scratch'): LocalClip | undef
   return cache.get(id);
 }
 
-export async function newReceivingClip(origin: string, replacing: string | null = null): Promise<LocalClip> {
+export async function newReceivingClip(
+  origin: string,
+  replacing: string | null = null,
+): Promise<LocalClip> {
   while (true) {
     const id = generateClipId();
     const pw = generatePassword(8);

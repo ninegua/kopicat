@@ -106,7 +106,11 @@ describe('Clip creation flow', () => {
       });
       shareState.set({ prefillText: null });
 
-      modalState.set({ showModal: 'share', shareUrl: `http://localhost/?${clipId}#testpw`, successMessage: null });
+      modalState.set({
+        showModal: 'share',
+        shareUrl: `http://localhost/?${clipId}#testpw`,
+        successMessage: null,
+      });
     });
 
     clipState.set({
@@ -685,7 +689,12 @@ describe('ResultView save local copy', () => {
       props: {
         onDismiss: () => {},
         onSave,
-        clip: { blob: new Uint8Array(), created_at: Date.now(), expires_at: 0, burn_after_read: false },
+        clip: {
+          blob: new Uint8Array(),
+          created_at: Date.now(),
+          expires_at: 0,
+          burn_after_read: false,
+        },
         error: null,
       },
     });
@@ -728,7 +737,12 @@ describe('ResultView save local copy', () => {
       props: {
         onDismiss: () => {},
         onSave,
-        clip: { blob: new Uint8Array(), created_at: Date.now(), expires_at: 0, burn_after_read: false },
+        clip: {
+          blob: new Uint8Array(),
+          created_at: Date.now(),
+          expires_at: 0,
+          burn_after_read: false,
+        },
         error: null,
       },
     });
@@ -783,7 +797,12 @@ describe('ResultView save local copy', () => {
       props: {
         onDismiss: () => {},
         onSave,
-        clip: { blob: new Uint8Array(), created_at: Date.now(), expires_at: 0, burn_after_read: false },
+        clip: {
+          blob: new Uint8Array(),
+          created_at: Date.now(),
+          expires_at: 0,
+          burn_after_read: false,
+        },
         error: null,
       },
     });
