@@ -5,7 +5,7 @@ import { clipState, modalState, shareState } from '$lib/api/store';
 import { get } from 'svelte/store';
 import { encrypt } from '$lib/crypto';
 import { generateClipId } from '$lib/words';
-import { getLocalClips, addLocalClip } from '$lib/api/local-store';
+import { getLocalClips, addLocalClip, loadClipsDB } from '$lib/api/local-store';
 
 import Page from '../routes/+page.svelte';
 
@@ -358,6 +358,7 @@ describe('Clip deletion flow', () => {
       'copycat_clips',
       JSON.stringify([{ id: 'del-clip-1', text: testText, saved_at: now }]),
     );
+    await loadClipsDB();
 
     const { default: GridView } = await import('../lib/components/GridView.svelte');
     const { container } = render(GridView);
@@ -386,6 +387,7 @@ describe('Clip deletion flow', () => {
       'copycat_clips',
       JSON.stringify([{ id: 'temp-clip-1', text: testText, saved_at: now }]),
     );
+    await loadClipsDB();
 
     const { default: GridView } = await import('../lib/components/GridView.svelte');
     render(GridView);
@@ -427,6 +429,7 @@ describe('Clip deletion flow', () => {
       'copycat_clips',
       JSON.stringify([{ id: 'restore-clip-1', text: testText, saved_at: now }]),
     );
+    await loadClipsDB();
 
     const { default: GridView } = await import('../lib/components/GridView.svelte');
     render(GridView);
@@ -462,6 +465,7 @@ describe('Clip deletion flow', () => {
       'copycat_clips',
       JSON.stringify([{ id: 'last-clip-1', text: testText, saved_at: now }]),
     );
+    await loadClipsDB();
 
     const { default: GridView } = await import('../lib/components/GridView.svelte');
     render(GridView);

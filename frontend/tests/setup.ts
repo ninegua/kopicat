@@ -192,29 +192,19 @@ window.matchMedia = vi.fn().mockImplementation((query: string) => ({
 // Reset clip store + modal store between tests
 // ---------------------------------------------------------------------------
 
-function clearIndexedDB(): void {
-  if (typeof indexedDB !== 'undefined') {
-    const request = indexedDB.open('copycat', 1);
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains('clips')) {
-        db.createObjectStore('clips', { keyPath: 'id' });
-      }
-    };
-    request.onsuccess = () => {
-      const db = request.result;
-      if (db.objectStoreNames.contains('clips')) {
-        const tx = db.transaction('clips', 'readwrite');
-        tx.objectStore('clips').clear();
-        tx.oncomplete = () => db.close();
-      } else {
-        db.close();
-      }
-    };
-  }
+function clearIndexedDB(): Promise<void> {
+  return new Promise<void>((resolve) => {
+    if (typeof indexedDB === 'undefined') {
+      resolve();
+      return;
+    }
+    const request = indexedDB.deleteDatabase('copycat');
+    request.onsuccess = () => resolve();
+    request.onerror = () => resolve();
+  });
 }
 
-afterEach(() => {
+afterEach(async () => {
   clipStore.clear();
   clipState.set({
     clipId: null,
@@ -228,7 +218,7 @@ afterEach(() => {
     successMessage: null,
   });
   __resetLocalStore();
-  clearIndexedDB();
+  await clearIndexedDB();
 });
 
 // Reset mock function calls between tests

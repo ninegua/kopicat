@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { clipState, shareState } from '$lib/api/store';
+import { loadClipsDB } from '$lib/api/local-store';
 
 import GridView from '../lib/components/GridView.svelte';
 import CreateForm from '../lib/components/CreateForm.svelte';
@@ -10,8 +11,9 @@ import CreateForm from '../lib/components/CreateForm.svelte';
 // Helpers
 // ---------------------------------------------------------------------------
 
-function seedLocalClips(clips: { id: string; text: string; saved_at: number }[]) {
+async function seedLocalClips(clips: { id: string; text: string; saved_at: number }[]) {
   localStorage.setItem('copycat_clips', JSON.stringify(clips));
+  await loadClipsDB();
 }
 
 // ---------------------------------------------------------------------------
@@ -32,7 +34,7 @@ describe('GridView chooser mode', () => {
     const testText = 'Chooser clip text';
     const now = Date.now();
 
-    seedLocalClips([{ id: 'choose-clip-1', text: testText, saved_at: now }]);
+    await seedLocalClips([{ id: 'choose-clip-1', text: testText, saved_at: now }]);
 
     render(GridView, { props: { onChoose } });
 
@@ -56,7 +58,7 @@ describe('GridView chooser mode', () => {
     const testText = 'Non expanding clip';
     const now = Date.now();
 
-    seedLocalClips([{ id: 'choose-clip-2', text: testText, saved_at: now }]);
+    await seedLocalClips([{ id: 'choose-clip-2', text: testText, saved_at: now }]);
 
     const { container } = render(GridView, { props: { onChoose } });
 
@@ -80,7 +82,7 @@ describe('GridView chooser mode', () => {
     const testText = 'Normal expanding clip';
     const now = Date.now();
 
-    seedLocalClips([{ id: 'choose-clip-3', text: testText, saved_at: now }]);
+    await seedLocalClips([{ id: 'choose-clip-3', text: testText, saved_at: now }]);
 
     render(GridView);
 
@@ -128,6 +130,7 @@ describe('CreateForm browse saved clips button', () => {
       'copycat_clips',
       JSON.stringify([{ id: 'browse-1', text: 'Browse me', saved_at: Date.now() }]),
     );
+    await loadClipsDB();
 
     const onBrowseClips = vi.fn();
     render(CreateForm, {
@@ -153,6 +156,7 @@ describe('CreateForm browse saved clips button', () => {
       'copycat_clips',
       JSON.stringify([{ id: 'browse-2', text: 'Click me', saved_at: Date.now() }]),
     );
+    await loadClipsDB();
 
     const onBrowseClips = vi.fn();
     render(CreateForm, {
@@ -195,7 +199,7 @@ describe('Edit page chooser workflow', () => {
     const testText = 'Prefilled from chooser';
     const now = Date.now();
 
-    seedLocalClips([{ id: 'chooser-1', text: testText, saved_at: now }]);
+    await seedLocalClips([{ id: 'chooser-1', text: testText, saved_at: now }]);
 
     const { default: ChooserTestWrapper } = await import('./ChooserTestWrapper.svelte');
     const { container } = render(ChooserTestWrapper);
@@ -245,7 +249,7 @@ describe('GridView focusClipId prop', () => {
 
   it('expands the clip matching focusClipId', async () => {
     const testText = 'Focus me';
-    seedLocalClips([{ id: 'focus-1', text: testText, saved_at: Date.now() }]);
+    await seedLocalClips([{ id: 'focus-1', text: testText, saved_at: Date.now() }]);
 
     const { container } = render(GridView, { props: { focusClipId: 'focus-1' } });
 
@@ -261,7 +265,7 @@ describe('GridView focusClipId prop', () => {
 
   it('reverts changes when undo button is clicked', async () => {
     const testText = 'Original text';
-    seedLocalClips([{ id: 'undo-1', text: testText, saved_at: Date.now() }]);
+    await seedLocalClips([{ id: 'undo-1', text: testText, saved_at: Date.now() }]);
 
     const { container } = render(GridView, { props: { focusClipId: 'undo-1' } });
 

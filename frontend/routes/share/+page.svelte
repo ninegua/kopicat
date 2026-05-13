@@ -9,7 +9,7 @@
     resetShareState,
   } from '$lib/api/store';
   import { createClip } from '$lib/api/client';
-  import { getLocalClips, addLocalClip, updateLocalClip, getLocalClip } from '$lib/api/local-store';
+  import { addLocalClip, updateLocalClip, getLocalClip } from '$lib/api/local-store';
   import { encrypt, generatePassword } from '$lib/crypto';
   import { generateClipId } from '$lib/words';
   import Header from '$lib/components/Header.svelte';

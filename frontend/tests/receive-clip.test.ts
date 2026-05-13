@@ -10,6 +10,7 @@ import {
   getLocalClip,
   newReceivingClip,
   updateLocalClip,
+  loadClipsDB,
 } from '$lib/api/local-store';
 import { clipStore } from './setup';
 
@@ -117,6 +118,7 @@ describe('pollReceivingClip — successful receive', () => {
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
     );
+    await loadClipsDB();
 
     render(GridView);
 
@@ -145,6 +147,7 @@ describe('pollReceivingClip — successful receive', () => {
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
     );
+    await loadClipsDB();
 
     render(GridView);
     await tick();
@@ -172,6 +175,7 @@ describe('pollReceivingClip — successful receive', () => {
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
     );
+    await loadClipsDB();
 
     const { container } = render(GridView);
 
@@ -210,6 +214,7 @@ describe('pollReceivingClip — successful receive', () => {
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: beforeCreate, receiving: true }]),
     );
+    await loadClipsDB();
 
     render(GridView);
     await tick();
@@ -235,6 +240,7 @@ describe('pollReceivingClip — successful receive', () => {
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
     );
+    await loadClipsDB();
 
     render(GridView);
     await tick();
@@ -278,6 +284,7 @@ describe('pollReceivingClip — decryption failure', () => {
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
     );
+    await loadClipsDB();
 
     render(GridView);
     await tick();
@@ -307,6 +314,7 @@ describe('pollReceivingClip — decryption failure', () => {
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
     );
+    await loadClipsDB();
 
     render(GridView);
     await tick();
@@ -334,6 +342,7 @@ describe('pollReceivingClip — decryption failure', () => {
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
     );
+    await loadClipsDB();
 
     const { container } = render(GridView);
 
@@ -366,6 +375,7 @@ describe('pollReceivingClip — decryption failure', () => {
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: originalSavedAt, receiving: true }]),
     );
+    await loadClipsDB();
 
     render(GridView);
     await tick();
@@ -392,6 +402,7 @@ describe('pollReceivingClip — decryption failure', () => {
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
     );
+    await loadClipsDB();
 
     render(GridView);
 
@@ -434,6 +445,7 @@ describe('pollReceivingClip — remote clip not found', () => {
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
     );
+    await loadClipsDB();
 
     render(GridView);
     await tick();
@@ -458,6 +470,7 @@ describe('pollReceivingClip — remote clip not found', () => {
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
     );
+    await loadClipsDB();
 
     render(GridView);
     await tick();
@@ -480,6 +493,7 @@ describe('pollReceivingClip — remote clip not found', () => {
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
     );
+    await loadClipsDB();
 
     const { container } = render(GridView);
 
@@ -531,6 +545,7 @@ describe('pollReceivingClip — try again flow', () => {
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
     );
+    await loadClipsDB();
 
     // Use fake timers from the start for timer-based operations
     vi.useFakeTimers();
@@ -595,6 +610,7 @@ describe('pollReceivingClip — try again flow', () => {
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
     );
+    await loadClipsDB();
 
     // Use fake timers from the start for timer-based operations
     vi.useFakeTimers();
@@ -655,6 +671,7 @@ describe('pollReceivingClip — try again flow', () => {
       'copycat_clips',
       JSON.stringify([{ id: clipId, text: url, saved_at: Date.now(), receiving: true }]),
     );
+    await loadClipsDB();
 
     // Use fake timers from the start for timer-based operations
     vi.useFakeTimers();
@@ -735,6 +752,7 @@ describe('pollReceivingClip — multiple receiving clips', () => {
         { id: clipId2, text: url2, saved_at: Date.now(), receiving: true },
       ]),
     );
+    await loadClipsDB();
 
     render(GridView);
     await tick();
@@ -776,6 +794,7 @@ describe('pollReceivingClip — multiple receiving clips', () => {
         { id: clipId2, text: clip2Url, saved_at: Date.now(), receiving: true },
       ]),
     );
+    await loadClipsDB();
 
     render(GridView);
     await tick();
@@ -810,6 +829,7 @@ describe('pollReceivingClip — multiple receiving clips', () => {
         { id: clipId2, text: url2, saved_at: Date.now(), receiving: true },
       ]),
     );
+    await loadClipsDB();
 
     render(GridView);
     await tick();

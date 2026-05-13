@@ -13,6 +13,7 @@
     removeLocalClip,
     updateLocalClip,
     isOnScratchpad,
+    flushClipsDB,
   } from '$lib/api/local-store';
   import { fetchClip } from '$lib/api/client';
   import { decrypt } from '$lib/crypto';
@@ -68,6 +69,7 @@
       if (id == focusClip) {
         editingText = updated.text;
       }
+      flushClipsDB();
     }
   }
 
@@ -390,6 +392,7 @@
       clips.splice(index, 1);
       await delay(500);
       const newClip = newReceivingClip(location.origin, clip.id);
+      flushClipsDB();
       clips.splice(index, 0, newClip);
       focusClip = newClip.id;
     }
@@ -448,6 +451,7 @@
     }
     function deleteIt() {
       removeLocalClip(clip.id);
+      flushClipsDB();
       clips = clips.filter((c) => c.id !== clip.id);
       pendingDeletes = pendingDeletes.filter((d) => d.id !== clip.id);
       deleteProgress = Object.fromEntries(

@@ -48,6 +48,45 @@ function getDb(): Promise<IDBDatabase> {
   return dbReady;
 }
 
+const LEGACY_STORAGE_KEY = 'copycat_clips';
+
+/** Migrate clips from localStorage (legacy) into IndexedDB if they don't already exist. */
+async function migrateFromLocalStorage(db: IDBDatabase): Promise<void> {
+  if (typeof localStorage === 'undefined') return;
+  const raw = localStorage.getItem(LEGACY_STORAGE_KEY);
+  if (!raw) return;
+
+  let legacyClips: LocalClip[];
+  try {
+    legacyClips = JSON.parse(raw) as LocalClip[];
+    if (!Array.isArray(legacyClips)) return;
+  } catch {
+    return;
+  }
+
+  // Read existing IDs from the store to avoid duplicates
+  const existingIds = await new Promise<Set<string>>((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.getAllKeys();
+    request.onsuccess = () => resolve(new Set(request.result.map((k) => String(k))));
+    request.onerror = () => reject(new Error('IndexedDB keys read failed'));
+  });
+
+  const toInsert = legacyClips.filter((c) => c.id && !existingIds.has(c.id));
+  if (toInsert.length === 0) return;
+
+  await new Promise<void>((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    for (const clip of toInsert) {
+      store.put({ ...clip, receiving: clip.receiving ?? false });
+    }
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(new Error('IndexedDB migration write failed'));
+  });
+}
+
 /** Load all clips from IndexedDB into the in-memory cache. */
 export async function loadClipsDB(): Promise<void> {
   if (!isBrowser()) {
@@ -58,6 +97,10 @@ export async function loadClipsDB(): Promise<void> {
   }
   try {
     const db = await getDb();
+
+    // Migrate legacy localStorage data into IndexedDB before reading
+    await migrateFromLocalStorage(db);
+
     const clips = await new Promise<LocalClip[]>((resolve, reject) => {
       const transaction = db.transaction(STORE_NAME, 'readonly');
       const store = transaction.objectStore(STORE_NAME);
