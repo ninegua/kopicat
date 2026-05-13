@@ -89,6 +89,7 @@
 
   .code-editor-stack {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     min-height: 100%;
   }
 
