@@ -58,7 +58,7 @@
       chooserMode = true;
     }
     if (fromClipId) {
-      const clip = getLocalClip(fromClipId);
+      const clip = getLocalClip(fromClipId, "scratch") ?? getLocalClip(fromClipId);
       if (clip) {
         prefillText = clip.text;
       }
@@ -72,8 +72,9 @@
   // Always clear sendState when leaving page.
   onDestroy(resetSendState);
 
-  function handleChoose(clip: LocalClip) {
-    shareState.set({ prefillText: clip.text });
+  function handleChoose(clipId: string) {
+    let clip = getLocalClip(clipId, "scratch") ?? getLocalClip(clipId);
+    shareState.set({ prefillText: clip?.text ?? "" });
     chooserMode = false;
     // Remove the chooser parameter from the URL now that selection is done.
     const url = new URL(window.location.href);

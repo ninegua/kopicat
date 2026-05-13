@@ -23,9 +23,9 @@
     focusClipId,
     onShare,
   }: {
-    onChoose?: (clip: LocalClip) => void;
+    onChoose?: (clipId: string) => void;
     focusClipId?: string | null;
-    onShare?: (clip: LocalClip) => void;
+    onShare?: (clipId: string) => void;
   } = $props();
 
   let copiedId = $state<string | null>(null);
@@ -380,10 +380,7 @@
   function handleClick(clipId: string) {
     if (focusClip === clipId) return;
     if (onChoose) {
-      const clip = getClips().find((c) => c.id === clipId);
-      if (clip) {
-        onChoose(clip);
-      }
+      onChoose(clipId);
       return;
     }
     focusClip = clipId;
@@ -507,7 +504,6 @@
                     showMaximize={true}
                     maximized={maximizedClip === clip.id}
                     onDelete={() => handleDelete(clip)}
-                    onShare={() => onShare?.(clip)}
                     onToggleMaximize={() => handleToggleMaximize(clip)}
                     onCopy={() => handleCopied(clip.id)}
                   >
@@ -582,7 +578,7 @@
                       updateLocalClip(clip.id, { text: code }, 'scratch');
                     }}
                     onDelete={() => handleDelete(clip)}
-                    onShare={() => onShare?.(clip)}
+                    onShare={() => onShare?.(clip.id)}
                     onSave={() => handleSave(clip.id)}
                     onCancel={() => handleCancel(clip.id)}
                     onToggleMaximize={() => handleToggleMaximize(clip)}

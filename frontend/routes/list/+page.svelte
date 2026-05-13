@@ -30,8 +30,8 @@
     focusClipId = clip.id;
   }
 
-  function handleShare(clip: { id: string }) {
-    goto(`/share?from=${clip.id}`);
+  function handleShare(clipId: string) {
+    goto(`/share?from=${clipId}`);
   }
 </script>
 
