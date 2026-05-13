@@ -29,9 +29,10 @@
   } = $props();
 
   let copiedId = $state<string | null>(null);
-  let pendingDeletes = $state<{ id: string; text: string; timer: ReturnType<typeof setTimeout> }[]>(
+  let pendingDeletes = $state<{ id: string; text: string; timer: ReturnType<typeof setTimeout>; startTime: number }[]>(
     [],
   );
+  let deleteProgress = $state<Record<string, number>>({});
   let clips = $state<LocalClip[]>(getLocalClips());
   let edits = $state<SvelteSet<string>>(
     new SvelteSet(
@@ -435,9 +436,18 @@
       removeLocalClip(clip.id);
       clips = clips.filter((c) => c.id !== clip.id);
       pendingDeletes = pendingDeletes.filter((d) => d.id !== clip.id);
+      deleteProgress = Object.fromEntries(Object.entries(deleteProgress).filter(([key]) => key !== clip.id));
     }
-    const timer = setTimeout(deleteIt, 5000);
-    pendingDeletes = [...pendingDeletes, { id: clip.id, text: clip.text, timer }];
+    const startTime = Date.now();
+    const timer = setTimeout(deleteIt, 3000);
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.max(0, 1 - elapsed / 3000);
+      if (progress > 0) {
+        deleteProgress = { ...deleteProgress, [clip.id]: progress };
+      }
+    }, 50);
+    pendingDeletes = [...pendingDeletes, { id: clip.id, text: clip.text, timer, startTime }];
   }
 
   function handleRestoreById(id: string) {
@@ -445,6 +455,7 @@
     if (entry) {
       clearTimeout(entry.timer);
       pendingDeletes = pendingDeletes.filter((d) => d.id !== id);
+      deleteProgress = Object.fromEntries(Object.entries(deleteProgress).filter(([key]) => key !== id));
       focusClip = id;
     }
   }
@@ -612,17 +623,16 @@
   <div class="snackbar-root">
     {#each [...pendingDeletes].reverse() as pendingDelete}
       <button type="button" class="snackbar" onclick={() => handleRestoreById(pendingDelete.id)}>
-        <svg
-          class="snackbar-icon icon-sm"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <polyline points="1 4 1 10 7 10" />
-          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+        <svg class="snackbar-progress" viewBox="0 0 32 32" fill="none">
+          <circle class="snackbar-progress-bg" cx="16" cy="16" r="13" />
+          <circle
+            class="snackbar-progress-ring"
+            cx="16"
+            cy="16"
+            r="13"
+            stroke-dasharray="81.681"
+            stroke-dashoffset="{81.681 * (1 - (deleteProgress[pendingDelete.id] ?? 1))}"
+          />
         </svg>
         <span class="snackbar-message">
           <span>Deleted '<span class="snackbar-id">{truncate(pendingDelete.text, 20)}</span>'.</span
@@ -886,9 +896,27 @@
     background: var(--bg-secondary);
   }
 
-  .snackbar-icon {
+  .snackbar-progress {
     flex-shrink: 0;
-    color: var(--accent);
+    width: 28px;
+    height: 28px;
+    margin-right: var(--space-sm);
+  }
+
+  .snackbar-progress-bg {
+    fill: none;
+    stroke: var(--border-color);
+    stroke-width: 1.5;
+  }
+
+  .snackbar-progress-ring {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 3;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: center;
+    transition: stroke-dashoffset 0.05s linear;
   }
 
   .snackbar-id {
