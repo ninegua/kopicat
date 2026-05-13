@@ -20,6 +20,16 @@
     return url.startsWith(window.location.origin) || url.startsWith('https://kopicat.cc');
   }
 
+  function isSendUrl(url: string): boolean {
+    if (!isAppUrl(url)) return false;
+    try {
+      const parsed = new URL(url);
+      return parsed.pathname === '/send';
+    } catch {
+      return false;
+    }
+  }
+
   function isValidUrl(text: string): boolean {
     try {
       new URL(text);
@@ -189,6 +199,9 @@
         </div>
       {/if}
 
+      {#if result && isValidUrl(result) && isSendUrl(result)}
+        <p class="send-hint">This is a request to receive from you.</p>
+      {/if}
       <div class="btn-row">
         {#if result}
           {#if isValidUrl(result)}
@@ -206,7 +219,7 @@
                 <polyline points="15 3 21 3 21 9" />
                 <line x1="10" y1="14" x2="21" y2="3" />
               </svg>
-              View
+              {#if isSendUrl(result)}Send{:else}Open link{/if}
             </button>
           {:else}
             <button class="btn-primary" class:btn-primary--copied={copied} onclick={handleCopy}>
@@ -323,5 +336,23 @@
     word-break: break-all;
     margin: 0;
     line-height: 1.5;
+  }
+
+  .send-hint {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    margin: var(--space-xs) 0 0 0;
+  }
+
+  .btn-row {
+    justify-content: center;
+  }
+
+  .btn-primary {
+    font-size: var(--text-sm);
+  }
+  .btn-secondary {
+    max-width: 12rem;
+    font-size: var(--text-sm);
   }
 </style>
