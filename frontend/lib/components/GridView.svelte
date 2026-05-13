@@ -29,9 +29,9 @@
   } = $props();
 
   let copiedId = $state<string | null>(null);
-  let pendingDeletes = $state<{ id: string; text: string; timer: ReturnType<typeof setTimeout>; startTime: number }[]>(
-    [],
-  );
+  let pendingDeletes = $state<
+    { id: string; text: string; timer: ReturnType<typeof setTimeout>; startTime: number }[]
+  >([]);
   let deleteProgress = $state<Record<string, number>>({});
   let clips = $state<LocalClip[]>(getLocalClips());
   let edits = $state<SvelteSet<string>>(
@@ -74,6 +74,20 @@
   let focusClip = $state<string | null>(null);
   let focusMaximized = $state(false);
   let maximizedClip = $derived(focusMaximized ? focusClip : null);
+
+  $effect(() => {
+    const id = focusClipId;
+    if (id && !focusClip) {
+      focusClip = id;
+    }
+    // The following check would only be true for a newly created clip
+    if (focusClipId && focusClip === focusClipId) {
+      const el = document.getElementById('editor');
+      if (el) {
+        (el as HTMLTextAreaElement).focus();
+      }
+    }
+  });
 
   // Grid layout constants (must match CSS)
   const ROW_HEIGHT = 145; // grid-auto-rows: 145px
@@ -436,7 +450,9 @@
       removeLocalClip(clip.id);
       clips = clips.filter((c) => c.id !== clip.id);
       pendingDeletes = pendingDeletes.filter((d) => d.id !== clip.id);
-      deleteProgress = Object.fromEntries(Object.entries(deleteProgress).filter(([key]) => key !== clip.id));
+      deleteProgress = Object.fromEntries(
+        Object.entries(deleteProgress).filter(([key]) => key !== clip.id),
+      );
     }
     const startTime = Date.now();
     const timer = setTimeout(deleteIt, 3000);
@@ -455,7 +471,9 @@
     if (entry) {
       clearTimeout(entry.timer);
       pendingDeletes = pendingDeletes.filter((d) => d.id !== id);
-      deleteProgress = Object.fromEntries(Object.entries(deleteProgress).filter(([key]) => key !== id));
+      deleteProgress = Object.fromEntries(
+        Object.entries(deleteProgress).filter(([key]) => key !== id),
+      );
       focusClip = id;
     }
   }
@@ -631,7 +649,7 @@
             cy="16"
             r="13"
             stroke-dasharray="81.681"
-            stroke-dashoffset="{81.681 * (1 - (deleteProgress[pendingDelete.id] ?? 1))}"
+            stroke-dashoffset={81.681 * (1 - (deleteProgress[pendingDelete.id] ?? 1))}
           />
         </svg>
         <span class="snackbar-message">

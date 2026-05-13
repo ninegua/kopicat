@@ -64,6 +64,7 @@
         ></pre>
       <!-- svelte-ignore a11y_autofocus -->
       <textarea
+        id="editor"
         class="code-editor code-editor-input"
         {value}
         oninput={handleInput}
