@@ -261,16 +261,22 @@ export async function invalidateCache(id: string): Promise<void> {
   }
 }
 
-export async function commitToDB(id: string): Promise<void> {
+export async function commitToDB(id: string, last_modified: number | null): Promise<void> {
+  if (!cache.has(id)) {
+    return
+  }
   // Note that removed and dirty are always disjoint.
   if (removed.has(id)) {
-    if (await commitDBChanges(new Set([id]), new Set())) {
+    if (await commitDBChanges(new Set(), new Set([id]))) {
       removed.delete(id);
     }
   }
+  if (last_modified) {
+    clip = cache.get(id);
+    clip.last_modified = last_modified;
+  }
   if (dirty.has(id)) {
     if (await commitDBChanges(new Set([id]), new Set())) {
-      await commitDBChanges(new Set(), new Set([id]));
       dirty.delete(id);
     }
   }

@@ -486,10 +486,10 @@
     setTimeout(() => (copiedId = null), 1500);
   }
 
-  function handleSave(clipId: string) {
+  async function handleSave(clipId: string) {
     const now = Date.now();
+    await commitToDB(clipId, now);
     edits.delete(clipId);
-    commitToDB(clipId);
   }
 
   async function handleCancel(clipId: string) {
