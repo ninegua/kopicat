@@ -525,7 +525,7 @@
     font-size: var(--text-md);
     line-height: 1.6;
     color: var(--text-primary);
-    padding: var(--space-xs) 0;
+    padding: var(--space-xs);
     background: var(--bg-card);
   }
 
