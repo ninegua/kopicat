@@ -22,8 +22,12 @@
   let highlighted = $derived(highlightCode(value || ''));
 
   function highlightCode(code: string): string {
-    if (!code) return '';
-    return Prism.highlight(code, Prism.languages.markdown, 'markdown');
+    if (!code) return '\n';
+    let html = Prism.highlight(code, Prism.languages.markdown, 'markdown');
+    // Ensure trailing newline renders as an actual line in the <pre> so that
+    // the highlight overlay height matches the textarea (Firefox fix).
+    if (code.endsWith('\n')) html += '\n';
+    return html;
   }
 
   function handleInput(e: Event) {
@@ -141,6 +145,9 @@
     field-sizing: content;
     -webkit-text-fill-color: transparent;
     min-height: 120px;
+    /* Ensure textarea stretches to fill the grid cell even when
+       field-sizing: content underestimates height (Firefox trailing newline bug) */
+    align-self: stretch;
   }
 
   .code-editor-input::selection {
