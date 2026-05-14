@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent, cleanup, within } from '@testing-library/svelte';
 import { goto } from '$app/navigation';
 import ClipNotFound from '../lib/components/ClipNotFound.svelte';

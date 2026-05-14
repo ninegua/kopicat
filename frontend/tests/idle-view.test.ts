@@ -203,7 +203,7 @@ describe('IdleView paste event listener', () => {
 
   it('calls onPaste with paste text when paste event fires on body', async () => {
     const pasteText = 'Pasted text';
-    const clipboardData = { getData: () => pasteText } as DataTransfer;
+    const clipboardData = { getData: () => pasteText } as unknown as DataTransfer;
 
     const onPaste = vi.fn();
     render(IdleView, {
@@ -218,8 +218,7 @@ describe('IdleView paste event listener', () => {
     await new Promise((r) => setTimeout(r, 50));
     expect(onPaste).toHaveBeenCalledWith(pasteText);
   });
-
- });
+});
 
 // ---------------------------------------------------------------------------
 // IdleView card click behavior

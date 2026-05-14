@@ -452,5 +452,3 @@ describe('ClipDisplay text rendering', () => {
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
   });
 });
-
-

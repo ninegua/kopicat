@@ -158,13 +158,22 @@ class ClipboardEventMock extends Event {
   clipboardData: DataTransfer;
 
   constructor(type: string, init?: { clipboardData?: DataTransfer }) {
-    super(type, init);
+    super(type, init as EventInit);
     this.clipboardData = init?.clipboardData || (new DataTransfer() as unknown as DataTransfer);
   }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).ClipboardEvent = ClipboardEventMock;
+
+// ---------------------------------------------------------------------------
+// Mock navigator.mediaDevices (not supported by jsdom)
+// ---------------------------------------------------------------------------
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(navigator as any).mediaDevices = {
+  getUserMedia: () => Promise.reject(new Error('Camera not available')),
+};
 
 // ---------------------------------------------------------------------------
 // Mock ResizeObserver (not supported by jsdom)

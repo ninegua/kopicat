@@ -55,7 +55,11 @@ describe('List page — modal management', () => {
   });
 
   it('shows ScanQR when modalState.showModal is scanQR', async () => {
-    modalState.set({ showModal: 'scanQR', shareUrl: 'http://localhost/share-url', successMessage: null });
+    modalState.set({
+      showModal: 'scanQR',
+      shareUrl: 'http://localhost/share-url',
+      successMessage: null,
+    });
 
     render(ListPage);
     await tick();
@@ -66,7 +70,11 @@ describe('List page — modal management', () => {
   });
 
   it('dismisses scanQR modal with cancel button', async () => {
-    modalState.set({ showModal: 'scanQR', shareUrl: 'http://localhost/share-url', successMessage: null });
+    modalState.set({
+      showModal: 'scanQR',
+      shareUrl: 'http://localhost/share-url',
+      successMessage: null,
+    });
 
     render(ListPage);
     await tick();

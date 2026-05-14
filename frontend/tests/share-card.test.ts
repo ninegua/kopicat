@@ -61,7 +61,9 @@ describe('ShareCard copy link button', () => {
 
   it('copies URL to clipboard when copy button is clicked', async () => {
     const url = 'http://example.com/clip/abc123';
-    const clipboardMock = navigator.clipboard as unknown as { writeText: (text: string) => Promise<void> };
+    const clipboardMock = navigator.clipboard as unknown as {
+      writeText: (text: string) => Promise<void>;
+    };
     vi.spyOn(clipboardMock, 'writeText').mockResolvedValue();
 
     render(ShareCard, {
@@ -79,7 +81,9 @@ describe('ShareCard copy link button', () => {
 
   it('shows copied feedback after copy', async () => {
     const url = 'http://example.com/clip/abc123';
-    const clipboardMock = navigator.clipboard as unknown as { writeText: (text: string) => Promise<void> };
+    const clipboardMock = navigator.clipboard as unknown as {
+      writeText: (text: string) => Promise<void>;
+    };
     vi.spyOn(clipboardMock, 'writeText').mockResolvedValue();
 
     render(ShareCard, {
@@ -155,5 +159,3 @@ describe('ShareCard backdrop dismissal', () => {
     expect(onDismiss).not.toHaveBeenCalled();
   });
 });
-
-

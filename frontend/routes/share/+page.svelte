@@ -9,6 +9,7 @@
     resetShareState,
   } from '$lib/api/store';
   import { createClip } from '$lib/api/client';
+  import type { AfterNavigate } from '@sveltejs/kit';
   import { addLocalClip, getLocalClip } from '$lib/api/local-store';
   import { encrypt, generatePassword } from '$lib/crypto';
   import { generateClipId } from '$lib/words';
@@ -20,7 +21,7 @@
 
   let previousPath: string | null = null;
 
-  afterNavigate(({ from }) => {
+  afterNavigate(({ from }: AfterNavigate) => {
     previousPath = from?.url.pathname || null;
   });
 

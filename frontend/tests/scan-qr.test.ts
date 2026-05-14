@@ -127,7 +127,8 @@ describe('ScanQR URL validation', () => {
     // We can't easily simulate camera results, so we test the button text logic
     // by checking what text would be shown based on the URL type
     const isSendUrl = (url: string) => {
-      const isAppUrl = url.startsWith(window.location.origin) || url.startsWith('https://kopicat.cc');
+      const isAppUrl =
+        url.startsWith(window.location.origin) || url.startsWith('https://kopicat.cc');
       if (!isAppUrl) return false;
       try {
         const parsed = new URL(url);
@@ -180,7 +181,9 @@ describe('ScanQR copy button', () => {
   });
 
   it('copies result text when copy button is clicked', async () => {
-    const clipboardMock = navigator.clipboard as unknown as { writeText: (text: string) => Promise<void> };
+    const clipboardMock = navigator.clipboard as unknown as {
+      writeText: (text: string) => Promise<void>;
+    };
     vi.spyOn(clipboardMock, 'writeText').mockResolvedValue();
 
     const { container } = render(ScanQR, {
@@ -255,5 +258,3 @@ describe('ScanQR backdrop dismissal', () => {
     expect(onDismiss).not.toHaveBeenCalled();
   });
 });
-
-

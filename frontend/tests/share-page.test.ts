@@ -120,7 +120,7 @@ describe('Share page — from clipId param', () => {
 
     // The CreateForm should have the pre-filled text
     await waitFor(() => {
-      const textarea = document.querySelector('textarea.code-editor-input');
+      const textarea = document.querySelector('textarea.code-editor-input') as HTMLTextAreaElement;
       expect(textarea?.value).toBe('Source clip text');
     });
   });
@@ -319,9 +319,7 @@ describe('Share page — chooser selection flow', () => {
   it('prefills text when a clip is chosen from GridView', async () => {
     mockLocation('http://localhost/share?chooser=true');
 
-    await seedLocalClips([
-      { id: 'choose-3', text: 'Chosen clip text', saved_at: Date.now() },
-    ]);
+    await seedLocalClips([{ id: 'choose-3', text: 'Chosen clip text', saved_at: Date.now() }]);
 
     render(SharePage);
     await tick();
@@ -340,7 +338,7 @@ describe('Share page — chooser selection flow', () => {
 
     // After choosing, should switch back to CreateForm with pre-filled text
     await waitFor(() => {
-      const textarea = document.querySelector('textarea.code-editor-input');
+      const textarea = document.querySelector('textarea.code-editor-input') as HTMLTextAreaElement;
       expect(textarea?.value).toBe('Chosen clip text');
     });
   });

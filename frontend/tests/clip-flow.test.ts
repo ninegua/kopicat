@@ -516,5 +516,3 @@ describe('Clip deletion flow', () => {
     });
   });
 });
-
-

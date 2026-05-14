@@ -57,7 +57,7 @@ describe('DecryptForm loading state', () => {
 
     const onDecrypt = vi.fn(async () => {
       await new Promise((r) => setTimeout(r, 100));
-      clipState.set({ ...clipState, decryptedText: text });
+      clipState.set({ ...get(clipState), decryptedText: text });
     });
 
     render(DecryptForm, {
@@ -197,7 +197,12 @@ describe('DecryptForm expired clip handling', () => {
 
     render(DecryptForm, {
       props: {
-        clip: { blob, created_at: Date.now(), expires_at: Date.now() - 1000, burn_after_read: false },
+        clip: {
+          blob,
+          created_at: Date.now(),
+          expires_at: Date.now() - 1000,
+          burn_after_read: false,
+        },
         password: '',
         onDecrypt: vi.fn(),
         error: null,
@@ -218,12 +223,17 @@ describe('DecryptForm expired clip handling', () => {
 
     const onDecrypt = vi.fn(async (pw: string) => {
       const result = await import('$lib/crypto').then((m) => m.decrypt(blob, pw));
-      clipState.set({ ...clipState, decryptedText: result });
+      clipState.set({ ...get(clipState), decryptedText: result });
     });
 
     render(DecryptForm, {
       props: {
-        clip: { blob, created_at: Date.now(), expires_at: Date.now() - 1000, burn_after_read: false },
+        clip: {
+          blob,
+          created_at: Date.now(),
+          expires_at: Date.now() - 1000,
+          burn_after_read: false,
+        },
         password: '',
         onDecrypt,
         error: null,
@@ -367,7 +377,7 @@ describe('DecryptForm auto-decrypt', () => {
 
     const onDecrypt = vi.fn(async (pw: string) => {
       const result = await import('$lib/crypto').then((m) => m.decrypt(blob, pw));
-      clipState.set({ ...clipState, decryptedText: result });
+      clipState.set({ ...get(clipState), decryptedText: result });
     });
 
     render(DecryptForm, {
@@ -469,7 +479,7 @@ describe('DecryptForm Enter key handling', () => {
 
     const onDecrypt = vi.fn(async (pw: string) => {
       const result = await import('$lib/crypto').then((m) => m.decrypt(blob, pw));
-      clipState.set({ ...clipState, decryptedText: result });
+      clipState.set({ ...get(clipState), decryptedText: result });
     });
 
     render(DecryptForm, {
