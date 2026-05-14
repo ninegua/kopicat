@@ -214,8 +214,11 @@
             stroke-linecap="round"
             stroke-linejoin="round"
           >
-            <path d="M22 2L11 13" />
-            <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+            <circle cx="18" cy="5" r="2.5" />
+            <circle cx="6" cy="12" r="2.5" />
+            <circle cx="18" cy="19" r="2.5" />
+            <line x1="8.5" y1="12" x2="16" y2="17" />
+            <line x1="8.5" y1="12" x2="16" y2="7" />
           </svg>
         </button>
       {/if}
