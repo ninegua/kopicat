@@ -318,7 +318,7 @@ export async function newReceivingClip(
 ): Promise<LocalClip> {
   while (true) {
     const id = generateClipId();
-    const pw = generatePassword(8);
+    const pw = generatePassword(11);
     const url = `${origin}/send?${id}#${pw}`;
     if (!cache.has(id)) {
       const clip = { id, text: url, saved_at: Date.now(), receiving: true };
