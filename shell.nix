@@ -2,7 +2,7 @@
 with pkgs;
 let
   dfx-env = import (fetchTarball
-    "https://github.com/ninegua/ic-nix/releases//download/20260426/dfx-env.tar.gz")
+    "https://github.com/ninegua/ic-nix/releases//download/20260515/dfx-env.tar.gz")
     { };
   xclip = writeShellScriptBin "xclip" ''
     exec ${wl-clipboard}/bin/wl-copy "$@"
