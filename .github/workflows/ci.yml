@@ -21,7 +21,8 @@ jobs:
       - name: Set up Cachix
         uses: cachix/cachix-action@v17
         with:
-          name: mycache
+          name: kopicat
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
       - name: Cache vessel dependencies
         uses: actions/cache@v4
@@ -31,23 +32,5 @@ jobs:
           restore-keys: |
             vessel-
 
-      - name: Build and test with nix-shell
-        run: |
-          echo "=== Building backend ==="
-          nix-shell --run "make backend"
-
-          echo "=== Building frontend ==="
-          nix-shell --run "pnpm run build"
-
-          echo "=== Running type checks ==="
-          nix-shell --run "pnpm run check"
-
-          echo "=== Running tests ==="
-          nix-shell --run "pnpm run test"
-
-      - name: Show test results on failure
-        if: failure()
-        run: |
-          echo "=== Last 100 lines of output ==="
-          # Tests run in CI, check if any output was captured
-          echo "Check the job logs above for test output"
+      - name: Build and test
+        run: nix-build

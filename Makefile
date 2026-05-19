@@ -3,7 +3,8 @@ VERSION?=$(shell git rev-parse --abbrev-ref HEAD)
 BACKEND_MAIN_SRC=backend/main.mo
 BACKEND_SRC=$(wildcard backend/*.mo)
 MOC_VERSION=$(shell grep compiler vessel.dhall|cut -d\" -f2)
-MOC=.vessel/.bin/$(MOC_VERSION)/moc
+MOC?=.vessel/.bin/$(MOC_VERSION)/moc
+VESSEL_SOURCES?=$(shell vessel sources)
 DIDC=didc
 
 default: backend frontend
@@ -52,7 +53,7 @@ $(ASSETS_DIR)/:
 
 build/$(NAME).wasm build/$(NAME).did &: ${BACKEND_SRC} $(MOC) | .vessel/ build/
 	$(MOC) --public-metadata candid:service --public-metadata candid:args --public-metadata motoko:compiler \
-	    --idl -c -o $@ $$(vessel sources) $(BACKEND_MAIN_SRC)
+	    --idl -c -o $@ $(VESSEL_SOURCES) $(BACKEND_MAIN_SRC)
 
 build/$(NAME)-did.ts: build/$(NAME).did
 	$(DIDC) bind -t ts $< > $@
