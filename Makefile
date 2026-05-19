@@ -22,10 +22,8 @@ ASSETS=\
 	$(ASSETS_DIR)/favicon-32x32.png \
 	$(ASSETS_DIR)/apple-touch-icon.png
 
-frontend: | assets
+frontend: $(ASSETS)
 	pnpm run build
-
-assets: $(ASSETS)
 
 $(ASSETS_DIR)/kopicat-192x192.png: $(ASSETS_SRC) | $(ASSETS_DIR)/
 	magick $< -resize 192x192 $@
@@ -76,4 +74,4 @@ clean:
 distclean: clean
 	rm -rf .vessel/
 
-.PHONY: default backend frontend assets clean distclean
+.PHONY: default backend frontend clean distclean

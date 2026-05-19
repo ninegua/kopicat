@@ -71,8 +71,7 @@ let
     buildPhase = ''
       runHook preBuild
       ln -s ${backend} build
-      make assets
-      pnpm build
+      make frontend
       runHook postBuild
     '';
     checkPhase = ''
