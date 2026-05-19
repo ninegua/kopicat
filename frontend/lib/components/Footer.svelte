@@ -4,7 +4,25 @@
 <footer class="footer">
   <div class="footer-inner">
     <p class="footer-text">Secure clipboard sharing via simple links.</p>
-    <p class="footer-meta">Built on the Internet Computer</p>
+    <p class="footer-meta">
+      <a
+        href="https://dashboard.internetcomputer.org"
+        class="footer-link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img class="internetcomputer-icon" src="/internet-computer.svg" alt="InternetComputer" />
+      </a>
+      <a
+        href="https://github.com/ninegua/kopicat"
+        class="footer-link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img class="github-icon" src="/github.svg" alt="GitHub" />
+        <span>GitHub</span>
+      </a>
+    </p>
   </div>
 </footer>
 
@@ -27,9 +45,27 @@
   }
 
   .footer-meta {
-    color: var(--text-muted);
-    font-size: var(--text-xs);
-    margin-top: var(--space-xs);
+    display: flex;
+    justify-content: center;
+    gap: var(--space-md);
+    margin-top: var(--space-md);
     opacity: 0.6;
+  }
+
+  .footer-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xxs);
+    color: black;
+    font-size: var(--text-xs);
+  }
+
+  .github-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .internetcomputer-icon {
+    width: 80px;
   }
 </style>
