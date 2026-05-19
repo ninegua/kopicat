@@ -24,13 +24,5 @@ jobs:
           name: kopicat
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
-      - name: Cache vessel dependencies
-        uses: actions/cache@v4
-        with:
-          path: .vessel
-          key: vessel-${{ hashFiles('vessel.dhall', 'package-set.dhall') }}
-          restore-keys: |
-            vessel-
-
       - name: Build and test
         run: nix-build --argstr pnpmDepsHash sha256-B2l4qXnm7gBOizqlXo7Gb/UnIATGk08Wtol38GDhueI=
