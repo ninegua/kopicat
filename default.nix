@@ -33,7 +33,7 @@ let
           "package-set.dhall"
         ];
     });
-    nativeBuildInputs = with ic-pkgs; [ motoko candid ];
+    nativeBuildInputs = with ic-pkgs; [ moc candid ];
     configurePhase = "mkdir .vessel";
     buildPhase = ''
       make backend MOC=${moc}/bin/moc MOTOKO_CORE="${motoko-core}"
