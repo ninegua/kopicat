@@ -25,4 +25,6 @@ jobs:
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
       - name: Build and test
-        run: nix-build --argstr pnpmDepsHash sha256-B2l4qXnm7gBOizqlXo7Gb/UnIATGk08Wtol38GDhueI=
+        run: |
+          nix-build --argstr pnpmDepsHash sha256-B2l4qXnm7gBOizqlXo7Gb/UnIATGk08Wtol38GDhueI=
+          sha256sum $(nix-build -A backend --no-out-link)/*.wasm

@@ -11,6 +11,7 @@ let
     sha256 = "sha256:0xslzm2jdsikmws9rz09wrdr9zy16wsj4mg945fpdxz3y6sc2dnz";
   };
   ic-pkgs = import "${ic-nix}/default.nix" { inherit pkgs; };
+  moc = ic-pkgs.motoko.moc;
   motoko-core-version = "v2.5.0";
   motoko-core = fetchFromGitHub {
     owner = "caffeinelabs";
@@ -32,10 +33,10 @@ let
           "package-set.dhall"
         ];
     });
-    nativeBuildInputs = with ic-pkgs; [ vessel candid ];
+    nativeBuildInputs = with ic-pkgs; [ motoko candid ];
     configurePhase = "mkdir .vessel";
     buildPhase = ''
-      make backend MOC=${ic-pkgs.motoko.moc}/bin/moc VESSEL_SOURCES="--package core ${motoko-core}/src"
+      make backend MOC=${moc}/bin/moc MOTOKO_CORE="${motoko-core}"
     '';
     installPhase = ''
       mkdir -p $out
@@ -83,4 +84,4 @@ let
     doCheck = true;
   });
 
-in { inherit frontend backend; }
+in { inherit moc motoko-core frontend backend; }

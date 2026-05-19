@@ -1,10 +1,10 @@
 NAME=backend
-VERSION?=$(shell git rev-parse --abbrev-ref HEAD)
 BACKEND_MAIN_SRC=backend/main.mo
 BACKEND_SRC=$(wildcard backend/*.mo)
 MOC_VERSION=$(shell grep compiler vessel.dhall|cut -d\" -f2)
+MOTOKO_CORE_VERSION=$(shell grep 'version =' package-set.dhall|cut -d\" -f2)
 MOC?=.vessel/.bin/$(MOC_VERSION)/moc
-VESSEL_SOURCES?=$(shell vessel sources)
+MOTOKO_CORE?=.vessel/core/$(MOTOKO_CORE_VERSION)
 DIDC=didc
 
 default: backend frontend
@@ -51,9 +51,9 @@ $(ASSETS_DIR)/apple-touch-icon.png: $(ASSETS_SRC) | $(ASSETS_DIR)/
 $(ASSETS_DIR)/:
 	mkdir -p $(ASSETS_DIR)
 
-build/$(NAME).wasm build/$(NAME).did &: ${BACKEND_SRC} $(MOC) | .vessel/ build/
+build/$(NAME).wasm build/$(NAME).did &: ${BACKEND_SRC} $(MOC) $(MOTOKO_CORE) | .vessel/ build/
 	$(MOC) --public-metadata candid:service --public-metadata candid:args --public-metadata motoko:compiler \
-	    --idl -c -o $@ $(VESSEL_SOURCES) $(BACKEND_MAIN_SRC)
+	    --idl -c -o $@ --package core $(MOTOKO_CORE)/src $(BACKEND_MAIN_SRC)
 
 build/$(NAME)-did.ts: build/$(NAME).did
 	$(DIDC) bind -t ts $< > $@
@@ -61,11 +61,13 @@ build/$(NAME)-did.ts: build/$(NAME).did
 build/$(NAME)-did.mjs: build/$(NAME).did
 	$(DIDC) bind -t js $< > $@
 
-$(MOC): | .vessel/
-	vessel bin
+$(MOC):
+	mkdir -p $$(dirname $@)
+	ln -s $$(nix-build -A moc --no-out-link)/bin/moc $@
 
-.vessel/: vessel.dhall package-set.dhall
-	vessel install
+$(MOTOKO_CORE):
+	mkdir -p $$(dirname $@)
+	nix-build -A motoko-core -o $@
 
 build/:
 	mkdir -p $@
