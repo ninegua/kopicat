@@ -9,8 +9,6 @@
 ![Svelte](https://img.shields.io/badge/Svelte-5-ff3e00)
 ![ci](https://github.com/ninegua/kopicat/actions/workflows/ci.yml/badge.svg?branch=master)
 
----
-
 ## Features
 
 - 🔐 **End-to-end encryption** — AES-256-GCM with client-side key derivation (PBKDF2)
@@ -21,8 +19,6 @@
 - 💾 **Persistent storage** — clips saved locally in browser via IndexedDB
 - 📡 **Receive mode** — generate a receiving clip and let others send to you
 - 🎨 **Markdown & syntax highlighting** — code-aware clip display
-
----
 
 ## Usage
 
@@ -39,8 +35,6 @@
 2. A **receiving clip** is generated with a QR code and URL
 3. The sender scans the QR code or visits the `/send?clipId#password` URL
 4. Paste the text they send — your app polls the canister and auto-decrypts the result
-
----
 
 ## Architecture
 
@@ -63,8 +57,6 @@
 - **Stable memory persistence** — `persistent actor` auto-persists all state across upgrades
 - **Static frontend** — SvelteKit app built to `dist/`, deployed as static assets via `icp sync`
 
----
-
 ### Development
 
 All development was done in [nix-shell](https://nixos.org/nix), using IC development kit from [ic-nix](https://github.com/ninegua/ic-nix).
@@ -82,8 +74,6 @@ pnpm test
 # Type check
 pnpm check
 ```
-
----
 
 ## Project Structure
 
@@ -104,8 +94,6 @@ Makefile                    # Backend build (moc, didc)
 package.json                # Frontend dependencies (pnpm)
 ```
 
----
-
 ## Security Notes
 
 - **Password is never transmitted** — it's stored in the URL hash fragment (`#password`)
@@ -114,13 +102,9 @@ package.json                # Frontend dependencies (pnpm)
 - **Burn after read** is best-effort (query calls cannot mutate state)
 - **Clip IDs** are human-readable 3-word phrases (~44 bits of entropy)
 
----
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-
----
 
 ## License
 
