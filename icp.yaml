@@ -12,6 +12,4 @@ canisters:
       configuration:
         dir: dist
         build:
-          - sed -i "s/VITE_CANISTER_ID=.*$/VITE_CANISTER_ID=$(icp canister status backend -i)/" .env.development
-          - sed -i "s/VITE_CANISTER_ID=.*$/VITE_CANISTER_ID=$(icp canister status backend -i -e ic)/" .env.production
           - make frontend

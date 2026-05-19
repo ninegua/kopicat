@@ -7,8 +7,6 @@ import { idlFactory } from '$generated/backend-did';
 const DEFAULT_HOST = 'https://icp-api.io';
 const LOCAL_HOST = 'http://localhost:4943';
 
-const canisterIdEnv = import.meta.env?.VITE_CANISTER_ID || '';
-
 const isLocal = () => {
   const host = import.meta.env?.VITE_AGENT_HOST || DEFAULT_HOST;
   return host === LOCAL_HOST || host.includes('localhost') || host.includes('127.0.0.1');
@@ -37,10 +35,10 @@ async function getAgent(): Promise<HttpAgent> {
 }
 
 function getCanisterId(): Principal {
-  if (!canisterIdEnv) {
-    throw new Error('VITE_CANISTER_ID is not set. Please configure the canister ID.');
+  if (!BACKEND_CANISTER_ID) {
+    throw new Error('BACKEND_CANISTER_ID is not set. Please configure the canister ID.');
   }
-  return Principal.fromText(canisterIdEnv);
+  return Principal.fromText(BACKEND_CANISTER_ID);
 }
 
 interface CanisterActor {
