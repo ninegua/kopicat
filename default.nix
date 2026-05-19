@@ -53,6 +53,7 @@ let
           "frontend"
           "assets"
           "static"
+          "Makefile"
           "package.json"
           "pnpm-lock.yaml"
           "svelte.config.js"
@@ -71,7 +72,7 @@ let
     buildPhase = ''
       runHook preBuild
       ln -s ${backend} build
-      make -B frontend
+      make frontend
       runHook postBuild
     '';
     checkPhase = ''
