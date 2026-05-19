@@ -17,7 +17,7 @@
   let unmounted = false;
 
   function isAppUrl(url: string): boolean {
-    return url.startsWith(window.location.origin) || url.startsWith('https://kopicat.cc');
+    return url.startsWith(window.location.origin);
   }
 
   function isSendUrl(url: string): boolean {

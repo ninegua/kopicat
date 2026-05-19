@@ -1,9 +1,11 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
+  import { modalState } from '$lib/api/store';
   import { newReceivingClip } from '$lib/api/local-store';
   import { shareState } from '$lib/api/store';
   import Header from '$lib/components/Header.svelte';
+  import ScanQR from '$lib/components/ScanQR.svelte';
   import IdleView from '$lib/components/IdleView.svelte';
   import Footer from '$lib/components/Footer.svelte';
 
@@ -54,6 +56,10 @@
     const clip = await newReceivingClip(location.origin);
     goto(`/list?clip=${clip.id}`);
   }
+
+  function handleDismiss() {
+    modalState.set({ showModal: null, shareUrl: null, successMessage: null });
+  }
 </script>
 
 <svelte:head>
@@ -85,6 +91,9 @@
 <Header linkMode="hide" showMenu={true} />
 
 <main class="app-main">
+  {#if $modalState.showModal === 'scanQR'}
+    <ScanQR onDismiss={handleDismiss} />
+  {/if}
   <IdleView
     onPaste={(text) => {
       shareState.set({ prefillText: text });
