@@ -1,4 +1,6 @@
-{ pkgs ? import <nixpkgs> { } }:
+# The default hash is with nixpkgs unstable. Supply `pnpmDepsHash` if you want to pin nixpkgs.
+{ pkgs ? import <nixpkgs> { }
+, pnpmDepsHash ? "sha256-5DYWAgl/3WjrUdLHdnurayOjedUPSUn6SLEjsHasr9o=" }:
 with pkgs;
 let
   ic-nix = fetchFromGitHub {
@@ -63,7 +65,7 @@ let
     pnpmDeps = fetchPnpmDeps {
       inherit (finalAttrs) pname version src;
       fetcherVersion = 3;
-      hash = "sha256-5DYWAgl/3WjrUdLHdnurayOjedUPSUn6SLEjsHasr9o=";
+      hash = pnpmDepsHash;
     };
     buildPhase = ''
       runHook preBuild

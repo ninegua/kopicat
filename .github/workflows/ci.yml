@@ -33,4 +33,4 @@ jobs:
             vessel-
 
       - name: Build and test
-        run: nix-build
+        run: nix-build --argstr pnpmDepsHash sha256-B2l4qXnm7gBOizqlXo7Gb/UnIATGk08Wtol38GDhueI=
