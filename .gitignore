@@ -5,6 +5,7 @@
 .vessel/
 build/
 dist/
+**/*.bak
 **/*.sw[po]
 node_modules/
 skills-lock.json

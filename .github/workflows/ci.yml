@@ -2,9 +2,8 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
 
 jobs:
   build-and-test:
@@ -14,33 +13,16 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Nix
-        uses: cachix/install-nix-action@v30
-
-      - name: Cache vessel dependencies
-        uses: actions/cache@v4
+        uses: cachix/install-nix-action@v31
         with:
-          path: .vessel
-          key: vessel-${{ hashFiles('vessel.dhall', 'package-set.dhall') }}
-          restore-keys: |
-            vessel-
+          nix_path: nixpkgs=channel:nixos-25.11
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and test with nix-shell
-        run: |
-          echo "=== Building backend ==="
-          nix-shell --run "make backend"
+      - name: Set up Cachix
+        uses: cachix/cachix-action@v17
+        with:
+          name: kopicat
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
-          echo "=== Building frontend ==="
-          nix-shell --run "pnpm run build"
-
-          echo "=== Running type checks ==="
-          nix-shell --run "pnpm run check"
-
-          echo "=== Running tests ==="
-          nix-shell --run "pnpm run test"
-
-      - name: Show test results on failure
-        if: failure()
-        run: |
-          echo "=== Last 100 lines of output ==="
-          # Tests run in CI, check if any output was captured
-          echo "Check the job logs above for test output"
+      - name: Build and test
+        run: nix-build --argstr pnpmDepsHash sha256-B2l4qXnm7gBOizqlXo7Gb/UnIATGk08Wtol38GDhueI=
