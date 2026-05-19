@@ -181,17 +181,4 @@
     line-height: 1.6;
   }
 
-  .faq-icon-clip,
-  .faq-icon-receive {
-    display: inline-block;
-    vertical-align: middle;
-    margin: 0 2px;
-    color: var(--accent);
-  }
-
-  .faq-icon-clip svg,
-  .faq-icon-receive svg {
-    width: 14px;
-    height: 14px;
-  }
 </style>
