@@ -21,7 +21,7 @@ jobs:
       - name: Set up Cachix
         uses: cachix/cachix-action@v17
         with:
-          name: readonly
+          name: mycache
 
       - name: Cache vessel dependencies
         uses: actions/cache@v4
