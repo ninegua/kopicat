@@ -69,7 +69,7 @@ build/:
 	mkdir -p $@
 
 clean:
-	rm -rf build/
+	rm -rf dist/ build/ $(ASSETS)
 
 distclean: clean
 	rm -rf .vessel/

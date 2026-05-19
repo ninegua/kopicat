@@ -71,7 +71,7 @@ let
     buildPhase = ''
       runHook preBuild
       ln -s ${backend} build
-      make frontend
+      make -B frontend
       runHook postBuild
     '';
     checkPhase = ''
