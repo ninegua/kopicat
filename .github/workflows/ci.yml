@@ -19,7 +19,7 @@ jobs:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Cachix
-        uses: cachix/cache-action@v17
+        uses: cachix/cachix-action@v17
         with:
           name: readonly
 
