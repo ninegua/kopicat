@@ -180,5 +180,4 @@
     font-size: var(--text-base);
     line-height: 1.6;
   }
-
 </style>
