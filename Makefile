@@ -5,7 +5,7 @@ MOC_VERSION=$(shell grep compiler vessel.dhall|cut -d\" -f2)
 MOTOKO_CORE_VERSION=$(shell grep 'version =' package-set.dhall|cut -d\" -f2)
 MOC?=.vessel/.bin/$(MOC_VERSION)/moc
 MOTOKO_CORE?=.vessel/core/$(MOTOKO_CORE_VERSION)
-DIDC=didc
+DIDC?=didc
 
 default: backend frontend
 

@@ -12,6 +12,7 @@ let
   };
   ic-pkgs = import "${ic-nix}/default.nix" { inherit pkgs; };
   moc = ic-pkgs.motoko.moc;
+  candid = ic-pkgs.candid;
   motoko-core-version = "v2.5.0";
   motoko-core = fetchFromGitHub {
     owner = "caffeinelabs";
@@ -33,10 +34,9 @@ let
           "package-set.dhall"
         ];
     });
-    nativeBuildInputs = with ic-pkgs; [ moc candid ];
     configurePhase = "mkdir .vessel";
     buildPhase = ''
-      make backend MOC=${moc}/bin/moc MOTOKO_CORE="${motoko-core}"
+      make backend MOC=${moc}/bin/moc MOTOKO_CORE="${motoko-core}" DIDC="${candid}/bin/didc"
     '';
     installPhase = ''
       mkdir -p $out
