@@ -82,7 +82,7 @@
   <meta name="twitter:image" content="https://kopicat.cc/kopicat-192x192.png" />
 </svelte:head>
 
-<Header />
+<Header linkMode="hide" showMenu={true} />
 
 <main class="app-main">
   <IdleView

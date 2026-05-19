@@ -43,7 +43,14 @@
   />
 </svelte:head>
 
-<Header linkMode="show" listMode onAddNew={handleAddNew} onReceive={handleReceive} />
+<Header
+  linkMode="show"
+  wide
+  showMenu
+  showLogo={false}
+  onAddNew={handleAddNew}
+  onReceive={handleReceive}
+/>
 
 <main class="app-main">
   {#if $modalState.showModal === 'share' && $modalState.shareUrl}

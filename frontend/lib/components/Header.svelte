@@ -9,12 +9,16 @@
 
   let {
     linkMode = 'link',
-    listMode = false,
+    showLogo = true,
+    showMenu = false,
+    wide = false,
     onAddNew,
     onReceive,
   }: {
     linkMode?: 'link' | 'show' | 'hide';
-    listMode?: boolean;
+    showLogo?: boolean;
+    showMenu?: boolean;
+    wide?: boolean;
     onAddNew?: () => void;
     onReceive?: () => void;
   } = $props();
@@ -87,8 +91,8 @@
 </script>
 
 <header class="header">
-  <div class="header-inner" class:header--list={listMode}>
-    {#if !listMode}
+  <div class="header-inner" class:header--list={wide}>
+    {#if showLogo}
       <a href="/" class="logo" tabindex="0" role="button" aria-label="Home" onclick={onReset}>
         <img src="/kopicat-logo.png" alt="KopiCat" class="logo-img" />
         <span class="logo-text">KopiCat</span>
@@ -154,7 +158,7 @@
         {/if}
       {/if}
     </div>
-    {#if listMode}
+    {#if showMenu}
       <div class="menu-wrapper">
         <button
           type="button"
