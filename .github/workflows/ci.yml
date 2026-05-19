@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Nix
+        uses: cachix/install-nix-action@v30
+
+      - name: Cache vessel dependencies
+        uses: actions/cache@v4
+        with:
+          path: .vessel
+          key: vessel-${{ hashFiles('vessel.dhall', 'package-set.dhall') }}
+          restore-keys: |
+            vessel-
+
+      - name: Build and test with nix-shell
+        run: |
+          echo "=== Building backend ==="
+          nix-shell --run "make backend"
+
+          echo "=== Building frontend ==="
+          nix-shell --run "pnpm run build"
+
+          echo "=== Running type checks ==="
+          nix-shell --run "pnpm run check"
+
+          echo "=== Running tests ==="
+          nix-shell --run "pnpm run test"
+
+      - name: Show test results on failure
+        if: failure()
+        run: |
+          echo "=== Last 100 lines of output ==="
+          # Tests run in CI, check if any output was captured
+          echo "Check the job logs above for test output"
