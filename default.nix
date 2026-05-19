@@ -1,6 +1,7 @@
 # The default hash is with nixpkgs unstable. Supply `pnpmDepsHash` if you want to pin nixpkgs.
 { pkgs ? import <nixpkgs> { }
-, pnpmDepsHash ? "sha256-5DYWAgl/3WjrUdLHdnurayOjedUPSUn6SLEjsHasr9o=" }:
+, pnpmDepsHash ? "sha256-+qysXTGTj82hXKzWNOsTl9VArOgfWAccPb26/mYUf5s="
+, version ? "0.0.1" }:
 with pkgs;
 let
   ic-nix = fetchFromGitHub {
@@ -18,7 +19,8 @@ let
     sha256 = "sha256-Tl7p+94UteAC1oaUo9cG+yp6HtlyrFGbATvOGwBn2Ro=";
   };
   backend = stdenv.mkDerivation {
-    name = "kopicat";
+    inherit version;
+    pname = "kopicat-backend";
     src = lib.cleanSourceWith (rec {
       src = ./.;
       filter = path: type:
@@ -41,13 +43,13 @@ let
     '';
   };
   frontend = stdenv.mkDerivation (finalAttrs: {
-    pname = "kopicat";
-    version = "0.0.1";
+    inherit version;
+    pname = "kopicat-frontend";
     src = lib.cleanSourceWith (rec {
       src = ./.;
       filter = path: type:
         let relPath = lib.removePrefix (toString src + "/") (toString path);
-        in lib.any (prefix: lib.hasPrefix prefix relPath) [
+        in (lib.any (prefix: lib.hasPrefix prefix relPath) [
           "frontend"
           "assets"
           "static"
@@ -57,8 +59,7 @@ let
           "tsconfig.json"
           "vite.config.js"
           "vitest.config.ts"
-          ".icp"
-        ];
+        ] || lib.hasPrefix relPath ".icp/data/mappings/ic.ids.json");
     });
     nativeBuildInputs = [ nodejs pnpm pnpmConfigHook imagemagick ];
 
@@ -70,6 +71,7 @@ let
     buildPhase = ''
       runHook preBuild
       ln -s ${backend} build
+      make assets
       pnpm build
       runHook postBuild
     '';
