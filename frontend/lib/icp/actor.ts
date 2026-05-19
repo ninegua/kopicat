@@ -1,5 +1,4 @@
 import { Actor, HttpAgent } from '@icp-sdk/core/agent';
-import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 import { Principal } from '@icp-sdk/core/principal';
 import type { Clip, ClipInput } from './types';
 import { idlFactory } from '$generated/backend-did';
@@ -13,22 +12,20 @@ const isLocal = () => {
 };
 
 let agentPromise: Promise<HttpAgent> | null = null;
-let identity: Ed25519KeyIdentity | null = null;
 
 async function getAgent(): Promise<HttpAgent> {
   if (agentPromise) return agentPromise;
 
-  if (!identity) {
-    const seed = isLocal() ? new Uint8Array(32).fill(0) : new Uint8Array(32);
-    identity = Ed25519KeyIdentity.generate(seed);
-  }
-
   const host = import.meta.env?.VITE_AGENT_HOST || DEFAULT_HOST;
+  const isLocalHost = isLocal();
+
+  // Anonymous identity for all environments
+  const identity: undefined = undefined;
 
   agentPromise = HttpAgent.create({
     host,
     identity,
-    shouldFetchRootKey: isLocal(),
+    shouldFetchRootKey: isLocalHost,
   });
 
   return agentPromise;
