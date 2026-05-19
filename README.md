@@ -7,6 +7,7 @@
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![ICP](https://img.shields.io/badge/Internet%20Computer-100%25-green)
 ![Svelte](https://img.shields.io/badge/Svelte-5-ff3e00)
+![ci](https://github.com/ninegua/kopicat/actions/workflows/ci.yml/badge.svg?branch=master)
 
 ---
 
