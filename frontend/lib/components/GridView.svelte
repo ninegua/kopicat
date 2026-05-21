@@ -2,7 +2,7 @@
   import { SvelteSet } from 'svelte/reactivity';
   import { goto } from '$app/navigation';
   import type { LocalClip } from '$lib/api/local-store';
-  import { headerClipCount } from '$lib/api/store';
+  import { headerClipCount, searchQuery } from '$lib/api/store';
   import { renderQR } from '$lib/qr';
   import { flip } from 'svelte/animate';
   import { cubicOut } from 'svelte/easing';
@@ -208,13 +208,25 @@
 
   const displayClips = $derived.by(() => {
     const visible = getClips();
+
     if (maximizedClip) {
       return visible.filter((c) => c.id === maximizedClip);
     }
-    if (onChoose) {
-      return rearrange(visible.filter((c) => !c.receiving));
+
+    let filtered = visible;
+    if ($searchQuery.trim()) {
+      const query = $searchQuery.toLowerCase();
+      filtered = filtered.filter((c) => {
+        const text = (c.text ?? '').toLowerCase();
+        return text.includes(query);
+      });
     }
-    return rearrange(visible);
+
+    if (onChoose) {
+      return rearrange(filtered.filter((c) => !c.receiving));
+    }
+
+    return rearrange(filtered);
   });
 
   let editingText = $state<string>('');
@@ -504,6 +516,10 @@
     {#if clips.length == pendingDeletes.length}
       <div class="empty-state">
         <p>No clips yet. Create one to get started.</p>
+      </div>
+    {:else if $searchQuery.trim() && displayClips.length === 0}
+      <div class="empty-state">
+        <p>No clips match your search</p>
       </div>
     {:else}
       <div class="clips-grid" class:grid-maximized={maximizedClip !== null}>

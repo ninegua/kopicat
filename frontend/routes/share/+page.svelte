@@ -178,7 +178,7 @@
   />
 </svelte:head>
 
-<Header linkMode="hide" />
+<Header />
 
 <main class="app-main">
   {#if chooserMode}

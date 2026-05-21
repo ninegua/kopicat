@@ -69,6 +69,8 @@ export interface HeaderClipCount {
 
 export const headerClipCount = writable<HeaderClipCount>({ total: 0, unsaved: 0, receiving: 0 });
 
+export const searchQuery = writable<string>('');
+
 export const resetAllStates = () => {
   modalState.set(modalInitial);
   shareState.set(shareInitial);

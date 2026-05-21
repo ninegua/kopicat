@@ -55,7 +55,7 @@ Always use `pnpm`, never `npm`.
 
 ## Deploy
 ```bash
-icp deploy          # Deploys canisters per icp.yaml (backend + frontend asset canister)
+icp deploy          # Deploys canisters per icp.yaml (backend + frontend asset canister, must be already built)
 icp sync            # Syncs dist/ assets to the frontend asset canister
 ```
 `icp.yaml` specifies:

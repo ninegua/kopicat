@@ -4,24 +4,27 @@
     headerClipCount,
     type HeaderClipCount,
     modalState,
+    searchQuery,
   } from '$lib/api/store';
   import { getLocalClips } from '$lib/api/local-store';
 
   let {
-    linkMode = 'link',
     showLogo = true,
     showMenu = false,
     wide = false,
     onAddNew,
     onReceive,
+    onSearch,
   }: {
-    linkMode?: 'link' | 'show' | 'hide';
     showLogo?: boolean;
     showMenu?: boolean;
     wide?: boolean;
     onAddNew?: () => void;
     onReceive?: () => void;
+    onSearch?: (query: string) => void;
   } = $props();
+
+  let focused = $state(false);
 
   let animateAdd = $state(false);
   let animateReceive = $state(false);
@@ -48,17 +51,9 @@
     return n === 1 ? 'clip' : 'clips';
   }
 
-  function formatClipCountText(count: HeaderClipCount): { main: string; badge: string } {
+  function formatClipCountText(count: HeaderClipCount): string {
     const word = clipWord(count.total);
-    const main = `${count.total} ${word}`;
-    let badge = '';
-    if (count.receiving > 0) {
-      badge = `${count.receiving} receiving`;
-    }
-    if (count.unsaved > 0) {
-      badge = (badge ? badge + ', ' : '') + `${count.unsaved} unsaved`;
-    }
-    return { main, badge: badge ? `(${badge})` : '' };
+    return `${count.total} ${word}`;
   }
 
   $effect(() => {
@@ -144,18 +139,46 @@
         </button>
       </div>
     {/if}
-    <div class="clip-count-container">
-      {#if linkMode !== 'hide' && $headerClipCount.total > 0}
-        {#if linkMode === 'link'}
-          <a href="/list" class="clip-count clip-count--link">
-            <span>{formatClipCountText($headerClipCount).main} on device</span>
-          </a>
-        {:else}
-          <span class="clip-count">
-            <span>{formatClipCountText($headerClipCount).main}</span>
-            <span class="clip-count-badge">{formatClipCountText($headerClipCount).badge}</span>
-          </span>
-        {/if}
+    <div class="search-bar-wrapper">
+      <svg
+        class="search-icon"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+      <input
+        type="search"
+        class="search-bar"
+        class:search-bar--focused={focused}
+        class:search-bar--has-text={$searchQuery.length > 0}
+        placeholder={formatClipCountText($headerClipCount)}
+        value={$searchQuery}
+        oninput={(e) => {
+          const value = e.currentTarget.value;
+          searchQuery.set(value);
+          onSearch?.(value);
+        }}
+        onfocus={() => (focused = true)}
+        onblur={() => (focused = false)}
+      />
+      {#if $searchQuery.length > 0}
+        <button
+          type="button"
+          class="search-clear-btn"
+          onclick={() => {
+            searchQuery.set('');
+            onSearch?.('');
+          }}
+          aria-label="Clear search"
+        >
+          ×
+        </button>
       {/if}
     </div>
     {#if showMenu}
@@ -317,38 +340,71 @@
     border-radius: 4px;
   }
 
-  .clip-count-container {
+  .search-bar-wrapper {
     flex: 1;
     display: flex;
-    flex-direction: row;
-    justify-content: center;
+    align-items: center;
+    position: relative;
   }
 
-  .clip-count {
-    flex-direction: column;
-    align-items: flex-end;
+  .search-icon {
+    position: absolute;
+    left: var(--space-sm);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
     color: var(--text-muted);
-    font-size: var(--text-sm);
-    user-select: none;
+    pointer-events: none;
+    opacity: 0.5;
   }
 
-  .clip-count--link {
+  .search-bar {
+    flex: 1;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    font-family: inherit;
+    font-size: inherit;
+    padding: var(--space-xs) var(--space-sm) var(--space-xs) calc(var(--space-sm) + 14px + var(--space-xs));
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .search-bar:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 2px var(--focus-ring);
+  }
+
+  .search-bar::placeholder {
+    color: var(--text-muted);
+    opacity: 0.4;
+  }
+
+  .search-bar--focused::placeholder,
+  .search-bar--has-text::placeholder {
+    opacity: 0;
+  }
+
+  .search-clear-btn {
+    position: absolute;
+    right: var(--space-xs);
+    top: 50%;
+    transform: translateY(-50%);
     background: none;
     border: none;
     cursor: pointer;
-    padding: 0;
-    transition: color 0.15s;
-    text-align: right;
-    flex: 1;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    padding: var(--space-xs);
+    line-height: 1;
+    opacity: 0.6;
+    transition: opacity 0.15s;
   }
 
-  .clip-count--link:hover {
-    color: var(--accent);
-  }
-
-  .clip-count-badge {
-    color: var(--accent-amber);
-    font-size: var(--text-xs);
+  .search-clear-btn:hover {
+    opacity: 1;
   }
 
   .header-actions {

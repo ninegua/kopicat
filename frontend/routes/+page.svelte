@@ -88,7 +88,7 @@
   <meta name="twitter:image" content="https://kopicat.cc/kopicat-192x192.png" />
 </svelte:head>
 
-<Header linkMode="hide" showMenu={true} />
+<Header showMenu={true} />
 
 <main class="app-main">
   {#if $modalState.showModal === 'scanQR'}

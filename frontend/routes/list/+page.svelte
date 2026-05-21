@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { modalState, shareState } from '$lib/api/store';
+  import { modalState, searchQuery, shareState } from '$lib/api/store';
   import { generateClipId } from '$lib/words';
   import { addLocalClipCache, newReceivingClip } from '$lib/api/local-store';
   import Header from '$lib/components/Header.svelte';
@@ -44,12 +44,12 @@
 </svelte:head>
 
 <Header
-  linkMode="show"
   wide
   showMenu
   showLogo={false}
   onAddNew={handleAddNew}
   onReceive={handleReceive}
+  onSearch={(query) => searchQuery.set(query)}
 />
 
 <main class="app-main">
