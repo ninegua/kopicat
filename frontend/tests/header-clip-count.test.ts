@@ -151,7 +151,7 @@ describe('Header add new button', () => {
   });
 
   it('renders add-new button when showLogo is false', () => {
-    render(Header, { props: { showLogo: false } });
+    render(Header, { props: { showLogo: false, showButton: true } });
     const btn = screen.getByRole('button', { name: /new clip/i });
     expect(btn).toBeInTheDocument();
   });
@@ -164,7 +164,7 @@ describe('Header add new button', () => {
   it('calls onAddNew when clicked', async () => {
     const onAddNew = vi.fn();
     render(Header, {
-      props: { showLogo: false, onAddNew },
+      props: { showLogo: false, showButton: true, onAddNew },
     });
     const btn = screen.getByRole('button', { name: /new clip/i });
     await fireEvent.click(btn);
@@ -174,7 +174,7 @@ describe('Header add new button', () => {
   it('applies animation class on click then removes it', async () => {
     const onAddNew = vi.fn();
     render(Header, {
-      props: { showLogo: false, onAddNew },
+      props: { showLogo: false, showButton: true, onAddNew },
     });
     const btn = screen.getByRole('button', { name: /new clip/i });
     expect(btn).not.toHaveClass('add-new-btn-animate');
