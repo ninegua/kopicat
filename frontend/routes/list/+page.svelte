@@ -47,6 +47,8 @@
   wide
   showMenu
   showLogo={false}
+  showButton
+  showSearch
   onAddNew={handleAddNew}
   onReceive={handleReceive}
   onSearch={(query) => searchQuery.set(query)}

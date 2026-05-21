@@ -10,7 +10,9 @@
 
   let {
     showLogo = true,
+    showButton = false,
     showMenu = false,
+    showSearch = false,
     wide = false,
     onAddNew,
     onReceive,
@@ -18,6 +20,8 @@
   }: {
     showLogo?: boolean;
     showMenu?: boolean;
+    showButton?: boolean;
+    showSearch?: boolean;
     wide?: boolean;
     onAddNew?: () => void;
     onReceive?: () => void;
@@ -92,7 +96,8 @@
         <img src="/kopicat-logo.png" alt="KopiCat" class="logo-img" />
         <span class="logo-text">KopiCat</span>
       </a>
-    {:else}
+    {/if}
+    {#if showButton}
       <div class="header-actions">
         <button
           type="button"
@@ -139,48 +144,50 @@
         </button>
       </div>
     {/if}
-    <div class="search-bar-wrapper">
-      <svg
-        class="search-icon"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <circle cx="11" cy="11" r="8" />
-        <line x1="21" y1="21" x2="16.65" y2="16.65" />
-      </svg>
-      <input
-        type="search"
-        class="search-bar"
-        class:search-bar--focused={focused}
-        class:search-bar--has-text={$searchQuery.length > 0}
-        placeholder={formatClipCountText($headerClipCount)}
-        value={$searchQuery}
-        oninput={(e) => {
-          const value = e.currentTarget.value;
-          searchQuery.set(value);
-          onSearch?.(value);
-        }}
-        onfocus={() => (focused = true)}
-        onblur={() => (focused = false)}
-      />
-      {#if $searchQuery.length > 0}
-        <button
-          type="button"
-          class="search-clear-btn"
-          onclick={() => {
-            searchQuery.set('');
-            onSearch?.('');
-          }}
-          aria-label="Clear search"
+    {#if showSearch}
+      <div class="search-bar-wrapper">
+        <svg
+          class="search-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
         >
-          ×
-        </button>
-      {/if}
-    </div>
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input
+          type="search"
+          class="search-bar"
+          class:search-bar--focused={focused}
+          class:search-bar--has-text={$searchQuery.length > 0}
+          placeholder={formatClipCountText($headerClipCount)}
+          value={$searchQuery}
+          oninput={(e) => {
+            const value = e.currentTarget.value;
+            searchQuery.set(value);
+            onSearch?.(value);
+          }}
+          onfocus={() => (focused = true)}
+          onblur={() => (focused = false)}
+        />
+        {#if $searchQuery.length > 0}
+          <button
+            type="button"
+            class="search-clear-btn"
+            onclick={() => {
+              searchQuery.set('');
+              onSearch?.('');
+            }}
+            aria-label="Clear search"
+          >
+            ×
+          </button>
+        {/if}
+      </div>
+    {/if}
     {#if showMenu}
       <div class="menu-wrapper">
         <button
@@ -345,6 +352,7 @@
     display: flex;
     align-items: center;
     position: relative;
+    min-width: 0;
   }
 
   .search-icon {
@@ -366,10 +374,14 @@
     background: var(--bg-card);
     font-family: inherit;
     font-size: inherit;
-    padding: var(--space-xs) var(--space-sm) var(--space-xs) calc(var(--space-sm) + 14px + var(--space-xs));
+    padding: var(--space-xs) var(--space-sm) var(--space-xs)
+      calc(var(--space-sm) + 14px + var(--space-xs));
     color: var(--text-primary);
     outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
+    min-width: 0;
   }
 
   .search-bar:focus {

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { goto } from '$app/navigation';
-import { clipState, shareState, modalState } from '$lib/api/store';
+import { clipState, shareState, modalState, searchQuery } from '$lib/api/store';
 import { get } from 'svelte/store';
 import { generateClipId } from '$lib/words';
 import { loadClipsDB } from '$lib/api/local-store';
@@ -271,11 +271,13 @@ describe('List page — multiple clips display', () => {
     clipState.set({ clipId: null, decryptedText: null, clipPass: null });
     shareState.set({ prefillText: null });
     modalState.set({ showModal: null, shareUrl: null, successMessage: null });
+    searchQuery.set('');
     mockLocation('http://localhost/list');
   });
 
   afterEach(() => {
     cleanup();
+    searchQuery.set('');
   });
 
   it('displays all local clips in the grid', async () => {
@@ -299,6 +301,106 @@ describe('List page — multiple clips display', () => {
       expect(screen.getByText('Clip 1')).toBeInTheDocument();
       expect(screen.getByText('Clip 2')).toBeInTheDocument();
       expect(screen.getByText('Clip 3')).toBeInTheDocument();
+    });
+  });
+
+  it('filters clips by search query', async () => {
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([
+        { id: 'search-a', text: 'Hello world', saved_at: Date.now() },
+        { id: 'search-b', text: 'Goodbye moon', saved_at: Date.now() },
+      ]),
+    );
+    await loadClipsDB();
+
+    render(ListPage);
+    await tick();
+
+    await waitFor(() => {
+      expect(screen.getByText('Hello world')).toBeInTheDocument();
+      expect(screen.getByText('Goodbye moon')).toBeInTheDocument();
+    });
+
+    searchQuery.set('hello');
+    await tick();
+
+    await waitFor(() => {
+      expect(screen.getByText('Hello world')).toBeInTheDocument();
+      expect(screen.queryByText('Goodbye moon')).not.toBeInTheDocument();
+    });
+  });
+
+  it('shows no results message when search matches nothing', async () => {
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([
+        { id: 'nr-1', text: 'Alpha', saved_at: Date.now() },
+        { id: 'nr-2', text: 'Beta', saved_at: Date.now() },
+      ]),
+    );
+    await loadClipsDB();
+
+    render(ListPage);
+    await tick();
+
+    searchQuery.set('zzz');
+    await tick();
+
+    await waitFor(() => {
+      expect(screen.getByText('No clips match your search')).toBeInTheDocument();
+    });
+  });
+
+  it('search is case-insensitive', async () => {
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([
+        { id: 'ci-1', text: 'UPPERCASE TEXT', saved_at: Date.now() },
+        { id: 'ci-2', text: 'lowercase text', saved_at: Date.now() },
+      ]),
+    );
+    await loadClipsDB();
+
+    render(ListPage);
+    await tick();
+
+    searchQuery.set('uppercase');
+    await tick();
+
+    await waitFor(() => {
+      expect(screen.getByText('UPPERCASE TEXT')).toBeInTheDocument();
+      expect(screen.queryByText('lowercase text')).not.toBeInTheDocument();
+    });
+  });
+
+  it('restores all clips when search is cleared', async () => {
+    localStorage.setItem(
+      'copycat_clips',
+      JSON.stringify([
+        { id: 'clear-1', text: 'Keep me', saved_at: Date.now() },
+        { id: 'clear-2', text: 'Hide me', saved_at: Date.now() },
+      ]),
+    );
+    await loadClipsDB();
+
+    render(ListPage);
+    await tick();
+
+    searchQuery.set('Keep');
+    await tick();
+
+    await waitFor(() => {
+      expect(screen.getByText('Keep me')).toBeInTheDocument();
+      expect(screen.queryByText('Hide me')).not.toBeInTheDocument();
+    });
+
+    searchQuery.set('');
+    await tick();
+
+    await waitFor(() => {
+      expect(screen.getByText('Keep me')).toBeInTheDocument();
+      expect(screen.getByText('Hide me')).toBeInTheDocument();
     });
   });
 });

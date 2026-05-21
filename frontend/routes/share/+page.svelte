@@ -178,7 +178,7 @@
   />
 </svelte:head>
 
-<Header />
+<Header showSearch={chooserMode} showLogo={!chooserMode} />
 
 <main class="app-main">
   {#if chooserMode}

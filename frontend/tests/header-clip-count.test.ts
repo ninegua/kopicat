@@ -23,8 +23,13 @@ describe('Header search bar', () => {
     vi.clearAllMocks();
   });
 
+  it('hides search bar when showSearch is false', () => {
+    const { container } = render(Header);
+    expect(container.querySelector('.search-bar')).not.toBeInTheDocument();
+  });
+
   it('shows search input with placeholder "0 clips" when total is 0', () => {
-    render(Header);
+    render(Header, { props: { showSearch: true } });
     const input = screen.getByPlaceholderText('0 clips');
     expect(input).toBeInTheDocument();
     expect(input).toHaveAttribute('type', 'search');
@@ -32,7 +37,7 @@ describe('Header search bar', () => {
 
   it('shows placeholder "1 clip" when a clip exists', async () => {
     addLocalClip({ id: 'a', text: 'test', saved_at: Date.now() });
-    render(Header);
+    render(Header, { props: { showSearch: true } });
     await tick();
     const input = screen.getByPlaceholderText('1 clip');
     expect(input).toBeInTheDocument();
@@ -41,7 +46,7 @@ describe('Header search bar', () => {
   it('shows placeholder "2 clips" when multiple clips exist', async () => {
     addLocalClip({ id: 'a', text: 'test1', saved_at: Date.now() });
     addLocalClip({ id: 'b', text: 'test2', saved_at: Date.now() });
-    render(Header);
+    render(Header, { props: { showSearch: true } });
     await tick();
     const input = screen.getByPlaceholderText('2 clips');
     expect(input).toBeInTheDocument();
@@ -49,7 +54,7 @@ describe('Header search bar', () => {
 
   it('updates placeholder reactively on storage event from another tab', async () => {
     addLocalClip({ id: 'a', text: 'test', saved_at: Date.now() });
-    render(Header);
+    render(Header, { props: { showSearch: true } });
     await tick();
     expect(screen.getByPlaceholderText('1 clip')).toBeInTheDocument();
 
@@ -61,7 +66,7 @@ describe('Header search bar', () => {
 
   it('emits search query via onSearch callback', async () => {
     const onSearch = vi.fn();
-    render(Header, { props: { onSearch } });
+    render(Header, { props: { showSearch: true, onSearch } });
     const input = screen.getByPlaceholderText('0 clips') as HTMLInputElement;
     await fireEvent.input(input, { target: { value: 'hello' } });
     expect(onSearch).toHaveBeenCalledWith('hello');
@@ -69,7 +74,7 @@ describe('Header search bar', () => {
 
   it('clears search when clear button is clicked', async () => {
     const onSearch = vi.fn();
-    render(Header, { props: { onSearch } });
+    render(Header, { props: { showSearch: true, onSearch } });
     const input = screen.getByPlaceholderText('0 clips') as HTMLInputElement;
     await fireEvent.input(input, { target: { value: 'hello' } });
     await fireEvent.focus(input);
@@ -78,6 +83,52 @@ describe('Header search bar', () => {
     const clearBtn = screen.getByRole('button', { name: /clear search/i });
     await fireEvent.click(clearBtn);
     expect(input.value).toBe('');
+    expect(onSearch).toHaveBeenLastCalledWith('');
+  });
+
+  it('renders search icon inside the bar', () => {
+    const { container } = render(Header, { props: { showSearch: true } });
+    const icon = container.querySelector('.search-icon');
+    expect(icon).toBeInTheDocument();
+  });
+
+  it('shows clear button whenever text exists, even without focus', async () => {
+    render(Header, { props: { showSearch: true } });
+    const input = screen.getByPlaceholderText('0 clips') as HTMLInputElement;
+    await fireEvent.input(input, { target: { value: 'test' } });
+    expect(screen.getByRole('button', { name: /clear search/i })).toBeInTheDocument();
+  });
+
+  it('hides clear button when search is empty', async () => {
+    render(Header, { props: { showSearch: true } });
+    const input = screen.getByPlaceholderText('0 clips') as HTMLInputElement;
+    await fireEvent.input(input, { target: { value: 'test' } });
+    expect(screen.getByRole('button', { name: /clear search/i })).toBeInTheDocument();
+
+    await fireEvent.input(input, { target: { value: '' } });
+    expect(screen.queryByRole('button', { name: /clear search/i })).not.toBeInTheDocument();
+  });
+
+  it('applies focused class when input is focused', async () => {
+    render(Header, { props: { showSearch: true } });
+    const input = screen.getByPlaceholderText('0 clips');
+    await fireEvent.focus(input);
+    expect(input).toHaveClass('search-bar--focused');
+  });
+
+  it('applies has-text class when input has value', async () => {
+    render(Header, { props: { showSearch: true } });
+    const input = screen.getByPlaceholderText('0 clips');
+    await fireEvent.input(input, { target: { value: 'hello' } });
+    expect(input).toHaveClass('search-bar--has-text');
+  });
+
+  it('emits empty string when input is cleared manually', async () => {
+    const onSearch = vi.fn();
+    render(Header, { props: { showSearch: true, onSearch } });
+    const input = screen.getByPlaceholderText('0 clips') as HTMLInputElement;
+    await fireEvent.input(input, { target: { value: 'hello' } });
+    await fireEvent.input(input, { target: { value: '' } });
     expect(onSearch).toHaveBeenLastCalledWith('');
   });
 });
