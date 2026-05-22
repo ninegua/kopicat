@@ -13,6 +13,7 @@
     showButton = false,
     showMenu = false,
     showSearch = false,
+    showClipCountLink = false,
     wide = false,
     onAddNew,
     onReceive,
@@ -22,6 +23,7 @@
     showMenu?: boolean;
     showButton?: boolean;
     showSearch?: boolean;
+    showClipCountLink?: boolean;
     wide?: boolean;
     onAddNew?: () => void;
     onReceive?: () => void;
@@ -53,6 +55,14 @@
 
   function clipWord(n: number): string {
     return n === 1 ? 'clip' : 'clips';
+  }
+
+  function formatClipCountTextDetail(count: HeaderClipCount): string {
+    let txt = formatClipCountText(count);
+    if (count.receiving) {
+      txt += `, ${count.receiving} recieving`;
+    }
+    return txt;
   }
 
   function formatClipCountText(count: HeaderClipCount): string {
@@ -163,7 +173,7 @@
           class="search-bar"
           class:search-bar--focused={focused}
           class:search-bar--has-text={$searchQuery.length > 0}
-          placeholder={formatClipCountText($headerClipCount)}
+          placeholder={formatClipCountTextDetail($headerClipCount)}
           value={$searchQuery}
           oninput={(e) => {
             const value = e.currentTarget.value;
@@ -187,6 +197,9 @@
           </button>
         {/if}
       </div>
+    {/if}
+    {#if showClipCountLink}
+      <a class="clip-count" href="/list">{formatClipCountText($headerClipCount)} on device</a>
     {/if}
     {#if showMenu}
       <div class="menu-wrapper">
@@ -390,6 +403,7 @@
   }
 
   .search-bar::placeholder {
+    font-size: var(--text-xs);
     color: var(--text-muted);
     opacity: 0.4;
   }
@@ -568,5 +582,9 @@
 
   .menu-item:hover {
     background: var(--hover-bg);
+  }
+
+  .clip-count {
+    font-size: var(--text-sm);
   }
 </style>

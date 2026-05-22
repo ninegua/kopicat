@@ -84,7 +84,7 @@
   />
 </svelte:head>
 
-<Header showMenu={true} />
+<Header showMenu />
 
 <main class="app-main">
   <div class="faq-container">
