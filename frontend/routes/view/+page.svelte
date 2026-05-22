@@ -17,8 +17,12 @@
   let pagePassword = $state('');
   let error = $state<string | null>(null);
   let loading = $state(false);
+  let fetchedClip: Clip | null = $state(null);
 
   function initFromUrl() {
+    // Reset clip state from any previous clip
+    clipState.update((s) => ({ ...s, decryptedText: null, clipPass: null }));
+    fetchedClip = null;
     const url = new URL(window.location.href);
     const clipId = url.searchParams.get('clip');
     pagePassword = url.hash.slice(1);
@@ -104,8 +108,6 @@
     window.dispatchEvent(new StorageEvent('storage', { key: 'copycat_clips' }));
   }
 
-  let fetchedClip: Clip | null = $state(null);
-
   onMount(initFromUrl);
 </script>
 
@@ -117,7 +119,7 @@
   />
 </svelte:head>
 
-<Header />
+<Header showClipCountLink />
 
 <main class="app-main">
   {#if loading && !fetchedClip}
