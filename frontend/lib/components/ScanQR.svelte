@@ -148,7 +148,14 @@
     if (!result) return;
     if (isAppUrl(result)) {
       onDismiss();
-      goto(result);
+      let path = result.slice(window.location.origin.length);
+      if (path.startsWith('/?') && window.location.pathname == "/") {
+        // When QR scan is invoked from home page, because mobile browser won't fire
+        // reload event when it is same origin, we need to manually change it to '/view'
+        // in order to load the page.
+        path = '/view?clip=' + path.slice(2);
+      }
+      goto(path);
       return;
     }
     const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
