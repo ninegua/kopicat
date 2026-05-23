@@ -452,3 +452,157 @@ describe('ClipDisplay text rendering', () => {
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
   });
 });
+
+// ---------------------------------------------------------------------------
+// ClipDisplay clickable checkboxes
+// ---------------------------------------------------------------------------
+
+describe('ClipDisplay clickable checkboxes', () => {
+  afterEach(cleanup);
+
+  it('renders checkboxes in task list when in markdown mode', async () => {
+    render(ClipDisplay, {
+      props: { text: '- [ ] one\n- [x] two', maximized: true, showMarkdown: true },
+    });
+
+    await new Promise((r) => setTimeout(r, 50));
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    expect(checkboxes.length).toBe(2);
+  });
+
+  it('injects data-source-pos attribute on checkboxes', async () => {
+    render(ClipDisplay, {
+      props: { text: '- [ ] one\n- [x] two', maximized: true, showMarkdown: true },
+    });
+
+    await new Promise((r) => setTimeout(r, 50));
+    const firstCheckbox = document.querySelector('input[type="checkbox"]') as HTMLInputElement;
+    expect(firstCheckbox).toBeTruthy();
+    expect(firstCheckbox.hasAttribute('data-source-pos')).toBe(true);
+    expect(firstCheckbox.getAttribute('disabled')).toBeNull();
+  });
+
+  it('toggles [ ] to [x] when a preview checkbox is clicked', async () => {
+    const onTextChange = vi.fn();
+    render(ClipDisplay, {
+      props: {
+        text: '- [ ] buy milk\n- [x] walk dog',
+        maximized: true,
+        showMarkdown: true,
+        onTextChange,
+      },
+    });
+
+    await new Promise((r) => setTimeout(r, 50));
+
+    const checkbox = document.querySelector('input[type="checkbox"]') as HTMLInputElement;
+    expect(checkbox).toBeTruthy();
+
+    await fireEvent.click(checkbox);
+
+    expect(onTextChange).toHaveBeenCalledOnce();
+    expect(onTextChange).toHaveBeenCalledWith('- [x] buy milk\n- [x] walk dog');
+  });
+
+  it('toggles [x] back to [ ]', async () => {
+    const onTextChange = vi.fn();
+    render(ClipDisplay, {
+      props: {
+        text: '- [x] done',
+        maximized: true,
+        showMarkdown: true,
+        onTextChange,
+      },
+    });
+
+    await new Promise((r) => setTimeout(r, 50));
+
+    const checkbox = document.querySelector('input[type="checkbox"]') as HTMLInputElement;
+    await fireEvent.click(checkbox);
+
+    expect(onTextChange).toHaveBeenCalledWith('- [ ] done');
+  });
+
+  it('does not trigger onTextChange for non-checkbox clicks', async () => {
+    const onTextChange = vi.fn();
+    render(ClipDisplay, {
+      props: {
+        text: '- [ ] task',
+        maximized: true,
+        showMarkdown: true,
+        onTextChange,
+      },
+    });
+
+    await new Promise((r) => setTimeout(r, 50));
+
+    // Click on the list item text (not the checkbox)
+    const li = document.querySelector('li');
+    if (li) {
+      await fireEvent.click(li);
+    }
+
+    expect(onTextChange).not.toHaveBeenCalled();
+  });
+
+  it('supports ordered task lists', async () => {
+    const onTextChange = vi.fn();
+    render(ClipDisplay, {
+      props: {
+        text: '1. [ ] first\n2. [x] second',
+        maximized: true,
+        showMarkdown: true,
+        onTextChange,
+      },
+    });
+
+    await new Promise((r) => setTimeout(r, 50));
+
+    const checkbox = document.querySelector('input[type="checkbox"]') as HTMLInputElement;
+    await fireEvent.click(checkbox);
+
+    expect(onTextChange).toHaveBeenCalledWith('1. [x] first\n2. [x] second');
+  });
+
+  it('supports mixed list markers', async () => {
+    const onTextChange = vi.fn();
+    render(ClipDisplay, {
+      props: {
+        text: '- [ ] unordered\n* [x] also unordered\n+ [ ] plus marker',
+        maximized: true,
+        showMarkdown: true,
+        onTextChange,
+      },
+    });
+
+    await new Promise((r) => setTimeout(r, 50));
+
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    expect(checkboxes.length).toBe(3);
+
+    // Click first checkbox
+    await fireEvent.click(checkboxes[0] as HTMLInputElement);
+    expect(onTextChange).toHaveBeenCalledWith('- [x] unordered\n* [x] also unordered\n+ [ ] plus marker');
+  });
+
+  it('ignores checkboxes inside code blocks', async () => {
+    const onTextChange = vi.fn();
+    render(ClipDisplay, {
+      props: {
+        text: '```\n- [ ] inside code\n```\n- [ ] real task',
+        maximized: true,
+        showMarkdown: true,
+        showEdit: true,
+        onTextChange,
+      },
+    });
+
+    await new Promise((r) => setTimeout(r, 50));
+
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    expect(checkboxes.length).toBe(1); // only the real one
+
+    await fireEvent.click(checkboxes[0]);
+    expect(onTextChange).toHaveBeenCalledWith('```\n- [ ] inside code\n```\n- [x] real task');
+  });
+});

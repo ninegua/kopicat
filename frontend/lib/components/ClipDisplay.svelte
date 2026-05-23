@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { micromark } from 'micromark';
-  import { gfm, gfmHtml } from 'micromark-extension-gfm';
+  import { renderMarkdown } from '$lib/markdown';
   import CodeEditor from './CodeEditor.svelte';
 
   interface Props {
@@ -101,6 +100,37 @@
     if (minutes > 0) return `${minutes}m ago`;
     return 'just now';
   }
+
+  /**
+   * Handle clicks on checkboxes in the markdown preview.
+   * Reads the `data-source-pos` attribute, toggles the source text,
+   * and notifies the parent via `onTextChange`.
+   */
+  function handlePreviewClick(e: MouseEvent): void {
+    const target = (e.target as HTMLElement).closest(
+      'input[type="checkbox"]',
+    ) as HTMLInputElement | null;
+    if (!target) return;
+
+    const posAttr = target.getAttribute('data-source-pos');
+    if (posAttr === null) return;
+
+    const pos = parseInt(posAttr, 10);
+    if (pos < 0 || pos + 3 > text.length) return;
+
+    // Toggle [ ] ↔ [x] (support uppercase [X] during read)
+    const current = text.substring(pos, pos + 3);
+    const toggle = current === '[ ]' ? '[x]' : '[ ]';
+    const newText = text.substring(0, pos) + toggle + text.substring(pos + 3);
+
+    // Update text directly since it's $bindable — this propagates to the parent
+    // AND triggers a re-render of the preview with the new text.
+    text = newText;
+
+    // Also notify parent via callback for backward compatibility (e.g., ResultView).
+    onTextChange?.(newText);
+  }
+
 </script>
 
 <div class="clip-display">
@@ -381,8 +411,13 @@
     {:else if showEdit && !markdownMode}
       <CodeEditor bind:value={text} oninput={onTextChange} />
     {:else if markdownMode && showMarkdown}
-      <div class="markdown-preview">
-        {@html micromark(text, { extensions: [gfm()], htmlExtensions: [gfmHtml()] })}
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <div
+        class="markdown-preview"
+        onclick={handlePreviewClick}
+      >
+        {@html renderMarkdown(text)}
       </div>
     {:else}
       <CodeEditor bind:value={text} readOnly />
@@ -602,5 +637,19 @@
 
   .markdown-preview :global(th) {
     background: var(--bg-secondary);
+  }
+
+  /* Phase 1: Clickable checkbox styles */
+  :global(.markdown-preview input[type="checkbox"]) {
+    cursor: pointer;
+    margin-right: 0.5em;
+  }
+
+  :global(.markdown-preview li) {
+    cursor: default;
+  }
+
+  :global(.markdown-preview input[type="checkbox"]:hover) {
+    opacity: 0.8;
   }
 </style>
