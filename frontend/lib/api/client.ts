@@ -3,7 +3,14 @@ import { createClip as icpCreateClip, fetchClip as icpFetchClip } from '$lib/icp
 
 export type { Clip, ClipInput } from '$lib/icp/types';
 
+function isOffline(): boolean {
+  return typeof navigator !== 'undefined' && !navigator.onLine;
+}
+
 export async function createClip(input: ClipInput): Promise<{ ok: string } | { error: string }> {
+  if (isOffline()) {
+    return { error: 'You are offline. Cannot create clips without network access.' };
+  }
   try {
     return await icpCreateClip(input);
   } catch {
@@ -12,6 +19,9 @@ export async function createClip(input: ClipInput): Promise<{ ok: string } | { e
 }
 
 export async function fetchClip(id: string): Promise<Clip | null> {
+  if (isOffline()) {
+    return null;
+  }
   try {
     return await icpFetchClip(id);
   } catch {

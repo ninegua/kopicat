@@ -77,6 +77,18 @@
   let focusClip = $state<string | null>(null);
   let focusMaximized = $state(false);
   let maximizedClip = $derived(focusMaximized ? focusClip : null);
+  let online = $state(typeof navigator !== 'undefined' && navigator.onLine);
+
+  $effect(() => {
+    const onOnline = () => (online = true);
+    const onOffline = () => (online = false);
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+    return () => {
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+    };
+  });
 
   $effect(() => {
     const id = focusClipId;
@@ -254,6 +266,7 @@
   });
 
   function receivingStatus(clip: LocalClip): string {
+    if (!online) return 'Offline — polling paused';
     return matchBaseUrl(clip.text) ? 'Yet to receive' : 'Failed to receive';
   }
 
@@ -317,6 +330,10 @@
 
       function scheduleNext() {
         pollingTimer = setTimeout(() => {
+          if (!online) {
+            scheduleNext();
+            return;
+          }
           const freshReceiving = getClips().filter((c) => c.receiving);
           freshReceiving.forEach((clip) => {
             if (pendingIds.size < receivingClips.length) {

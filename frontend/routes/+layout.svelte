@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import NetworkBanner from '$lib/components/NetworkBanner.svelte';
 
   onMount(() => {
     if ('orientation' in screen && 'lock' in screen.orientation) {
@@ -22,6 +23,8 @@
     }
   });
 </script>
+
+<NetworkBanner />
 
 <svelte:head>
   <meta charset="utf-8" />

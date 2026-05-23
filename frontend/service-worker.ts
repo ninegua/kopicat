@@ -30,6 +30,11 @@ registerRoute(
   }),
 );
 
+// NOTE: We intentionally do NOT cache ICP API requests here.
+// ICP agent calls use POST/fetch with CORS preflight; Workbox does not cache POSTs
+// by default, and stale query responses would be confusing (TTL expiry, burn-after-read).
+// The application handles offline gracefully via navigator.onLine checks.
+
 self.addEventListener('message', (event) => {
   console.log('[SW] message from client:', event.data);
 });

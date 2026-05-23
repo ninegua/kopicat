@@ -18,6 +18,11 @@
   let error = $state<string | null>(null);
   let loading = $state(false);
   let fetchedClip: Clip | null = $state(null);
+  let offline = $state(false);
+
+  $effect(() => {
+    offline = typeof navigator !== 'undefined' && !navigator.onLine;
+  });
 
   function initFromUrl() {
     // Reset clip state from any previous clip
@@ -123,7 +128,11 @@
 
 <main class="app-main">
   {#if loading && !fetchedClip}
-    <LoadingSpinner message="Fetching clip..." />
+    {#if offline}
+      <div class="error-banner">You are offline. Cannot fetch this clip.</div>
+    {:else}
+      <LoadingSpinner message="Fetching clip..." />
+    {/if}
   {:else if fetchedClip && !$clipState.decryptedText}
     <DecryptForm
       clip={fetchedClip}

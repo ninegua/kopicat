@@ -141,6 +141,16 @@ Element.prototype.getAnimations = function () {
 };
 
 // ---------------------------------------------------------------------------
+// Mock navigator.onLine (not supported by jsdom)
+// ---------------------------------------------------------------------------
+
+Object.defineProperty(navigator, 'onLine', {
+  writable: true,
+  value: true,
+  configurable: true,
+});
+
+// ---------------------------------------------------------------------------
 // Mock navigator.clipboard (not supported by jsdom)
 // ---------------------------------------------------------------------------
 
