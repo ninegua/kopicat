@@ -95,13 +95,6 @@
     if (id && !focusClip) {
       focusClip = id;
     }
-    // The following check would only be true for a newly created clip
-    if (focusClipId && focusClip === focusClipId) {
-      const el = document.getElementById('editor');
-      if (el) {
-        (el as HTMLTextAreaElement).focus();
-      }
-    }
   });
 
   // Grid layout constants (must match CSS)
@@ -243,12 +236,18 @@
 
   let editingText = $state<string>('');
 
-  // Sets editingText when focusClip changes.
+  // Sets editingText and focuses the editor when focusClip changes.
   $effect(() => {
     if (focusClip !== null) {
       let clip = getLocalClip(focusClip);
       if (clip !== undefined && !clip.receiving) {
         editingText = clip.text;
+        // Focus the textarea and place cursor at the beginning.
+        const el = document.getElementById('editor');
+        if (el) {
+          (el as HTMLTextAreaElement).focus();
+          (el as HTMLTextAreaElement).select();
+        }
       }
     }
   });
