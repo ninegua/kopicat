@@ -6,6 +6,7 @@ import Text "mo:core/Text";
 import Time "mo:core/Time";
 import Result "mo:core/Result";
 import Option "mo:core/Option";
+import Sha256 "mo:sha2/Sha256";
 
 shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_to_live: Nat; max_blob_bytes: Nat }) {
 
@@ -15,6 +16,7 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
     created_at : Int;
     expires_at : Int;
     burn_after_read : Bool;
+    sha256 : ?Blob;
   };
 
   let clips : Map.Map<Text, Clip> = Map.empty<Text, Clip>();
@@ -30,6 +32,7 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
   type Input = {
     id : Text;
     blob : Blob;
+    sha256: ?Blob;
     expires_after: ?Nat;
     burn_after_read : Bool;
   };
@@ -53,7 +56,7 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
   };
 
   public shared func create_clip(input : Input) : async (Result.Result<Text, Text>) {
-    let { id; blob; expires_after; burn_after_read } = input;
+    let { id; blob; expires_after; burn_after_read; sha256 } = input;
     let now = now_secs();
 
     switch (Map.get(clips, Text.compare, id)) {
@@ -81,11 +84,23 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
     if (expires_at > now + max_ttl) {
       return #err("Expiration must be within " # Nat.toText(max_ttl) # " seconds.");
     };
+
+    switch (sha256) {
+      case (?provided_hash) {
+        let expected_hash = Sha256.fromBlob(#sha256, blob);
+        if (provided_hash != expected_hash) {
+          return #err("Sha256 verification failed");
+        }
+      };
+      case null {}
+    };
+
     let clip : Clip = {
       blob;
       created_at = now;
       expires_at;
       burn_after_read;
+      sha256;
     };
 
     Map.add(clips, Text.compare, id, clip);

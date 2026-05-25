@@ -20,6 +20,13 @@ let
     rev = motoko-core-version;
     sha256 = "sha256-Tl7p+94UteAC1oaUo9cG+yp6HtlyrFGbATvOGwBn2Ro=";
   };
+  motoko-sha2-revision = "fffed5cfd1e9cc21d0443be2cc3b7f5ac4f36e36";
+  motoko-sha2 = fetchFromGitHub {
+    owner = "research-ag";
+    repo = "sha2";
+    rev = motoko-sha2-revision;
+    sha256 = "sha256-+EPzFj9dSVSaupkoSZ925i73NHyPuSPyNXEJxZjRR9Y=";
+  };
   backend = stdenv.mkDerivation {
     inherit version;
     pname = "kopicat-backend";
@@ -36,7 +43,7 @@ let
     });
     configurePhase = "mkdir .vessel";
     buildPhase = ''
-      make backend MOC=${moc}/bin/moc MOTOKO_CORE="${motoko-core}" DIDC="${candid}/bin/didc"
+      make backend MOC=${moc}/bin/moc MOTOKO_CORE="${motoko-core}" MOTOKO_SHA2="${motoko-sha2}" DIDC="${candid}/bin/didc"
     '';
     installPhase = ''
       mkdir -p $out
@@ -84,4 +91,4 @@ let
     doCheck = true;
   });
 
-in { inherit moc motoko-core frontend backend; }
+in { inherit moc motoko-core motoko-sha2 frontend backend; }
