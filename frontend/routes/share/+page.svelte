@@ -11,7 +11,7 @@
   import { createClip } from '$lib/api/client';
   import type { AfterNavigate } from '@sveltejs/kit';
   import { addLocalClip, getLocalClip } from '$lib/api/local-store';
-  import { encrypt, generatePassword } from '$lib/crypto';
+  import { encrypt, generatePassword, computeSha256 } from '$lib/crypto';
   import { generateClipId } from '$lib/words';
   import Header from '$lib/components/Header.svelte';
   import CreateForm from '$lib/components/CreateForm.svelte';
@@ -105,6 +105,7 @@
       pw = generatePassword(11);
     }
     const encryptedBlob = await encrypt(text, pw);
+    const sha256Hash = await computeSha256(encryptedBlob);
 
     const url = new URL(window.location.href);
     const expires_after = ttl === 0 ? undefined : ttl;
@@ -114,6 +115,7 @@
       blob: encryptedBlob,
       expires_after,
       burn_after_read,
+      sha256: sha256Hash,
     });
 
     if ('error' in result) {

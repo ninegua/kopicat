@@ -50,6 +50,14 @@ export async function encrypt(text: string, password: string): Promise<Uint8Arra
   return blob;
 }
 
+export async function computeSha256(data: Uint8Array): Promise<Uint8Array> {
+  const hashBuffer = await crypto.subtle.digest(
+    'SHA-256',
+    data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer,
+  );
+  return new Uint8Array(hashBuffer);
+}
+
 export async function decrypt(blob: Uint8Array, password: string): Promise<string> {
   if (blob.length < SALT_BYTES + IV_BYTES) {
     throw new Error('Decryption failed.');

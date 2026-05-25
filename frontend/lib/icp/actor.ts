@@ -42,8 +42,9 @@ interface CanisterActor {
   create_clip: (input: {
     id: string;
     blob: Uint8Array;
-    expires_after?: bigint | bigint[];
+    expires_after: bigint[];
     burn_after_read: boolean;
+    sha256: Uint8Array[];
   }) => Promise<{ ok?: string; err?: string }>;
   get_clip: (id: string) => Promise<[] | [Clip]>;
 }
@@ -75,6 +76,7 @@ export async function createClip(input: ClipInput): Promise<{ ok: string } | { e
       blob: input.blob,
       expires_after: input.expires_after !== undefined ? [BigInt(input.expires_after)] : [],
       burn_after_read: input.burn_after_read,
+      sha256: input.sha256 !== undefined ? [input.sha256] : [],
     });
 
     if ('ok' in result && result.ok) {

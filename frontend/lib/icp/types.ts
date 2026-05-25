@@ -10,4 +10,5 @@ export type ClipInput = {
   blob: Uint8Array;
   expires_after?: number;
   burn_after_read: boolean;
+  sha256?: Uint8Array;
 };
