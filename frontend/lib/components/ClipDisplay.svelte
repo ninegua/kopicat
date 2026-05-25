@@ -130,7 +130,6 @@
     // Also notify parent via callback for backward compatibility (e.g., ResultView).
     onTextChange?.(newText);
   }
-
 </script>
 
 <div class="clip-display">
@@ -413,10 +412,7 @@
     {:else if markdownMode && showMarkdown}
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <div
-        class="markdown-preview"
-        onclick={handlePreviewClick}
-      >
+      <div class="markdown-preview" onclick={handlePreviewClick}>
         {@html renderMarkdown(text)}
       </div>
     {:else}
@@ -640,7 +636,7 @@
   }
 
   /* Phase 1: Clickable checkbox styles */
-  :global(.markdown-preview input[type="checkbox"]) {
+  :global(.markdown-preview input[type='checkbox']) {
     cursor: pointer;
     margin-right: 0.5em;
   }
@@ -649,7 +645,7 @@
     cursor: default;
   }
 
-  :global(.markdown-preview input[type="checkbox"]:hover) {
+  :global(.markdown-preview input[type='checkbox']:hover) {
     opacity: 0.8;
   }
 </style>

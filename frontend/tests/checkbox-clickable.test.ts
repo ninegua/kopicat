@@ -29,9 +29,7 @@ describe('renderMarkdown source-position binding', () => {
   });
 
   it('excludes checkboxes inside fenced code blocks', () => {
-    const html = renderMarkdown(
-      '- [ ] real task\n```\n- [ ] inside code\n```\n- [ ] another real',
-    );
+    const html = renderMarkdown('- [ ] real task\n```\n- [ ] inside code\n```\n- [ ] another real');
     const posMatches = [...html.matchAll(/data-source-pos="(\d+)"/g)];
     // Only two positions: the two real task list items outside the code block.
     expect(posMatches.length).toBe(2);

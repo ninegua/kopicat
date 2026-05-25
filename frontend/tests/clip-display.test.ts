@@ -582,7 +582,9 @@ describe('ClipDisplay clickable checkboxes', () => {
 
     // Click first checkbox
     await fireEvent.click(checkboxes[0] as HTMLInputElement);
-    expect(onTextChange).toHaveBeenCalledWith('- [x] unordered\n* [x] also unordered\n+ [ ] plus marker');
+    expect(onTextChange).toHaveBeenCalledWith(
+      '- [x] unordered\n* [x] also unordered\n+ [ ] plus marker',
+    );
   });
 
   it('ignores checkboxes inside code blocks', async () => {

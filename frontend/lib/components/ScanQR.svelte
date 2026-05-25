@@ -149,7 +149,7 @@
     if (isAppUrl(result)) {
       onDismiss();
       let path = result.slice(window.location.origin.length);
-      if (path.startsWith('/?') && window.location.pathname == "/") {
+      if (path.startsWith('/?') && window.location.pathname == '/') {
         // When QR scan is invoked from home page, because mobile browser won't fire
         // reload event when it is same origin, we need to manually change it to '/view'
         // in order to load the page.
