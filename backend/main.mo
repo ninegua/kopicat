@@ -43,7 +43,8 @@ shared ({ caller = creator }) persistent actor class (init_arg: ? { max_seconds_
     available_clips: Nat;
   };
 
-  public shared func get_stats() : async Stats {
+  public shared ({ caller }) func get_stats() : async Stats {
+    assert(caller == creator);
     let max_seconds_to_live = switch (init_arg) {
       case (null) MAX_SECONDS_TO_LIVE;
       case (?{ max_seconds_to_live }) max_seconds_to_live;
