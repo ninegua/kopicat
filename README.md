@@ -11,100 +11,53 @@
 
 ## Features
 
-- 🔐 **End-to-end encryption** — AES-256-GCM with client-side key derivation (PBKDF2)
-- 🌐 **Decentralized** — runs entirely on the Internet Computer, no central servers
-- 📱 **QR code sharing** — send clips to nearby devices via scanned QR codes
-- ⏳ **Auto-expiry** — configurable TTL (1 min → 7 days) with automatic cleanup
-- 🔥 **Burn after read** — optional one-time delivery for sensitive content
-- 💾 **Persistent storage** — clips saved locally in browser via IndexedDB
+- 🔐 **AES-256-GCM** client-side encryption with PBKDF2 key derivation
+- 🌐 **Fully decentralized** — single ICP canister, no central servers
+- 📱 **QR code sharing** — send clips to nearby devices
+- ⏳ **Auto-expiry** — configurable TTL with lazy cleanup
+- 🔥 **Burn after read** — optional one-time delivery
+- 💾 **IndexedDB** persistence for saved clips
 - 📡 **Receive mode** — generate a receiving clip and let others send to you
-- 🎨 **Markdown & syntax highlighting** — code-aware clip display
+- 🔍 **SHA-256 verification** — frontend computes hash, backend validates integrity
 
-## Usage
+## Quick Start
 
-### Creating a clip
-
-1. Open the app or paste text onto the home screen
-2. Optionally edit: set TTL, enable "burn after read", keep a local copy
-3. A **clip ID** (e.g., `violet-dolphin-canyon`) and **password** are generated
-4. Share the URL (`/?clipId#password`) — the password is in the URL fragment and **never sent to the server**
-
-### Receiving a clip
-
-1. On the home screen, click **"Or receive?"**
-2. A **receiving clip** is generated with a QR code and URL
-3. The sender scans the QR code or visits the `/send?clipId#password` URL
-4. Paste the text they send — your app polls the canister and auto-decrypts the result
+```bash
+icp deploy            # deploy backend + frontend
+pnpm dev              # start frontend dev server (proxies /api to local replica)
+pnpm test             # run tests
+pnpm check            # type check
+```
 
 ## Architecture
 
-```
-┌──────────────┐        HTTPS        ┌───────────────────────────┐
-│              │ ──────────────────▶ │  Asset Canister           │
-│              │                     │  (Frontend HTML/JS)       │
-│              │                     └───────────────────────────┘
-│   Browser    │                     ┌───────────────────────────┐
-│  (SvelteKit) │                     │  Single ICP Canister      │
-│              │     Canister RPC    │  (Motoko persistent actor)│
-│              │ ──────────────────▶ │  create_clip (update)     │
-│              │                     │  get_clip (query)         │
-└──────────────┘                     └───────────────────────────┘
-```
+- **Backend**: Motoko `persistent actor` with `create_clip` (update), `get_clip` (query), and `get_stats` (admin-only)
+- **Frontend**: Svelte 5 SPA, static build → `dist/` → asset canister via `icp sync`
+- **Crypto**: AES-256-GCM; ciphertext = `salt(16) + iv(12) + ciphertext`; password stays in URL fragment
 
-**Key decisions:**
+## Security
 
-- **Client-side encryption** — the canister stores only encrypted blobs; it never sees plaintext
-- **Stable memory persistence** — `persistent actor` auto-persists all state across upgrades
-- **Static frontend** — SvelteKit app built to `dist/`, deployed as static assets via `icp sync`
-
-### Development
-
-All development was done in [nix-shell](https://nixos.org/nix), using IC development kit from [ic-nix](https://github.com/ninegua/ic-nix).
-
-```bash
-# Deploy the backend canister
-icp deploy backend
-
-# Start the frontend dev server
-pnpm dev
-
-# Run tests
-pnpm test
-
-# Type check
-pnpm check
-```
+- Password never leaves the browser — stored in `#fragment`, never sent to server
+- Canister stores only encrypted blobs; plaintext never exposed on-chain
+- SHA-256 checksum verified on `create_clip` to detect corruption
+- `get_stats` restricted to canister creator
 
 ## Project Structure
 
 ```
-backend/
-├── main.mo                 # Motoko persistent actor — clip CRUD API
+backend/main.mo          # Motoko persistent actor — clip CRUD + sha256 verification
 frontend/
 ├── lib/
-│   ├── api/
-│   │   ├── client.ts       # ICP Actor client (createClip, fetchClip)
-│   │   ├── local-store.ts  # IndexedDB persistence for saved clips
-│   │   └── store.ts        # Svelte writable stores
-│   ├── crypto.ts           # AES-256-GCM encryption/decryption
-│   ├── components/         # Svelte 5 components (runes)
-│   └── routes/             # SvelteKit pages
-vessel.dhall                # Motoko dependencies (mo:core)
-Makefile                    # Backend build (moc, didc)
-package.json                # Frontend dependencies (pnpm)
+│   ├── api/             # ICP client, IndexedDB store, Svelte writables
+│   ├── crypto.ts        # AES-256-GCM + SHA-256
+│   └── components/      # Svelte 5 runes
+├── routes/              # /, /send, /share, /view, /list, /faq
+└── service-worker.ts    # Workbox PWA
 ```
-
-## Security Notes
-
-- **Password is never transmitted** — it's stored in the URL hash fragment (`#password`)
-- **Encryption is client-side only** — the canister sees only encrypted blobs
-- **Key derivation** uses PBKDF2 with 100k iterations and SHA-256
-- **Burn after read** is best-effort (query calls cannot mutate state)
-- **Clip IDs** are human-readable 3-word phrases (~44 bits of entropy)
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+PRs welcome.
 
 ## License
 
