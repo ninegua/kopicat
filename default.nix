@@ -7,8 +7,8 @@ let
   ic-nix = fetchFromGitHub {
     owner = "ninegua";
     repo = "ic-nix";
-    rev = "20260515";
-    sha256 = "sha256:0xslzm2jdsikmws9rz09wrdr9zy16wsj4mg945fpdxz3y6sc2dnz";
+    rev = "e12c81df38f19335f7b837ca6c2bcaad834db08b";
+    sha256 = "sha256-UH6X6IdlE6pK9UIpDciCx1s/3xudlHcM1HjSOb/dqvk=";
   };
   ic-pkgs = import "${ic-nix}/default.nix" { inherit pkgs; };
   moc = ic-pkgs.motoko.moc;
