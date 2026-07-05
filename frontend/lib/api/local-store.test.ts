@@ -18,6 +18,7 @@ import {
   isDirty,
   persistCacheDelta,
   registerUnloadFlush,
+  migrateBatchCacheToDeltas,
   CACHE_KEY,
   CACHE_KEY_PREFIX,
 } from '$lib/api/local-store';
@@ -532,6 +533,83 @@ describe('local-store (cache + IndexedDB)', () => {
       expect(callCount).toBe(1);
 
       window.addEventListener = originalAddEventListener;
+    });
+
+    it('survives receiving-only edit across reload', async () => {
+      const clip = makeClip({ id: 'receiving-only', text: 'x', receiving: false });
+      await addLocalClip(clip);
+
+      __resetLocalStore();
+
+      // Seed delta with receiving changed but text same
+      localStorage.setItem(
+        `${CACHE_KEY_PREFIX}receiving-only`,
+        JSON.stringify({ id: 'receiving-only', text: 'x', saved_at: clip.saved_at, receiving: true }),
+      );
+
+      await loadClipsDB();
+      expect(getLocalClip('receiving-only')!.receiving).toBe(true);
+      expect(isDirty('receiving-only')).toBe(true);
+    });
+
+    it('survives last_modified-only edit across reload', async () => {
+      const clip = makeClip({ id: 'lastmod-only', text: 'x', saved_at: Date.now() });
+      await addLocalClip(clip);
+
+      __resetLocalStore();
+
+      const newLastModified = Date.now() + 1000;
+      // Seed delta with last_modified changed but text same
+      localStorage.setItem(
+        `${CACHE_KEY_PREFIX}lastmod-only`,
+        JSON.stringify({ id: 'lastmod-only', text: 'x', saved_at: clip.saved_at, last_modified: newLastModified }),
+      );
+
+      await loadClipsDB();
+      expect(getLocalClip('lastmod-only')!.last_modified).toBe(newLastModified);
+      expect(isDirty('lastmod-only')).toBe(true);
+    });
+
+    it('retains legacy batch key when migration quota error occurs', () => {
+      __resetLocalStore();
+      const legacy: [string, LocalClip][] = [
+        ['legacy-a', { id: 'legacy-a', text: 'A', saved_at: Date.now() }],
+        ['legacy-b', { id: 'legacy-b', text: 'B', saved_at: Date.now() }],
+      ];
+      localStorage.setItem(CACHE_KEY, JSON.stringify(legacy));
+
+      const origProtoSetItem = Storage.prototype.setItem;
+      Storage.prototype.setItem = function (key: string, value: string) {
+        if (key === `${CACHE_KEY_PREFIX}legacy-b`) {
+          throw new Error('QUOTA_EXCEEDED');
+        }
+        return origProtoSetItem.call(this, key, value);
+      };
+
+      migrateBatchCacheToDeltas();
+
+      // Old key should still be there since migration failed partway
+      expect(localStorage.getItem(CACHE_KEY)).not.toBeNull();
+      // Partial delta should have been written
+      expect(localStorage.getItem(`${CACHE_KEY_PREFIX}legacy-a`)).not.toBeNull();
+
+      Storage.prototype.setItem = origProtoSetItem;
+    });
+
+    it('does not write localStorage delta when invalidating non-existent clip', async () => {
+      // Pre-seed a delta key and tombstone
+      localStorage.setItem(
+        `${CACHE_KEY_PREFIX}nonexistent`,
+        JSON.stringify({ id: 'nonexistent', text: 'x', saved_at: Date.now() }),
+      );
+      localStorage.setItem('copycat_cache_tombstone:nonexistent', '1');
+
+      await invalidateCache('nonexistent');
+
+      // Delta key should be gone immediately
+      expect(localStorage.getItem(`${CACHE_KEY_PREFIX}nonexistent`)).toBeNull();
+      // Tombstone should also be cleared
+      expect(localStorage.getItem('copycat_cache_tombstone:nonexistent')).toBeNull();
     });
 
     it('persists delta entries for individual clip edits', () => {

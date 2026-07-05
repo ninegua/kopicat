@@ -99,7 +99,7 @@ export function persistCacheDelta(id: string): boolean {
 }
 
 /** One-shot migration: split legacy batch cache into individual delta keys. */
-function migrateBatchCacheToDeltas(): void {
+export function migrateBatchCacheToDeltas(): void {
   if (typeof localStorage === 'undefined') return;
   try {
     const raw = localStorage.getItem(CACHE_KEY);
@@ -109,18 +109,34 @@ function migrateBatchCacheToDeltas(): void {
       localStorage.removeItem(CACHE_KEY);
       return;
     }
+    let allMigrated = true;
     for (const [, clip] of entries) {
       if (clip?.id) {
         try {
           localStorage.setItem(`${CACHE_KEY_PREFIX}${clip.id}`, JSON.stringify(clip));
-        } catch {}
+        } catch {
+          allMigrated = false;
+        }
       }
     }
-    localStorage.removeItem(CACHE_KEY);
+    if (allMigrated) {
+      try {
+        localStorage.removeItem(CACHE_KEY);
+      } catch {}
+    }
   } catch (e) {
     console.error('migrateBatchCacheToDeltas failed', e);
     try { localStorage.removeItem(CACHE_KEY); } catch {}
   }
+}
+
+/** Compare the fields that determine whether a delta is meaningfully different from the DB version. */
+function clipFieldsEqual(a: LocalClip, b: LocalClip): boolean {
+  return (
+    a.text === b.text &&
+    (a.receiving ?? false) === (b.receiving ?? false) &&
+    a.last_modified === b.last_modified
+  );
 }
 
 /** Rehydrate the cache Map from localStorage delta keys. */
@@ -160,7 +176,7 @@ function loadCacheFromDeltaKeys(): void {
               continue;
             }
             const dbClip = cache.get(clip.id);
-            if (dbClip && clip.text === dbClip.text) {
+            if (dbClip && clipFieldsEqual(clip, dbClip)) {
               localStorage.removeItem(key);
               continue;
             }
@@ -291,7 +307,7 @@ export async function loadClipsDB(): Promise<void> {
     const clipMap = new Map(clips.map((c) => [c.id, c]));
     for (const [id, cached] of cache) {
       const dbClip = clipMap.get(id);
-      if (dbClip && cached.text !== dbClip.text) {
+      if (dbClip && !clipFieldsEqual(cached, dbClip)) {
         dirty.add(id);
       }
     }
@@ -450,9 +466,16 @@ export async function invalidateCache(id: string): Promise<void> {
   let clip = await getLocalClipDB(id);
   if (clip) {
     cache.set(id, clip);
+    pendingFlush.add(id);
+    scheduleFlush();
+  } else {
+    // Ensure any stale delta key is removed immediately
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.removeItem(`${CACHE_KEY_PREFIX}${id}`);
+      } catch {}
+    }
   }
-  pendingFlush.add(id);
-  scheduleFlush();
   // Clear any stale tombstone after reverting to DB state
   if (typeof localStorage !== 'undefined') {
     try {
