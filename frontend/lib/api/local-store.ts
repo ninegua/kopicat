@@ -11,7 +11,9 @@ import { generatePassword } from '$lib/crypto';
 
 const DB_NAME = 'copycat';
 const STORE_NAME = 'clips';
-const CACHE_KEY = 'copycat_cache';
+export const CACHE_KEY = 'copycat_cache';
+export const CACHE_KEY_PREFIX = 'copycat_cache:';
+const TOMBSTONE_PREFIX = 'copycat_cache_tombstone:';
 
 // In-memory cache backed by a Map for O(1) lookups
 let cache: Map<string, LocalClip> = new Map();
@@ -28,46 +30,142 @@ function isBrowser(): boolean {
 /** Whether localStorage writes have succeeded at least once since last reset. */
 let localStorageAvailable = true;
 
-/** Final fallback: flush cache to localStorage before the tab is destroyed. */
-function registerUnloadFlush(): void {
+/** Set of clip IDs whose delta localStorage writes are pending. */
+let pendingFlush: Set<string> = new Set();
+
+/** Debounce timer for delta localStorage writes. */
+let flushTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** Schedule a debounced flush of pending delta localStorage writes. */
+export function scheduleFlush(): void {
+  if (flushTimer) {
+    clearTimeout(flushTimer);
+  }
+  flushTimer = setTimeout(() => {
+    flushTimer = null;
+    for (const id of pendingFlush) {
+      persistCacheDelta(id);
+    }
+    pendingFlush.clear();
+  }, 1000);
+}
+
+/** Final fallback: flush pending deltas to localStorage before the tab is destroyed. */
+export function registerUnloadFlush(): void {
   if (typeof window === 'undefined') return;
   window.addEventListener('pagehide', () => {
-    try {
-      const data = Array.from(cache.entries());
-      if (data.length > 0) {
-        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-      }
-    } catch {}
+    if (flushTimer) {
+      clearTimeout(flushTimer);
+      flushTimer = null;
+    }
+    for (const id of pendingFlush) {
+      persistCacheDelta(id);
+    }
+    pendingFlush.clear();
   });
 }
 
-/** Serialize the cache Map to localStorage. Called after every cache mutation. */
-function persistCacheToLocalStorage(): void {
-  if (!localStorageAvailable) return;
+/** Write a single clip entry to localStorage (delta-based). */
+export function persistCacheDelta(id: string): boolean {
+  if (!localStorageAvailable) return false;
   if (typeof localStorage === 'undefined') {
     localStorageAvailable = false;
-    return;
+    return false;
+  }
+  const clip = cache.get(id);
+  if (!clip) {
+    try {
+      localStorage.removeItem(`${CACHE_KEY_PREFIX}${id}`);
+    } catch (e) {
+      console.error('persistCacheDelta removeItem failed', e);
+      localStorageAvailable = false;
+    }
+    return false;
   }
   try {
-    const data = Array.from(cache.entries());
-    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    localStorage.setItem(`${CACHE_KEY_PREFIX}${id}`, JSON.stringify(clip));
+    return true;
   } catch (e) {
-    console.error('persistCacheToLocalStorage failed', e);
+    console.error('persistCacheDelta setItem failed', e);
     localStorageAvailable = false;
+    return false;
   }
 }
 
-/** Rehydrate the cache Map from localStorage. Called during loadClipsDB(). */
-function loadCacheFromLocalStorage(): void {
+/** One-shot migration: split legacy batch cache into individual delta keys. */
+function migrateBatchCacheToDeltas(): void {
   if (typeof localStorage === 'undefined') return;
   try {
     const raw = localStorage.getItem(CACHE_KEY);
-    if (raw) {
-      const entries: [string, LocalClip][] = JSON.parse(raw);
-      cache = new Map(entries);
+    if (!raw) return;
+    const entries: [string, LocalClip][] = JSON.parse(raw);
+    if (!Array.isArray(entries)) {
+      localStorage.removeItem(CACHE_KEY);
+      return;
+    }
+    for (const [, clip] of entries) {
+      if (clip?.id) {
+        try {
+          localStorage.setItem(`${CACHE_KEY_PREFIX}${clip.id}`, JSON.stringify(clip));
+        } catch {}
+      }
+    }
+    localStorage.removeItem(CACHE_KEY);
+  } catch (e) {
+    console.error('migrateBatchCacheToDeltas failed', e);
+    try { localStorage.removeItem(CACHE_KEY); } catch {}
+  }
+}
+
+/** Rehydrate the cache Map from localStorage delta keys. */
+function loadCacheFromDeltaKeys(): void {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    const tombstoned = new Set<string>();
+
+    // Process tombstones first (deleted clips that may still exist in IndexedDB)
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(TOMBSTONE_PREFIX)) {
+        const id = key.slice(TOMBSTONE_PREFIX.length);
+        tombstoned.add(id);
+        cache.delete(id);
+        localStorage.removeItem(key);
+      }
+    }
+
+    // Process delta entries
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(CACHE_KEY_PREFIX)) {
+        const id = key.slice(CACHE_KEY_PREFIX.length);
+        // Skip deltas for tombstoned IDs
+        if (tombstoned.has(id)) {
+          localStorage.removeItem(key);
+          continue;
+        }
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          try {
+            const clip = JSON.parse(raw) as LocalClip;
+            if (!clip.id || clip.id !== id) {
+              localStorage.removeItem(key);
+              continue;
+            }
+            const dbClip = cache.get(clip.id);
+            if (dbClip && clip.text === dbClip.text) {
+              localStorage.removeItem(key);
+              continue;
+            }
+            cache.set(clip.id, clip);
+          } catch {
+            localStorage.removeItem(key);
+          }
+        }
+      }
     }
   } catch (e) {
-    console.error('loadCacheFromLocalStorage failed', e);
+    console.error('loadCacheFromDeltaKeys failed', e);
   }
 }
 
@@ -175,8 +273,11 @@ export async function loadClipsDB(): Promise<void> {
     dirty.clear();
     removed.clear();
 
+    // Migrate old batch-format cache into delta keys (one-shot)
+    migrateBatchCacheToDeltas();
+
     // Overlay any unsaved edits from localStorage on top of the DB data
-    loadCacheFromLocalStorage();
+    loadCacheFromDeltaKeys();
 
     // For clips where localStorage text differs from DB text, mark as dirty
     // so the UI shows the amber "modified" glow on next render.
@@ -255,7 +356,14 @@ export function addLocalClipCache(clip: LocalClip): LocalClip[] {
 
   dirty.add(clip.id);
   removed.delete(clip.id);
-  persistCacheToLocalStorage();
+  pendingFlush.add(clip.id);
+  scheduleFlush();
+  // Clear any stale tombstone for this ID (e.g. after manual re-add)
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.removeItem(`${TOMBSTONE_PREFIX}${clip.id}`);
+    } catch {}
+  }
 
   return getSortedClips();
 }
@@ -274,7 +382,14 @@ export function removeLocalClipCache(id: string): void {
     cache.delete(id);
     dirty.delete(id);
     removed.add(id);
-    persistCacheToLocalStorage();
+    pendingFlush.add(id);
+    scheduleFlush();
+    // Tombstone ensures the clip stays deleted even if IndexedDB hasn't flushed
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem(`${TOMBSTONE_PREFIX}${id}`, '1');
+      } catch {}
+    }
   }
 }
 
@@ -295,7 +410,14 @@ export function updateLocalClipCache(id: string, updates: Partial<LocalClip>): L
   cache.set(id, updated);
   dirty.add(id);
   removed.delete(id);
-  persistCacheToLocalStorage();
+  pendingFlush.add(id);
+  scheduleFlush();
+  // Clear any stale tombstone for this ID
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.removeItem(`${TOMBSTONE_PREFIX}${id}`);
+    } catch {}
+  }
 
   return updated;
 }
@@ -322,7 +444,14 @@ export async function invalidateCache(id: string): Promise<void> {
   if (clip) {
     cache.set(id, clip);
   }
-  persistCacheToLocalStorage();
+  pendingFlush.add(id);
+  scheduleFlush();
+  // Clear any stale tombstone after reverting to DB state
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.removeItem(`${TOMBSTONE_PREFIX}${id}`);
+    } catch {}
+  }
 }
 
 export async function commitToDB(id: string, last_modified: number | null): Promise<void> {
@@ -395,7 +524,14 @@ export async function newReceivingClip(
           removed.delete(replacing);
         }
       }
-      persistCacheToLocalStorage();
+      pendingFlush.add(id);
+      scheduleFlush();
+      // Clear any stale tombstone for this ID
+      if (typeof localStorage !== 'undefined') {
+        try {
+          localStorage.removeItem(`${TOMBSTONE_PREFIX}${id}`);
+        } catch {}
+      }
       return clip;
     }
   }
@@ -406,11 +542,26 @@ export function __resetLocalStore(): void {
   cache = new Map();
   dirty.clear();
   removed.clear();
+  pendingFlush.clear();
   localStorageAvailable = true;
+  if (flushTimer) {
+    clearTimeout(flushTimer);
+    flushTimer = null;
+  }
   if (typeof localStorage !== 'undefined') {
+    // Clear the legacy batch key (for first-load migration)
     try {
       localStorage.removeItem(CACHE_KEY);
     } catch {}
+    // Clear all delta and tombstone keys
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith(CACHE_KEY_PREFIX) || key.startsWith(TOMBSTONE_PREFIX))) {
+        try {
+          localStorage.removeItem(key);
+        } catch {}
+      }
+    }
   }
   if (dbReady) {
     dbReady

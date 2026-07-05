@@ -16,6 +16,9 @@ import {
   invalidateCache,
   __resetLocalStore,
   isDirty,
+  persistCacheDelta,
+  CACHE_KEY,
+  CACHE_KEY_PREFIX,
 } from '$lib/api/local-store';
 import type { LocalClip } from '$lib/api/local-store';
 
@@ -379,67 +382,79 @@ describe('local-store (cache + IndexedDB)', () => {
       localStorage.removeItem(CACHE_KEY);
     });
 
-    it('updateLocalClipCache persists the cache to localStorage', () => {
-      const clip = makeClip({ id: 'persist-update', text: 'original' });
+    it('updateLocalClipCache persists a delta entry to localStorage', () => {
+      const clip = makeClip({ id: 'delta-update', text: 'original' });
       addLocalClipCache(clip);
 
       // Mutate via cache-only function
-      updateLocalClipCache('persist-update', { text: 'modified' });
+      updateLocalClipCache('delta-update', { text: 'modified' });
 
-      const stored = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
-      const map = new Map<string, any>(stored as [string, any][]);
-      expect(map.get('persist-update').text).toBe('modified');
+      // Flush pending delta
+      persistCacheDelta('delta-update');
+
+      const key = `${CACHE_KEY_PREFIX}delta-update`;
+      const stored = JSON.parse(localStorage.getItem(key) || 'null');
+      expect(stored).not.toBeNull();
+      expect(stored.text).toBe('modified');
     });
 
-    it('addLocalClipCache persists the cache to localStorage', () => {
-      const clip = makeClip({ id: 'persist-add', text: 'new clip' });
+    it('addLocalClipCache persists a delta entry to localStorage', () => {
+      const clip = makeClip({ id: 'delta-add', text: 'new clip' });
       addLocalClipCache(clip);
 
-      const stored = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
-      const map = new Map<string, any>(stored as [string, any][]);
-      expect(map.get('persist-add').text).toBe('new clip');
+      // Flush pending delta
+      persistCacheDelta('delta-add');
+
+      const key = `${CACHE_KEY_PREFIX}delta-add`;
+      const stored = JSON.parse(localStorage.getItem(key) || 'null');
+      expect(stored).not.toBeNull();
+      expect(stored.text).toBe('new clip');
     });
 
-    it('removeLocalClipCache persists the deletion to localStorage', () => {
-      const clip = makeClip({ id: 'persist-rm', text: 'to delete' });
+    it('removeLocalClipCache removes the delta entry from localStorage', () => {
+      const clip = makeClip({ id: 'delta-rm', text: 'to delete' });
       addLocalClipCache(clip);
-      expect(JSON.parse(localStorage.getItem(CACHE_KEY) || '[]')).toHaveLength(1);
+      const key = `${CACHE_KEY_PREFIX}delta-rm`;
+      persistCacheDelta('delta-rm');
+      expect(localStorage.getItem(key)).not.toBeNull();
 
-      removeLocalClipCache('persist-rm');
+      removeLocalClipCache('delta-rm');
+      persistCacheDelta('delta-rm');
 
-      const stored = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
-      const map = new Map<string, any>(stored as [string, any][]);
-      expect(map.has('persist-rm')).toBe(false);
+      expect(localStorage.getItem(key)).toBeNull();
     });
 
-    it('newReceivingClip persists the cache to localStorage', async () => {
-      await newReceivingClip('https://example.com');
+    it('newReceivingClip persists a delta entry to localStorage', async () => {
+      const clip = await newReceivingClip('https://example.com');
 
-      const stored = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
-      expect(stored).not.toHaveLength(0);
-      const map = new Map<string, any>(stored as [string, any][]);
-      const ids = Array.from(map.keys());
-      expect(ids.length).toBeGreaterThanOrEqual(1);
+      // Flush pending delta
+      persistCacheDelta(clip.id);
+
+      const key = `${CACHE_KEY_PREFIX}${clip.id}`;
+      const stored = JSON.parse(localStorage.getItem(key)!);
+      expect(stored.receiving).toBe(true);
     });
 
     it('invalidateCache persists the reverted state to localStorage', async () => {
-      const clip = makeClip({ id: 'persist-revert', text: 'saved text' });
+      const clip = makeClip({ id: 'delta-revert', text: 'saved text' });
       await addLocalClip(clip);
 
       // Simulate unsaved edit
-      updateLocalClipCache('persist-revert', { text: 'unsaved edit' });
-      expect(getLocalClip('persist-revert')!.text).toBe('unsaved edit');
+      updateLocalClipCache('delta-revert', { text: 'unsaved edit' });
+      expect(getLocalClip('delta-revert')!.text).toBe('unsaved edit');
 
       // Revert via invalidateCache
-      await invalidateCache('persist-revert');
+      await invalidateCache('delta-revert');
 
-      // localStorage should now have the DB text, not the unsaved edit
-      const stored = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
-      const map = new Map<string, any>(stored as [string, any][]);
-      expect(map.get('persist-revert').text).toBe('saved text');
+      // Flush pending delta — localStorage should now have the DB text
+      persistCacheDelta('delta-revert');
+
+      const key = `${CACHE_KEY_PREFIX}delta-revert`;
+      const stored = JSON.parse(localStorage.getItem(key) || 'null');
+      expect(stored.text).toBe('saved text');
     });
 
-    it('loadClipsDB overlays localStorage edits on top of IndexedDB', async () => {
+    it('loadClipsDB overlays localStorage delta edits on top of IndexedDB', async () => {
       // Seed IndexedDB with a saved clip
       const clip = makeClip({ id: 'overlay-test', text: 'db text' });
       await addLocalClip(clip);
@@ -447,11 +462,10 @@ describe('local-store (cache + IndexedDB)', () => {
       // Reset to clear in-memory cache (but keep IndexedDB)
       __resetLocalStore();
 
-      // Set localStorage AFTER reset but BEFORE loadClipsDB
-      // (reset clears localStorage, so we must set it after)
+      // Seed localStorage delta AFTER reset
       localStorage.setItem(
-        CACHE_KEY,
-        JSON.stringify([['overlay-test', { id: 'overlay-test', text: 'localstorage edit', saved_at: clip.saved_at }]]),
+        `${CACHE_KEY_PREFIX}overlay-test`,
+        JSON.stringify({ id: 'overlay-test', text: 'localstorage edit', saved_at: clip.saved_at }),
       );
 
       // Reload — loadClipsDB should merge localStorage on top of IndexedDB
@@ -461,13 +475,13 @@ describe('local-store (cache + IndexedDB)', () => {
       expect(isDirty('overlay-test')).toBe(true);
     });
 
-    it('loadClipsDB keeps localStorage clips missing from IndexedDB', async () => {
+    it('loadClipsDB keeps localStorage delta clips missing from IndexedDB', async () => {
       __resetLocalStore();
 
-      // Seed localStorage AFTER reset (reset clears it) with a clip that has no IndexedDB entry
+      // Seed localStorage delta AFTER reset (reset clears it) with a clip that has no IndexedDB entry
       localStorage.setItem(
-        CACHE_KEY,
-        JSON.stringify([['local-only', { id: 'local-only', text: 'local only', saved_at: Date.now() }]]),
+        `${CACHE_KEY_PREFIX}local-only`,
+        JSON.stringify({ id: 'local-only', text: 'local only', saved_at: Date.now() }),
       );
 
       await loadClipsDB();
@@ -476,30 +490,72 @@ describe('local-store (cache + IndexedDB)', () => {
       expect(getLocalClip('local-only')!.text).toBe('local only');
     });
 
+    it('persists delta entries for individual clip edits', () => {
+      const clipA = makeClip({ id: 'multi-delta-a', text: 'A' });
+      const clipB = makeClip({ id: 'multi-delta-b', text: 'B' });
+
+      addLocalClipCache(clipA);
+      addLocalClipCache(clipB);
+
+      // Flush pending deltas
+      persistCacheDelta('multi-delta-a');
+      persistCacheDelta('multi-delta-b');
+
+      const keyA = `${CACHE_KEY_PREFIX}multi-delta-a`;
+      const keyB = `${CACHE_KEY_PREFIX}multi-delta-b`;
+      expect(JSON.parse(localStorage.getItem(keyA) || 'null').text).toBe('A');
+      expect(JSON.parse(localStorage.getItem(keyB) || 'null').text).toBe('B');
+
+      // Remove one — delta should be removed too
+      removeLocalClipCache('multi-delta-a');
+      persistCacheDelta('multi-delta-a');
+      expect(localStorage.getItem(keyA)).toBeNull();
+      expect(JSON.parse(localStorage.getItem(keyB) || 'null').text).toBe('B');
+    });
+
+    it('persistCacheDelta writes and removes individual entries', () => {
+      // Add clip to cache first
+      addLocalClipCache(makeClip({ id: 'direct-delta', text: 'direct' }));
+
+      // Write
+      const written = persistCacheDelta('direct-delta');
+      expect(written).toBe(true);
+      const key = `${CACHE_KEY_PREFIX}direct-delta`;
+      expect(JSON.parse(localStorage.getItem(key) || 'null').text).toBe('direct');
+
+      // Remove (clip no longer in cache after deletion)
+      removeLocalClipCache('direct-delta');
+      const removed = persistCacheDelta('direct-delta');
+      expect(removed).toBe(false);
+      expect(localStorage.getItem(key)).toBeNull();
+    });
+
     it('stops writing to localStorage after a quota error', () => {
-      // Access the internal flag by calling persistCacheToLocalStorage after
-      // making localStorage throw. We patch localStorage.setItem to throw.
+      // Patch localStorage.setItem to throw on any call
       const originalSetItem = localStorage.setItem;
       localStorage.setItem = () => {
-        const err = new DOMException('QuotaExceededError', 'QuotaExceededError');
-        throw err;
+        throw new Error('QUOTA_EXCEEDED');
       };
 
+      // First call fails, setting localStorageAvailable = false internally
+      // Note: do NOT call __resetLocalStore here — it resets localStorageAvailable = true
       addLocalClipCache(makeClip({ id: 'quota-test', text: 'x' }));
-      // First call should fail, setting the internal flag.
+      persistCacheDelta('quota-test');
 
-      // Restore and reset store for a clean assertion.
+      // Restore original and re-patch to detect writes
       localStorage.setItem = originalSetItem;
-      __resetLocalStore();
-
-      // The next persistCacheToLocalStorage call should skip immediately.
-      // We verify by checking that no localStorage write occurred during this call.
       let writeCalled = false;
       localStorage.setItem = () => {
         writeCalled = true;
       };
+
+      // Subsequent call should skip immediately because localStorageAvailable = false
       addLocalClipCache(makeClip({ id: 'after-fail', text: 'y' }));
+      persistCacheDelta('after-fail');
       expect(writeCalled).toBe(false);
+
+      // Restore original
+      localStorage.setItem = originalSetItem;
     });
 
     it('loadClipsDB does not mark clean clips as dirty', async () => {
@@ -507,10 +563,10 @@ describe('local-store (cache + IndexedDB)', () => {
       const clip = makeClip({ id: 'clean-test', text: 'same text' });
       await addLocalClip(clip);
 
-      // Seed localStorage with the same text (no edit happened)
+      // Seed localStorage delta with the same text (no edit happened)
       localStorage.setItem(
-        CACHE_KEY,
-        JSON.stringify([['clean-test', { id: 'clean-test', text: 'same text', saved_at: clip.saved_at }]]),
+        `${CACHE_KEY_PREFIX}clean-test`,
+        JSON.stringify({ id: 'clean-test', text: 'same text', saved_at: clip.saved_at }),
       );
 
       __resetLocalStore();
