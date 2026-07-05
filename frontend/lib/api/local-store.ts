@@ -50,10 +50,15 @@ export function scheduleFlush(): void {
   }, 1000);
 }
 
+let unloadFlushRegistered = false;
+let unloadFlushHandler: (() => void) | null = null;
+
 /** Final fallback: flush pending deltas to localStorage before the tab is destroyed. */
 export function registerUnloadFlush(): void {
   if (typeof window === 'undefined') return;
-  window.addEventListener('pagehide', () => {
+  if (unloadFlushRegistered) return;
+  unloadFlushRegistered = true;
+  unloadFlushHandler = () => {
     if (flushTimer) {
       clearTimeout(flushTimer);
       flushTimer = null;
@@ -62,7 +67,8 @@ export function registerUnloadFlush(): void {
       persistCacheDelta(id);
     }
     pendingFlush.clear();
-  });
+  };
+  window.addEventListener('pagehide', unloadFlushHandler);
 }
 
 /** Write a single clip entry to localStorage (delta-based). */
@@ -130,6 +136,7 @@ function loadCacheFromDeltaKeys(): void {
         const id = key.slice(TOMBSTONE_PREFIX.length);
         tombstoned.add(id);
         cache.delete(id);
+        removed.add(id);
         localStorage.removeItem(key);
       }
     }
@@ -548,6 +555,11 @@ export function __resetLocalStore(): void {
     clearTimeout(flushTimer);
     flushTimer = null;
   }
+  if (typeof window !== 'undefined' && unloadFlushHandler) {
+    window.removeEventListener('pagehide', unloadFlushHandler);
+    unloadFlushHandler = null;
+  }
+  unloadFlushRegistered = false;
   if (typeof localStorage !== 'undefined') {
     // Clear the legacy batch key (for first-load migration)
     try {

@@ -17,6 +17,7 @@ import {
   __resetLocalStore,
   isDirty,
   persistCacheDelta,
+  registerUnloadFlush,
   CACHE_KEY,
   CACHE_KEY_PREFIX,
 } from '$lib/api/local-store';
@@ -488,6 +489,49 @@ describe('local-store (cache + IndexedDB)', () => {
 
       expect(getLocalClip('local-only')).toBeDefined();
       expect(getLocalClip('local-only')!.text).toBe('local only');
+    });
+
+    it('survives deletion across reload before IndexedDB flush', async () => {
+      const clip = makeClip({ id: 'tombstone-survive', text: 'x' });
+      await addLocalClip(clip);
+
+      // Reset memory and localStorage, but keep IndexedDB
+      __resetLocalStore();
+
+      // Simulate a tombstone left by a previous session that crashed/reloaded
+      // before removeLocalClip could finish its async IndexedDB commit.
+      localStorage.setItem('copycat_cache_tombstone:tombstone-survive', '1');
+
+      // Reload — tombstone should evict the clip and mark it for removal
+      await loadClipsDB();
+      expect(getLocalClip('tombstone-survive')).toBeUndefined();
+
+      // Flush to IndexedDB — the removal should now propagate
+      await flushClipsDB();
+
+      // Verify the deletion actually stuck by reloading again
+      __resetLocalStore();
+      await loadClipsDB();
+      expect(getLocalClip('tombstone-survive')).toBeUndefined();
+    });
+
+    it('does not register duplicate pagehide listeners', () => {
+      const originalAddEventListener = window.addEventListener;
+      let callCount = 0;
+      window.addEventListener = (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions) => {
+        if (type === 'pagehide') callCount++;
+        return originalAddEventListener.call(window, type, listener, options);
+      };
+
+      // First call should register
+      registerUnloadFlush();
+      // Subsequent calls should be no-ops
+      registerUnloadFlush();
+      registerUnloadFlush();
+
+      expect(callCount).toBe(1);
+
+      window.addEventListener = originalAddEventListener;
     });
 
     it('persists delta entries for individual clip edits', () => {
