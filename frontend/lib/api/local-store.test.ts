@@ -13,7 +13,9 @@ import {
   loadClipsDB,
   flushClipsDB,
   commitToDB,
+  invalidateCache,
   __resetLocalStore,
+  isDirty,
 } from '$lib/api/local-store';
 import type { LocalClip } from '$lib/api/local-store';
 
@@ -367,6 +369,150 @@ describe('local-store (cache + IndexedDB)', () => {
       const result = await getLocalClipDB('db-receive');
       expect(result).not.toBeNull();
       expect(result!.receiving).toBe(true);
+    });
+  });
+
+    describe('localStorage cache persistence', () => {
+    const CACHE_KEY = 'copycat_cache';
+
+    beforeEach(() => {
+      localStorage.removeItem(CACHE_KEY);
+    });
+
+    it('updateLocalClipCache persists the cache to localStorage', () => {
+      const clip = makeClip({ id: 'persist-update', text: 'original' });
+      addLocalClipCache(clip);
+
+      // Mutate via cache-only function
+      updateLocalClipCache('persist-update', { text: 'modified' });
+
+      const stored = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
+      const map = new Map<string, any>(stored as [string, any][]);
+      expect(map.get('persist-update').text).toBe('modified');
+    });
+
+    it('addLocalClipCache persists the cache to localStorage', () => {
+      const clip = makeClip({ id: 'persist-add', text: 'new clip' });
+      addLocalClipCache(clip);
+
+      const stored = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
+      const map = new Map<string, any>(stored as [string, any][]);
+      expect(map.get('persist-add').text).toBe('new clip');
+    });
+
+    it('removeLocalClipCache persists the deletion to localStorage', () => {
+      const clip = makeClip({ id: 'persist-rm', text: 'to delete' });
+      addLocalClipCache(clip);
+      expect(JSON.parse(localStorage.getItem(CACHE_KEY) || '[]')).toHaveLength(1);
+
+      removeLocalClipCache('persist-rm');
+
+      const stored = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
+      const map = new Map<string, any>(stored as [string, any][]);
+      expect(map.has('persist-rm')).toBe(false);
+    });
+
+    it('newReceivingClip persists the cache to localStorage', async () => {
+      await newReceivingClip('https://example.com');
+
+      const stored = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
+      expect(stored).not.toHaveLength(0);
+      const map = new Map<string, any>(stored as [string, any][]);
+      const ids = Array.from(map.keys());
+      expect(ids.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('invalidateCache persists the reverted state to localStorage', async () => {
+      const clip = makeClip({ id: 'persist-revert', text: 'saved text' });
+      await addLocalClip(clip);
+
+      // Simulate unsaved edit
+      updateLocalClipCache('persist-revert', { text: 'unsaved edit' });
+      expect(getLocalClip('persist-revert')!.text).toBe('unsaved edit');
+
+      // Revert via invalidateCache
+      await invalidateCache('persist-revert');
+
+      // localStorage should now have the DB text, not the unsaved edit
+      const stored = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
+      const map = new Map<string, any>(stored as [string, any][]);
+      expect(map.get('persist-revert').text).toBe('saved text');
+    });
+
+    it('loadClipsDB overlays localStorage edits on top of IndexedDB', async () => {
+      // Seed IndexedDB with a saved clip
+      const clip = makeClip({ id: 'overlay-test', text: 'db text' });
+      await addLocalClip(clip);
+
+      // Reset to clear in-memory cache (but keep IndexedDB)
+      __resetLocalStore();
+
+      // Set localStorage AFTER reset but BEFORE loadClipsDB
+      // (reset clears localStorage, so we must set it after)
+      localStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify([['overlay-test', { id: 'overlay-test', text: 'localstorage edit', saved_at: clip.saved_at }]]),
+      );
+
+      // Reload — loadClipsDB should merge localStorage on top of IndexedDB
+      await loadClipsDB();
+
+      expect(getLocalClip('overlay-test')!.text).toBe('localstorage edit');
+      expect(isDirty('overlay-test')).toBe(true);
+    });
+
+    it('loadClipsDB keeps localStorage clips missing from IndexedDB', async () => {
+      __resetLocalStore();
+
+      // Seed localStorage AFTER reset (reset clears it) with a clip that has no IndexedDB entry
+      localStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify([['local-only', { id: 'local-only', text: 'local only', saved_at: Date.now() }]]),
+      );
+
+      await loadClipsDB();
+
+      expect(getLocalClip('local-only')).toBeDefined();
+      expect(getLocalClip('local-only')!.text).toBe('local only');
+    });
+
+    it('loadClipsDB does not mark clean clips as dirty', async () => {
+      // Seed IndexedDB with a saved clip
+      const clip = makeClip({ id: 'clean-test', text: 'same text' });
+      await addLocalClip(clip);
+
+      // Seed localStorage with the same text (no edit happened)
+      localStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify([['clean-test', { id: 'clean-test', text: 'same text', saved_at: clip.saved_at }]]),
+      );
+
+      __resetLocalStore();
+      await loadClipsDB();
+
+      expect(getLocalClip('clean-test')!.text).toBe('same text');
+      expect(isDirty('clean-test')).toBe(false);
+    });
+
+    it('persists multiple clips and survives full reset + reload', async () => {
+      const clipA = makeClip({ id: 'multi-a', text: 'A' });
+      const clipB = makeClip({ id: 'multi-b', text: 'B' });
+
+      addLocalClipCache(clipA);
+      addLocalClipCache(clipB);
+
+      // Simulate page reload by resetting and re-loading from DB + localStorage.
+      // The cache was persisted to localStorage by addLocalClipCache.
+      // __resetLocalStore clears in-memory AND localStorage, so we need to
+      // first flush to IndexedDB to make clips survive.
+      await flushClipsDB();
+      __resetLocalStore();
+      await loadClipsDB();
+
+      const clips = getLocalClips();
+      expect(clips).toHaveLength(2);
+      expect(clips.find((c) => c.id === 'multi-a')!.text).toBe('A');
+      expect(clips.find((c) => c.id === 'multi-b')!.text).toBe('B');
     });
   });
 

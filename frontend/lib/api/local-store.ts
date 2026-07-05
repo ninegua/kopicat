@@ -11,6 +11,7 @@ import { generatePassword } from '$lib/crypto';
 
 const DB_NAME = 'copycat';
 const STORE_NAME = 'clips';
+const CACHE_KEY = 'copycat_cache';
 
 // In-memory cache backed by a Map for O(1) lookups
 let cache: Map<string, LocalClip> = new Map();
@@ -22,6 +23,31 @@ let dbReady: Promise<IDBDatabase> | null = null;
 
 function isBrowser(): boolean {
   return typeof window !== 'undefined' && typeof indexedDB !== 'undefined';
+}
+
+/** Serialize the cache Map to localStorage. Called after every cache mutation. */
+function persistCacheToLocalStorage(): void {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    const data = Array.from(cache.entries());
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.error('persistCacheToLocalStorage failed', e);
+  }
+}
+
+/** Rehydrate the cache Map from localStorage. Called during loadClipsDB(). */
+function loadCacheFromLocalStorage(): void {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (raw) {
+      const entries: [string, LocalClip][] = JSON.parse(raw);
+      cache = new Map(entries);
+    }
+  } catch (e) {
+    console.error('loadCacheFromLocalStorage failed', e);
+  }
 }
 
 function getDb(): Promise<IDBDatabase> {
@@ -127,6 +153,18 @@ export async function loadClipsDB(): Promise<void> {
     cache = new Map(clips.map((c) => [c.id, c]));
     dirty.clear();
     removed.clear();
+
+    // Overlay any unsaved edits from localStorage on top of the DB data
+    loadCacheFromLocalStorage();
+
+    // For clips where localStorage text differs from DB text, mark as dirty
+    // so the UI shows the amber "modified" glow on next render.
+    for (const [id, cached] of cache) {
+      const dbClip = clips.find((c) => c.id === id);
+      if (dbClip && cached.text !== dbClip.text) {
+        dirty.add(id);
+      }
+    }
   } catch (err) {
     console.error('loadClipsDB', err);
     cache = new Map();
@@ -195,6 +233,7 @@ export function addLocalClipCache(clip: LocalClip): LocalClip[] {
 
   dirty.add(clip.id);
   removed.delete(clip.id);
+  persistCacheToLocalStorage();
 
   return getSortedClips();
 }
@@ -213,6 +252,7 @@ export function removeLocalClipCache(id: string): void {
     cache.delete(id);
     dirty.delete(id);
     removed.add(id);
+    persistCacheToLocalStorage();
   }
 }
 
@@ -233,6 +273,7 @@ export function updateLocalClipCache(id: string, updates: Partial<LocalClip>): L
   cache.set(id, updated);
   dirty.add(id);
   removed.delete(id);
+  persistCacheToLocalStorage();
 
   return updated;
 }
@@ -259,6 +300,7 @@ export async function invalidateCache(id: string): Promise<void> {
   if (clip) {
     cache.set(id, clip);
   }
+  persistCacheToLocalStorage();
 }
 
 export async function commitToDB(id: string, last_modified: number | null): Promise<void> {
@@ -331,16 +373,22 @@ export async function newReceivingClip(
           removed.delete(replacing);
         }
       }
+      persistCacheToLocalStorage();
       return clip;
     }
   }
 }
 
-/** Reset internal cache. For tests only. */
+/** Reset internal cache and clear localStorage cache. For tests only. */
 export function __resetLocalStore(): void {
   cache = new Map();
   dirty.clear();
   removed.clear();
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.removeItem(CACHE_KEY);
+    } catch {}
+  }
   if (dbReady) {
     dbReady
       .then((db) => {
