@@ -13,7 +13,13 @@ let
   ic-pkgs = import "${ic-nix}/default.nix" { inherit pkgs; };
   moc = ic-pkgs.motoko.moc;
   candid = ic-pkgs.candid;
-  motoko-core-version = "v2.5.0";
+  deps = builtins.concatStringsSep " " (builtins.builtins.map (pkg:
+    "${pkg.name}=${
+      builtins.fetchGit {
+        url = pkg.repo;
+        rev = pkgs.version;
+      }
+    }") (dhallToNix ./package-set.dhall));
   motoko-core = fetchFromGitHub {
     owner = "caffeinelabs";
     repo = "motoko-core";
@@ -43,7 +49,7 @@ let
     });
     configurePhase = "mkdir .vessel";
     buildPhase = ''
-      make backend MOC=${moc}/bin/moc MOTOKO_CORE="${motoko-core}" MOTOKO_SHA2="${motoko-sha2}" DIDC="${candid}/bin/didc"
+      make backend ${deps}"
     '';
     installPhase = ''
       mkdir -p $out

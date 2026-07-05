@@ -8,6 +8,8 @@ let
     exec ${wl-clipboard}/bin/wl-copy "$@"
   '';
 in dfx-env.overrideAttrs (old: {
+  # disable icp-cli telemetry
+  DO_NOT_TRACK = 1;
   DFX_WARNING = "-mainnet_plaintext_identity";
   buildInputs = old.buildInputs
     ++ [ nodejs typescript prettier webpack-cli pnpm imagemagick xclip ];
