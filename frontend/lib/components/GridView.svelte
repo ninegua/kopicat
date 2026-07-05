@@ -45,14 +45,17 @@
     ),
   );
 
+  // Sync the local `edits` Set with the store's `dirty` set so the UI reflects
+  // unsaved edits that existed before this component was constructed (e.g. after a page reload).
   $effect(() => {
-    function onStorage(e: StorageEvent) {
-      if (e.key === 'copycat_clips') {
-        clips = getLocalClips();
+    const allClips = getLocalClips();
+    for (const clip of allClips) {
+      if (isDirty(clip.id)) {
+        edits.add(clip.id);
+      } else {
+        edits.delete(clip.id);
       }
     }
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
   });
 
   function getClips(): LocalClip[] {

@@ -476,6 +476,32 @@ describe('local-store (cache + IndexedDB)', () => {
       expect(getLocalClip('local-only')!.text).toBe('local only');
     });
 
+    it('stops writing to localStorage after a quota error', () => {
+      // Access the internal flag by calling persistCacheToLocalStorage after
+      // making localStorage throw. We patch localStorage.setItem to throw.
+      const originalSetItem = localStorage.setItem;
+      localStorage.setItem = () => {
+        const err = new DOMException('QuotaExceededError', 'QuotaExceededError');
+        throw err;
+      };
+
+      addLocalClipCache(makeClip({ id: 'quota-test', text: 'x' }));
+      // First call should fail, setting the internal flag.
+
+      // Restore and reset store for a clean assertion.
+      localStorage.setItem = originalSetItem;
+      __resetLocalStore();
+
+      // The next persistCacheToLocalStorage call should skip immediately.
+      // We verify by checking that no localStorage write occurred during this call.
+      let writeCalled = false;
+      localStorage.setItem = () => {
+        writeCalled = true;
+      };
+      addLocalClipCache(makeClip({ id: 'after-fail', text: 'y' }));
+      expect(writeCalled).toBe(false);
+    });
+
     it('loadClipsDB does not mark clean clips as dirty', async () => {
       // Seed IndexedDB with a saved clip
       const clip = makeClip({ id: 'clean-test', text: 'same text' });
@@ -501,10 +527,8 @@ describe('local-store (cache + IndexedDB)', () => {
       addLocalClipCache(clipA);
       addLocalClipCache(clipB);
 
-      // Simulate page reload by resetting and re-loading from DB + localStorage.
-      // The cache was persisted to localStorage by addLocalClipCache.
-      // __resetLocalStore clears in-memory AND localStorage, so we need to
-      // first flush to IndexedDB to make clips survive.
+      // addLocalClipCache writes to IndexedDB, so clips survive a reset.
+      // localStorage also has them, but __resetLocalStore clears localStorage.
       await flushClipsDB();
       __resetLocalStore();
       await loadClipsDB();

@@ -25,14 +25,35 @@ function isBrowser(): boolean {
   return typeof window !== 'undefined' && typeof indexedDB !== 'undefined';
 }
 
+/** Whether localStorage writes have succeeded at least once since last reset. */
+let localStorageAvailable = true;
+
+/** Final fallback: flush cache to localStorage before the tab is destroyed. */
+function registerUnloadFlush(): void {
+  if (typeof window === 'undefined') return;
+  window.addEventListener('pagehide', () => {
+    try {
+      const data = Array.from(cache.entries());
+      if (data.length > 0) {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+      }
+    } catch {}
+  });
+}
+
 /** Serialize the cache Map to localStorage. Called after every cache mutation. */
 function persistCacheToLocalStorage(): void {
-  if (typeof localStorage === 'undefined') return;
+  if (!localStorageAvailable) return;
+  if (typeof localStorage === 'undefined') {
+    localStorageAvailable = false;
+    return;
+  }
   try {
     const data = Array.from(cache.entries());
     localStorage.setItem(CACHE_KEY, JSON.stringify(data));
   } catch (e) {
     console.error('persistCacheToLocalStorage failed', e);
+    localStorageAvailable = false;
   }
 }
 
@@ -159,8 +180,9 @@ export async function loadClipsDB(): Promise<void> {
 
     // For clips where localStorage text differs from DB text, mark as dirty
     // so the UI shows the amber "modified" glow on next render.
+    const clipMap = new Map(clips.map((c) => [c.id, c]));
     for (const [id, cached] of cache) {
-      const dbClip = clips.find((c) => c.id === id);
+      const dbClip = clipMap.get(id);
       if (dbClip && cached.text !== dbClip.text) {
         dirty.add(id);
       }
@@ -384,6 +406,7 @@ export function __resetLocalStore(): void {
   cache = new Map();
   dirty.clear();
   removed.clear();
+  localStorageAvailable = true;
   if (typeof localStorage !== 'undefined') {
     try {
       localStorage.removeItem(CACHE_KEY);
@@ -400,3 +423,6 @@ export function __resetLocalStore(): void {
   }
   dbReady = null;
 }
+
+// Register pagehide flush on module load (no-op in SSR/tests).
+registerUnloadFlush();
