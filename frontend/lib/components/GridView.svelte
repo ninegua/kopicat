@@ -11,11 +11,12 @@
     getLocalClips,
     commitToDB,
     newReceivingClip,
-    removeLocalClip,
     updateLocalClip,
     updateLocalClipCache,
     invalidateCache,
     isDirty,
+    addLocalClip,
+    removeLocalClip,
   } from '$lib/api/local-store';
   import { fetchClip } from '$lib/api/client';
   import { decrypt } from '$lib/crypto';
@@ -32,8 +33,14 @@
   } = $props();
 
   let copiedId = $state<string | null>(null);
+
   let pendingDeletes = $state<
-    { id: string; text: string; timer: ReturnType<typeof setTimeout>; startTime: number }[]
+    {
+      id: string;
+      clip: LocalClip;
+      timer: ReturnType<typeof setTimeout>;
+      startTime: number;
+    }[]
   >([]);
   let deleteProgress = $state<Record<string, number>>({});
   let clips = $state<LocalClip[]>(getLocalClips());
@@ -66,6 +73,8 @@
       return clips;
     }
   }
+
+  let visibleCount = $derived.by(() => getClips().length);
 
   async function updateClip(id: string, updates: Partial<LocalClip>) {
     let updated = await updateLocalClip(id, updates);
@@ -481,16 +490,17 @@
       clearTimeout(existing.timer);
       pendingDeletes = pendingDeletes.filter((d) => d.id !== clip.id);
     }
-    async function deleteIt() {
-      await removeLocalClip(clip.id);
-      clips = clips.filter((c) => c.id !== clip.id);
+    // Immediately remove from IndexedDB and cache
+    await removeLocalClip(clip.id);
+    clips = clips.filter((c) => c.id !== clip.id);
+    // Store full clip for undo, then clear pending after timeout expires
+    const startTime = Date.now();
+    const timer = setTimeout(() => {
       pendingDeletes = pendingDeletes.filter((d) => d.id !== clip.id);
       deleteProgress = Object.fromEntries(
         Object.entries(deleteProgress).filter(([key]) => key !== clip.id),
       );
-    }
-    const startTime = Date.now();
-    const timer = setTimeout(deleteIt, 3000);
+    }, 3000);
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
       const progress = Math.max(0, 1 - elapsed / 3000);
@@ -498,16 +508,21 @@
         deleteProgress = { ...deleteProgress, [clip.id]: progress };
       }
     }, 50);
-    pendingDeletes = [...pendingDeletes, { id: clip.id, text: clip.text, timer, startTime }];
+    pendingDeletes = [...pendingDeletes, { id: clip.id, clip, timer, startTime }];
   }
 
-  function handleRestoreById(id: string) {
+  async function handleRestoreById(id: string) {
     const entry = pendingDeletes.find((d) => d.id === id);
     if (entry) {
       clearTimeout(entry.timer);
       pendingDeletes = pendingDeletes.filter((d) => d.id !== id);
       deleteProgress = Object.fromEntries(
         Object.entries(deleteProgress).filter(([key]) => key !== id),
+      );
+      // Re-insert the clip back into IndexedDB and cache
+      await addLocalClip(entry.clip);
+      clips = [...clips, entry.clip].sort(
+        (a, b) => b.saved_at - a.saved_at,
       );
       focusClip = id;
     }
@@ -533,7 +548,7 @@
 
 <div class="grid-wrapper" class:grid-maximized={maximizedClip !== null}>
   <div class="grid-container" class:grid-maximized={maximizedClip !== null}>
-    {#if clips.length == pendingDeletes.length}
+    {#if visibleCount === 0}
       <div class="empty-state">
         <p>No clips yet. Create one to get started.</p>
       </div>
@@ -689,7 +704,7 @@
           />
         </svg>
         <span class="snackbar-message">
-          <span>Deleted '<span class="snackbar-id">{truncate(pendingDelete.text, 20)}</span>'.</span
+          <span>Deleted '<span class="snackbar-id">{truncate(pendingDelete.clip.text, 20)}</span>'.</span
           >
           <span>Not yet? Click to restore.</span></span
         >
