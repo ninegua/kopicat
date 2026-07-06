@@ -151,7 +151,14 @@
   }
 
   .code-editor-input::selection {
-    background: rgba(100, 100, 100, 0.3);
+    background: rgba(197, 150, 69, 0.35);
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .code-editor-input::-moz-selection {
+    background: rgba(197, 150, 69, 0.35);
+    color: transparent;
   }
 
   .code-editor-readonly {
