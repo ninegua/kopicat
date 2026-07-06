@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   getLocalClips,
   addLocalClip,
@@ -19,6 +19,10 @@ import {
   persistCacheDelta,
   registerUnloadFlush,
   migrateBatchCacheToDeltas,
+  scheduleFlush,
+  __pendingFlush,
+  __localStorageFailureAt,
+  LOCALSTORAGE_RETRY_INTERVAL,
   CACHE_KEY,
   CACHE_KEY_PREFIX,
 } from '$lib/api/local-store';
@@ -680,6 +684,75 @@ describe('local-store (cache + IndexedDB)', () => {
       localStorage.setItem = originalSetItem;
     });
 
+    it('recovers from quota error after cooldown period', () => {
+      // Mock Date.now to control time
+      const originalDateNow = Date.now;
+      let mockNow = Date.now();
+      Date.now = () => mockNow;
+
+      // Patch Storage.prototype.setItem to throw so module's persistCacheDelta
+      // (which accesses setItem via prototype chain) also gets the mock.
+      const origProtoSetItem = Storage.prototype.setItem;
+      Storage.prototype.setItem = function (this: Storage, key: string, value: string): void {
+        if (key === `${CACHE_KEY_PREFIX}retry-test` || key === `${CACHE_KEY_PREFIX}retry-skip`) {
+          throw new Error('QUOTA_EXCEEDED');
+        }
+        return origProtoSetItem.call(this, key, value);
+      };
+
+      // First write fails — sets failure timestamp
+      addLocalClipCache(makeClip({ id: 'retry-test', text: 'x' }));
+      persistCacheDelta('retry-test');
+      expect(__localStorageFailureAt()).not.toBeNull();
+
+      // Advance time just inside cooldown window — write should still be skipped
+      mockNow += LOCALSTORAGE_RETRY_INTERVAL - 1000;
+      addLocalClipCache(makeClip({ id: 'retry-skip', text: 'y' }));
+      persistCacheDelta('retry-skip');
+      expect(localStorage.getItem(`${CACHE_KEY_PREFIX}retry-skip`)).toBeNull();
+
+      // Advance time past cooldown — write should retry and succeed
+      mockNow += 2000;
+      addLocalClipCache(makeClip({ id: 'retry-resume', text: 'z' }));
+      persistCacheDelta('retry-resume');
+      expect(__localStorageFailureAt()).toBeNull();
+      expect(JSON.parse(localStorage.getItem(`${CACHE_KEY_PREFIX}retry-resume`)!).text).toBe('z');
+
+      // Restore
+      Date.now = originalDateNow;
+      Storage.prototype.setItem = origProtoSetItem;
+    });
+
+    it('scheduleFlush preserves IDs added between consecutive calls', () => {
+      // Add clips A and B, then schedule a flush
+      const clipA = makeClip({ id: 'flush-preserve-a', text: 'A' });
+      const clipB = makeClip({ id: 'flush-preserve-b', text: 'B' });
+      addLocalClipCache(clipA);
+      addLocalClipCache(clipB);
+      scheduleFlush();
+
+      // Immediately add clip C and schedule again (simulates concurrent mutation)
+      const clipC = makeClip({ id: 'flush-preserve-c', text: 'C' });
+      addLocalClipCache(clipC);
+      scheduleFlush();
+
+      // pendingFlush should contain all three IDs
+      expect(__pendingFlush().size).toBe(3);
+      expect(__pendingFlush().has('flush-preserve-a')).toBe(true);
+      expect(__pendingFlush().has('flush-preserve-b')).toBe(true);
+      expect(__pendingFlush().has('flush-preserve-c')).toBe(true);
+
+      // Manually flush each to localStorage (bypass timer)
+      persistCacheDelta('flush-preserve-a');
+      persistCacheDelta('flush-preserve-b');
+      persistCacheDelta('flush-preserve-c');
+
+      // Verify all three were written
+      expect(JSON.parse(localStorage.getItem(`${CACHE_KEY_PREFIX}flush-preserve-a`)!).text).toBe('A');
+      expect(JSON.parse(localStorage.getItem(`${CACHE_KEY_PREFIX}flush-preserve-b`)!).text).toBe('B');
+      expect(JSON.parse(localStorage.getItem(`${CACHE_KEY_PREFIX}flush-preserve-c`)!).text).toBe('C');
+    });
+
     it('loadClipsDB does not mark clean clips as dirty', async () => {
       // Seed IndexedDB with a saved clip
       const clip = makeClip({ id: 'clean-test', text: 'same text' });
@@ -705,7 +778,7 @@ describe('local-store (cache + IndexedDB)', () => {
       addLocalClipCache(clipA);
       addLocalClipCache(clipB);
 
-      // addLocalClipCache writes to IndexedDB, so clips survive a reset.
+      // addLocalClipCache writes to the in-memory cache; flushClipsDB persists to IndexedDB.
       // localStorage also has them, but __resetLocalStore clears localStorage.
       await flushClipsDB();
       __resetLocalStore();

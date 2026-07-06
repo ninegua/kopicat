@@ -29,9 +29,17 @@ function isBrowser(): boolean {
 
 /** Whether localStorage writes have succeeded at least once since last reset. */
 let localStorageAvailable = true;
+/** Timestamp of last localStorage write failure, or null if no failure. */
+let localStorageFailureAt: number | null = null;
+// Exported for testing only
+export function __localStorageFailureAt(): number | null { return localStorageFailureAt; }
+export const LOCALSTORAGE_RETRY_INTERVAL = 30_000; // 30 seconds
 
 /** Set of clip IDs whose delta localStorage writes are pending. */
 let pendingFlush: Set<string> = new Set();
+
+// Exported for testing only — use __resetLocalStore() to reset
+export function __pendingFlush(): Set<string> { return pendingFlush; }
 
 /** Debounce timer for delta localStorage writes. */
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
@@ -43,10 +51,12 @@ export function scheduleFlush(): void {
   }
   flushTimer = setTimeout(() => {
     flushTimer = null;
-    for (const id of pendingFlush) {
+    // Snapshot pending IDs so concurrent scheduleFlush() calls don't get cleared
+    const ids = Array.from(pendingFlush);
+    pendingFlush.clear();
+    for (const id of ids) {
       persistCacheDelta(id);
     }
-    pendingFlush.clear();
   }, 1000);
 }
 
@@ -63,37 +73,54 @@ export function registerUnloadFlush(): void {
       clearTimeout(flushTimer);
       flushTimer = null;
     }
-    for (const id of pendingFlush) {
+    // Snapshot pending IDs so concurrent scheduleFlush() calls don't get cleared
+    const ids = Array.from(pendingFlush);
+    pendingFlush.clear();
+    for (const id of ids) {
       persistCacheDelta(id);
     }
-    pendingFlush.clear();
   };
   window.addEventListener('pagehide', unloadFlushHandler);
 }
 
 /** Write a single clip entry to localStorage (delta-based). */
 export function persistCacheDelta(id: string): boolean {
-  if (!localStorageAvailable) return false;
+  // If a previous write failed, allow retry after a cooldown period
+  if (!localStorageAvailable) {
+    if (localStorageFailureAt && Date.now() - localStorageFailureAt < LOCALSTORAGE_RETRY_INTERVAL) {
+      return false;
+    }
+    // Cooldown elapsed — allow retry
+  }
   if (typeof localStorage === 'undefined') {
     localStorageAvailable = false;
+    localStorageFailureAt = Date.now();
     return false;
   }
   const clip = cache.get(id);
   if (!clip) {
     try {
       localStorage.removeItem(`${CACHE_KEY_PREFIX}${id}`);
+      // Successful removal — reset failure state
+      localStorageAvailable = true;
+      localStorageFailureAt = null;
     } catch (e) {
       console.error('persistCacheDelta removeItem failed', e);
       localStorageAvailable = false;
+      localStorageFailureAt = Date.now();
     }
     return false;
   }
   try {
     localStorage.setItem(`${CACHE_KEY_PREFIX}${id}`, JSON.stringify(clip));
+    // Successful write — reset failure state
+    localStorageAvailable = true;
+    localStorageFailureAt = null;
     return true;
   } catch (e) {
     console.error('persistCacheDelta setItem failed', e);
     localStorageAvailable = false;
+    localStorageFailureAt = Date.now();
     return false;
   }
 }
@@ -574,6 +601,7 @@ export function __resetLocalStore(): void {
   removed.clear();
   pendingFlush.clear();
   localStorageAvailable = true;
+  localStorageFailureAt = null;
   if (flushTimer) {
     clearTimeout(flushTimer);
     flushTimer = null;
