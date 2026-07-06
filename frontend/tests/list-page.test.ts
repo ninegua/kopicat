@@ -136,6 +136,27 @@ describe('List page — header buttons', () => {
       expect(screen.getByTitle('New receive')).toBeInTheDocument();
     });
   });
+
+  it('adds a new clip to the grid when New clip button is clicked', async () => {
+    render(ListPage);
+    await tick();
+
+    // Grid starts empty
+    expect(screen.getByText('No clips yet. Create one to get started.')).toBeInTheDocument();
+
+    // Click New clip
+    const newClipBtn = screen.getByTitle('New clip');
+    await fireEvent.click(newClipBtn);
+    await tick();
+
+    // Empty state disappears and a focused clip appears
+    await waitFor(() => {
+      expect(screen.queryByText('No clips yet. Create one to get started.')).not.toBeInTheDocument();
+      expect(document.querySelector('.clip-box')).toBeInTheDocument();
+      expect(document.querySelector('.clip-box-focused')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Delete clip' })).toBeInTheDocument();
+    });
+  });
 });
 
 // ---------------------------------------------------------------------------
