@@ -13,7 +13,7 @@ const DB_NAME = 'copycat';
 const STORE_NAME = 'clips';
 export const CACHE_KEY = 'copycat_cache';
 export const CACHE_KEY_PREFIX = 'copycat_cache:';
-const TOMBSTONE_PREFIX = 'copycat_cache_tombstone:';
+export const TOMBSTONE_PREFIX = 'copycat_cache_tombstone:';
 
 // In-memory cache backed by a Map for O(1) lookups
 let cache: Map<string, LocalClip> = new Map();
@@ -81,6 +81,24 @@ export function registerUnloadFlush(): void {
     }
   };
   window.addEventListener('pagehide', unloadFlushHandler);
+}
+
+/** Clean up localStorage delta/tombstone keys for IDs successfully committed to IndexedDB. */
+function clearCommittedFromLocalStorage(dirtyIds: Set<string>, removedIds: Set<string>): void {
+  if (typeof localStorage === 'undefined') return;
+  for (const id of dirtyIds) {
+    try {
+      localStorage.removeItem(`${CACHE_KEY_PREFIX}${id}`);
+    } catch {}
+    pendingFlush.delete(id);
+  }
+  for (const id of removedIds) {
+    try {
+      localStorage.removeItem(`${CACHE_KEY_PREFIX}${id}`);
+      localStorage.removeItem(`${TOMBSTONE_PREFIX}${id}`);
+    } catch {}
+    pendingFlush.delete(id);
+  }
 }
 
 /** Write a single clip entry to localStorage (delta-based). */
@@ -371,6 +389,7 @@ export async function commitDBChanges(dirty: Set<string>, removed: Set<string>):
       transaction.oncomplete = () => resolve();
       transaction.onerror = (e) => reject(new Error('IndexedDB commit failed', { cause: e }));
     });
+    clearCommittedFromLocalStorage(dirty, removed);
     return true;
   } catch (err) {
     console.error('commitDBChanges', err);
@@ -573,6 +592,8 @@ export async function newReceivingClip(
     if (!cache.has(id)) {
       const clip = { id, text: url, saved_at: Date.now(), receiving: true };
       cache.set(id, clip);
+      pendingFlush.add(id);
+      scheduleFlush();
       if (await commitDBChanges(new Set([id]), new Set(replacing ? [replacing] : []))) {
         dirty.delete(id);
         if (replacing) {
@@ -581,8 +602,6 @@ export async function newReceivingClip(
           removed.delete(replacing);
         }
       }
-      pendingFlush.add(id);
-      scheduleFlush();
       // Clear any stale tombstone for this ID
       if (typeof localStorage !== 'undefined') {
         try {

@@ -25,6 +25,7 @@ import {
   LOCALSTORAGE_RETRY_INTERVAL,
   CACHE_KEY,
   CACHE_KEY_PREFIX,
+  TOMBSTONE_PREFIX,
 } from '$lib/api/local-store';
 import type { LocalClip } from '$lib/api/local-store';
 
@@ -788,6 +789,116 @@ describe('local-store (cache + IndexedDB)', () => {
       expect(clips).toHaveLength(2);
       expect(clips.find((c) => c.id === 'multi-a')!.text).toBe('A');
       expect(clips.find((c) => c.id === 'multi-b')!.text).toBe('B');
+    });
+  });
+
+  describe('localStorage eviction after IndexedDB commit', () => {
+    it('addLocalClip removes the delta key after commit', async () => {
+      const clip = makeClip({ id: 'evict-add', text: 'A' });
+      addLocalClipCache(clip);
+      persistCacheDelta('evict-add');
+      const key = `${CACHE_KEY_PREFIX}evict-add`;
+      expect(localStorage.getItem(key)).not.toBeNull();
+
+      await addLocalClip(clip);
+
+      expect(localStorage.getItem(key)).toBeNull();
+    });
+
+    it('updateLocalClip removes the delta key after commit', async () => {
+      const clip = makeClip({ id: 'evict-update', text: 'original' });
+      await addLocalClip(clip);
+
+      updateLocalClipCache('evict-update', { text: 'modified' });
+      persistCacheDelta('evict-update');
+      const key = `${CACHE_KEY_PREFIX}evict-update`;
+      expect(localStorage.getItem(key)).not.toBeNull();
+
+      await updateLocalClip('evict-update', { text: 'modified' });
+
+      expect(localStorage.getItem(key)).toBeNull();
+    });
+
+    it('removeLocalClip removes the delta and tombstone keys after commit', async () => {
+      const clip = makeClip({ id: 'evict-rm', text: 'X' });
+      await addLocalClip(clip);
+
+      // Seed stale delta and tombstone
+      localStorage.setItem(`${CACHE_KEY_PREFIX}evict-rm`, JSON.stringify(clip));
+      localStorage.setItem(`${TOMBSTONE_PREFIX}evict-rm`, '1');
+
+      await removeLocalClip('evict-rm');
+
+      expect(localStorage.getItem(`${CACHE_KEY_PREFIX}evict-rm`)).toBeNull();
+      expect(localStorage.getItem(`${TOMBSTONE_PREFIX}evict-rm`)).toBeNull();
+    });
+
+    it('flushClipsDB removes all dirty and removed keys after commit', async () => {
+      const clipA = makeClip({ id: 'evict-flush-a', text: 'A' });
+      const clipB = makeClip({ id: 'evict-flush-b', text: 'B' });
+      await addLocalClip(clipA);
+      await addLocalClip(clipB);
+
+      // Make A dirty, remove B
+      updateLocalClipCache('evict-flush-a', { text: 'A-modified' });
+      removeLocalClipCache('evict-flush-b');
+
+      // Seed stale localStorage keys
+      localStorage.setItem(`${CACHE_KEY_PREFIX}evict-flush-a`, JSON.stringify({ ...clipA, text: 'A-modified' }));
+      localStorage.setItem(`${CACHE_KEY_PREFIX}evict-flush-b`, JSON.stringify(clipB));
+      localStorage.setItem(`${TOMBSTONE_PREFIX}evict-flush-b`, '1');
+
+      await flushClipsDB();
+
+      expect(localStorage.getItem(`${CACHE_KEY_PREFIX}evict-flush-a`)).toBeNull();
+      expect(localStorage.getItem(`${CACHE_KEY_PREFIX}evict-flush-b`)).toBeNull();
+      expect(localStorage.getItem(`${TOMBSTONE_PREFIX}evict-flush-b`)).toBeNull();
+    });
+
+    it('commitToDB removes the delta key for a dirty clip', async () => {
+      const clip = makeClip({ id: 'evict-commit', text: 'A' });
+      await addLocalClip(clip);
+
+      updateLocalClipCache('evict-commit', { text: 'A-modified' });
+      persistCacheDelta('evict-commit');
+      const key = `${CACHE_KEY_PREFIX}evict-commit`;
+      expect(localStorage.getItem(key)).not.toBeNull();
+
+      await commitToDB('evict-commit', null);
+
+      expect(localStorage.getItem(key)).toBeNull();
+    });
+
+    it('commitToDB removes the tombstone and delta key for a removed clip', async () => {
+      const clip = makeClip({ id: 'evict-commit-rm', text: 'A' });
+      await addLocalClip(clip);
+
+      removeLocalClipCache('evict-commit-rm');
+      localStorage.setItem(`${TOMBSTONE_PREFIX}evict-commit-rm`, '1');
+      expect(localStorage.getItem(`${TOMBSTONE_PREFIX}evict-commit-rm`)).not.toBeNull();
+
+      await commitToDB('evict-commit-rm', null);
+
+      expect(localStorage.getItem(`${TOMBSTONE_PREFIX}evict-commit-rm`)).toBeNull();
+      expect(localStorage.getItem(`${CACHE_KEY_PREFIX}evict-commit-rm`)).toBeNull();
+    });
+
+    it('newReceivingClip removes its delta key after commit', async () => {
+      const clip = await newReceivingClip('https://example.com');
+      const key = `${CACHE_KEY_PREFIX}${clip.id}`;
+      expect(localStorage.getItem(key)).toBeNull();
+    });
+
+    it('newReceivingClip removes replaced clip delta after commit', async () => {
+      const original = makeClip({ id: 'evict-replace', text: 'original' });
+      await addLocalClip(original);
+
+      localStorage.setItem(`${CACHE_KEY_PREFIX}evict-replace`, JSON.stringify(original));
+
+      await newReceivingClip('https://example.com', 'evict-replace');
+
+      expect(localStorage.getItem(`${CACHE_KEY_PREFIX}evict-replace`)).toBeNull();
+      expect(localStorage.getItem(`${TOMBSTONE_PREFIX}evict-replace`)).toBeNull();
     });
   });
 
