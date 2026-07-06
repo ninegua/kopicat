@@ -39,6 +39,7 @@
       id: string;
       clip: LocalClip;
       timer: ReturnType<typeof setTimeout>;
+      interval: ReturnType<typeof setInterval>;
       startTime: number;
     }[]
   >([]);
@@ -427,6 +428,7 @@
     const existing = pendingDeletes.find((d) => d.id === clip.id);
     if (existing) {
       clearTimeout(existing.timer);
+      clearInterval(existing.interval);
       pendingDeletes = pendingDeletes.filter((d) => d.id !== clip.id);
     }
     const index = clips.findIndex((d) => d.id === clip.id);
@@ -488,6 +490,7 @@
     const existing = pendingDeletes.find((d) => d.id === clip.id);
     if (existing) {
       clearTimeout(existing.timer);
+      clearInterval(existing.interval);
       pendingDeletes = pendingDeletes.filter((d) => d.id !== clip.id);
     }
     // Immediately remove from IndexedDB and cache
@@ -496,6 +499,7 @@
     // Store full clip for undo, then clear pending after timeout expires
     const startTime = Date.now();
     const timer = setTimeout(() => {
+      clearInterval(interval);
       pendingDeletes = pendingDeletes.filter((d) => d.id !== clip.id);
       deleteProgress = Object.fromEntries(
         Object.entries(deleteProgress).filter(([key]) => key !== clip.id),
@@ -508,19 +512,26 @@
         deleteProgress = { ...deleteProgress, [clip.id]: progress };
       }
     }, 50);
-    pendingDeletes = [...pendingDeletes, { id: clip.id, clip, timer, startTime }];
+    pendingDeletes = [...pendingDeletes, { id: clip.id, clip, timer, interval, startTime }];
   }
 
   async function handleRestoreById(id: string) {
     const entry = pendingDeletes.find((d) => d.id === id);
     if (entry) {
       clearTimeout(entry.timer);
+      clearInterval(entry.interval);
       pendingDeletes = pendingDeletes.filter((d) => d.id !== id);
       deleteProgress = Object.fromEntries(
         Object.entries(deleteProgress).filter(([key]) => key !== id),
       );
-      // Re-insert the clip back into IndexedDB and cache
-      await addLocalClip(entry.clip);
+      // Remove any duplicate from in-memory state before re-inserting
+      clips = clips.filter((c) => c.id !== id);
+      try {
+        // Re-insert the clip back into IndexedDB and cache
+        await addLocalClip(entry.clip);
+      } catch (e) {
+        console.error('Failed to restore clip to IndexedDB:', e);
+      }
       clips = [...clips, entry.clip].sort(
         (a, b) => b.saved_at - a.saved_at,
       );
