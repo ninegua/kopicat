@@ -532,9 +532,7 @@
       } catch (e) {
         console.error('Failed to restore clip to IndexedDB:', e);
       }
-      clips = [...clips, entry.clip].sort(
-        (a, b) => b.saved_at - a.saved_at,
-      );
+      clips = [...clips, entry.clip].sort((a, b) => b.saved_at - a.saved_at);
       focusClip = id;
     }
   }
@@ -715,7 +713,9 @@
           />
         </svg>
         <span class="snackbar-message">
-          <span>Deleted '<span class="snackbar-id">{truncate(pendingDelete.clip.text, 20)}</span>'.</span
+          <span
+            >Deleted '<span class="snackbar-id">{truncate(pendingDelete.clip.text, 20)}</span
+            >'.</span
           >
           <span>Not yet? Click to restore.</span></span
         >

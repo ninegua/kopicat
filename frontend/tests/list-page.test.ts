@@ -151,7 +151,9 @@ describe('List page — header buttons', () => {
 
     // Empty state disappears and a focused clip appears
     await waitFor(() => {
-      expect(screen.queryByText('No clips yet. Create one to get started.')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('No clips yet. Create one to get started.'),
+      ).not.toBeInTheDocument();
       expect(document.querySelector('.clip-box')).toBeInTheDocument();
       expect(document.querySelector('.clip-box-focused')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Delete clip' })).toBeInTheDocument();

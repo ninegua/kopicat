@@ -382,7 +382,7 @@ describe('local-store (cache + IndexedDB)', () => {
     });
   });
 
-    describe('localStorage cache persistence', () => {
+  describe('localStorage cache persistence', () => {
     const CACHE_KEY = 'copycat_cache';
 
     beforeEach(() => {
@@ -524,7 +524,11 @@ describe('local-store (cache + IndexedDB)', () => {
     it('does not register duplicate pagehide listeners', () => {
       const originalAddEventListener = window.addEventListener;
       let callCount = 0;
-      window.addEventListener = (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions) => {
+      window.addEventListener = (
+        type: string,
+        listener: EventListenerOrEventListenerObject,
+        options?: boolean | AddEventListenerOptions,
+      ) => {
         if (type === 'pagehide') callCount++;
         return originalAddEventListener.call(window, type, listener, options);
       };
@@ -549,7 +553,12 @@ describe('local-store (cache + IndexedDB)', () => {
       // Seed delta with receiving changed but text same
       localStorage.setItem(
         `${CACHE_KEY_PREFIX}receiving-only`,
-        JSON.stringify({ id: 'receiving-only', text: 'x', saved_at: clip.saved_at, receiving: true }),
+        JSON.stringify({
+          id: 'receiving-only',
+          text: 'x',
+          saved_at: clip.saved_at,
+          receiving: true,
+        }),
       );
 
       await loadClipsDB();
@@ -567,7 +576,12 @@ describe('local-store (cache + IndexedDB)', () => {
       // Seed delta with last_modified changed but text same
       localStorage.setItem(
         `${CACHE_KEY_PREFIX}lastmod-only`,
-        JSON.stringify({ id: 'lastmod-only', text: 'x', saved_at: clip.saved_at, last_modified: newLastModified }),
+        JSON.stringify({
+          id: 'lastmod-only',
+          text: 'x',
+          saved_at: clip.saved_at,
+          last_modified: newLastModified,
+        }),
       );
 
       await loadClipsDB();
@@ -749,9 +763,15 @@ describe('local-store (cache + IndexedDB)', () => {
       persistCacheDelta('flush-preserve-c');
 
       // Verify all three were written
-      expect(JSON.parse(localStorage.getItem(`${CACHE_KEY_PREFIX}flush-preserve-a`)!).text).toBe('A');
-      expect(JSON.parse(localStorage.getItem(`${CACHE_KEY_PREFIX}flush-preserve-b`)!).text).toBe('B');
-      expect(JSON.parse(localStorage.getItem(`${CACHE_KEY_PREFIX}flush-preserve-c`)!).text).toBe('C');
+      expect(JSON.parse(localStorage.getItem(`${CACHE_KEY_PREFIX}flush-preserve-a`)!).text).toBe(
+        'A',
+      );
+      expect(JSON.parse(localStorage.getItem(`${CACHE_KEY_PREFIX}flush-preserve-b`)!).text).toBe(
+        'B',
+      );
+      expect(JSON.parse(localStorage.getItem(`${CACHE_KEY_PREFIX}flush-preserve-c`)!).text).toBe(
+        'C',
+      );
     });
 
     it('loadClipsDB does not mark clean clips as dirty', async () => {
@@ -844,7 +864,10 @@ describe('local-store (cache + IndexedDB)', () => {
       removeLocalClipCache('evict-flush-b');
 
       // Seed stale localStorage keys
-      localStorage.setItem(`${CACHE_KEY_PREFIX}evict-flush-a`, JSON.stringify({ ...clipA, text: 'A-modified' }));
+      localStorage.setItem(
+        `${CACHE_KEY_PREFIX}evict-flush-a`,
+        JSON.stringify({ ...clipA, text: 'A-modified' }),
+      );
       localStorage.setItem(`${CACHE_KEY_PREFIX}evict-flush-b`, JSON.stringify(clipB));
       localStorage.setItem(`${TOMBSTONE_PREFIX}evict-flush-b`, '1');
 

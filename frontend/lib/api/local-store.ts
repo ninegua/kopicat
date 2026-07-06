@@ -32,14 +32,18 @@ let localStorageAvailable = true;
 /** Timestamp of last localStorage write failure, or null if no failure. */
 let localStorageFailureAt: number | null = null;
 // Exported for testing only
-export function __localStorageFailureAt(): number | null { return localStorageFailureAt; }
+export function __localStorageFailureAt(): number | null {
+  return localStorageFailureAt;
+}
 export const LOCALSTORAGE_RETRY_INTERVAL = 30_000; // 30 seconds
 
 /** Set of clip IDs whose delta localStorage writes are pending. */
 let pendingFlush: Set<string> = new Set();
 
 // Exported for testing only — use __resetLocalStore() to reset
-export function __pendingFlush(): Set<string> { return pendingFlush; }
+export function __pendingFlush(): Set<string> {
+  return pendingFlush;
+}
 
 /** Debounce timer for delta localStorage writes. */
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
@@ -171,7 +175,9 @@ export function migrateBatchCacheToDeltas(): void {
     }
   } catch (e) {
     console.error('migrateBatchCacheToDeltas failed', e);
-    try { localStorage.removeItem(CACHE_KEY); } catch {}
+    try {
+      localStorage.removeItem(CACHE_KEY);
+    } catch {}
   }
 }
 
