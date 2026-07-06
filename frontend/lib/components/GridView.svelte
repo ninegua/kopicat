@@ -162,6 +162,7 @@
     if (focusClipId !== undefined && focusClipId !== null) {
       focusClip = focusClipId;
       focusMaximized = false;
+      clips = getLocalClips();
       return;
     }
     if (onChoose) {
